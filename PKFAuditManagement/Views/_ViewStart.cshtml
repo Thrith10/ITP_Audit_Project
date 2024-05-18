@@ -1,3 +1,14 @@
 ﻿@{
-    Layout = "_Layout";
+    var user = Context.User;
+    string layout = "_Layout";
+    if (user.IsInRole("Admin"))
+    {
+        layout = "_AdminLayout";
+    }
+    else if (user.IsInRole("Auditor"))
+    {
+        layout = "_AuditorLayout";
+    }
+
+    Layout = layout;
 }

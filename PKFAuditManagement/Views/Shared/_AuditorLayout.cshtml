@@ -244,7 +244,10 @@
                         </li>
 
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <form id="signOutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post" style="display: none;">
+                                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
+                            </form>
+                            <a id="signOutLink" class="dropdown-item d-flex align-items-center" href="#">
                                 <i class="bi bi-box-arrow-right"></i>
                                 <span>Sign Out</span>
                             </a>
@@ -508,6 +511,14 @@
 
     <!-- Template Main JS File -->
     <script src="~/js/main.js"></script>
+
+    <script>
+    document.getElementById("signOutLink").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default link behavior
+        document.getElementById("signOutForm").submit(); // Submit the form
+    });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

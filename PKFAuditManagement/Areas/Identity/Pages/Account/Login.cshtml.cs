@@ -123,7 +123,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
 
                     if (roles.Contains("Admin"))
                     {
-                        return LocalRedirect(Url.Content("~/Admin"));
+                        return LocalRedirect(Url.Content("~/Admin/AdminDashboard"));
                     }
                     else if (roles.Contains("Auditor"))
                     {
