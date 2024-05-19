@@ -20,6 +20,18 @@ namespace PKFAuditManagement.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Auditor")]
+        public IActionResult QC6Creation()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Auditor")]
+        public IActionResult QC7Creation()
+        {
+            return View();
+        }
+
         public IActionResult Login()
         {
             return View();

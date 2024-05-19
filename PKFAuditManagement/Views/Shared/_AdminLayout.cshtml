@@ -35,7 +35,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <a href="index.html" class="logo d-flex align-items-center">
                 <img src="assets/img/logo.png" alt="">
-                <span class="d-none d-lg-block">NiceAdmin</span>
+                <span class="d-none d-lg-block">PKF-CAP</span>
             </a>
             <i class="bi bi-list toggle-sidebar-btn"></i>
         </div><!-- End Logo -->
@@ -262,58 +262,16 @@
     </header><!-- End Header -->
     <!-- ======= Sidebar ======= -->
     <aside id="sidebar" class="sidebar">
-
-        <ul class="sidebar-nav" id="sidebar-nav">
-
-            <li class="nav-item">
-                <a class="nav-link " href="Admin">
-                    <i class="bi bi-grid"></i>
-                    <span>AdminDashboard</span>
-                </a>
-            </li><!-- End Dashboard Nav -->
-
-            
-
-            <li class="nav-heading">Pages</li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="Profile">
-                    <i class="bi bi-person"></i>
-                    <span>Profile</span>
-                </a>
-            </li><!-- End Profile Page Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="FAQ">
-                    <i class="bi bi-question-circle"></i>
-                    <span>F.A.Q</span>
-                </a>
-            </li><!-- End F.A.Q Page Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="Contact">
-                    <i class="bi bi-envelope"></i>
-                    <span>Contact</span>
-                </a>
-            </li><!-- End Contact Page Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="Blank">
-                    <i class="bi bi-file-earmark"></i>
-                    <span>Blank</span>
-                </a>
-            </li><!-- End Blank Page Nav -->
-
-        </ul>
-
-    </aside><!-- End Sidebar-->
+        @RenderSection("SidebarContent", required: false)
+    </aside>
+    <!-- End Sidebar-->
     <div>
         <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <!-- ======= Footer ======= -->
+@*     <!-- ======= Footer ======= -->
     <footer id="footer" class="footer">
         <div class="copyright">
             &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
@@ -325,7 +283,7 @@
             <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
             Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
         </div>
-    </footer><!-- End Footer -->
+    </footer><!-- End Footer --> *@
 
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

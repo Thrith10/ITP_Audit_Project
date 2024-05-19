@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<body>
+    @section SidebarContent {
+        <ul class="sidebar-nav" id="sidebar-nav">
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="AdminDashboard">
+                    <i class="bi bi-grid"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+            </li><!-- End Dashboard Nav -->
+
+            <li class="nav-heading">Pages</li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="AccountManagement">
+                    <i class="bi bi-person"></i>
+                    <span>Account Management</span>
+                </a>
+            </li><!-- End Profile Page Nav -->
+        </ul>
+    }
+    <main id="main" class="main">
+
+        <div class="pagetitle">
+            <h1>Manage System Accounts</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Admin</a></li>
+                    <li class="breadcrumb-item">AccountManagement</li>
+                </ol>
+            </nav>
+        </div><!-- End Page Title -->
+
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">System Accounts</h5>
+                            <p>The table below displays all the accounts present in the PKF Audit Management System.</p>
+
+                            <!-- Table with stripped rows -->
+                            <table class="table datatable">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>UserName</th>
+                                        <th>Role</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Model)
+                                    {
+                                        <tr>
+                                            <td>@user.Email</td>
+                                            <td>@user.UserName</td>
+                                            <td>@user.Role</td>
+                                            <td>
+                                                <!-- You can add links or buttons for actions like edit, delete, etc. -->
+                                                <a asp-action="EditUser" asp-route-id="@user.UserId">Edit</a> |
+                                                <a asp-action="DeleteUser" asp-route-id="@user.UserId">Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <!-- End Table with stripped rows -->
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main><!-- End #main -->
+    <!-- ======= Footer ======= -->
+@*     <footer id="footer" class="footer">
+        <div class="copyright">
+            &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+            <!-- All the links in the footer should remain intact. -->
+            <!-- You can delete the links only if you purchased the pro version. -->
+            <!-- Licensing information: https://bootstrapmade.com/license/ -->
+            <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
+            Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        </div>
+    </footer><!-- End Footer --> *@
+
+</body>
+
+</html>
