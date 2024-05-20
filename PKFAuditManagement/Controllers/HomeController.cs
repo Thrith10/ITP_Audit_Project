@@ -17,179 +17,166 @@ namespace PKFAuditManagement.Controllers
         [Authorize(Roles = "Auditor")]
         public IActionResult Dashboard()
         {
-            return View();
+            return View("~/Views/General/Home/Dashboard.cshtml");
         }
-
-        [Authorize(Roles = "Auditor")]
-        public IActionResult QC6Creation()
-        {
-            return View();
-        }
-
-        [Authorize(Roles = "Auditor")]
-        public IActionResult QC7Creation()
-        {
-            return View();
-        }
-
         public IActionResult Login()
         {
-            return View();
+            return View("~/Views/General/Home/Login.cshtml");
         }
 
         public IActionResult Privacy()
         {
-            return View();
+            return View("~/Views/General/Home/Privacy.cshtml");
         }
 
         public IActionResult TablesGeneral()
         {
-            return View();
+            return View("~/Views/General/Home/TablesGeneral.cshtml");
         }
 
         public IActionResult DataTables()
         {
-            return View();
+            return View("~/Views/General/Home/DataTables.cshtml");
         }
 
         public IActionResult ApexCharts()
         {
-            return View();
+            return View("~/Views/General/Home/ApexCharts.cshtml");
         }
 
         public IActionResult ChartJs()
         {
-            return View();
+            return View("~/Views/General/Home/ChartJs.cshtml");
         }
 
         public IActionResult ECharts()
         {
-            return View();
+            return View("~/Views/General/Home/ECharts.cshtml");
         }
 
         public IActionResult Accordion()
         {
-            return View();
+            return View("~/Views/General/Home/Accordion.cshtml");
         }
 
         public IActionResult Alerts()
         {
-            return View();
+            return View("~/Views/General/Home/Alerts.cshtml");
         }
 
         public IActionResult Badges()
         {
-            return View();
+            return View("~/Views/General/Home/Badges.cshtml");
         }
 
         public IActionResult Breadcrumbs()
         {
-            return View();
+            return View("~/Views/General/Home/Breadcrumbs.cshtml");
         }
 
         public IActionResult Buttons()
         {
-            return View();
+            return View("~/Views/General/Home/Buttons.cshtml");
         }
 
         public IActionResult Cards()
         {
-            return View();
+            return View("~/Views/General/Home/Cards.cshtml");
         }
 
         public IActionResult Carousel()
         {
-            return View();
+            return View("~/Views/General/Home/Carousel.cshtml");
         }
 
         public IActionResult ListGroup()
         {
-            return View();
+            return View("~/Views/General/Home/ListGroup.cshtml");
         }
 
         public IActionResult Modal()
         {
-            return View();
+            return View("~/Views/General/Home/Modal.cshtml");
         }
 
         public IActionResult Pagination()
         {
-            return View();
+            return View("~/Views/General/Home/Pagination.cshtml");
         }
 
         public IActionResult Progress()
         {
-            return View();
+            return View("~/Views/General/Home/Progress.cshtml");
         }
 
         public IActionResult Spinners()
         {
-            return View();
+            return View("~/Views/General/Home/Spinners.cshtml");
         }
 
         public IActionResult Tabs()
         {
-            return View();
+            return View("~/Views/General/Home/Tabs.cshtml");
         }
 
         public IActionResult Tooltips()
         {
-            return View();
+            return View("~/Views/General/Home/Tooltips.cshtml");
         }
 
         public IActionResult FormsEditors()
         {
-            return View();
+            return View("~/Views/General/Home/FormsEditors.cshtml");
         }
 
         public IActionResult FormsElements()
         {
-            return View();
+            return View("~/Views/General/Home/FormsElements.cshtml");
         }
 
         public IActionResult FormsLayouts()
         {
-            return View();
+            return View("~/Views/General/Home/FormsLayouts.cshtml");
         }
 
         public IActionResult FormsValidation()
         {
-            return View();
+            return View("~/Views/General/Home/FormsValidation.cshtml");
         }
 
         public IActionResult BootstrapIcons()
         {
-            return View();
+            return View("~/Views/General/Home/BootstrapIcons.cshtml");
         }
 
         public IActionResult BoxIcons()
         {
-            return View();
+            return View("~/Views/General/Home/BoxIcons.cshtml");
         }
 
         public IActionResult IconsRemix()
         {
-            return View();
+            return View("~/Views/General/Home/IconsRemix.cshtml");
         }
 
         public IActionResult Blank()
         {
-            return View();
+            return View("~/Views/General/Home/Blank.cshtml");
         }
 
         public IActionResult Contact()
         {
-            return View();
+            return View("~/Views/General/Home/Contact.cshtml");
         }
 
         public IActionResult Profile()
         {
-            return View();
+            return View("~/Views/General/Home/Profile.cshtml");
         }
 
         public IActionResult FAQ()
         {
-            return View();
+            return View("~/Views/General/Home/FAQ.cshtml");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
