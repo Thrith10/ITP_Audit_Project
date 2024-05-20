@@ -16,5 +16,11 @@ namespace PKFAuditManagement.Controllers
         {
             return View("~/Views/General/QC7/QC7FormCreation.cshtml");
         }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult QC7FormApprovalManagement()
+        {
+            return View("~/Views/General/QC7/QC7FormApprovalManagement.cshtml");
+        }
     }
 }

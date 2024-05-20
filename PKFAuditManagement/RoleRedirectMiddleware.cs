@@ -18,20 +18,24 @@ namespace PKFAuditManagement
             if (context.User.Identity.IsAuthenticated)
             {
                 var user = await userManager.GetUserAsync(context.User);
-                var roles = await userManager.GetRolesAsync(user);
 
-                // Only redirect when accessing the root or login page
-                if (context.Request.Path == "/" || context.Request.Path.StartsWithSegments("/Identity/Account/Login"))
+                if (user != null)
                 {
-                    if (roles.Contains("Admin"))
+                    var roles = await userManager.GetRolesAsync(user);
+
+                    // Only redirect when accessing the root or login page
+                    if (context.Request.Path == "/" || context.Request.Path.StartsWithSegments("/Identity/Account/Login"))
                     {
-                        context.Response.Redirect("/Admin/AdminDashboard");
-                        return;
-                    }
-                    else if (roles.Contains("Auditor"))
-                    {
-                        context.Response.Redirect("/Home/Dashboard");
-                        return;
+                        if (roles.Contains("Admin"))
+                        {
+                            context.Response.Redirect("/Admin/AdminDashboard");
+                            return;
+                        }
+                        else if (roles.Contains("Auditor"))
+                        {
+                            context.Response.Redirect("/Home/Dashboard");
+                            return;
+                        }
                     }
                 }
             }

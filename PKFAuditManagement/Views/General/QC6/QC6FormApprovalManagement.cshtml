@@ -4,10 +4,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
+    @section SidebarContent {
+        <ul class="sidebar-nav" id="sidebar-nav">
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="AdminDashboard">
+                    <i class="bi bi-grid"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+            </li><!-- End Dashboard Nav -->
+
+            <li class="nav-heading">Pages</li>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="QC6Form" asp-action="QC6FormApprovalManagement">
+                    <i class="bi bi-person"></i>
+                    <span>Manage QC6 Forms</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" asp-controller="QC7Form" asp-action="QC7FormApprovalManagement">
+                    <i class="bi bi-person"></i>
+                    <span>Manage QC7 Forms</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="AccountManagement">
+                    <i class="bi bi-person"></i>
+                    <span>Account Management</span>
+                </a>
+            </li><!-- End Profile Page Nav -->
+        </ul>
+    }
     <main id="main" class="main">
 
         <div class="pagetitle">
-            <h1>Manage QC6 Forms</h1>
+            <h1>Manage QC6 Form Approvals</h1>
         </div><!-- End Page Title -->
 
         <section class="section">
@@ -16,17 +48,10 @@
 
                     <div class="card">
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <h5 class="card-title">QC6 Forms Display</h5>
-                                </div>
-                                <div class="col-6 mt-3 text-end">
-                                    <a asp-controller="QC6Form" asp-action="QC6FormCreation" class="btn btn-primary btn-lg btn-floating shadow-lg">Create Form</a>
-                                </div>
-                            </div>
-                            <p>The table displays all the QC6 Forms that have been created. Auditors are able to create, edit and delete QC6 Forms.</p>
-                            <!-- Table with stripped rows -->
-                            <table class="table datatable">
+                            <h5 class="card-title">Handle the Approval or Rejection of QC6 Forms</h5>
+                            <p>As an administrator, you will be able to approval or reject submitted QC6 forms.</p>
+
+                            <table class="table datatable" id="engagementTable">
                                 <thead>
                                     <tr>
                                         <th>
@@ -70,8 +95,8 @@
                                                     }
                                                 </td>
                                                 <td>
-                                                    <a asp-action="EditEngagement" asp-route-id="@engagement.EngagementID">Edit</a> |
-                                                    <a asp-action="DeleteEngagement" asp-route-id="@engagement.EngagementID">Delete</a>
+                                                    <a asp-controller="QC6Form" asp-action="View" asp-route-id="@engagement.EngagementID">View</a> |
+                                                    <a class="approveLink" href="#" data-engagement-id="@engagement.EngagementID">Approve</a>
                                                 </td>
                                             </tr>
                                         }
@@ -82,17 +107,57 @@
                                     }
                                 </tbody>
                             </table>
-                            <!-- End Table with stripped rows -->
+
                         </div>
                     </div>
 
                 </div>
             </div>
-            <div class="position-fixed bottom-0 end-0 p-3">
-                <button class="btn btn-primary btn-lg btn-floating shadow-lg">+</button>
-            </div>
         </section>
+
     </main><!-- End #main -->
+    <!-- ======= Footer ======= -->
+    @*     <footer id="footer" class="footer">
+    <div class="copyright">
+    &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
+    </div>
+    <div class="credits">
+    <!-- All the links in the footer should remain intact. -->
+    <!-- You can delete the links only if you purchased the pro version. -->
+    <!-- Licensing information: https://bootstrapmade.com/license/ -->
+    <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
+    Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+    </div>
+    </footer><!-- End Footer --> *@
+
 </body>
 
 </html>
+<script>
+    document.getElementById('engagementTable').addEventListener('click', function (e) {
+        if (e.target && e.target.matches('.approveLink')) {
+            e.preventDefault();
+
+            var engagementId = e.target.getAttribute('data-engagement-id');
+
+            fetch('/QC6Form/ApproveQC6Form/' + engagementId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    console.log('Approved successfully');
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    });
+</script>
+
+

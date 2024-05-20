@@ -1231,3 +1231,20 @@ h6 {
   font-size: 13px;
   color: #012970;
 }
+
+.link-text {
+    color: blue !important;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Custom CSS to override table-striped */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa; /* Light grey color */
+}
+
+/* Make thead darker grey */
+.table-head-qc6 {
+    background-color: #343a40 !important;
+    color: white;
+}
