@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using PKFAuditManagement.Models
+@model List<ContinuingEngagement>
+
+<!DOCTYPE html>
 <html lang="en">
 <body>
     @section SidebarContent {
@@ -36,13 +39,7 @@
     <main id="main" class="main">
 
         <div class="pagetitle">
-            <h1>Manage System Accounts</h1>
-            <nav>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.html">Admin</a></li>
-                    <li class="breadcrumb-item">AccountManagement</li>
-                </ol>
-            </nav>
+            <h1>Manage QC7 Form Approvals</h1>
         </div><!-- End Page Title -->
 
         <section class="section">
@@ -51,20 +48,64 @@
 
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">System Accounts</h5>
-                            <p>The table below displays all the accounts present in the PKF Audit Management System.</p>
+                            <h5 class="card-title">Handle the Approval or Rejection of QC7 Forms</h5>
+                            <p>As an administrator, you will be able to approval or reject submitted QC7 forms.</p>
 
                             <!-- Table with stripped rows -->
-                            <table class="table datatable">
+                            <table class="table datatable" id="engagementTable">
                                 <thead>
                                     <tr>
-                                        <th>Email</th>
-                                        <th>UserName</th>
-                                        <th>Role</th>
+                                        <th>
+                                            File Ref.
+                                        </th>
+                                        <th>Client</th>
+                                        <th>Period Ended</th>
+                                        <th>Type of Engagement</th>
+                                        <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
+                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @if (Model != null)
+                                    {
+                                        foreach (var engagement in Model)
+                                        {
+                                            <tr>
+                                                <td>@engagement.FileReference</td>
+                                                <td>@engagement.Client</td>
+                                                <td>@engagement.PeriodEnded</td>
+                                                <td>@engagement.EngagementType</td>
+                                                <td>@engagement.FormSubmissionDate</td>
+                                                <td>
+                                                    @if (engagement.Status == "Pending")
+                                                    {
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    }
+                                                    else if (engagement.Status == "Approved")
+                                                    {
+                                                        <span class="badge bg-success">Approved</span>
+                                                    }
+                                                    else if (engagement.Status == "Rejected")
+                                                    {
+                                                        <span class="badge bg-danger">Rejected</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">@engagement.Status</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a asp-controller="QC7Form" asp-action="View" asp-route-id="@engagement.ContinuingEngagementId">View</a> |
+                                                    <a class="approveLink" href="#" data-engagement-id="@engagement.ContinuingEngagementId">Approve</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="7">No data found.</td></tr>
+                                    }
                                 </tbody>
                             </table>
                             <!-- End Table with stripped rows -->
@@ -94,3 +135,29 @@
 </body>
 
 </html>
+<script>
+    document.getElementById('engagementTable').addEventListener('click', function (e) {
+        if (e.target && e.target.matches('.approveLink')) {
+            e.preventDefault();
+
+            var engagementId = e.target.getAttribute('data-engagement-id');
+
+            fetch('/QC7Form/ApproveQC7Form/' + engagementId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    console.log('Approved successfully');
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    });
+</script>

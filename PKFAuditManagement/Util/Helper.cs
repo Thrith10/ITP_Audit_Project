@@ -5,7 +5,7 @@ namespace PKFAuditManagement.Util
     public class Helper
     {
         // Method
-        public static string GenerateQC7FileReference()
+        public static string GenerateQCFormFileReference()
         {
             const string prefix = "FREF";
             const int digitsLength = 6;

@@ -15,6 +15,7 @@ namespace PKFAuditManagement.Data
         public DbSet<EngagementDetail> EngagementDetails { get; set; }
         public DbSet<EngagementObjective> EngagementObjectives { get; set; }
         public DbSet<EngagementProcedureTest> EngagementProcedureTests { get; set; }
+        public DbSet<ContinuingEngagement> ContinuingEngagements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

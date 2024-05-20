@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PKFAuditManagement.Data;
 
@@ -11,9 +12,11 @@ using PKFAuditManagement.Data;
 namespace PKFAuditManagement.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240520202728_Continuing")]
+    partial class Continuing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,49 +225,6 @@ namespace PKFAuditManagement.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("PKFAuditManagement.Models.ContinuingEngagement", b =>
-                {
-                    b.Property<int>("ContinuingEngagementId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContinuingEngagementId"));
-
-                    b.Property<string>("Client")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EngagementType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileReference")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("FormSubmissionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("PeriodEnded")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PreparedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PreparedByDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReviewedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ReviewedByDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ContinuingEngagementId");
-
-                    b.ToTable("ContinuingEngagements");
                 });
 
             modelBuilder.Entity("PKFAuditManagement.Models.Engagement", b =>

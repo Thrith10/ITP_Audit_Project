@@ -10,7 +10,7 @@ namespace PKFAuditManagement.Controllers
 {
     public class QC6FormController : Controller
     {
-        private readonly ApplicationDbContext _context; // Replace with your DbContext instance
+        private readonly ApplicationDbContext _context;
 
         public QC6FormController(ApplicationDbContext context)
         {
@@ -78,7 +78,7 @@ namespace PKFAuditManagement.Controllers
                     // Save viewModel data to EngagementTable
                     var engagementData = new Engagement
                     {
-                        FileReference = Helper.GenerateQC7FileReference(),
+                        FileReference = Helper.GenerateQCFormFileReference(),
                         ProspectiveClient = viewModel.ProspectiveClient,
                         PeriodEnded = viewModel.PeriodEnded,
                         EngagementType = viewModel.EngagementType,
