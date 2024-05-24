@@ -125,7 +125,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
                     {
                         return LocalRedirect(Url.Content("~/Admin/AdminDashboard"));
                     }
-                    else if (roles.Contains("Auditor"))
+                    else if (roles.Contains("User"))
                     {
                         return LocalRedirect(Url.Content("~/Home/Dashboard"));
                     }

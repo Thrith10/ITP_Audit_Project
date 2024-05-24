@@ -5,9 +5,9 @@
     {
         layout = "_AdminLayout";
     }
-    else if (user.IsInRole("Auditor"))
+    else if (user.IsInRole("User"))
     {
-        layout = "_AuditorLayout";
+        layout = "_UserLayout";
     }
 
     Layout = layout;

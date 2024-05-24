@@ -64,7 +64,7 @@ using (var scope = app.Services.CreateScope())
     // Initialise an instance of the roleManager
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    var roles = new[] { "Admin", "Auditor", "Quality Management Team Member", "Engagement Partner", "Engagement Team Member" };
+    var roles = new[] { "Admin", "User" };
 
     // Iterate through the roles and add them to database if they have not been created
     foreach (var role in roles)
