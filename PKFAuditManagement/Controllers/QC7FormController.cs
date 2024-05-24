@@ -17,7 +17,7 @@ namespace PKFAuditManagement.Controllers
             _context = context;
         }
 
-        [Authorize(Roles = "Auditor")]
+        [Authorize(Roles = "User")]
         public IActionResult QC7FormManagement()
         {
             // Retrieve engagement data from database
@@ -25,7 +25,7 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/QC7/QC7FormManagement.cshtml", engagements);
         }
 
-        [Authorize(Roles = "Auditor")]
+        [Authorize(Roles = "User")]
         public IActionResult QC7FormCreation()
         {
             var viewModel = new QC7FormViewModel();
@@ -62,7 +62,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Auditor")]
+        [Authorize(Roles = "User")]
         public IActionResult SubmitQC7Form(QC7FormViewModel viewModel)
         {
             if (!ModelState.IsValid)

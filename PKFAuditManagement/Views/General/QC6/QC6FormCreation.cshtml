@@ -25,9 +25,6 @@
                                 <h5 class="card-title">New engagement / client acceptance checklist</h5>
                                 <form>
                                     <div class="row mb-3">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">File Reference: D3.3</label>
-                                    </div>
-                                    <div class="row mb-3">
                                         <label asp-for="ProspectiveClient" class="col-sm-2 col-form-label">Prospective Client:</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control" asp-for="ProspectiveClient">
@@ -52,8 +49,7 @@
                                             <strong>Prepared by:</strong>
                                         </div>
                                         <div class="col">
-                                            <input type="file" name="uploadedPreparedSignature" id="uploadedPreparedSignature" style="display:none;" />
-                                            <label for="uploadedPreparedSignature" class="link-text">Upload Signature</label>
+                                                <input type="text" class="form-control" placeholder="Signature">
                                         </div>
                                         <div class="col">
                                             <input type="date" class="form-control">
@@ -64,8 +60,7 @@
                                             <strong>Reviewed by:</strong>
                                         </div>
                                         <div class="col">
-                                            <input type="file" name="uploadedReviewedSignature" id="uploadedReviewedSignature" style="display:none;" />
-                                            <label for="uploadedReviewedSignature" class="link-text">Upload Signature</label>
+                                                <input type="text" class="form-control" placeholder="Signature">
                                         </div>
                                         <div class="col">
                                             <input type="date" class="form-control">
@@ -86,14 +81,24 @@
                                             <input type="text" class="form-control">
                                         </div>
                                     </div>
-
                                     <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client (indicate the nature of services)</label>
+                                        <label class="col-sm-2 col-form-label">Indicate the nature of service</label>
                                         <div class="col-sm-10">
                                             <input type="text" class="form-control">
                                         </div>
                                     </div>
-
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Budgeted Time Cost</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control">
+                                        </div>
+                                    </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.  And to disclose reasons for acceptance if the budgeted fee recovery percentage is below 30%.">
                                             <span class="link-text">Budgeted fee recovery rate (budgeted fee / budgeted time cost)</span>
@@ -725,449 +730,450 @@
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <h5 class="card-title">AUDIT AND REVIEW ENGAGEMENTS ONLY - FIRM AND NETWORK INDEPENDENCE (Confirm that no conflict exist. If this section is not applicable, please indicate “NA”)</h5>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
-                                            <thead class="table-light" style="background-color: #f8f9fa;">
-                                                <tr>
-                                                    <th class="text-left pl-3 text-uppercase" style="width: 50%;">
-                                                        Objectives and detailed tests
-                                                    </th>
-                                                    <th class="text-left text-uppercase">
-                                                        Ref
-                                                    </th>
-                                                    <th class="text-left text-uppercase">
-                                                        Sign/Date
-                                                    </th>
-                                                    <th class="text-left text-uppercase">
-                                                        Ref/Comment
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                    <td colspan="4"><b>Objective – Acceptance Procedures</b></td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            <b>When proposing for an audit or review engagement: </b>
-                                                            <br><br> 
-                                                            a) Is the potential client listed (public)? If yes, proceed to (c). If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group. 
-                                                            <br><br>  If there are listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (d).
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            b) If there are listed entities in the group, investigate whether the firm or other PKF Member Firms provide audit or review services to these listed entities.
-                                                            <br><br> 
-                                                            This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities (this is not required).
-                                                            <br><br> 
-                                                            If the firm or other Member Firms provide audit or review services to listed entities in the group, proceed to (c). If not, proceed to (d).
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            c) If the potential client is listed, or the firm or other Member Firms provide audit or review services to listed entities in the group, independence considerations must include all related entities as defined in the IESBA Code for Professional Accountants.
-                                                            <br><br> 
-                                                            Enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or any related entities. This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these related entities.
-                                                            <br><br> 
-                                                            If the firm or other Member Firms provide non-assurance services to the potential client or any related entities, proceed to (f). If not, no further action is required.
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            d) If the potential client is not listed and there are no listed entities in the group or the firm or other Member Firms do not provide audit or review services to any listed entities in the group, enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control.
-                                                            <br><br> 
-                                                            This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
-                                                            <br><br> 
-                                                            If the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control, proceed to (f). If not, proceed to (e).
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            e) Is there reason to believe that a relationship or circumstance involving any other related entity of the potential client is relevant to the evaluation of the firm’s independence from the client? If yes, apply step (f) below to that related entity. If not, no further action is required.
-                                                            </p>          
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            f) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
-                                                            <br><br> 
-                                                            Carry out the evaluation under the IESBA International Code of Ethics for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <h5 class="card-title">NON-ASSURANCE ENGAGEMENTS ONLY - FIRM AND NETWORK INDEPENDENCE (Confirm that no conflict exist.  If this section is not applicable, please indicate “NA”)</h5>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
-                                            <thead class="table-light" style="background-color: #f8f9fa;">
-                                                <tr>
-                                                    <th class="text-left pl-3 text-uppercase" style="width: 50%;">
-                                                        Objectives and detailed tests
-                                                    </th>
-                                                    <th class="text-left text-uppercase">
-                                                        Ref
-                                                    </th>
-                                                    <th class="text-left text-uppercase">
-                                                        Sign/Date
-                                                    </th>
-                                                    <th class="text-left text-uppercase">
-                                                        Ref/Comment
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                    <td colspan="4"><b>Objective - Acceptance Procedures</b></td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            <b>When proposing for a non-assurance engagement:</b>
-                                                            <br><br> 
-                                                            a) Is the potential client listed (public)? If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group.
-                                                            <br><br> 
-                                                            If the potential client is listed or there are other listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (c).
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            b) If the potential client is listed or there are other listed entities in the group, investigate whether the firms or other PKF Member Firms provide audit or review services to these listed entities. This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities.
-                                                            <br><br> 
-                                                            If the firm or other Member Firms do not provide audit or review services to listed entities in the group, proceed to (c).
-                                                            <br><br> 
-                                                            If the firm or other Member Firms provide audit or review services to these listed entities, independence considerations must include all related entities as defined in the IESBA International Code for Professional Accountants, including International Independence Standards. Proceed to (d).
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            c) If the potential client is not listed and there are no other listed entities in the group, or the firm or other Member Firms do not provide audit or review services to the listed entities in the group, enquire as to whether the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client.
-                                                            <br><br> 
-                                                            This enquiry shall be direct enquiry of the client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
-                                                            <br><br> 
-                                                            If the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client, proceed to (d). If not, no further action is required.
+                                </div>
+                                <h5 class="card-title">AUDIT AND REVIEW ENGAGEMENTS ONLY - FIRM AND NETWORK INDEPENDENCE (Confirm that no conflict exist. If this section is not applicable, please indicate “NA”)</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-light" style="background-color: #f8f9fa;">
+                                            <tr>
+                                                <th class="text-left pl-3 text-uppercase" style="width: 50%;">
+                                                    Objectives and detailed tests
+                                                </th>
+                                                <th class="text-left text-uppercase">
+                                                    Ref
+                                                </th>
+                                                <th class="text-left text-uppercase">
+                                                    Sign/Date
+                                                </th>
+                                                <th class="text-left text-uppercase">
+                                                    Ref/Comment
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                <td colspan="4"><b>Objective – Acceptance Procedures</b></td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        <b>When proposing for an audit or review engagement: </b>
+                                                        <br><br> 
+                                                        a) Is the potential client listed (public)? If yes, proceed to (c). If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group. 
+                                                        <br><br>  If there are listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (d).
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        b) If there are listed entities in the group, investigate whether the firm or other PKF Member Firms provide audit or review services to these listed entities.
+                                                        <br><br> 
+                                                        This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities (this is not required).
+                                                        <br><br> 
+                                                        If the firm or other Member Firms provide audit or review services to listed entities in the group, proceed to (c). If not, proceed to (d).
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        c) If the potential client is listed, or the firm or other Member Firms provide audit or review services to listed entities in the group, independence considerations must include all related entities as defined in the IESBA Code for Professional Accountants.
+                                                        <br><br> 
+                                                        Enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or any related entities. This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these related entities.
+                                                        <br><br> 
+                                                        If the firm or other Member Firms provide non-assurance services to the potential client or any related entities, proceed to (f). If not, no further action is required.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        d) If the potential client is not listed and there are no listed entities in the group or the firm or other Member Firms do not provide audit or review services to any listed entities in the group, enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control.
+                                                        <br><br> 
+                                                        This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
+                                                        <br><br> 
+                                                        If the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control, proceed to (f). If not, proceed to (e).
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        e) Is there reason to believe that a relationship or circumstance involving any other related entity of the potential client is relevant to the evaluation of the firm’s independence from the client? If yes, apply step (f) below to that related entity. If not, no further action is required.
+                                                        </p>          
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        f) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
+                                                        <br><br> 
+                                                        Carry out the evaluation under the IESBA International Code of Ethics for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <h5 class="card-title">NON-ASSURANCE ENGAGEMENTS ONLY - FIRM AND NETWORK INDEPENDENCE (Confirm that no conflict exist.  If this section is not applicable, please indicate “NA”)</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-light" style="background-color: #f8f9fa;">
+                                            <tr>
+                                                <th class="text-left pl-3 text-uppercase" style="width: 50%;">
+                                                    Objectives and detailed tests
+                                                </th>
+                                                <th class="text-left text-uppercase">
+                                                    Ref
+                                                </th>
+                                                <th class="text-left text-uppercase">
+                                                    Sign/Date
+                                                </th>
+                                                <th class="text-left text-uppercase">
+                                                    Ref/Comment
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                <td colspan="4"><b>Objective - Acceptance Procedures</b></td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        <b>When proposing for a non-assurance engagement:</b>
+                                                        <br><br> 
+                                                        a) Is the potential client listed (public)? If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group.
+                                                        <br><br> 
+                                                        If the potential client is listed or there are other listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (c).
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        b) If the potential client is listed or there are other listed entities in the group, investigate whether the firms or other PKF Member Firms provide audit or review services to these listed entities. This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities.
+                                                        <br><br> 
+                                                        If the firm or other Member Firms do not provide audit or review services to listed entities in the group, proceed to (c).
+                                                        <br><br> 
+                                                        If the firm or other Member Firms provide audit or review services to these listed entities, independence considerations must include all related entities as defined in the IESBA International Code for Professional Accountants, including International Independence Standards. Proceed to (d).
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        c) If the potential client is not listed and there are no other listed entities in the group, or the firm or other Member Firms do not provide audit or review services to the listed entities in the group, enquire as to whether the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client.
+                                                        <br><br> 
+                                                        This enquiry shall be direct enquiry of the client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
+                                                        <br><br> 
+                                                        If the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client, proceed to (d). If not, no further action is required.
 
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>
-                                                <tr class="text-zinc-700 dark:text-zinc-400">
-                                                    <td>
-                                                        <div>
-                                                            <p>
-                                                            d) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
-                                                            <br><br> 
-                                                            Carry out the evaluation under the IESBA International Code for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                <td>
+                                                    <div>
+                                                        <p>
+                                                        d) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
+                                                        <br><br> 
+                                                        Carry out the evaluation under the IESBA International Code for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
 
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Ref" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Sign/Date" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               placeholder="Enter Comment" />
-                                                    </td>
-                                                </tr>          
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <h5 class="card-title">Conclusion</h5>
-                                    <div class="row mb-3">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">
-                                            Are there any significant risks associated with the acceptance of the engagement?
-                                            <br>
-                                            <u>Note</u>
-                                            <br>
-                                            <i>If yes, describe these risks and what safeguards are required to reduce these risks to an acceptable level before acceptance of this engagement.</i>
-                                        </label>
-                                        <div class="col-sm-10">
-                                            <textarea class="form-control" id="inputText" rows="4"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">New engagement / *client risk rated as: <br> *See <a>Appendix 2</a> for categories of risks</label>
-                                        <div class="col-sm-10">
-                                            <select class="form-control" id="riskLevel">
-                                                <option value="normal">Normal (N)</option>
-                                                <option value="moderate">Moderate (M)</option>
-                                                <option value="high_risk">High Risk (H1)</option>
-                                                <option value="high_risk_2">High Risk 2 (H2)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Reason for the risk rating:</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" id="inputText">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Based on the risk rating above, the engagement should be subject to:  </label>
-                                        <div class="col-sm-10">
-                                            <select class="form-control" id="safeguardReview">
-                                                <option value="N">No safeguard review (N)</option>
-                                                <option value="H1">Full safeguard review (H1)</option>
-                                                <option value="H2">Focused safeguard review on opinion (H2)</option>
-                                                <option value="M">Focused safeguard review on audit or accounting issues (M)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                     <div class="row mb-3">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Name of safeguard reviewer assigned by Head of Division/Managing Partner/Quality Management Partner: </label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" id="inputText">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Should new engagement or client be accepted or rejected?</label>
-                                        <div class="col-sm-10">
-                                            <select class="form-control" id="engagementClientAcceptance">
-                                                <option value="ecaYes">Accepted</option>
-                                                <option value="ecaNo">Rejected</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Should suspicious transaction report (“STR”) be filed with CAD for the prospective client? If yes, please set out the rationale and basis for STR. If in doubt, please seek advice from legal counsel after discussing with Managing Partner and /or Quality Management Partner.</label>
-                                        <div class="col-sm-10">
-                                            <textarea class="form-control" id="inputText" rows="4"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Having considered the objectives above, I am satisfied that we should accept the engagement subject to approval by the Managing Partner/Quality Management Partner/Head of Division  </label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control" id="inputText">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-sm-6">
-                                            <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:</label>
-                                            <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager">
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
-                                            <input type="text" class="form-control" id="inputText">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-sm-6">
-                                            <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
-                                            <input type="text" class="form-control" id="inputText" placeholder="Engagement Partner / Head of Division">
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
-                                            <input type="text" class="form-control" id="inputText">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-sm-6">
-                                            <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
-                                            <input type="text" class="form-control" id="inputText" placeholder="Managing Partner / Head of Division / Quality Management Partner">
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="inputPassword3" class="col-form-label">Date:</label>
-                                            <input type="text" class="form-control" id="inputText">
-                                        </div>
-                                    </div>
-                                    <h5 class="card-title"><u><i>Notes</i></u></h5>
-                                    <p> <i>To enable the authorized person to approve, the following are the minimum documentation required to be submitted together with this Form:
-                                        <br> &ensp;(a) Company BizFile search (full search is not required for a newly incorporated company or a company that is dormant)
-                                        <br> &ensp;(b) Screening of directors and ultimate beneficial owners owning more than 25% of the ultimate holding company using LexisNexis
-                                        <br> &ensp;(c) Notes of meeting(s) or communications with the management of the prospective client or persons knowledgeable about the prospect or notes written in QC6(3)
-                                        <br> &ensp;(d) Financial information if available
-                                        <br> &ensp;(e) Google search to obtain any further information about the company and the directors (exclude nominee directors) that are running and managing the operations of the company.
-                                        <br> &ensp;(f) Further procedures to be carried out on AML and CTF <u>should there be indicators or suspicion of integrity issues identified from the above client due diligence checking</u> may include:
-                                        <br>&ensp;&ensp;(i) Ascertaining how the entity's operation is funded including the source of funds
-                                        <br>&ensp;&ensp;(ii) Country where source of funds are derived
-                                        <br>&ensp;&ensp;(iii) Purpose of funds flow and whether it is considered unusual
-                                        <br>&ensp;&ensp;(iv) Finding out from management any investigations past or current by regulators and authorities on matters relating to tax evasion, corruption charges, terrorism financing, money laundering and any fraud and irregularities
-                                        <br>&ensp;&ensp;(v) Any other procedures considered necessary by the approver.
-                                        </i>
-                                     </p>
-                                    <div class="text-center">
-                                        <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC6 Form</button>
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Ref" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Sign/Date" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"
+                                                            class="form-control"
+                                                            placeholder="Enter Comment" />
+                                                </td>
+                                            </tr>          
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <h5 class="card-title">Conclusion</h5>
+                                <div class="row mb-3">
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">
+                                        Are there any significant risks associated with the acceptance of the engagement?
+                                        <br>
+                                        <u>Note</u>
+                                        <br>
+                                        <i>If yes, describe these risks and what safeguards are required to reduce these risks to an acceptable level before acceptance of this engagement.</i>
+                                    </label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" id="inputText" rows="4"></textarea>
                                     </div>
                                 </div>
+                                <div class="row mb-3">
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">New engagement / *client risk rated as: <br> *See <a>Appendix 2</a> for categories of risks</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="riskLevel">
+                                            <option value="normal">Normal (N)</option>
+                                            <option value="moderate">Moderate (M)</option>
+                                            <option value="high_risk">High Risk (H1)</option>
+                                            <option value="high_risk_2">High Risk 2 (H2)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Reason for the risk rating:</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputText">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Based on the risk rating above, the engagement should be subject to:  </label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="safeguardReview">
+                                            <option value="N">No safeguard review (N)</option>
+                                            <option value="H1">Full safeguard review (H1)</option>
+                                            <option value="H2">Focused safeguard review on opinion (H2)</option>
+                                            <option value="M">Focused safeguard review on audit or accounting issues (M)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                    <div class="row mb-3">
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Name of safeguard reviewer assigned by Head of Division/Managing Partner/Quality Management Partner: </label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputText">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Should new engagement or client be accepted or rejected?</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="engagementClientAcceptance">
+                                            <option value="ecaYes">Accepted</option>
+                                            <option value="ecaNo">Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="inputPassword3" class="col-sm-2 col-form-label">Should suspicious transaction report (“STR”) be filed with CAD for the prospective client? If yes, please set out the rationale and basis for STR. If in doubt, please seek advice from legal counsel after discussing with Managing Partner and /or Quality Management Partner.</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" id="inputText" rows="4"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="inputPassword3" class="col-sm-2 col-form-label">Having considered the objectives above, I am satisfied that we should accept the engagement subject to approval by the Managing Partner/Quality Management Partner/Head of Division  </label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputText">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-6">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:</label>
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
+                                        <input type="text" class="form-control" id="inputText">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-6">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Partner / Head of Division">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
+                                        <input type="text" class="form-control" id="inputText">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-6">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
+                                        <input type="text" class="form-control" id="inputText" placeholder="Managing Partner / Head of Division / Quality Management Partner">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="inputPassword3" class="col-form-label">Date:</label>
+                                        <input type="text" class="form-control" id="inputText">
+                                    </div>
+                                </div>
+                                <h5 class="card-title"><u><i>Notes</i></u></h5>
+                                <p> <i>To enable the authorized person to approve, the following are the minimum documentation required to be submitted together with this Form:
+                                    <br> &ensp;(a) Company BizFile search (full search is not required for a newly incorporated company or a company that is dormant)
+                                    <br> &ensp;(b) Screening of directors and ultimate beneficial owners owning more than 25% of the ultimate holding company using LexisNexis
+                                    <br> &ensp;(c) Notes of meeting(s) or communications with the management of the prospective client or persons knowledgeable about the prospect or notes written in QC6(3)
+                                    <br> &ensp;(d) Financial information if available
+                                    <br> &ensp;(e) Google search to obtain any further information about the company and the directors (exclude nominee directors) that are running and managing the operations of the company.
+                                    <br> &ensp;(f) Further procedures to be carried out on AML and CTF <u>should there be indicators or suspicion of integrity issues identified from the above client due diligence checking</u> may include:
+                                    <br>&ensp;&ensp;(i) Ascertaining how the entity's operation is funded including the source of funds
+                                    <br>&ensp;&ensp;(ii) Country where source of funds are derived
+                                    <br>&ensp;&ensp;(iii) Purpose of funds flow and whether it is considered unusual
+                                    <br>&ensp;&ensp;(iv) Finding out from management any investigations past or current by regulators and authorities on matters relating to tax evasion, corruption charges, terrorism financing, money laundering and any fraud and irregularities
+                                    <br>&ensp;&ensp;(v) Any other procedures considered necessary by the approver.
+                                    </i>
+                                    </p>
+                                <div class="text-center">
+                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC6 Form</button>
+                                </div>
                             </div>
+                        </div>
                         </form>
                     </div>
                 </div>
