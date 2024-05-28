@@ -5,6 +5,7 @@ namespace PKFAuditManagement.Models
     public class ContinuingEngagement
     {
         public int ContinuingEngagementId { get; set; }
+        public string CreatedBy { get; set; }
         public string? FileReference { get; set; }
         public string? Client { get; set; }
         public DateTime? PeriodEnded { get; set; }

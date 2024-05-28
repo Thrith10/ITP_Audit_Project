@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement.Data;
@@ -11,17 +12,23 @@ namespace PKFAuditManagement.Controllers
     public class QC6FormController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public QC6FormController(ApplicationDbContext context)
+        public QC6FormController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [Authorize(Roles = "User")]
-        public IActionResult QC6FormManagement()
+        public async Task<IActionResult> QC6FormManagement()
         {
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+
             // Retrieve engagement data from database
-            var engagements = _context.Engagements.ToList();
+            var engagements = _context.Engagements.Where(e => e.CreatedBy.Equals(userId)).ToList();
             return View("~/Views/General/QC6/QC6FormManagement.cshtml", engagements);
         }
 
@@ -62,7 +69,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult SubmitQC6Form(QC6FormViewModel viewModel)
+        public async Task<IActionResult> SubmitQC6Form(QC6FormViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -74,10 +81,15 @@ namespace PKFAuditManagement.Controllers
             {
                 try
                 {
+                    // Get the current user's ID
+                    var user = await _userManager.GetUserAsync(User);
+                    var userId = user?.Id;
+
                     // Save viewModel data to EngagementTable
                     var engagementData = new Engagement
                     {
                         FileReference = Helper.GenerateQCFormFileReference(),
+                        CreatedBy = userId,
                         ProspectiveClient = viewModel.ProspectiveClient,
                         PeriodEnded = viewModel.PeriodEnded,
                         EngagementType = viewModel.EngagementType,

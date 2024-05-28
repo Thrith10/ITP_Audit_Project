@@ -5,6 +5,7 @@ namespace PKFAuditManagement.Models
     public class Engagement
     {
         public int EngagementID { get; set; }
+        public string CreatedBy { get; set; }
         public string? FileReference { get; set; }
         public string? ProspectiveClient { get; set; }
         public DateTime? PeriodEnded { get; set; }

@@ -31,7 +31,7 @@ namespace PKFAuditManagement
                             context.Response.Redirect("/Admin/AdminDashboard");
                             return;
                         }
-                        else if (roles.Contains("Auditor"))
+                        else if (roles.Contains("User"))
                         {
                             context.Response.Redirect("/Home/Dashboard");
                             return;
