@@ -1,0 +1,36 @@
+﻿@* Views/Shared/_Sidebar.cshtml *@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<ul class="sidebar-nav" id="sidebar-nav">
+
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "Admin" && currentAction == "AdminDashboard" ? "active" : "collapsed")" asp-controller="Admin" asp-action="AdminDashboard">
+            <i class="bi bi-grid"></i>
+            <span>Admin Dashboard</span>
+        </a>
+    </li><!-- End Dashboard Nav -->
+
+    <li class="nav-heading">Pages</li>
+
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "QC6Form" && currentAction == "QC6FormApprovalManagement" ? "active" : "collapsed")" asp-controller="QC6Form" asp-action="QC6FormApprovalManagement">
+            <i class="bi bi-person"></i>
+            <span>Manage QC6 Forms</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "QC7Form" && currentAction == "QC7FormApprovalManagement" ? "active" : "collapsed")" asp-controller="QC7Form" asp-action="QC7FormApprovalManagement">
+            <i class="bi bi-person"></i>
+            <span>Manage QC7 Forms</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "Admin" && currentAction == "AccountManagement" ? "active" : "collapsed")" asp-controller="Admin" asp-action="AccountManagement">
+            <i class="bi bi-person"></i>
+            <span>Account Management</span>
+        </a>
+    </li><!-- End Profile Page Nav -->
+</ul>
