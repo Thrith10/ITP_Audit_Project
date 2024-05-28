@@ -1,19 +1,17 @@
 ﻿@using PKFAuditManagement.ViewModels
 @model QC6FormViewModel
 
-<!DOCTYPE html>
-<html lang="en">
+<script src="~/js/qc6form.js"></script>
 
-<body>
-    <div class="justify-content-center">
-        <main id="main" class="main">
-            <div class="pagetitle">
-                <h1>Form QC6(3)</h1>
-            </div><!-- End Page Title -->
-            <section class="section">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <form asp-action="SubmitQC6Form" asp-controller="QC6Form" method="post">
+<div class="justify-content-center">
+    <main id="main" class="main">
+        <div class="pagetitle">
+            <h1>Form QC6(3)</h1>
+        </div><!-- End Page Title -->
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+                    <form asp-action="SubmitQC6Form" asp-controller="QC6Form" method="post">
                         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                         {
                             <div class="alert alert-danger">
@@ -27,20 +25,21 @@
                                     @Html.AntiForgeryToken()
                                     <div class="row mb-3">
                                         <label asp-for="ProspectiveClient" class="col-sm-2 col-form-label">Prospective Client:</label>
-                                        <div class="col-sm-10">
+                                        <div class="col-sm-10 d-flex align-items-center">
                                             <input type="text" class="form-control" asp-for="ProspectiveClient">
                                             <span asp-validation-for="ProspectiveClient" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputEmail3" class="col-sm-2 col-form-label">Period Ended:</label>
-                                        <div class="col-sm-10">
-                                                <input type="date" class="form-control" asp-for="PeriodEnded">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="date" class="form-control" asp-for="PeriodEnded">
+                                            <span asp-validation-for="PeriodEnded" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label asp-for="EngagementType" class="col-sm-2 col-form-label">Type of Engagement:</label>
-                                        <div class="col-sm-10">
+                                        <div class="col-sm-10 d-flex align-items-center">
                                             <input type="text" class="form-control" asp-for="EngagementType">
                                             <span asp-validation-for="EngagementType" class="text-danger"></span>
                                         </div>
@@ -50,10 +49,12 @@
                                             <strong>Prepared by:</strong>
                                         </div>
                                         <div class="col">
-                                                <input type="text" class="form-control" placeholder="Signature">
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy">
+                                            <span asp-validation-for="PreparedBy" class="text-danger"></span>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control">
+                                            <input type="date" class="form-control" asp-for="PreparedByDate">
+                                            <span asp-validation-for="PreparedByDate" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -61,65 +62,73 @@
                                             <strong>Reviewed by:</strong>
                                         </div>
                                         <div class="col">
-                                                <input type="text" class="form-control" placeholder="Signature">
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="ReviewedBy">
+                                            <span asp-validation-for="ReviewedBy" class="text-danger"></span>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control">
+                                            <input type="date" class="form-control" asp-for="ReviewedByDate">
+                                            <span asp-validation-for="ReviewedByDate" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <br>
                                     <hr class="my-4">
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Name of PKF entity proposing for the service</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="PKFEntityProposingService">
+                                            <span asp-validation-for="PKFEntityProposingService" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Source of referral of prospective client</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="SourceOfReferral">
+                                            <span asp-validation-for="SourceOfReferral" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Indicate the nature of service</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="NatureOfServiceForEstimateFee">
+                                            <span asp-validation-for="NatureOfServiceForEstimateFee" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="number" class="form-control" asp-for="EstimatedFee">
+                                            <span asp-validation-for="EstimatedFee" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost">
+                                            <span asp-validation-for="BudgetedTimeCost" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.  And to disclose reasons for acceptance if the budgeted fee recovery percentage is below 30%.">
                                             <span class="link-text">Budgeted fee recovery rate (budgeted fee / budgeted time cost)</span>
                                         </label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" disabled asp-for="BudgetedFeeRecoveryRate">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Fee from tax services, accounting, payroll, secretarial services and other non-audit services (if any)</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <label class="col-sm-2 col-form-label"> (TBC) Fee from tax services, accounting, payroll, secretarial services and other non-audit services (if any)</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="FeeFromServices">
+                                            <span asp-validation-for="FeeFromServices" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?</label>
-                                        <div class="col-sm-10">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="OutstandingUnpaidFees">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -127,56 +136,58 @@
                                         Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.">
                                             <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
                                         </label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="FeeConcentration">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Conflicts check done?</label>
-                                        <div class="col-sm-10">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="ConflictsCheckDone">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Type of activities of prospective client</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="TypeOfActivities">
+                                            <span asp-validation-for="TypeOfActivities" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Complexity of engagement based on preliminary evaluation</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement">
+                                            <span asp-validation-for="ComplexityOfEngagement" class="text-danger"></span>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Predecessor Auditor (if applicable)</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="PredecessorAuditor">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" class="form-control">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?</label>
-                                        <div class="col-sm-10">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity">
                                         </div>
                                     </div>
 
-                                    <div class="row mb-3">
+                                    <div class="row mb-3" id="riskLevelRow" style="display: none;">
                                         <label class="col-sm-2 col-form-label">Type of PIE</label>
-                                        <div class="col-sm-10">
-                                            <select class="form-control" id="riskLevel">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <select class="form-control" id="riskLevel" name="riskLevel" disabled asp-for="TypeOfPIE">
                                                 <option value="Listed">Listed</option>
                                                 <option value="FinancialInstitution">Financial Institution</option>
                                                 <option value="LargeCharity">Large Charity</option>
@@ -187,19 +198,19 @@
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Is this a transnational entity (TNE)?</label>
-                                        <div class="col-sm-10">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input me-3" type="checkbox" id="gridCheck1" asp-for="TransnationalEntity">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3 align-items-center">
                                         <label class="col-sm-2 col-form-label">If this is a transnational audit (TNA)?</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input me-3" type="checkbox" id="gridCheck1">
+                                            <input class="form-check-input me-3" type="checkbox" id="gridCheck1" asp-for="TransnationalAudit">
                                         </div>
                                     </div>
 
-                                </form>                         
+                                </form>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <thead class="table-light table-head-qc6">
@@ -292,10 +303,10 @@
                                                 <td>
                                                     <div>
                                                         <p>
-                                                            3. Consider whether the firm can comply with relevant ethical requirements, 
-                                                            including the firm’s independence. Include in your consideration potential 
-                                                            independence or conflicts of interest problems arising from relationships 
-                                                            with other clients, firm members, or their families; providing non-assurance 
+                                                            3. Consider whether the firm can comply with relevant ethical requirements,
+                                                            including the firm’s independence. Include in your consideration potential
+                                                            independence or conflicts of interest problems arising from relationships
+                                                            with other clients, firm members, or their families; providing non-assurance
                                                             services; or unpaid fees.
                                                         </p>
                                                     </div>
@@ -320,8 +331,8 @@
                                                 <td>
                                                     <div>
                                                         <p>
-                                                            4. Regarding the proposed relationship between the firm and the client or 
-                                                            any associated companies, decide whether we are, and can be seen to be, 
+                                                            4. Regarding the proposed relationship between the firm and the client or
+                                                            any associated companies, decide whether we are, and can be seen to be,
                                                             independent of the client.  Consider:
                                                         </p>
                                                         <ul>
@@ -336,12 +347,16 @@
                                                             <li>Litigation (actual or threatened)</li>
                                                             <li>Family or professional relationships</li>
                                                             <li>Prohibited services</li>
-                                                            <li>Financial involvement, including trustee investments, 
-                                                                mutual business interests, loans, beneficial interests- shares/trusts, overdue fees</li>
-                                                            <li>Network form independence conflict checking procedures performed 
-                                                                (i.e. conflict of interest to be considered by completing either “Audit and Review Engagements – 
-                                                                Firm and Network Independence” or “Non-assurance Engagements – Firm and Network Independence,” 
-                                                                which are part of this form.</li>
+                                                            <li>
+                                                                Financial involvement, including trustee investments,
+                                                                mutual business interests, loans, beneficial interests- shares/trusts, overdue fees
+                                                            </li>
+                                                            <li>
+                                                                Network form independence conflict checking procedures performed
+                                                                (i.e. conflict of interest to be considered by completing either “Audit and Review Engagements –
+                                                                Firm and Network Independence” or “Non-assurance Engagements – Firm and Network Independence,”
+                                                                which are part of this form.
+                                                            </li>
                                                         </ul>
 
                                                     </div>
@@ -369,8 +384,8 @@
                                                 <td>
                                                     <div>
                                                         <p>
-                                                            5. Decide whether we have the competence to carry out the professional services properly. 
-                                                            Consider whether special skills are needed to deal with the particular features or specialised 
+                                                            5. Decide whether we have the competence to carry out the professional services properly.
+                                                            Consider whether special skills are needed to deal with the particular features or specialised
                                                             reporting requirements of the client.
                                                         </p>
                                                     </div>
@@ -395,8 +410,8 @@
                                                 <td>
                                                     <div>
                                                         <p>
-                                                            6. Is there any reason to believe that management will not provide access to all 
-                                                            information of which management is aware that is relevant to the preparation of 
+                                                            6. Is there any reason to believe that management will not provide access to all
+                                                            information of which management is aware that is relevant to the preparation of
                                                             the financial statements including access to information relevant to disclosures?
                                                         </p>
                                                     </div>
@@ -646,19 +661,19 @@
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        16. Carry out procedures for establishing/verifying the identity of new clients for possible instances of money laundering if there are indicators or suspicion of such activities based on the evaluation of integrity of the new client set out above.
-                                                        <ol class="list-decimal pl-4">
-                                                            <li>Perform a search of the company’s name, all directors and ultimate beneficial owners owning more than 25% equity interest in the ultimate holding company using LexisNexis. This screening covers not only identifying any PEPs but also terrorist names, terrorist organisations and names sanctioned by United States / United Nations. A copy of the screening should be attached to QC6(3).</li>
-                                                            <br>
-                                                            <li>Carry out a google check on the company’s name, names of the directors and ultimate BOs owning more than 25% equity interest in the ultimate holding company. A copy of the google check should be attached to QC6(3).</li>
-                                                            <br>
-                                                            <li>For audit clients whereby the companies are incorporated by our related entities, PKF-CAP Corporate Services Pte Ltd (“CS”) or PKF-Khoo Management Services Pte Ltd (“KMS”), then carry out a review of the screening and google checking that have been carried out by CS or KMS. If the result is satisfactory, then document the review that you have performed. No further screening or checking is required unless work performed is considered not adequate for our purposes. This placing of reliance is acceptable so long as the screening carried out by CS or KMS is current within 12 months from our client/engagement evaluation date.</li>
-                                                        </ol>
-                                                        <i>
-                                                        <b>Note:</b> If the prospective client is - (a) an entity listed on the Singapore Exchange; (b) an entity listed on a stock exchange outside Singapore; (c) a Singapore financial institution; (d) a financial institution incorporated or established outside Singapore; or (e) an investment vehicle, the managers of which are — (i) Singapore financial institutions; or (ii) financial institutions incorporated or established outside Singapore, under the Accountants Act 2004, Accountants (Prevention of Money Laundering and Financing of Terrorism) Rules 2023, an accounting entity need not inquire if there exists any beneficial owner unless the accounting entity has doubts about the veracity of the information obtained by the accounting entity in carrying out customer due diligence measures under these Rules or suspects that the client is carrying out or facilitating money laundering or the financing of terrorism.
-                                                        <br><br>
-                                                        “Beneficial owner” means — (a) an individual who ultimately owns all of the assets or undertakings of the client (whether or not the client is a body corporate); (b) an individual who has ultimate control or ultimate effective control over, or has executive authority in, the client; or (c) an individual on whose behalf the client has employed or engaged the services of an accounting entity.
-                                                        </i>
+                                                            16. Carry out procedures for establishing/verifying the identity of new clients for possible instances of money laundering if there are indicators or suspicion of such activities based on the evaluation of integrity of the new client set out above.
+                                                            <ol class="list-decimal pl-4">
+                                                                <li>Perform a search of the company’s name, all directors and ultimate beneficial owners owning more than 25% equity interest in the ultimate holding company using LexisNexis. This screening covers not only identifying any PEPs but also terrorist names, terrorist organisations and names sanctioned by United States / United Nations. A copy of the screening should be attached to QC6(3).</li>
+                                                                <br>
+                                                                <li>Carry out a google check on the company’s name, names of the directors and ultimate BOs owning more than 25% equity interest in the ultimate holding company. A copy of the google check should be attached to QC6(3).</li>
+                                                                <br>
+                                                                <li>For audit clients whereby the companies are incorporated by our related entities, PKF-CAP Corporate Services Pte Ltd (“CS”) or PKF-Khoo Management Services Pte Ltd (“KMS”), then carry out a review of the screening and google checking that have been carried out by CS or KMS. If the result is satisfactory, then document the review that you have performed. No further screening or checking is required unless work performed is considered not adequate for our purposes. This placing of reliance is acceptable so long as the screening carried out by CS or KMS is current within 12 months from our client/engagement evaluation date.</li>
+                                                            </ol>
+                                                            <i>
+                                                                <b>Note:</b> If the prospective client is - (a) an entity listed on the Singapore Exchange; (b) an entity listed on a stock exchange outside Singapore; (c) a Singapore financial institution; (d) a financial institution incorporated or established outside Singapore; or (e) an investment vehicle, the managers of which are — (i) Singapore financial institutions; or (ii) financial institutions incorporated or established outside Singapore, under the Accountants Act 2004, Accountants (Prevention of Money Laundering and Financing of Terrorism) Rules 2023, an accounting entity need not inquire if there exists any beneficial owner unless the accounting entity has doubts about the veracity of the information obtained by the accounting entity in carrying out customer due diligence measures under these Rules or suspects that the client is carrying out or facilitating money laundering or the financing of terrorism.
+                                                                <br><br>
+                                                                “Beneficial owner” means — (a) an individual who ultimately owns all of the assets or undertakings of the client (whether or not the client is a body corporate); (b) an individual who has ultimate control or ultimate effective control over, or has executive authority in, the client; or (c) an individual on whose behalf the client has employed or engaged the services of an accounting entity.
+                                                            </i>
                                                         </p>
                                                     </div>
                                                 </td>
@@ -678,7 +693,7 @@
                                                            placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
-                                             <tr class="text-zinc-700 dark:text-zinc-400">
+                                            <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
@@ -759,161 +774,161 @@
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        <b>When proposing for an audit or review engagement: </b>
-                                                        <br><br> 
-                                                        a) Is the potential client listed (public)? If yes, proceed to (c). If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group. 
-                                                        <br><br>  If there are listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (d).
+                                                            <b>When proposing for an audit or review engagement: </b>
+                                                            <br><br>
+                                                            a) Is the potential client listed (public)? If yes, proceed to (c). If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group.
+                                                            <br><br>  If there are listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (d).
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        b) If there are listed entities in the group, investigate whether the firm or other PKF Member Firms provide audit or review services to these listed entities.
-                                                        <br><br> 
-                                                        This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities (this is not required).
-                                                        <br><br> 
-                                                        If the firm or other Member Firms provide audit or review services to listed entities in the group, proceed to (c). If not, proceed to (d).
+                                                            b) If there are listed entities in the group, investigate whether the firm or other PKF Member Firms provide audit or review services to these listed entities.
+                                                            <br><br>
+                                                            This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities (this is not required).
+                                                            <br><br>
+                                                            If the firm or other Member Firms provide audit or review services to listed entities in the group, proceed to (c). If not, proceed to (d).
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        c) If the potential client is listed, or the firm or other Member Firms provide audit or review services to listed entities in the group, independence considerations must include all related entities as defined in the IESBA Code for Professional Accountants.
-                                                        <br><br> 
-                                                        Enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or any related entities. This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these related entities.
-                                                        <br><br> 
-                                                        If the firm or other Member Firms provide non-assurance services to the potential client or any related entities, proceed to (f). If not, no further action is required.
+                                                            c) If the potential client is listed, or the firm or other Member Firms provide audit or review services to listed entities in the group, independence considerations must include all related entities as defined in the IESBA Code for Professional Accountants.
+                                                            <br><br>
+                                                            Enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or any related entities. This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these related entities.
+                                                            <br><br>
+                                                            If the firm or other Member Firms provide non-assurance services to the potential client or any related entities, proceed to (f). If not, no further action is required.
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        d) If the potential client is not listed and there are no listed entities in the group or the firm or other Member Firms do not provide audit or review services to any listed entities in the group, enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control.
-                                                        <br><br> 
-                                                        This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
-                                                        <br><br> 
-                                                        If the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control, proceed to (f). If not, proceed to (e).
+                                                            d) If the potential client is not listed and there are no listed entities in the group or the firm or other Member Firms do not provide audit or review services to any listed entities in the group, enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control.
+                                                            <br><br>
+                                                            This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
+                                                            <br><br>
+                                                            If the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control, proceed to (f). If not, proceed to (e).
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        e) Is there reason to believe that a relationship or circumstance involving any other related entity of the potential client is relevant to the evaluation of the firm’s independence from the client? If yes, apply step (f) below to that related entity. If not, no further action is required.
-                                                        </p>          
+                                                            e) Is there reason to believe that a relationship or circumstance involving any other related entity of the potential client is relevant to the evaluation of the firm’s independence from the client? If yes, apply step (f) below to that related entity. If not, no further action is required.
+                                                        </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        f) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
-                                                        <br><br> 
-                                                        Carry out the evaluation under the IESBA International Code of Ethics for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
+                                                            f) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
+                                                            <br><br>
+                                                            Carry out the evaluation under the IESBA International Code of Ethics for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -946,114 +961,114 @@
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        <b>When proposing for a non-assurance engagement:</b>
-                                                        <br><br> 
-                                                        a) Is the potential client listed (public)? If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group.
-                                                        <br><br> 
-                                                        If the potential client is listed or there are other listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (c).
+                                                            <b>When proposing for a non-assurance engagement:</b>
+                                                            <br><br>
+                                                            a) Is the potential client listed (public)? If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group.
+                                                            <br><br>
+                                                            If the potential client is listed or there are other listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (c).
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        b) If the potential client is listed or there are other listed entities in the group, investigate whether the firms or other PKF Member Firms provide audit or review services to these listed entities. This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities.
-                                                        <br><br> 
-                                                        If the firm or other Member Firms do not provide audit or review services to listed entities in the group, proceed to (c).
-                                                        <br><br> 
-                                                        If the firm or other Member Firms provide audit or review services to these listed entities, independence considerations must include all related entities as defined in the IESBA International Code for Professional Accountants, including International Independence Standards. Proceed to (d).
+                                                            b) If the potential client is listed or there are other listed entities in the group, investigate whether the firms or other PKF Member Firms provide audit or review services to these listed entities. This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities.
+                                                            <br><br>
+                                                            If the firm or other Member Firms do not provide audit or review services to listed entities in the group, proceed to (c).
+                                                            <br><br>
+                                                            If the firm or other Member Firms provide audit or review services to these listed entities, independence considerations must include all related entities as defined in the IESBA International Code for Professional Accountants, including International Independence Standards. Proceed to (d).
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        c) If the potential client is not listed and there are no other listed entities in the group, or the firm or other Member Firms do not provide audit or review services to the listed entities in the group, enquire as to whether the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client.
-                                                        <br><br> 
-                                                        This enquiry shall be direct enquiry of the client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
-                                                        <br><br> 
-                                                        If the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client, proceed to (d). If not, no further action is required.
+                                                            c) If the potential client is not listed and there are no other listed entities in the group, or the firm or other Member Firms do not provide audit or review services to the listed entities in the group, enquire as to whether the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client.
+                                                            <br><br>
+                                                            This enquiry shall be direct enquiry of the client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.
+                                                            <br><br>
+                                                            If the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client, proceed to (d). If not, no further action is required.
 
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
                                             </tr>
                                             <tr class="text-zinc-700 dark:text-zinc-400">
                                                 <td>
                                                     <div>
                                                         <p>
-                                                        d) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
-                                                        <br><br> 
-                                                        Carry out the evaluation under the IESBA International Code for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
+                                                            d) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.
+                                                            <br><br>
+                                                            Carry out the evaluation under the IESBA International Code for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.
 
                                                         </p>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Ref" />
+                                                           class="form-control"
+                                                           placeholder="Enter Ref" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Sign/Date" />
+                                                           class="form-control"
+                                                           placeholder="Sign/Date" />
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                            class="form-control"
-                                                            placeholder="Enter Comment" />
+                                                           class="form-control"
+                                                           placeholder="Enter Comment" />
                                                 </td>
-                                            </tr>          
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -1066,13 +1081,13 @@
                                         <br>
                                         <i>If yes, describe these risks and what safeguards are required to reduce these risks to an acceptable level before acceptance of this engagement.</i>
                                     </label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <textarea class="form-control" id="inputText" rows="4"></textarea>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">New engagement / *client risk rated as: <br> *See <a>Appendix 2</a> for categories of risks</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <select class="form-control" id="riskLevel">
                                             <option value="normal">Normal (N)</option>
                                             <option value="moderate">Moderate (M)</option>
@@ -1083,13 +1098,13 @@
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Reason for the risk rating:</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <input type="text" class="form-control" id="inputText">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Based on the risk rating above, the engagement should be subject to:  </label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <select class="form-control" id="safeguardReview">
                                             <option value="N">No safeguard review (N)</option>
                                             <option value="H1">Full safeguard review (H1)</option>
@@ -1098,15 +1113,15 @@
                                         </select>
                                     </div>
                                 </div>
-                                    <div class="row mb-3">
+                                <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Name of safeguard reviewer assigned by Head of Division/Managing Partner/Quality Management Partner: </label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <input type="text" class="form-control" id="inputText">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Should new engagement or client be accepted or rejected?</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <select class="form-control" id="engagementClientAcceptance">
                                             <option value="ecaYes">Accepted</option>
                                             <option value="ecaNo">Rejected</option>
@@ -1115,13 +1130,13 @@
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">Should suspicious transaction report (“STR”) be filed with CAD for the prospective client? If yes, please set out the rationale and basis for STR. If in doubt, please seek advice from legal counsel after discussing with Managing Partner and /or Quality Management Partner.</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <textarea class="form-control" id="inputText" rows="4"></textarea>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">Having considered the objectives above, I am satisfied that we should accept the engagement subject to approval by the Managing Partner/Quality Management Partner/Head of Division  </label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-10 d-flex align-items-center">
                                         <input type="text" class="form-control" id="inputText">
                                     </div>
                                 </div>
@@ -1156,89 +1171,89 @@
                                     </div>
                                 </div>
                                 <h5 class="card-title"><u><i>Notes</i></u></h5>
-                                <p> <i>To enable the authorized person to approve, the following are the minimum documentation required to be submitted together with this Form:
-                                    <br> &ensp;(a) Company BizFile search (full search is not required for a newly incorporated company or a company that is dormant)
-                                    <br> &ensp;(b) Screening of directors and ultimate beneficial owners owning more than 25% of the ultimate holding company using LexisNexis
-                                    <br> &ensp;(c) Notes of meeting(s) or communications with the management of the prospective client or persons knowledgeable about the prospect or notes written in QC6(3)
-                                    <br> &ensp;(d) Financial information if available
-                                    <br> &ensp;(e) Google search to obtain any further information about the company and the directors (exclude nominee directors) that are running and managing the operations of the company.
-                                    <br> &ensp;(f) Further procedures to be carried out on AML and CTF <u>should there be indicators or suspicion of integrity issues identified from the above client due diligence checking</u> may include:
-                                    <br>&ensp;&ensp;(i) Ascertaining how the entity's operation is funded including the source of funds
-                                    <br>&ensp;&ensp;(ii) Country where source of funds are derived
-                                    <br>&ensp;&ensp;(iii) Purpose of funds flow and whether it is considered unusual
-                                    <br>&ensp;&ensp;(iv) Finding out from management any investigations past or current by regulators and authorities on matters relating to tax evasion, corruption charges, terrorism financing, money laundering and any fraud and irregularities
-                                    <br>&ensp;&ensp;(v) Any other procedures considered necessary by the approver.
+                                <p>
+                                    <i>
+                                        To enable the authorized person to approve, the following are the minimum documentation required to be submitted together with this Form:
+                                        <br> &ensp;(a) Company BizFile search (full search is not required for a newly incorporated company or a company that is dormant)
+                                        <br> &ensp;(b) Screening of directors and ultimate beneficial owners owning more than 25% of the ultimate holding company using LexisNexis
+                                        <br> &ensp;(c) Notes of meeting(s) or communications with the management of the prospective client or persons knowledgeable about the prospect or notes written in QC6(3)
+                                        <br> &ensp;(d) Financial information if available
+                                        <br> &ensp;(e) Google search to obtain any further information about the company and the directors (exclude nominee directors) that are running and managing the operations of the company.
+                                        <br> &ensp;(f) Further procedures to be carried out on AML and CTF <u>should there be indicators or suspicion of integrity issues identified from the above client due diligence checking</u> may include:
+                                        <br>&ensp;&ensp;(i) Ascertaining how the entity's operation is funded including the source of funds
+                                        <br>&ensp;&ensp;(ii) Country where source of funds are derived
+                                        <br>&ensp;&ensp;(iii) Purpose of funds flow and whether it is considered unusual
+                                        <br>&ensp;&ensp;(iv) Finding out from management any investigations past or current by regulators and authorities on matters relating to tax evasion, corruption charges, terrorism financing, money laundering and any fraud and irregularities
+                                        <br>&ensp;&ensp;(v) Any other procedures considered necessary by the approver.
                                     </i>
-                                    </p>
+                                </p>
                                 <div class="text-center">
                                     <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC6 Form</button>
                                 </div>
                             </div>
                         </div>
-                        </form>
-                    </div>
+                    </form>
                 </div>
-            </section>
-            <section class="section">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card">
-                            <div class="card-body">
+            </div>
+        </section>
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
                             <h1 class="card-title">Appendix 1</h1>
                             <p>
-                            <i>
-                                Extract (partial) from the Firm’s Quality Management Manual – Categories of Risk (paragraph 8.14 to 8.15)
-                                <br><br>
-                                The firm classifies its engagements into four categories namely: -
-                                <br><br>
-                                &nbsp;&nbsp;a)  High risk engagement requiring full scope review by the safeguard reviewer (H1)
-                                <br><br>
-                                &nbsp;&nbsp;b)  High risk engagement requiring focused review on the modified opinion or a specific area(s) by the safeguard reviewer (H2)
-                                <br><br>
-                                &nbsp;&nbsp;c)  Moderate risk engagement may require areas to be subjected to focused or selective review by safeguard reviewer based on engagement partner’s discretion (M)
-                                <br><br>
-                                &nbsp;&nbsp;d)  Normal risk engagement requiring no safeguard review (N)
-                                <br><br>
-                                A safeguard review is an objective evaluation of the significant judgements made by the engagement team and the conclusions reached in formulating the report before the report is issued. The firm typically requires safeguard reviews for all the following “high risk” engagements:
-                                <br><br>
-                                (A “high risk” client that is rated as H1, is a client considered to be of high public interest or likely to be subject to higher levels of scrutiny for a variety of reasons.)
-                                <br><br>
-                                &nbsp;&nbsp;1.	Transnational entities (which include some of the categories below) (Note it is only necessary to apply the safeguard review requirement for a subsidiary if it is greater than 15% of the group by turnover, gross assets or audit hours);
-                                <br><br>
-                                &nbsp;&nbsp;2.	Publicly traded or listed companies;
-                                <br><br>
-                                &nbsp;&nbsp;3.	Large charities with donation income of S$10 million or more;
-                                <br><br>
-                                &nbsp;&nbsp;4.	Other public interest entities, such as banks, financial institutions, insurance entities, large pension schemes, large publicly funded charities (with donation in excess of S$10 million), and regulated fund management activities including if their financial statements are likely to be used across national boundaries (i.e., internationally) or if they are important National Institutions;
-                                <br><br>
-                                &nbsp;&nbsp;5.	“For sale” entities or those which are known to be targets for acquisition by another entity;
-                                <br><br>
-                                &nbsp;&nbsp;6.	Entities where a qualified audit report was issued in the last financial statements, or where a qualified audit report is expected to be issued in the current financial statements which is not due to a technical qualification such as those falling under H2;
-                                <br><br>
-                                &nbsp;&nbsp;7.	Entities where there are particular reporting difficulties where there may be doubts over the nature of audit report to be issued.
-                                <br><br>
-                                &nbsp;&nbsp;8.	First year audit of a new client arising from a change of auditors (unless the engagement is non-complex and straight-forward in nature which based on the engagement partner recommendation does not need a safeguard review).
-                                <br><br>
-                                &nbsp;&nbsp;9.	Any other significant concerns identified by the engagement partner that requires a safeguard review under H1.
-                                <br><br>
-                                The Firm classifies high risk engagements into two types namely H1 and H2.
-                                <br><br><br>
-                                <h3 class="card-title">H1 engagements</h3>
-                                For engagements such as those listed from (1) to (9) above, the firm classifies these engagements as High risk 1 (“H1”).
-                                <br><br>
-                                <h3 class="card-title">H2 engagements</h3>
-                                However, there are certain specific instances where the engagement is not really a “high risk” engagement simply because the entity incurred losses and has deficit in shareholder’s equity as the share capital is only S$2 and the funding is entirely by way of loans from the holding/related companies and there are no borrowings from third parties.  So long as the holding company provides the financial support and there is no risk of borrowings from third parties, there is no real risk of going concern. Thus, the modification of the audit report on going concern which is commonly the case with this type of engagement represents a technical modification and would not require a full scope review.
-                                Another specific instance would be the non-consolidation of a subsidiary by the Singapore holding company as the ultimate parent does not publish consolidated accounts that are publicly available. Again, this type of engagement is not really a high-risk engagement and the reason is commonly one of cost and benefit to the holding company which does not need the group accounts at the Singapore level.
-                                For those engagements as described above, they are classified as High risk 2 (“H2”). Such engagements will require only the modified opinion to be reviewed by the safeguard reviewer including the documentation of the matters that give rise to the modified opinion. Based on the judgement of the safeguard reviewer, he or she can extend the review to other areas on a selective basis as he or she deems necessary after discussion with the engagement partner or manager.
-                            </i>
+                                <i>
+                                    Extract (partial) from the Firm’s Quality Management Manual – Categories of Risk (paragraph 8.14 to 8.15)
+                                    <br><br>
+                                    The firm classifies its engagements into four categories namely: -
+                                    <br><br>
+                                    &nbsp;&nbsp;a)  High risk engagement requiring full scope review by the safeguard reviewer (H1)
+                                    <br><br>
+                                    &nbsp;&nbsp;b)  High risk engagement requiring focused review on the modified opinion or a specific area(s) by the safeguard reviewer (H2)
+                                    <br><br>
+                                    &nbsp;&nbsp;c)  Moderate risk engagement may require areas to be subjected to focused or selective review by safeguard reviewer based on engagement partner’s discretion (M)
+                                    <br><br>
+                                    &nbsp;&nbsp;d)  Normal risk engagement requiring no safeguard review (N)
+                                    <br><br>
+                                    A safeguard review is an objective evaluation of the significant judgements made by the engagement team and the conclusions reached in formulating the report before the report is issued. The firm typically requires safeguard reviews for all the following “high risk” engagements:
+                                    <br><br>
+                                    (A “high risk” client that is rated as H1, is a client considered to be of high public interest or likely to be subject to higher levels of scrutiny for a variety of reasons.)
+                                    <br><br>
+                                    &nbsp;&nbsp;1.	Transnational entities (which include some of the categories below) (Note it is only necessary to apply the safeguard review requirement for a subsidiary if it is greater than 15% of the group by turnover, gross assets or audit hours);
+                                    <br><br>
+                                    &nbsp;&nbsp;2.	Publicly traded or listed companies;
+                                    <br><br>
+                                    &nbsp;&nbsp;3.	Large charities with donation income of S$10 million or more;
+                                    <br><br>
+                                    &nbsp;&nbsp;4.	Other public interest entities, such as banks, financial institutions, insurance entities, large pension schemes, large publicly funded charities (with donation in excess of S$10 million), and regulated fund management activities including if their financial statements are likely to be used across national boundaries (i.e., internationally) or if they are important National Institutions;
+                                    <br><br>
+                                    &nbsp;&nbsp;5.	“For sale” entities or those which are known to be targets for acquisition by another entity;
+                                    <br><br>
+                                    &nbsp;&nbsp;6.	Entities where a qualified audit report was issued in the last financial statements, or where a qualified audit report is expected to be issued in the current financial statements which is not due to a technical qualification such as those falling under H2;
+                                    <br><br>
+                                    &nbsp;&nbsp;7.	Entities where there are particular reporting difficulties where there may be doubts over the nature of audit report to be issued.
+                                    <br><br>
+                                    &nbsp;&nbsp;8.	First year audit of a new client arising from a change of auditors (unless the engagement is non-complex and straight-forward in nature which based on the engagement partner recommendation does not need a safeguard review).
+                                    <br><br>
+                                    &nbsp;&nbsp;9.	Any other significant concerns identified by the engagement partner that requires a safeguard review under H1.
+                                    <br><br>
+                                    The Firm classifies high risk engagements into two types namely H1 and H2.
+                                    <br><br><br>
+                                    <h3 class="card-title">H1 engagements</h3>
+                                    For engagements such as those listed from (1) to (9) above, the firm classifies these engagements as High risk 1 (“H1”).
+                                    <br><br>
+                                    <h3 class="card-title">H2 engagements</h3>
+                                    However, there are certain specific instances where the engagement is not really a “high risk” engagement simply because the entity incurred losses and has deficit in shareholder’s equity as the share capital is only S$2 and the funding is entirely by way of loans from the holding/related companies and there are no borrowings from third parties.  So long as the holding company provides the financial support and there is no risk of borrowings from third parties, there is no real risk of going concern. Thus, the modification of the audit report on going concern which is commonly the case with this type of engagement represents a technical modification and would not require a full scope review.
+                                    Another specific instance would be the non-consolidation of a subsidiary by the Singapore holding company as the ultimate parent does not publish consolidated accounts that are publicly available. Again, this type of engagement is not really a high-risk engagement and the reason is commonly one of cost and benefit to the holding company which does not need the group accounts at the Singapore level.
+                                    For those engagements as described above, they are classified as High risk 2 (“H2”). Such engagements will require only the modified opinion to be reviewed by the safeguard reviewer including the documentation of the matters that give rise to the modified opinion. Based on the judgement of the safeguard reviewer, he or she can extend the review to other areas on a selective basis as he or she deems necessary after discussion with the engagement partner or manager.
+                                </i>
                             </p>
-                            </div>
                         </div>
-                     </div>
-                 </div>
-            </section>
-        </main><!-- End #main -->
-    </div>
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-</body>
-</html>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main><!-- End #main -->
+</div>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>

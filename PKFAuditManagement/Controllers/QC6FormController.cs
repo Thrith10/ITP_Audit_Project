@@ -28,8 +28,8 @@ namespace PKFAuditManagement.Controllers
             var userId = user?.Id;
 
             // Retrieve engagement data from database
-            var engagements = _context.Engagements.Where(e => e.CreatedBy.Equals(userId)).ToList();
-            return View("~/Views/General/QC6/QC6FormManagement.cshtml", engagements);
+            var qc6forms = _context.QC6Forms.Where(e => e.CreatedBy.Equals(userId)).ToList();
+            return View("~/Views/General/QC6/QC6FormManagement.cshtml", qc6forms);
         }
 
         [Authorize(Roles = "User")]
@@ -43,8 +43,8 @@ namespace PKFAuditManagement.Controllers
         public IActionResult QC6FormApprovalManagement()
         {
             // Retrieve engagement data from database
-            var engagements = _context.Engagements.ToList();
-            return View("~/Views/General/QC6/QC6FormApprovalManagement.cshtml", engagements);
+            var qc6forms = _context.QC6Forms.ToList();
+            return View("~/Views/General/QC6/QC6FormApprovalManagement.cshtml", qc6forms);
         }
 
         [Authorize(Roles = "Admin")]
@@ -53,7 +53,7 @@ namespace PKFAuditManagement.Controllers
         public IActionResult ApproveQC6Form(int id)
         {
             // Retrieve engagement data from the database
-            var engagement = _context.Engagements.FirstOrDefault(e => e.EngagementID == id);
+            var engagement = _context.QC6Forms.FirstOrDefault(e => e.QC6FormID == id);
 
             if (engagement == null)
             {
@@ -86,7 +86,7 @@ namespace PKFAuditManagement.Controllers
                     var userId = user?.Id;
 
                     // Save viewModel data to EngagementTable
-                    var engagementData = new Engagement
+                    var qc6form = new QC6Form
                     {
                         FileReference = Helper.GenerateQCFormFileReference(),
                         CreatedBy = userId,
@@ -100,7 +100,7 @@ namespace PKFAuditManagement.Controllers
                         Status = "Pending",
                         FormSubmissionDate = DateTime.Now
                     };
-                    _context.Engagements.Add(engagementData);
+                    _context.Add(qc6form);
                     _context.SaveChanges();
 
 /*                    // Save to Table2

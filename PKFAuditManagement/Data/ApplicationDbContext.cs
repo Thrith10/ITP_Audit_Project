@@ -11,27 +11,25 @@ namespace PKFAuditManagement.Data
             : base(options)
         {
         }
-        public DbSet<Engagement> Engagements { get; set; }
-        public DbSet<EngagementDetail> EngagementDetails { get; set; }
-        public DbSet<EngagementObjective> EngagementObjectives { get; set; }
-        public DbSet<EngagementProcedureTest> EngagementProcedureTests { get; set; }
+        public DbSet<QC6Form> QC6Forms { get; set; }
+        public DbSet<QC6SubForm> QC6SubForms { get; set; }
+        public DbSet<QC6FormObjective> QC6FormObjectives { get; set; }
+        public DbSet<QC6FormTest> QC6FormTests { get; set; }
         public DbSet<ContinuingEngagement> ContinuingEngagements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Engagement>()
-                .HasOne(e => e.EngagementDetail)
-                .WithOne(ed => ed.Engagement)
-                .HasForeignKey<EngagementDetail>(ed => ed.EngagementId)
-                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for EngagementDetail
+            // QC6Form to QC6FormTest relationship
+            modelBuilder.Entity<QC6Form>()
+                .HasMany(q => q.QC6FormTests)
+                .WithOne()
+                .HasForeignKey(t => t.QC6FormID)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Engagement>()
-                .HasMany(e => e.EngagementProcedureTests)
-                .WithOne(pt => pt.Engagement)
-                .HasForeignKey(pt => pt.EngagementId)
-                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for EngagementProcedureTests
+            new DataSeeder(modelBuilder).Seed();
         }
+
     }
 }

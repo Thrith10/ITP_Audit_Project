@@ -1,8 +1,12 @@
-﻿namespace PKFAuditManagement.ViewModels
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace PKFAuditManagement.Models
 {
-    public class QC6FormViewModel
+    public class QC6Form
     {
-        // Start of QC6Form data
+        public int QC6FormID { get; set; }
+        public string CreatedBy { get; set; }
+        public string? FileReference { get; set; }
         public string? ProspectiveClient { get; set; }
         public DateTime? PeriodEnded { get; set; }
         public string? EngagementType { get; set; }
@@ -26,12 +30,11 @@
         public string? ComplexityOfEngagement { get; set; }
         public string? PredecessorAuditor { get; set; }
         public string? ReasonsForDiscontinuance { get; set; }
-        public bool IsPublicInterestEntity { get; set; }
+        public bool PublicInterestEntity { get; set; }
         public string? TypeOfPIE { get; set; }
         public bool TransnationalEntity { get; set; }
         public bool TransnationalAudit { get; set; }
-        public string? ErrorMessage { get; set; }
+        public ICollection<QC6FormTest> QC6FormTests { get; set; } // One-to-Many
 
-        // End of QC6Form data
     }
 }

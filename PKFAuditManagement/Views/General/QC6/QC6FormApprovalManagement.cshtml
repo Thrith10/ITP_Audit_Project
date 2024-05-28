@@ -1,5 +1,5 @@
 ﻿@using PKFAuditManagement.Models
-@model List<Engagement>
+@model List<QC6Form>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -63,8 +63,8 @@
                                                     }
                                                 </td>
                                                 <td>
-                                                    <a asp-controller="QC6Form" asp-action="View" asp-route-id="@engagement.EngagementID">View</a> |
-                                                    <a class="approveLink" href="#" data-engagement-id="@engagement.EngagementID">Approve</a>
+                                                    <a asp-controller="QC6Form" asp-action="View" asp-route-id="@engagement.QC6FormID">View</a> |
+                                                    <a class="approveLink" href="#" data-engagement-id="@engagement.QC6FormID">Approve</a>
                                                 </td>
                                             </tr>
                                         }
