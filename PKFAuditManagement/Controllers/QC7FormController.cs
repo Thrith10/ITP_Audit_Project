@@ -28,11 +28,11 @@ namespace PKFAuditManagement.Controllers
             var userId = user?.Id;
 
             // Retrieve continuing engagement data from database
-            var engagements = _context.ContinuingEngagements.Where(e => e.CreatedBy.Equals(userId)).ToList();
+            var engagements = _context.QC7Forms.Where(e => e.CreatedBy.Equals(userId)).ToList();
             return View("~/Views/General/QC7/QC7FormManagement.cshtml", engagements);
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Admin")]
         public IActionResult QC7FormCreation()
         {
             var viewModel = new QC7FormViewModel();
@@ -43,7 +43,7 @@ namespace PKFAuditManagement.Controllers
         public IActionResult QC7FormApprovalManagement()
         {
             // Retrieve engagement data from database
-            var engagements = _context.ContinuingEngagements.ToList();
+            var engagements = _context.QC7Forms.ToList();
             return View("~/Views/General/QC7/QC7FormApprovalManagement.cshtml", engagements);
         }
 
@@ -53,7 +53,7 @@ namespace PKFAuditManagement.Controllers
         public IActionResult ApproveQC7Form(int id)
         {
             // Retrieve engagement data from the database
-            var engagement = _context.ContinuingEngagements.FirstOrDefault(e => e.ContinuingEngagementId == id);
+            var engagement = _context.QC7Forms.FirstOrDefault(e => e.QC7FormID == id);
 
             if (engagement == null)
             {
@@ -69,7 +69,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> SubmitQC7Form(QC7FormViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -87,7 +87,7 @@ namespace PKFAuditManagement.Controllers
                     var userId = user?.Id;
 
                     // Save viewModel data to EngagementTable
-                    var engagementData = new ContinuingEngagement
+                    var engagementData = new QC7Form
                     {
                         FileReference = Helper.GenerateQCFormFileReference(),
                         CreatedBy = userId,
@@ -101,7 +101,7 @@ namespace PKFAuditManagement.Controllers
                         Status = "Pending",
                         FormSubmissionDate = DateTime.Now
                     };
-                    _context.ContinuingEngagements.Add(engagementData);
+                    _context.QC7Forms.Add(engagementData);
                     _context.SaveChanges();
 
                     transaction.Commit();

@@ -2,9 +2,9 @@
 
 namespace PKFAuditManagement.Models
 {
-    public class ContinuingEngagement
+    public class QC7Form
     {
-        public int ContinuingEngagementId { get; set; }
+        public int QC7FormID { get; set; }
         public string CreatedBy { get; set; }
         public string? FileReference { get; set; }
         public string? Client { get; set; }

@@ -24,7 +24,7 @@
                                     <a asp-controller="QC6Form" asp-action="QC6FormCreation" class="btn btn-primary btn-lg btn-floating shadow-lg">Create Form</a>
                                 </div>
                             </div>
-                            <p>The table displays all the QC6 Forms that have been created. Auditors are able to create, edit and delete QC6 Forms.</p>
+                            <p>The table displays the QC6 Forms that have been created by you. Users are able to create, edit and delete QC6 Forms.</p>
                             <!-- Table with stripped rows -->
                             <table class="table datatable">
                                 <thead>
@@ -46,7 +46,9 @@
                                         foreach (var engagement in Model)
                                         {
                                             <tr>
-                                                <td>@engagement.FileReference</td>
+                                                <td>
+                                                    <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = engagement.QC6FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
+                                                </td>
                                                 <td>@engagement.ProspectiveClient</td>
                                                 <td>@engagement.PeriodEnded</td>
                                                 <td>@engagement.EngagementType</td>
@@ -70,8 +72,17 @@
                                                     }
                                                 </td>
                                                 <td>
-                                                    <a asp-action="EditEngagement" asp-route-id="@engagement.QC6FormID">Edit</a> |
-                                                    <a asp-action="DeleteEngagement" asp-route-id="@engagement.QC6FormID">Delete</a>
+                                                    <div class="dropdown">
+                                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </a>
+
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                            <li><a class="dropdown-item" href="#">View</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC6Form", new { id = engagement.QC6FormID })">Edit</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("DeleteQC6Form", new { id = engagement.QC6FormID })">Delete</a></li>
+                                                        </ul>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         }

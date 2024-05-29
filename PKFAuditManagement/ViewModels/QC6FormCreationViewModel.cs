@@ -2,13 +2,8 @@
 
 namespace PKFAuditManagement.ViewModels
 {
-    public class QC6FormViewModel
+    public class QC6FormCreationViewModel
     {
-        // QC6Form Seeded Date from Database
-        public List<QC6SubForm> QC6SubForms { get; set; }
-        public List<QC6FormObjective> QC6FormObjectives { get; set; }
-        public List<QC6FormTestDescription> QC6FormTestDescriptions { get; set; }
-
         // Start of QC6Form data
         public string? ProspectiveClient { get; set; }
         public DateTime? PeriodEnded { get; set; }
@@ -21,7 +16,7 @@ namespace PKFAuditManagement.ViewModels
         public DateTime FormSubmissionDate { get; set; }
         public string? PKFEntityProposingService { get; set; }
         public string? SourceOfReferral { get; set; }
-        public decimal? NatureOfServiceForEstimateFee { get; set; }
+        public string? NatureOfServiceForEstimateFee { get; set; }
         public decimal? EstimatedFee { get; set; }
         public decimal? BudgetedTimeCost { get; set; }
         public decimal? BudgetedFeeRecoveryRate { get; set; }
@@ -58,5 +53,30 @@ namespace PKFAuditManagement.ViewModels
         public DateTime? EPHODApprovedByDate { get; set; }
         public string? MPHODQMPApprovedBy { get; set; }
         public DateTime? MPHODQMPApprovedByDate { get; set; }
+        public List<SubFormViewModel> SubForms { get; set; }
+    }
+
+    public class SubFormViewModel
+    {
+        public int QC6SubFormID { get; set; }
+        public string? SubFormType { get; set; }
+        public List<ObjectiveViewModel> Objectives { get; set; }
+    }
+
+    public class ObjectiveViewModel
+    {
+        public int QC6FormObjectiveID { get; set; }
+        public string? Objective { get; set; }
+        public List<TestDescriptionViewModel> TestDescriptions { get; set; }
+    }
+
+    public class TestDescriptionViewModel
+    {
+        public int QC6FormTestDescriptionID { get; set; }
+        public string? Description { get; set; }
+        public string Reference { get; set; }
+        public string SignBy { get; set; }
+        public DateTime SignDate { get; set; }
+        public string Comment { get; set; }
     }
 }

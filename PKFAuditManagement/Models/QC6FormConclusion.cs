@@ -5,7 +5,7 @@
         public int QC6FormConclusionID { get; set; }
         public int? QC6FormID { get; set; }
         public bool AnySignificantRisk { get; set; }
-        public required string SignificantRiskComment { get; set; }
+        public string? SignificantRiskComment { get; set; }
         public required string NewEngagementRiskRating { get; set; }
         public required string NewEngagementRiskRatingReason { get; set; }
         public required string EngagementSubjectedTo { get; set; }

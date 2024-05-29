@@ -1,5 +1,5 @@
 ﻿@using PKFAuditManagement.Models
-@model List<ContinuingEngagement>
+@model List<QC7Form>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,7 +7,7 @@
     <main id="main" class="main">
 
         <div class="pagetitle">
-            <h1>Manage QC7 Form Approvals</h1>
+            <h1>Manage QC7 Forms</h1>
         </div><!-- End Page Title -->
 
         <section class="section">
@@ -16,15 +16,22 @@
 
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Handle the Approval or Rejection of QC7 Forms</h5>
-                            <p>As an administrator, you will be able to approval or reject submitted QC7 forms.</p>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="card-title">Manage QC7 Forms</h5>
+                                </div>
+                                <div class="col-6 mt-3 text-end">
+                                    <a asp-controller="QC7Form" asp-action="QC7FormCreation" class="btn btn-primary btn-lg btn-floating shadow-lg">Create Form</a>
+                                </div>
+                            </div>
+                            <p>As an Admin, you will be able to view, edit and delete QC7 forms. Additionally, you will be able to approve or reject submitted QC7 forms.</p>
 
                             <!-- Table with stripped rows -->
                             <table class="table datatable" id="engagementTable">
                                 <thead>
                                     <tr>
                                         <th>
-                                            File Ref.
+                                            File Reference
                                         </th>
                                         <th>Client</th>
                                         <th>Period Ended</th>
@@ -40,7 +47,9 @@
                                         foreach (var engagement in Model)
                                         {
                                             <tr>
-                                                <td>@engagement.FileReference</td>
+                                                <td>
+                                                    <a href="@Url.Action("ViewQC7Form", "QC7Form", new { id = engagement.QC7FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
+                                                </td>
                                                 <td>@engagement.Client</td>
                                                 <td>@engagement.PeriodEnded</td>
                                                 <td>@engagement.EngagementType</td>
@@ -64,8 +73,18 @@
                                                     }
                                                 </td>
                                                 <td>
-                                                    <a asp-controller="QC7Form" asp-action="View" asp-route-id="@engagement.ContinuingEngagementId">View</a> |
-                                                    <a class="approveLink" href="#" data-engagement-id="@engagement.ContinuingEngagementId">Approve</a>
+                                                    <div class="dropdown">
+                                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </a>
+
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                            <li><a class="dropdown-item" href="#">View</a></li>
+                                                            <li><a class="dropdown-item approveLink" href="#" data-engagement-id="@engagement.QC7FormID">Approve</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC7Form", new { id = engagement.QC7FormID })">Edit</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("DeleteQC7Form", new { id = engagement.QC7FormID })">Delete</a></li>
+                                                        </ul>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         }

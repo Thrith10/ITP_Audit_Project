@@ -17,7 +17,7 @@ namespace PKFAuditManagement.Data
         public DbSet<QC6FormTest> QC6FormTests { get; set; }
         public DbSet<QC6FormConclusion> QC6FormConclusions { get; set; }
         public DbSet<QC6FormTestDescription> QC6FormTestDescriptions { get; set; }
-        public DbSet<ContinuingEngagement> ContinuingEngagements { get; set; }
+        public DbSet<QC7Form> QC7Forms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

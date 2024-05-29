@@ -9,10 +9,6 @@
         public string? SignOffBy { get; set; }
         public DateTime? SignOffDate { get; set; }
         public string? Comments { get; set; }
-
-        // Navigation properties
-        public QC6Form QC6Form { get; set; }
-        public QC6FormTestDescription QC6FormTestDescription { get; set; }
     }
 
 }

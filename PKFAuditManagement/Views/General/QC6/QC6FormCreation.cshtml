@@ -1,5 +1,11 @@
 ﻿@using PKFAuditManagement.ViewModels
-@model QC6FormViewModel
+@model QC6FormCreationViewModel
+
+@{
+    var qc6SubForms = ViewBag.QC6SubForms as List<QC6SubForm>;
+    var qc6FormObjectives = ViewBag.QC6FormObjectives as List<QC6FormObjective>;
+    var qc6FormTestDescriptions = ViewBag.QC6FormTestDescriptions as List<QC6FormTestDescription>;
+}
 
 <script src="~/js/qc6form.js"></script>
 
@@ -12,11 +18,18 @@
             <div class="row">
                 <div class="col-lg-12">
                     <form asp-action="SubmitQC6Form" asp-controller="QC6Form" method="post">
-                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        @if (ViewBag.Errors != null)
                         {
-                            <div class="alert alert-danger">
-                                @Model.ErrorMessage
-                            </div>
+                            <ul>
+                                @foreach (var error in ViewBag.Errors)
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        }
+                        else if (ViewBag.ErrorMessage != null)
+                        {
+                            <span class="alert alert-danger">@ViewBag.ErrorMessage</span>
                         }
                         <div class="card">
                             <div class="card-body">
@@ -53,7 +66,7 @@
                                             <span asp-validation-for="PreparedBy" class="text-danger"></span>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="PreparedByDate">
+                                            <input type="date" class="form-control" asp-for="PreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                                             <span asp-validation-for="PreparedByDate" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -66,7 +79,7 @@
                                             <span asp-validation-for="ReviewedBy" class="text-danger"></span>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="ReviewedByDate">
+                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                                             <span asp-validation-for="ReviewedByDate" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -97,14 +110,14 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="number" class="form-control" asp-for="EstimatedFee">
+                                            <input type="number" asp-format="{0:C2}" class="form-control" asp-for="EstimatedFee">
                                             <span asp-validation-for="EstimatedFee" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost">
+                                            <input type="number" asp-format="{0:C2}" class="form-control" asp-for="BudgetedTimeCost">
                                             <span asp-validation-for="BudgetedTimeCost" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -120,7 +133,7 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label"> (TBC) Fee from tax services, accounting, payroll, secretarial services and other non-audit services (if any)</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="FeeFromServices">
+                                            <input type="number" asp-format="{0:C2}" class="form-control" asp-for="FeeFromServices">
                                             <span asp-validation-for="FeeFromServices" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -190,9 +203,9 @@
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <select class="form-control" id="riskLevel" name="riskLevel" disabled asp-for="TypeOfPIE">
                                                 <option value="Listed">Listed</option>
-                                                <option value="FinancialInstitution">Financial Institution</option>
-                                                <option value="LargeCharity">Large Charity</option>
-                                                <option value="IPC">Large Institution of Public Character (“IPC”)</option>
+                                                <option value="Financial Institution">Financial Institution</option>
+                                                <option value="Large Charity">Large Charity</option>
+                                                <option value="Large Institution of Public Character (“IPC”)">Large Institution of Public Character (“IPC”)</option>
                                             </select>
                                         </div>
                                     </div>
@@ -212,6 +225,57 @@
                                     </div>
 
                                 </form>
+                                @foreach (var subForm in Model.SubForms)
+                                {
+                                    <input type="hidden" name="SubForms.Index" value="@subForm.QC6SubFormID" />
+                                    <h5 class="card-title">@subForm.SubFormType</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead class="table-light" style="background-color: #f8f9fa;">
+                                                <tr>
+                                                    <th class="text-left pl-3 text-uppercase" style="width: 50%;">Objectives and detailed tests</th>
+                                                    <th class="text-left text-uppercase">Ref</th>
+                                                    <th class="text-left text-uppercase">Sign</th>
+                                                    <th class="text-left text-uppercase">Date</th>
+                                                    <th class="text-left text-uppercase">Ref/Comment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var objective in subForm.Objectives)
+                                                {
+                                                    <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives.Index" value="@objective.QC6FormObjectiveID" />
+
+                                                    <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                        <td colspan="5"><b>@objective.Objective</b></td>
+                                                    </tr>
+                                                    @foreach (var testDescription in objective.TestDescriptions)
+                                                    {
+                                                        <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC6FormTestDescriptionID" />
+                                                        <tr class="text-zinc-700 dark:text-zinc-400">
+                                                            <td>
+                                                                <div>
+                                                                    <p>@Html.Raw(@testDescription.Description)</p>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Reference" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignBy" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignDate" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment" />
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <thead class="table-light table-head-qc6">
@@ -748,7 +812,20 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <h5 class="card-title">AUDIT AND REVIEW ENGAGEMENTS ONLY - FIRM AND NETWORK INDEPENDENCE (Confirm that no conflict exist. If this section is not applicable, please indicate “NA”)</h5>
+                                @{
+                                    // Access a specific subform by ID
+                                    var subForm2 = qc6SubForms?.FirstOrDefault(sf => sf.QC6SubFormID == 2);
+                                }
+                                @if (subForm2 != null)
+                                {
+                                    <h5 class="card-title">
+                                        @subForm2.SubFormType
+                                    </h5>
+                                }
+                                else
+                                {
+                                    <p>Sub Form Not Found.</p>
+                                }
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <thead class="table-light" style="background-color: #f8f9fa;">
@@ -935,7 +1012,20 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <h5 class="card-title">NON-ASSURANCE ENGAGEMENTS ONLY - FIRM AND NETWORK INDEPENDENCE (Confirm that no conflict exist.  If this section is not applicable, please indicate “NA”)</h5>
+                                @{
+                                    // Access a specific subform by ID
+                                    var subForm3 = qc6SubForms?.FirstOrDefault(sf => sf.QC6SubFormID == 3);
+                                }
+                                @if (subForm3 != null)
+                                {
+                                    <h5 class="card-title">
+                                        @subForm3.SubFormType
+                                    </h5>
+                                }
+                                else
+                                {
+                                    <p>Sub Form Not Found.</p>
+                                } 
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <thead class="table-light" style="background-color: #f8f9fa;">
@@ -1094,10 +1184,10 @@
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">New engagement / *client risk rated as: <br> *See <a>Appendix 2</a> for categories of risks</label>
                                     <div class="col-sm-10 d-flex align-items-center">
                                         <select class="form-control" id="riskLevel" asp-for="NewEngagementRiskRating">
-                                            <option value="normal">Normal (N)</option>
-                                            <option value="moderate">Moderate (M)</option>
-                                            <option value="high_risk">High Risk (H1)</option>
-                                            <option value="high_risk_2">High Risk 2 (H2)</option>
+                                            <option value="Normal (N)">Normal (N)</option>
+                                            <option value="Moderate (M)">Moderate (M)</option>
+                                            <option value="High Risk (H1)">High Risk (H1)</option>
+                                            <option value="High Risk 2 (H2)">High Risk 2 (H2)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1112,10 +1202,10 @@
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Based on the risk rating above, the engagement should be subject to:  </label>
                                     <div class="col-sm-10 d-flex align-items-center">
                                         <select class="form-control" id="safeguardReview" asp-for="EngagementSubjectedTo">
-                                            <option value="N">No safeguard review (N)</option>
-                                            <option value="H1">Full safeguard review (H1)</option>
-                                            <option value="H2">Focused safeguard review on opinion (H2)</option>
-                                            <option value="M">Focused safeguard review on audit or accounting issues (M)</option>
+                                            <option value="No safeguard review (N)">No safeguard review (N)</option>
+                                            <option value="Full safeguard review (H1)">Full safeguard review (H1)</option>
+                                            <option value="Focused safeguard review on opinion (H2)">Focused safeguard review on opinion (H2)</option>
+                                            <option value="Focused safeguard review on audit or accounting issues (M)">Focused safeguard review on audit or accounting issues (M)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1130,8 +1220,8 @@
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Should new engagement or client be accepted or rejected?</label>
                                     <div class="col-sm-10 d-flex align-items-center">
                                         <select class="form-control" id="engagementClientAcceptance" asp-for="IsNewEngagementAcceptance">
-                                            <option value="ecaYes">Accepted</option>
-                                            <option value="ecaNo">Rejected</option>
+                                            <option value="Accepted">Accepted</option>
+                                            <option value="Rejected">Rejected</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1147,43 +1237,43 @@
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
                                         <textarea class="form-control" id="rationaleSTRRowInput" rows="4" asp-for="SuspiciousTransactionReportFiledRationale"></textarea>
-                                        <span asp-validation-for="SuspiciousTransactionReportFiledRationale" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">Having considered the objectives above, I am satisfied that we should accept the engagement subject to approval by the Managing Partner/Quality Management Partner/Head of Division  </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText">
+                                        <input type="text" class="form-control" id="inputText" asp-for="Satisfaction">
+                                        <span asp-validation-for="Satisfaction" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:</label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager">
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
-                                        <input type="text" class="form-control" id="inputText">
+                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Partner / Head of Division">
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Partner / Head of Division" asp-for="EPHODApprovedBy">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
-                                        <input type="text" class="form-control" id="inputText">
+                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Managing Partner / Head of Division / Quality Management Partner">
+                                        <input type="text" class="form-control" id="inputText" placeholder="Managing Partner / Head of Division / Quality Management Partner" asp-for="MPHODQMPApprovedBy">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:</label>
-                                        <input type="text" class="form-control" id="inputText">
+                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                                     </div>
                                 </div>
                                 <h5 class="card-title"><u><i>Notes</i></u></h5>

@@ -6,6 +6,7 @@ using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
+using System.Globalization;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -35,18 +36,8 @@ namespace PKFAuditManagement.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult QC6FormCreation()
         {
-            // Retrieve QC6Form data from the database
-            var qc6SubForms = _context.QC6SubForms.ToList();
-            var qc6FormObjectives = _context.QC6FormObjectives.ToList();
-            var qc6FormTestDescriptions = _context.QC6FormTestDescriptions.ToList();
-
-            // Create ViewModel and populate it with the retrieved data
-            var viewModel = new QC6FormViewModel
-            {
-                QC6SubForms = qc6SubForms,
-                QC6FormObjectives = qc6FormObjectives,
-                QC6FormTestDescriptions = qc6FormTestDescriptions
-            };
+            // Retrieve QC6Form data
+            var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel());
 
             return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
         }
@@ -81,10 +72,19 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitQC6Form(QC6FormViewModel viewModel)
+        public async Task<IActionResult> SubmitQC6Form(QC6FormCreationViewModel viewModel)
         {
+            // Populate Sub Forms
+            viewModel = RetrieveSubFormData(viewModel);
+
             if (!ModelState.IsValid)
             {
+                // Access validation errors
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+
+                // Pass the errors to the view
+                ViewBag.Errors = errors;
+
                 return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
             }
 
@@ -130,29 +130,121 @@ namespace PKFAuditManagement.Controllers
                         TransnationalAudit = viewModel.TransnationalAudit
                     };
 
+                    // Add qc6form data to intermediary datastore
                     _context.Add(qc6form);
                     _context.SaveChanges();
 
-/*                    // Save to Table2
-                    var table2 = new Table2
+                    // Retrieve the QC6FormID from the saved entity
+                    int qc6formId = qc6form.QC6FormID;
+
+                    var qc6formConclusion = new QC6FormConclusion
                     {
-                        Age = viewModel.Age,
-                        // Map other properties
+                        QC6FormID = qc6formId,
+                        AnySignificantRisk = viewModel.AnySignificantRisk,
+                        SignificantRiskComment = viewModel.SignificantRiskComment,
+                        NewEngagementRiskRating = viewModel.NewEngagementRiskRating,
+                        NewEngagementRiskRatingReason = viewModel.NewEngagementRiskRatingReason,
+                        EngagementSubjectedTo = viewModel.EngagementSubjectedTo,
+                        SafeguardReviewerAssigned = viewModel.SafeguardReviewerAssigned,
+                        IsNewEngagementAcceptance = viewModel.IsNewEngagementAcceptance,
+                        IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled,
+                        SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale,
+                        Satisfaction = viewModel.Satisfaction,
+                        PreparedBy = viewModel.ConclusionPreparedBy,
+                        PreparedByDate = viewModel.ConclusionPreparedByDate.Value,
+                        EPHODApprovedBy = viewModel.EPHODApprovedBy,
+                        EPHODApprovedByDate = viewModel.EPHODApprovedByDate.Value,
+                        MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy,
+                        MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate.Value
                     };
-                    _context.Table2s.Add(table2);
-                    _context.SaveChanges();*/
+
+                    // Add qc6formConclusion data to the database
+                    _context.Add(qc6formConclusion);
+                    _context.SaveChanges();
+
+                    // Process the submitted data
+                    foreach (var subForm in viewModel.SubForms)
+                    {
+                        foreach (var objective in subForm.Objectives)
+                        {
+                            foreach (var testDescription in objective.TestDescriptions)
+                            {
+                                // Populate the TestDescriptions with posted data
+                                testDescription.Reference = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Reference"];
+                                testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignBy"];
+                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignDate"], "ddMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime signDate))
+                                {
+                                    testDescription.SignDate = signDate;
+                                }
+                                testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Comment"];
+
+                                // Save QC6FormTest
+                                var qc6formTest = new QC6FormTest
+                                {
+                                    QC6FormID = qc6formId,
+                                    QC6FormTestDescriptionID = testDescription.QC6FormTestDescriptionID,
+                                    Reference = testDescription.Reference,
+                                    SignOffDate = DateTime.Now,
+                                    SignOffBy = testDescription.SignBy,
+                                    Comments = testDescription.Comment
+                                };
+
+                                // Add qc6formTest to the context and save changes
+                                _context.Add(qc6formTest);
+                            }
+                        }
+                    }
+
+                    // Save all pending changes to QC6FormTest entities at once
+                    _context.SaveChanges();
 
                     transaction.Commit();
                     return RedirectToAction("QC6FormManagement", "QC6Form");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     transaction.Rollback();
                     // Log the error
-                    viewModel.ErrorMessage = "An error occurred while processing your request. Please try again.";
+                    ViewBag.ErrorMessage = "An error occurred while processing your request. Please try again.";
                     return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
                 }
             }
+        }
+
+        public QC6FormCreationViewModel RetrieveSubFormData(QC6FormCreationViewModel viewModel)
+        {
+            // Retrieve QC6Form data from the database
+            var qc6SubForms = _context.QC6SubForms.ToList();
+            var qc6FormObjectives = _context.QC6FormObjectives.ToList();
+            var qc6FormTestDescriptions = _context.QC6FormTestDescriptions.ToList();
+
+            // Populate SubForms
+            viewModel.SubForms = qc6SubForms.Select(subForm => new SubFormViewModel
+            {
+                QC6SubFormID = subForm.QC6SubFormID,
+                SubFormType = subForm.SubFormType,
+                Objectives = qc6FormObjectives
+                    .Where(obj => obj.QC6SubFormID == subForm.QC6SubFormID)
+                    .Select(obj => new ObjectiveViewModel
+                    {
+                        QC6FormObjectiveID = obj.QC6FormObjectiveID,
+                        Objective = obj.Objective,
+                        TestDescriptions = qc6FormTestDescriptions
+                            .Where(desc => desc.QC6FormObjectiveID == obj.QC6FormObjectiveID)
+                            .Select(desc => new TestDescriptionViewModel
+                            {
+                                QC6FormTestDescriptionID = desc.QC6FormTestDescriptionID,
+                                Description = desc.Description,
+                                Reference = "",
+                                SignDate = DateTime.MinValue,
+                                SignBy = "",
+                                Comment = ""
+                            }).ToList()
+                    }).ToList()
+
+            }).ToList();
+
+            return viewModel;
         }
     }
 }

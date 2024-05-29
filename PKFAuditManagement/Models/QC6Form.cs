@@ -18,7 +18,7 @@ namespace PKFAuditManagement.Models
         public DateTime FormSubmissionDate { get; set; }
         public string? PKFEntityProposingService { get; set; }
         public string? SourceOfReferral { get; set; }
-        public decimal? NatureOfServiceForEstimateFee { get; set; }
+        public string? NatureOfServiceForEstimateFee { get; set; }
         public decimal? EstimatedFee { get; set; }
         public decimal? BudgetedTimeCost { get; set; }
         public decimal? BudgetedFeeRecoveryRate { get; set; }

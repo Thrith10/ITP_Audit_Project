@@ -7,7 +7,7 @@
     <main id="main" class="main">
 
         <div class="pagetitle">
-            <h1>Manage QC6 Form Approvals</h1>
+            <h1>Manage QC6 Forms</h1>
         </div><!-- End Page Title -->
 
         <section class="section">
@@ -16,14 +16,21 @@
 
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Handle the Approval or Rejection of QC6 Forms</h5>
-                            <p>As an administrator, you will be able to approval or reject submitted QC6 forms.</p>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="card-title">Manage QC6 Forms</h5>
+                                </div>
+                                <div class="col-6 mt-3 text-end">
+                                    <a asp-controller="QC6Form" asp-action="QC6FormCreation" class="btn btn-primary btn-lg btn-floating shadow-lg">Create Form</a>
+                                </div>
+                            </div>
+                            <p>As an Admin, you will be able to view, edit and delete QC6 forms. Additionally, you will be able to approve or reject submitted QC6 forms.</p>
 
                             <table class="table datatable" id="engagementTable">
                                 <thead>
                                     <tr>
                                         <th>
-                                            File Ref.
+                                            File Reference
                                         </th>
                                         <th>Prospective Client</th>
                                         <th>Period Ended</th>
@@ -39,7 +46,9 @@
                                         foreach (var engagement in Model)
                                         {
                                             <tr>
-                                                <td>@engagement.FileReference</td>
+                                                <td>
+                                                    <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = engagement.QC6FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
+                                                </td>
                                                 <td>@engagement.ProspectiveClient</td>
                                                 <td>@engagement.PeriodEnded</td>
                                                 <td>@engagement.EngagementType</td>
@@ -63,8 +72,18 @@
                                                     }
                                                 </td>
                                                 <td>
-                                                    <a asp-controller="QC6Form" asp-action="View" asp-route-id="@engagement.QC6FormID">View</a> |
-                                                    <a class="approveLink" href="#" data-engagement-id="@engagement.QC6FormID">Approve</a>
+                                                    <div class="dropdown">
+                                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </a>
+
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                            <li><a class="dropdown-item" href="#">View</a></li>
+                                                            <li><a class="dropdown-item approveLink" href="#" data-engagement-id="@engagement.QC6FormID">Approve</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC6Form", new { id = engagement.QC6FormID })">Edit</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("DeleteQC6Form", new { id = engagement.QC6FormID })">Delete</a></li>
+                                                        </ul>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         }
