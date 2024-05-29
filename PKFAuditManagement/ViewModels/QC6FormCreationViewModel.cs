@@ -29,9 +29,10 @@ namespace PKFAuditManagement.ViewModels
         public string? PredecessorAuditor { get; set; }
         public string? ReasonsForDiscontinuance { get; set; }
         public bool IsPublicInterestEntity { get; set; }
-        public string? TypeOfPIE { get; set; }
+        public string? PublicInterestEntityType { get; set; }
         public bool TransnationalEntity { get; set; }
         public bool TransnationalAudit { get; set; }
+        public string? TransnationalAuditComment { get; set; }
         public string? ErrorMessage { get; set; }
 
         // End of QC6Form data

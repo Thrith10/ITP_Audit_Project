@@ -125,9 +125,10 @@ namespace PKFAuditManagement.Controllers
                         PredecessorAuditor = viewModel.PredecessorAuditor,
                         ReasonsForDiscontinuance = viewModel.ReasonsForDiscontinuance,
                         PublicInterestEntity = viewModel.IsPublicInterestEntity,
-                        TypeOfPIE = viewModel.TypeOfPIE,
+                        PublicInterestEntityType = viewModel.PublicInterestEntityType,
                         TransnationalEntity = viewModel.TransnationalEntity,
-                        TransnationalAudit = viewModel.TransnationalAudit
+                        TransnationalAudit = viewModel.TransnationalAudit,
+                        TransnationalAuditComment = viewModel.TransnationalAuditComment
                     };
 
                     // Add qc6form data to intermediary datastore

@@ -31,9 +31,10 @@ namespace PKFAuditManagement.Models
         public string? PredecessorAuditor { get; set; }
         public string? ReasonsForDiscontinuance { get; set; }
         public bool PublicInterestEntity { get; set; }
-        public string? TypeOfPIE { get; set; }
+        public string? PublicInterestEntityType { get; set; }
         public bool TransnationalEntity { get; set; }
         public bool TransnationalAudit { get; set; }
+        public string? TransnationalAuditComment { get; set; }
         public ICollection<QC6FormTest> QC6FormTests { get; set; } // One-to-Many
         public QC6FormConclusion QC6FormConclusion { get; set; } // One-to-One
 
