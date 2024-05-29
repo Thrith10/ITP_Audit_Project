@@ -15,6 +15,8 @@ namespace PKFAuditManagement.Data
         public DbSet<QC6SubForm> QC6SubForms { get; set; }
         public DbSet<QC6FormObjective> QC6FormObjectives { get; set; }
         public DbSet<QC6FormTest> QC6FormTests { get; set; }
+        public DbSet<QC6FormConclusion> QC6FormConclusions { get; set; }
+        public DbSet<QC6FormTestDescription> QC6FormTestDescriptions { get; set; }
         public DbSet<ContinuingEngagement> ContinuingEngagements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,7 +28,13 @@ namespace PKFAuditManagement.Data
                 .HasMany(q => q.QC6FormTests)
                 .WithOne()
                 .HasForeignKey(t => t.QC6FormID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<QC6Form>()
+                .HasOne(q => q.QC6FormConclusion)
+                .WithOne()
+                .HasForeignKey<QC6FormConclusion>(t => t.QC6FormID) 
+                .OnDelete(DeleteBehavior.NoAction);
 
             new DataSeeder(modelBuilder).Seed();
         }

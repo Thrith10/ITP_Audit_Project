@@ -1,0 +1,25 @@
+﻿namespace PKFAuditManagement.Models
+{
+    public class QC6FormConclusion
+    {
+        public int QC6FormConclusionID { get; set; }
+        public int? QC6FormID { get; set; }
+        public bool AnySignificantRisk { get; set; }
+        public required string SignificantRiskComment { get; set; }
+        public required string NewEngagementRiskRating { get; set; }
+        public required string NewEngagementRiskRatingReason { get; set; }
+        public required string EngagementSubjectedTo { get; set; }
+        public required string SafeguardReviewerAssigned { get; set; }
+        public required string IsNewEngagementAcceptance { get; set; }
+        public bool IsSuspiciousTransactionReportFiled { get; set; }
+        public string? SuspiciousTransactionReportFiledRationale { get; set; }
+        public required string Satisfaction { get; set; }
+        public required string PreparedBy { get; set; }
+        public required DateTime PreparedByDate { get; set; }
+        public required string EPHODApprovedBy { get; set; }
+        public required DateTime EPHODApprovedByDate { get; set; }
+        public required string MPHODQMPApprovedBy { get; set; }
+        public required DateTime MPHODQMPApprovedByDate { get; set; }
+        public QC6Form? QC6Form { get; set; }
+    }
+}

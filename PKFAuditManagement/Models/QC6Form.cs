@@ -35,6 +35,7 @@ namespace PKFAuditManagement.Models
         public bool TransnationalEntity { get; set; }
         public bool TransnationalAudit { get; set; }
         public ICollection<QC6FormTest> QC6FormTests { get; set; } // One-to-Many
+        public QC6FormConclusion QC6FormConclusion { get; set; } // One-to-One
 
     }
 }

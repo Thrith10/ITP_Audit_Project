@@ -32,10 +32,22 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/QC6/QC6FormManagement.cshtml", qc6forms);
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Admin")]
         public IActionResult QC6FormCreation()
         {
-            var viewModel = new QC6FormViewModel();
+            // Retrieve QC6Form data from the database
+            var qc6SubForms = _context.QC6SubForms.ToList();
+            var qc6FormObjectives = _context.QC6FormObjectives.ToList();
+            var qc6FormTestDescriptions = _context.QC6FormTestDescriptions.ToList();
+
+            // Create ViewModel and populate it with the retrieved data
+            var viewModel = new QC6FormViewModel
+            {
+                QC6SubForms = qc6SubForms,
+                QC6FormObjectives = qc6FormObjectives,
+                QC6FormTestDescriptions = qc6FormTestDescriptions
+            };
+
             return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
         }
 
@@ -98,8 +110,26 @@ namespace PKFAuditManagement.Controllers
                         ReviewedBy = viewModel.ReviewedBy,
                         ReviewedByDate = viewModel.ReviewedByDate,
                         Status = "Pending",
-                        FormSubmissionDate = DateTime.Now
+                        FormSubmissionDate = DateTime.Now,
+                        PKFEntityProposingService = viewModel.PKFEntityProposingService,
+                        SourceOfReferral = viewModel.SourceOfReferral,
+                        NatureOfServiceForEstimateFee = viewModel.NatureOfServiceForEstimateFee,
+                        EstimatedFee = viewModel.EstimatedFee,
+                        BudgetedTimeCost = viewModel.BudgetedTimeCost,
+                        FeeFromServices = viewModel.FeeFromServices,
+                        OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees,
+                        FeeConcentration = viewModel.FeeConcentration,
+                        ConflictsCheckDone = viewModel.ConflictsCheckDone,
+                        TypeOfActivities = viewModel.TypeOfActivities,
+                        ComplexityOfEngagement = viewModel.ComplexityOfEngagement,
+                        PredecessorAuditor = viewModel.PredecessorAuditor,
+                        ReasonsForDiscontinuance = viewModel.ReasonsForDiscontinuance,
+                        PublicInterestEntity = viewModel.IsPublicInterestEntity,
+                        TypeOfPIE = viewModel.TypeOfPIE,
+                        TransnationalEntity = viewModel.TransnationalEntity,
+                        TransnationalAudit = viewModel.TransnationalAudit
                     };
+
                     _context.Add(qc6form);
                     _context.SaveChanges();
 
