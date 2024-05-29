@@ -212,6 +212,45 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
+        [HttpDelete]
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult DeleteQC6Form(int id)
+        {
+            using var transaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                var qc6Form = _context.QC6Forms.Find(id);
+
+                if (qc6Form == null)
+                {
+                    return NotFound();
+                }
+
+                // Delete from QC6FormTests 
+                var tests = _context.QC6FormTests.Where(t => t.QC6FormID == id);
+                _context.QC6FormTests.RemoveRange(tests);
+
+                // Delete from QC6FormConclusions
+                var conclusions = _context.QC6FormConclusions.Where(c => c.QC6FormID == id);
+                _context.QC6FormConclusions.RemoveRange(conclusions);
+
+                // Delete the QC6Form itself
+                _context.QC6Forms.Remove(qc6Form);
+
+                _context.SaveChanges();
+
+                transaction.Commit(); // Commit the transaction if all operations are successful
+
+                return NoContent(); // Respond with 204 No Content
+            }
+            catch (Exception)
+            {
+                transaction.Rollback(); // Roll back the transaction if an error occurs
+                throw;
+            }
+        }
+
         public QC6FormCreationViewModel RetrieveSubFormData(QC6FormCreationViewModel viewModel)
         {
             // Retrieve QC6Form data from the database

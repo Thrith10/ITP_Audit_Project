@@ -1,14 +1,6 @@
 ﻿@using PKFAuditManagement.ViewModels
 @model QC6FormCreationViewModel
 
-@{
-    var qc6SubForms = ViewBag.QC6SubForms as List<QC6SubForm>;
-    var qc6FormObjectives = ViewBag.QC6FormObjectives as List<QC6FormObjective>;
-    var qc6FormTestDescriptions = ViewBag.QC6FormTestDescriptions as List<QC6FormTestDescription>;
-}
-
-
-
 <div class="justify-content-center">
     <main id="main" class="main">
         <div class="pagetitle">
@@ -526,5 +518,5 @@
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 @section Scripts {
-    <script src="~/js/qc6form.js"></script>
+    <script src="~/js/qc6-form-creation.js"></script>
 }

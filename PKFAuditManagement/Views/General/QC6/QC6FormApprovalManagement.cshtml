@@ -81,7 +81,7 @@
                                                             <li><a class="dropdown-item" href="#">View</a></li>
                                                             <li><a class="dropdown-item approveLink" href="#" data-engagement-id="@engagement.QC6FormID">Approve</a></li>
                                                             <li><a class="dropdown-item" href="@Url.Action("EditQC6Form", new { id = engagement.QC6FormID })">Edit</a></li>
-                                                            <li><a class="dropdown-item" href="@Url.Action("DeleteQC6Form", new { id = engagement.QC6FormID })">Delete</a></li>
+                                                            <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC6Form", new { id = engagement.QC6FormID })')">Delete</a></li>
                                                         </ul>
                                                     </div>
                                                 </td>
@@ -120,31 +120,8 @@
 </body>
 
 </html>
-<script>
-    document.getElementById('engagementTable').addEventListener('click', function (e) {
-        if (e.target && e.target.matches('.approveLink')) {
-            e.preventDefault();
 
-            var engagementId = e.target.getAttribute('data-engagement-id');
-
-            fetch('/QC6Form/ApproveQC6Form/' + engagementId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    console.log('Approved successfully');
-                    window.location.reload();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-    });
-</script>
-
+@section Scripts {
+    <script src="~/js/qc6-form-management-admin.js"></script>
+}
 
