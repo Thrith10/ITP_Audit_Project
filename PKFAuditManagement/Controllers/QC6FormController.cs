@@ -6,6 +6,7 @@ using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
+using System.Data;
 using System.Globalization;
 
 namespace PKFAuditManagement.Controllers
@@ -14,11 +15,12 @@ namespace PKFAuditManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-
-        public QC6FormController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public QC6FormController(ApplicationDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         [Authorize(Roles = "User")]
@@ -74,6 +76,9 @@ namespace PKFAuditManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitQC6Form(QC6FormCreationViewModel viewModel)
         {
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+
             // Populate Sub Forms
             viewModel = RetrieveSubFormData(viewModel);
 
@@ -94,7 +99,6 @@ namespace PKFAuditManagement.Controllers
                 try
                 {
                     // Get the current user's ID
-                    var user = await _userManager.GetUserAsync(User);
                     var userId = user?.Id;
 
                     // Save viewModel data to EngagementTable
@@ -200,7 +204,16 @@ namespace PKFAuditManagement.Controllers
                     _context.SaveChanges();
 
                     transaction.Commit();
-                    return RedirectToAction("QC6FormManagement", "QC6Form");
+                    if (roles.Contains("Admin"))
+                    {
+                        // Redirect to admin-specific page
+                        return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+                    }
+                    else
+                    {
+                        // Redirect to user-specific page
+                        return RedirectToAction("QC6FormManagement", "QC6Form");
+                    }
                 }
                 catch (Exception ex)
                 {

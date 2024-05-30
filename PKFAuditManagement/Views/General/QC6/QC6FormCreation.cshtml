@@ -123,7 +123,7 @@
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="text" class="form-control" disabled id="BudgetedFeeRecoveryRate" placeholder="0.00">
+                                            <input type="text" class="form-control" disabled id="BudgetedFeeRecoveryRate">
                                             <input type="hidden" asp-for="BudgetedFeeRecoveryRate" id="BudgetedFeeRecoveryRateHidden" />
                                         </div>
                                     </div>
@@ -222,6 +222,7 @@
                                         <label class="col-sm-2 col-form-label">Type of PIE</label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType">
+                                                <option value="" selected>Select an option</option>
                                                 <option value="Listed">Listed</option>
                                                 <option value="Financial Institution">Financial Institution</option>
                                                 <option value="Large Charity">Large Charity</option>
@@ -253,7 +254,7 @@
                                     </div>
                                 </form>
 
-                                <!-- QC7SubForms Beginning -->
+                                <!-- QC6SubForms Beginning -->
                                 @{
                                     int subFormIndex = 0;
                                 }

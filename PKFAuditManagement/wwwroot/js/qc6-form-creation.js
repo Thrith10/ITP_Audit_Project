@@ -63,6 +63,7 @@ function toggleTransnationalAuditRow() {
     } else {
         transnationalAuditRow.style.display = 'none';
         transnationalAuditComment.disabled = true;
+        transnationalAuditComment.value = '';
     }
 }
 
@@ -78,6 +79,7 @@ function toggleRiskLevel() {
     } else {
         riskLevelRow.style.display = 'none';
         riskLevel.disabled = true;
+        riskLevel.value = '';
     }
 }
 
@@ -93,6 +95,7 @@ function toggleSignificantRisk() {
     } else {
         significantRiskRow.style.display = 'none';
         significantRiskComment.disabled = true;
+        significantRiskComment.value = '';
     }
 }
 
@@ -108,5 +111,6 @@ function toggleRationaleSTR() {
     } else {
         rationaleSTRRow.style.display = 'none';
         rationaleSTRRowInput.disabled = true;
+        rationaleSTRRowInput.value = '';
     }
 }

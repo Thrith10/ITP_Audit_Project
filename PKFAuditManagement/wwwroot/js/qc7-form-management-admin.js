@@ -1,8 +1,8 @@
-﻿// This function deletes the QC6 form selected from the User Dashboard QC6 Form Management page
+// This function deletes the QC7 form selected from the Admin Dashboard QC7 Form Management page
 function confirmDelete(deleteUrl) {
     Swal.fire({
         title: 'Are you sure?',
-        text: 'You will not be able to recover the QC6 Form!',
+        text: 'You will not be able to recover the QC7 Form!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -24,7 +24,7 @@ function confirmDelete(deleteUrl) {
                         Swal.fire({
                             icon: 'success',
                             title: 'Deleted!',
-                            text: 'The QC6 Form has been deleted.',
+                            text: 'The QC7 Form has been deleted.',
                         }).then(() => {
                             // Refresh
                             location.reload();
@@ -46,3 +46,29 @@ function confirmDelete(deleteUrl) {
         }
     });
 }
+
+// This function changes the status to "Approved" for the selected QC7 Form
+document.getElementById('engagementTable').addEventListener('click', function (e) {
+    if (e.target && e.target.matches('.approveLink')) {
+        e.preventDefault();
+
+        var engagementId = e.target.getAttribute('data-engagement-id');
+
+        fetch('/QC7Form/ApproveQC7Form/' + engagementId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                console.log('Approved successfully');
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+});

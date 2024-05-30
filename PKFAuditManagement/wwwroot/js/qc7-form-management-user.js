@@ -1,8 +1,8 @@
-﻿// This function deletes the QC6 form selected from the User Dashboard QC6 Form Management page
+﻿// This function deletes the QC7 form selected from the User Dashboard QC7 Form Management page
 function confirmDelete(deleteUrl) {
     Swal.fire({
         title: 'Are you sure?',
-        text: 'You will not be able to recover the QC6 Form!',
+        text: 'You will not be able to recover the QC7 Form!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -24,7 +24,7 @@ function confirmDelete(deleteUrl) {
                         Swal.fire({
                             icon: 'success',
                             title: 'Deleted!',
-                            text: 'The QC6 Form has been deleted.',
+                            text: 'The QC7 Form has been deleted.',
                         }).then(() => {
                             // Refresh
                             location.reload();

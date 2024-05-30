@@ -1,109 +1,107 @@
 ﻿@using PKFAuditManagement.Models
 @model List<QC7Form>
 
-<!DOCTYPE html>
-<html lang="en">
-<body>
-    <main id="main" class="main">
+<main id="main" class="main">
 
-        <div class="pagetitle">
-            <h1>Manage QC7 Forms</h1>
-        </div><!-- End Page Title -->
+    <div class="pagetitle">
+        <h1>Manage QC7 Forms</h1>
+    </div><!-- End Page Title -->
 
-        <section class="section">
-            <div class="row">
-                <div class="col-lg-12">
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
 
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <h5 class="card-title">QC7 Forms Display</h5>
-                                </div>
-                                <div class="col-6 mt-3 text-end">
-                                    <a asp-controller="QC7Form" asp-action="QC7FormCreation" class="btn btn-primary btn-lg btn-floating shadow-lg">Create Form</a>
-                                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5 class="card-title">QC7 Forms Display</h5>
                             </div>
-                            <p>The table displays the QC7 Forms that have been created by you. Users are able to create, edit and delete QC7 Forms.</p>
-
-                            <!-- Table with stripped rows -->
-                            <table class="table datatable">
-                                <thead>
-                                    <tr>
-                                        <th>File Reference</th>
-                                        <th>
-                                            Client
-                                        </th>
-                                        <th>Period Ended</th>
-                                        <th>Type of Engagement</th>
-                                        <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (Model != null)
-                                    {
-                                        foreach (var engagement in Model)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <a href="@Url.Action("ViewQC7Form", "QC7Form", new { id = engagement.QC7FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
-                                                </td>
-                                                <td>@engagement.Client</td>
-                                                <td>@engagement.PeriodEnded</td>
-                                                <td>@engagement.EngagementType</td>
-                                                <td>@engagement.FormSubmissionDate</td>
-                                                <td>
-                                                    @if (engagement.Status == "Pending")
-                                                    {
-                                                        <span class="badge bg-warning">Pending</span>
-                                                    }
-                                                    else if (engagement.Status == "Approved")
-                                                    {
-                                                        <span class="badge bg-success">Approved</span>
-                                                    }
-                                                    else if (engagement.Status == "Rejected")
-                                                    {
-                                                        <span class="badge bg-danger">Rejected</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="badge bg-secondary">@engagement.Status</span>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    <div class="dropdown">
-                                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            Actions
-                                                        </a>
-
-                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                                            <li><a class="dropdown-item" href="#">View</a></li>
-                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC7Form", new { id = engagement.QC7FormID })">Edit</a></li>
-                                                            <li><a class="dropdown-item" href="@Url.Action("DeleteQC7Form", new { id = engagement.QC7FormID })">Delete</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr><td colspan="7">No data found.</td></tr>
-                                    }
-                                </tbody>
-                            </table>
-                            <!-- End Table with stripped rows -->
-
+                            <div class="col-6 mt-3 text-end">
+                                <a asp-controller="QC7Form" asp-action="QC7FormCreation" class="btn btn-primary btn-lg btn-floating shadow-lg">Create Form</a>
+                            </div>
                         </div>
+                        <p>The table displays the QC7 Forms that have been created by you. Users are able to create, edit and delete QC7 Forms.</p>
+
+                        <!-- Table with stripped rows -->
+                        <table class="table datatable">
+                            <thead>
+                                <tr>
+                                    <th>File Reference</th>
+                                    <th>
+                                        Client
+                                    </th>
+                                    <th>Period Ended</th>
+                                    <th>Type of Engagement</th>
+                                    <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null)
+                                {
+                                    foreach (var engagement in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="@Url.Action("ViewQC7Form", "QC7Form", new { id = engagement.QC7FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
+                                            </td>
+                                            <td>@engagement.Client</td>
+                                            <td>@engagement.PeriodEnded</td>
+                                            <td>@engagement.EngagementType</td>
+                                            <td>@engagement.FormSubmissionDate</td>
+                                            <td>
+                                                @if (engagement.Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                                else if (engagement.Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">Approved</span>
+                                                }
+                                                else if (engagement.Status == "Rejected")
+                                                {
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@engagement.Status</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Actions
+                                                    </a>
+
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                        <li><a class="dropdown-item" href="#">View</a></li>
+                                                        <li><a class="dropdown-item" href="@Url.Action("EditQC7Form", new { id = engagement.QC7FormID })">Edit</a></li>
+                                                        <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC7Form", new { id = engagement.QC7FormID })')">Delete</a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="7">No data found.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                        <!-- End Table with stripped rows -->
+
                     </div>
-
                 </div>
+
             </div>
-        </section>
+        </div>
+    </section>
 
-    </main><!-- End #main -->
-</body>
+</main><!-- End #main -->
 
-</html>
+@section Scripts {
+    <script src="~/js/qc7-form-management-user.js"></script>
+}
