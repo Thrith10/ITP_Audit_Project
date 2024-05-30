@@ -21,7 +21,7 @@ function calculateTotalAndConcentration() {
     document.getElementById('grandTotal').value = totalFee.toFixed(2);
 
     const auditFee = parseFloat(document.getElementById('auditFee').value) || 0;
-    const feeConcentration = (totalFee / auditFee) * 100;
+    const feeConcentration = totalFee / auditFee;
     document.getElementById('feeConcentration').value = feeConcentration.toFixed(2);
 }
 
@@ -39,6 +39,28 @@ $(document).ready(function () {
             $("#BudgetedFeeRecoveryRate").val("");
         }
     }
+
+    // Disables or hides the sub forms for QC6 on click
+    $('#toggleSubForm1').change(function () {
+        if (this.checked) {
+            // Hide the table
+            $('#tableContainer1').hide();
+        } else {
+            // Show the table
+            $('#tableContainer1').show();
+        }
+    });
+
+    // Disables or hides the sub forms for QC6 on click
+    $('#toggleSubForm2').change(function () {
+        if (this.checked) {
+            // Hide the table
+            $('#tableContainer2').hide();
+        } else {
+            // Show the table
+            $('#tableContainer2').show();
+        }
+    });
 
     // Update the Budgeted fee recovery rate when Estimated fee or Budgeted time cost changes
     $("#EstimatedFee, #BudgetedTimeCost").on("input", function () {

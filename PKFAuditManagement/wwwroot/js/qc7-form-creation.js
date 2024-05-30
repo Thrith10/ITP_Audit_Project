@@ -27,6 +27,28 @@ $(document).ready(function () {
         }
     }
 
+    // Disables or hides the sub forms for QC7 on click
+    $('#toggleSubForm1').change(function () {
+        if (this.checked) {
+            // Hide the table
+            $('#tableContainer1').hide();
+        } else {
+            // Show the table
+            $('#tableContainer1').show();
+        }
+    });
+
+    // Disables or hides the sub forms for QC7 on click
+    $('#toggleSubForm2').change(function () {
+        if (this.checked) {
+            // Hide the table
+            $('#tableContainer2').hide();
+        } else {
+            // Show the table
+            $('#tableContainer2').show();
+        }
+    });
+
     // Update the Prior year’s recovery rate when comp1 (prior year's fee) or time costs changes
     $("#comp1, #timeCosts").on("input", function () {
         updatePriorYearRecoveryRate();

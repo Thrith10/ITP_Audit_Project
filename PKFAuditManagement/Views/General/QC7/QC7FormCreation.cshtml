@@ -235,11 +235,24 @@
                                 </form>
 
                                 <!-- QC7SubForms Beginning -->
+                                @{
+                                    int subFormIndex = 0;
+                                }
                                 @foreach (var subForm in Model.SubForms)
                                 {
                                     <input type="hidden" name="SubForms.Index" value="@subForm.QC7SubFormID" />
                                     <h5 class="card-title">@subForm.SubFormType</h5>
-                                    <div class="table-responsive">
+                                    <!-- Checkbox for hiding/showing the table -->
+                                    @if (subFormIndex == 1 || subFormIndex == 2)
+                                    {
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)">
+                                            <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                Not Applicable
+                                            </label>
+                                        </div>
+                                    }
+                                    <div class="table-responsive" id="tableContainer@(subFormIndex)">
                                         <table class="table table-bordered table-striped">
                                             <thead class="table-light" style="background-color: #f8f9fa;">
                                                 <tr>
@@ -285,6 +298,7 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    subFormIndex++;
                                 }
                                 <h5 class="card-title">Conclusion</h5>
                                 <div class="row mb-3">
