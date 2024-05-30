@@ -2,13 +2,17 @@ document.getElementById('addService').addEventListener('click', addService);
 
 function addService() {
     const serviceDiv = document.createElement('div');
-    serviceDiv.className = 'service input-field';
+    serviceDiv.className = 'row mb-3 service input-field';
     serviceDiv.innerHTML = `
-                <label>Nature of Service:</label>
-                <input type="text" name="nature_of_service[]">
-                <label>Fee:</label>
-                <input type="number" name="fee[]" step="0.01">
-            `;
+        <div class="col-sm-6">
+            <label>Nature of Service:</label>
+            <input type="text" name="nature_of_service[]" class="form-control">
+        </div>
+        <div class="col-sm-6">
+            <label>Fee:</label>
+            <input type="number" name="fee[]" step="0.01" class="form-control">
+        </div>
+    `;
     document.getElementById('services').appendChild(serviceDiv);
 }
 
@@ -21,9 +25,54 @@ function calculateTotalAndConcentration() {
     document.getElementById('grandTotal').value = totalFee.toFixed(2);
 
     const auditFee = parseFloat(document.getElementById('auditFee').value) || 0;
-    const feeConcentration = totalFee / auditFee;
+    const feeConcentration = totalFee / auditFee * 100;
     document.getElementById('feeConcentration').value = feeConcentration.toFixed(2);
 }
+
+// Handles the change of selection for the TNE Form Assessment Dropdown Selection 
+document.getElementById('engagementType').addEventListener('change', function () {
+    var q1Yes = document.getElementById('q1Yes');
+    var q1No = document.getElementById('q1No');
+    var q2Yes = document.getElementById('q2Yes');
+    var q2No = document.getElementById('q2No');
+    var q3Yes = document.getElementById('q3Yes');
+    var q3No = document.getElementById('q3No');
+    var q4Yes = document.getElementById('q4Yes');
+    var q4No = document.getElementById('q4No');
+
+    if (this.value === 'Audit') {
+        // Enable Q1 to Q4
+        q1Yes.disabled = false;
+        q1No.disabled = false;
+        q2Yes.disabled = false;
+        q2No.disabled = false;
+        q3Yes.disabled = false;
+        q3No.disabled = false;
+        q4Yes.disabled = false;
+        q4No.disabled = false;
+    } else if (this.value === 'Non-Audit') {
+
+        // Clear selections for Q2 to Q4
+        q1Yes.checked = false;
+        q1No.checked = false;
+        q2Yes.checked = false;
+        q2No.checked = false;
+        q3Yes.checked = false;
+        q3No.checked = false;
+        q4Yes.checked = false;
+        q4No.checked = false;
+
+        // Disable Q1 to Q4
+        q1Yes.disabled = true;
+        q1No.disabled = true;
+        q2Yes.disabled = true;
+        q2No.disabled = true;
+        q3Yes.disabled = true;
+        q3No.disabled = true;
+        q4Yes.disabled = true;
+        q4No.disabled = true;
+    }
+});
 
 $(document).ready(function () {
     // Function to update the Budgeted fee recovery rate

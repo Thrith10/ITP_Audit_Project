@@ -135,28 +135,43 @@
                                             <span asp-validation-for="FeeFromServices" class="text-danger"></span>
                                         </div>
                                     </div>
-                                    <div id="services">
-                                        <div class="service input-field">
-                                            <label>Nature of Service:</label>
-                                            <input type="text" name="nature_of_service[]">
-                                            <label>Fee:</label>
-                                            <input type="number" name="fee[]" step="0.01">
+                                    <div class="card border border-secondary p-3 mb-3">
+                                        <h5 class="card-title"> Fee from tax services, accounting, payroll, secretarial services and other non-audit services (if any) </h5>
+                                        <div class="card-body">
+                                            <div class="row mb-3 service input-field" id="services">
+                                                <div class="row mb-3 service input-field">
+                                                    <div class="col-sm-6">
+                                                        <label>Nature of Service:</label>
+                                                        <input type="text" class="form-control" name="nature_of_service[]" placeholder="Nature of Service">
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label>Fee:</label>
+                                                        <input type="number" class="form-control" name="fee[]" step="0.01" placeholder="Fee">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-primary mb-3" id="addService">Add New Service</button>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="grandTotal" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">Audit Fee:</label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">Fee Concentration (%):</label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="feeConcentration" disabled>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-primary mb-3" onclick="calculateTotalAndConcentration()">Calculate</button>
                                         </div>
                                     </div>
-                                    <button type="button" id="addService">Add Service</button>
-                                    <div class="input-field">
-                                        <label>Grand Total Fee:</label>
-                                        <input type="number" id="grandTotal" readonly>
-                                    </div>
-                                    <div class="input-field">
-                                        <label>Audit Fee:</label>
-                                        <input type="number" id="auditFee" step="0.01">
-                                    </div>
-                                    <div class="input-field">
-                                        <label>Fee Concentration (%):</label>
-                                        <input type="number" id="feeConcentration" readonly>
-                                    </div>
-                                    <button type="button" onclick="calculateTotalAndConcentration()">Calculate</button>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
@@ -234,10 +249,9 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Is this a transnational entity (TNE)?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input me-3" type="checkbox" id="gridCheck1" asp-for="TransnationalEntity">
+                                            <input class="form-check-input me-3" type="checkbox" id="displayTNEFormCheckbox" onchange="displayTNEForm()" asp-for="TransnationalEntity">
                                         </div>
                                     </div>
-
                                     <div class="row mb-3 align-items-center">
                                         <label class="col-sm-2 col-form-label">If this is a transnational audit (TNA)?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
@@ -250,6 +264,166 @@
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <textarea class="form-control" id="transnationalAuditComment" rows="4" asp-for="TransnationalAuditComment"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3" id="TNEForm">
+                                        <div class="col-sm-12">
+                                            <h5 class="card-title">Section B: TNA / TNE Assessment</h5>
+                                            <hr>
+                                        </div>
+                                        <p>
+                                            Client circumstances may change, for continuing engagements, and therefore this <b>Section B</b> must be completed for each engagement continuance assessment.
+                                        </p>
+                                        <br>
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 col-form-label">Is the engagement audit or non-audit?</label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <select class="form-control" id="engagementType">
+                                                    <option value="Audit">Audit</option>
+                                                    <option value="Non-Audit">Non-Audit</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <tr>
+                                                        <td colspan="3"><b>If “Audit” complete Section B Q1-Q5, if “Non-audit” jump to Section B Q5</b></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q1</th>
+                                                        <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions? (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q1" id="q1Yes" value="Yes">
+                                                                <label class="form-check-label" for="q1Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q1" id="q1No" value="No">
+                                                                <label class="form-check-label" for="q1No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q2</th>
+                                                        <td style="width: 45%;">Does the entity have listed (public) equity or debt? (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q2" id="q2Yes" value="Yes">
+                                                                <label class="form-check-label" for="q2Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q2" id="q2No" value="No">
+                                                                <label class="form-check-label" for="q2No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q3</th>
+                                                        <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided? (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q3" id="q3Yes" value="Yes">
+                                                                <label class="form-check-label" for="q3Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q3" id="q3No" value="No">    
+                                                                <label class="form-check-label" for="q3No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q4</th>
+                                                        <td style="width: 45%;">Is the entity a significant component of a group which is a TNA (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q4" id="q4Yes" value="Yes">
+                                                                <label class="form-check-label" for="q4Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q4" id="q4No" value="No">
+                                                                <label class="form-check-label" for="q4No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q5</th>
+                                                        <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country? (Applies to AUDIT & NON-AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q5" id="q5Yes" value="Yes">
+                                                                <label class="form-check-label" for="q5Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="Q5" id="q5No" value="No">
+                                                                <label class="form-check-label" for="q5No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title">Section C: Overall Evaluation</h5>
+                                                <hr>
+                                            </div>
+                                            <p>
+                                                If the engagement is an audit and any of Section B Q1 – Q4 responses is “Yes”, the entity is a TNA. If the engagement is non-audit and Section B Q5 response is “Yes”, the entity is a TNE. If all responses to Section B Q1 – Q5 are “No”, the entity is neither a TNA nor a TNE.
+                                            </p>
+                                            <br>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 col-form-label">Client entity is assessed as</label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <select class="form-control">
+                                                    <option value="TNA">TNA</option>
+                                                    <option value="TNE">TNE</option>
+                                                    <option value="Neither a TNA nor a TNE">Neither a TNA nor a TNE</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title">Section D: Judgements applied</h5>
+                                                <hr>
+                                            </div>
+                                            <p>
+                                                This table can be used to document a record of any significant judgements applied when responding to the TNA/TNE questions in the table above. A record of any relevant judgements will be helpful to support the basis of future TNA/TNE assessments for the client as part of continuance procedures for recurring engagements.
+                                            </p>
+                                            <br>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q1</th>
+                                                        <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions?</td>
+                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q2</th>
+                                                        <td style="width: 45%;">Does the entity have listed (public) equity or debt?</td>
+                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q3</th>
+                                                        <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided?</td>
+                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q4</th>
+                                                        <td style="width: 45%;">Is the entity a significant component of a group which is a TNA?</td>
+                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q5</th>
+                                                        <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country?</td>
+                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
                                         </div>
                                     </div>
                                 </form>
