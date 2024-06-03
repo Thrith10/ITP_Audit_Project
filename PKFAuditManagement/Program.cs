@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement;
 using PKFAuditManagement.Data;
+using PKFAuditManagement.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Change options.SignIn.RequireConfirmedAccount = true if you want confirmed account email address
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddDefaultIdentity<CustomUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
@@ -78,7 +79,7 @@ using (var scope = app.Services.CreateScope())
 using (var scope = app.Services.CreateScope())
 {
     // Initialise an instance of the userManager
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
 
     string email = "admin@gmail.com";
     string password = "P@ssw0rd";
@@ -87,7 +88,7 @@ using (var scope = app.Services.CreateScope())
     if (await userManager.FindByEmailAsync(email) == null)
     {
         // Set details of the admin user
-        var user = new IdentityUser();
+        var user = new CustomUser();
         user.UserName = email;
         user.Email = email;
 

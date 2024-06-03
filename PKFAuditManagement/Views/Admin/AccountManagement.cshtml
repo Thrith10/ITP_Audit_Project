@@ -1,5 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage System Accounts</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
 <body>
     <main id="main" class="main">
 
@@ -19,7 +26,10 @@
 
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">System Accounts</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">System Accounts</h5>
+                                <a asp-action="CreateAccount" class="btn btn-primary">Create Account</a>
+                            </div>
                             <p>The table below displays all the accounts present in the PKF Audit Management System.</p>
 
                             <!-- Table with stripped rows -->
@@ -40,8 +50,15 @@
                                             <td>@user.UserName</td>
                                             <td>@user.Role</td>
                                             <td>
-                                                <a asp-action="EditUser" asp-route-id="@user.UserId">Edit</a> |
-                                                <a asp-action="DeleteUser" asp-route-id="@user.UserId">Delete</a>
+                                                <a asp-action="EditUser" asp-route-userId="@user.UserId" class="btn btn-link">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form asp-action="DeleteUser" method="post" class="d-inline">
+                                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                                    <button type="button" class="btn btn-link text-danger" data-toggle="modal" data-target="#confirmDeleteModal" data-userid="@user.UserId">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     }
@@ -55,6 +72,31 @@
                 </div>
             </div>
         </section>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this user?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <form id="deleteUserForm" method="post" asp-action="DeleteUser">
+                            <input type="hidden" name="userId" id="deleteUserId" />
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Delete Confirmation Modal -->
 
     </main><!-- End #main -->
     <!-- ======= Footer ======= -->
@@ -70,6 +112,18 @@
             Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
         </div>
     </footer><!-- End Footer --> *@
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $('#confirmDeleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var userId = button.data('userid');
+            var modal = $(this);
+            modal.find('#deleteUserId').val(userId);
+        });
+    </script>
+
 
 </body>
 

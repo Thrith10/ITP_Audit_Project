@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using PKFAuditManagement.Models;
 
 namespace PKFAuditManagement
 {
@@ -13,7 +14,7 @@ namespace PKFAuditManagement
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, UserManager<IdentityUser> userManager)
+        public async Task InvokeAsync(HttpContext context, UserManager<CustomUser> userManager)
         {
             if (context.User.Identity.IsAuthenticated)
             {
