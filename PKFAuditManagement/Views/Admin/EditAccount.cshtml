@@ -24,13 +24,6 @@
 
         <div class="pagetitle">
             <h1>Edit Account</h1>
-            <nav>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.html">Admin</a></li>
-                    <li class="breadcrumb-item"><a href="AccountManagement.html">Account Management</a></li>
-                    <li class="breadcrumb-item active">Edit Account</li>
-                </ol>
-            </nav>
         </div><!-- End Page Title -->
 
         <section class="section">
@@ -50,14 +43,17 @@
                                     <span asp-validation-for="UserName" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" class="form-control" asp-for="FullName" required>
+                                </div>
+                                <div class="form-group">
                                     <label for="Email">Email</label>
                                     <input asp-for="Email" class="form-control" />
                                     <span asp-validation-for="Email" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
-                                    <label for="PhoneNumber">Phone Number</label>
-                                    <input asp-for="PhoneNumber" class="form-control" />
-                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    <label for="role">Role</label>
+                                    @Html.DropDownListFor(m => m.Role, new SelectList(new[] { "User", "Admin" }), new { @class = "form-control" })
                                 </div>
                                 <div class="form-group text-center">
                                     <button type="submit" class="btn btn-primary mr-2">Save Changes</button>

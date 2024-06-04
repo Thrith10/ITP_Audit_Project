@@ -81,16 +81,24 @@ namespace PKFAuditManagement.Controllers
                     {
                         UserName = viewModel.UserName,
                         Email = viewModel.Email,
-                        PhoneNumber = viewModel.PhoneNumber,
                         FullName = viewModel.FullName
                     };
 
-                    var result = await _userManager.CreateAsync(user, viewModel.Password);
+                    //var defaultPassword = GenerateRandomPassword(); // Generate a random password
+                    //var result = await _userManager.CreateAsync(user, defaultPassword);
+                    var result = await _userManager.CreateAsync(user, viewModel.UserName);
 
                     if (result.Succeeded)
                     {
                         // You can add roles or any other operations here
                         await _userManager.AddToRoleAsync(user, viewModel.Role);
+
+                        // Add claim to force password change on first login
+                        //await _userManager.AddClaimAsync(user, new Claim("ForcePasswordChange", "true"));
+
+                        // Send email with the default password
+                        //await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been created",
+                        //    $"Your account has been created. Your temporary password is {defaultPassword}. Please change your password after logging in for the first time.");
 
                         await transaction.CommitAsync();
                         return RedirectToAction("AccountManagement", "Admin");
@@ -174,7 +182,7 @@ namespace PKFAuditManagement.Controllers
                 UserId = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
+                FullName = user.FullName,
                 Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() // Assuming single role
             };
 
@@ -201,13 +209,16 @@ namespace PKFAuditManagement.Controllers
 
             user.UserName = viewModel.UserName;
             user.Email = viewModel.Email;
-            user.PhoneNumber = viewModel.PhoneNumber;
+            user.FullName = viewModel.FullName;
 
-            var result = await _userManager.UpdateAsync(user);
+            var existingRoles = await _userManager.GetRolesAsync(user);
+            var result = await _userManager.RemoveFromRolesAsync(user, existingRoles);
 
             if (result.Succeeded)
             {
-                return RedirectToAction("AccountManagement", "Admin");
+                await _userManager.AddToRoleAsync(user, viewModel.Role);
+                viewModel.Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+                return RedirectToAction("AccountManagement", "Admin", new { viewModel });
             }
             else
             {
@@ -215,5 +226,6 @@ namespace PKFAuditManagement.Controllers
                 return View("~/Views/Admin/EditAccount.cshtml", viewModel);
             }
         }
+
     }
 }
