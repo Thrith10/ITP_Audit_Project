@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement.Data;
+using PKFAuditManagement.Interface;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.ViewModels;
+using System.Security.Claims;
+using System.Text;
 
 
 namespace PKFAuditManagement.Controllers
@@ -14,12 +17,15 @@ namespace PKFAuditManagement.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailSender _emailSender;
 
-        public AdminController(ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminController(ApplicationDbContext context, UserManager<CustomUser> userManager, 
+            RoleManager<IdentityRole> roleManager, IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSender = emailSender;
         }
 
         [Authorize(Roles = "Admin")]
@@ -84,9 +90,9 @@ namespace PKFAuditManagement.Controllers
                         FullName = viewModel.FullName
                     };
 
-                    //var defaultPassword = GenerateRandomPassword(); // Generate a random password
-                    //var result = await _userManager.CreateAsync(user, defaultPassword);
-                    var result = await _userManager.CreateAsync(user, viewModel.UserName);
+                    var defaultPassword = GenerateRandomPassword(); // Generate a random password
+                    var result = await _userManager.CreateAsync(user, defaultPassword);
+                    //var result = await _userManager.CreateAsync(user, viewModel.UserName);
 
                     if (result.Succeeded)
                     {
@@ -94,11 +100,11 @@ namespace PKFAuditManagement.Controllers
                         await _userManager.AddToRoleAsync(user, viewModel.Role);
 
                         // Add claim to force password change on first login
-                        //await _userManager.AddClaimAsync(user, new Claim("ForcePasswordChange", "true"));
+                        await _userManager.AddClaimAsync(user, new Claim("ForcePasswordChange", "true"));
 
                         // Send email with the default password
-                        //await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been created",
-                        //    $"Your account has been created. Your temporary password is {defaultPassword}. Please change your password after logging in for the first time.");
+                        await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been created",
+                            $"Your account has been created. Your temporary password is {defaultPassword}. Please change your password after logging in for the first time.");
 
                         await transaction.CommitAsync();
                         return RedirectToAction("AccountManagement", "Admin");
@@ -225,6 +231,25 @@ namespace PKFAuditManagement.Controllers
                 ViewBag.Errors = result.Errors;
                 return View("~/Views/Admin/EditAccount.cshtml", viewModel);
             }
+        }
+
+        private string GenerateRandomPassword()
+        {
+            var options = _userManager.Options.Password;
+            var password = new StringBuilder();
+            var random = new Random();
+
+            password.Append((char)random.Next(65, 91)); // Uppercase
+            password.Append((char)random.Next(97, 123)); // Lowercase
+            password.Append((char)random.Next(48, 58)); // Digit
+            password.Append((char)random.Next(33, 48)); // Special character
+
+            for (int i = 0; i < options.RequiredLength - 4; i++)
+            {
+                password.Append((char)random.Next(33, 126));
+            }
+
+            return new string(password.ToString().OrderBy(c => random.Next()).ToArray());
         }
 
     }

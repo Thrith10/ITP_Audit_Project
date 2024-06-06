@@ -3,6 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
+using System.Net.Mail;
+using System.Net;
+using PKFAuditManagement.Interface;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +28,17 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Error/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
+});
+
+builder.Configuration.AddEnvironmentVariables();
+var emailPassword = builder.Configuration["SMTP_PASSWORD"];
+
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+
+builder.Services.AddTransient<IEmailSender, EmailSender>(sp =>
+{
+    var smtpOptions = sp.GetRequiredService<IOptions<SmtpOptions>>().Value;
+    return new EmailSender(smtpOptions);
 });
 
 var app = builder.Build();
@@ -99,5 +115,7 @@ using (var scope = app.Services.CreateScope())
     }
 
 }
+
+
 
 app.Run();
