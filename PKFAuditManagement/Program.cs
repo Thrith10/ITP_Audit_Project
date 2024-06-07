@@ -8,6 +8,7 @@ using System.Net;
 using PKFAuditManagement.Interface;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
+using PKFAuditManagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,9 @@ builder.Configuration.AddEnvironmentVariables();
 var emailPassword = builder.Configuration["SMTP_PASSWORD"];
 
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+
+// Service registrations
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>(sp =>
 {

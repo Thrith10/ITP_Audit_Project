@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
+using PKFAuditManagement.Services;
 using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
 using System.Data;
@@ -13,11 +14,13 @@ namespace PKFAuditManagement.Controllers
 {
     public class QC6FormController : Controller
     {
+        private readonly IUserService _userService;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public QC6FormController(ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager)
+        public QC6FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            _userService = userService;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
@@ -36,10 +39,13 @@ namespace PKFAuditManagement.Controllers
         }
 
         [Authorize(Roles = "User,Admin")]
-        public IActionResult QC6FormCreation()
+        public async Task<IActionResult> QC6FormCreationAsync()
         {
+            // Retrieve user email
+            var userEmail = await _userService.GetUserEmailAsync(User);
+
             // Retrieve QC6Form data
-            var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel());
+            var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel { UserEmail = userEmail });
 
             return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
         }
@@ -82,6 +88,9 @@ namespace PKFAuditManagement.Controllers
             // Populate Sub Forms
             viewModel = RetrieveSubFormData(viewModel);
 
+            // Append UserEmail to viewModel
+            viewModel.UserEmail = user.Email;
+
             if (!ModelState.IsValid)
             {
                 // Access validation errors
@@ -107,7 +116,7 @@ namespace PKFAuditManagement.Controllers
                         FileReference = Helper.GenerateQCFormFileReference(),
                         CreatedBy = userId,
                         ProspectiveClient = viewModel.ProspectiveClient,
-                        PeriodEnded = viewModel.PeriodEnded,
+                        PeriodEnded = viewModel.PeriodEnded.Value,
                         EngagementType = viewModel.EngagementType,
                         PreparedBy = viewModel.PreparedBy,
                         PreparedByDate = viewModel.PreparedByDate,
@@ -118,11 +127,13 @@ namespace PKFAuditManagement.Controllers
                         PKFEntityProposingService = viewModel.PKFEntityProposingService,
                         SourceOfReferral = viewModel.SourceOfReferral,
                         NatureOfServiceForEstimateFee = viewModel.NatureOfServiceForEstimateFee,
-                        EstimatedFee = viewModel.EstimatedFee,
-                        BudgetedTimeCost = viewModel.BudgetedTimeCost,
-                        FeeFromServices = viewModel.FeeFromServices,
+                        EstimatedFee = viewModel.EstimatedFee.Value,
+                        BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
+                        BudgetedFeeRecoveryRate = viewModel.BudgetedFeeRecoveryRate.Value,
                         OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees,
-                        FeeConcentration = viewModel.FeeConcentration,
+                        GrandTotal = viewModel.GrandTotal.Value,
+                        AuditFee = viewModel.AuditFee.Value,
+                        FeeConcentration = viewModel.FeeConcentration.Value,
                         ConflictsCheckDone = viewModel.ConflictsCheckDone,
                         TypeOfActivities = viewModel.TypeOfActivities,
                         ComplexityOfEngagement = viewModel.ComplexityOfEngagement,
@@ -130,9 +141,6 @@ namespace PKFAuditManagement.Controllers
                         ReasonsForDiscontinuance = viewModel.ReasonsForDiscontinuance,
                         PublicInterestEntity = viewModel.IsPublicInterestEntity,
                         PublicInterestEntityType = viewModel.PublicInterestEntityType,
-                        TransnationalEntity = viewModel.TransnationalEntity,
-                        TransnationalAudit = viewModel.TransnationalAudit,
-                        TransnationalAuditComment = viewModel.TransnationalAuditComment
                     };
 
                     // Add qc6form data to intermediary datastore
@@ -158,9 +166,9 @@ namespace PKFAuditManagement.Controllers
                         PreparedBy = viewModel.ConclusionPreparedBy,
                         PreparedByDate = viewModel.ConclusionPreparedByDate.Value,
                         EPHODApprovedBy = viewModel.EPHODApprovedBy,
-                        EPHODApprovedByDate = viewModel.EPHODApprovedByDate.Value,
+                        EPHODApprovedByDate = viewModel.EPHODApprovedByDate,
                         MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy,
-                        MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate.Value
+                        MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate
                     };
 
                     // Add qc6formConclusion data to the database
@@ -175,11 +183,11 @@ namespace PKFAuditManagement.Controllers
                             foreach (var testDescription in objective.TestDescriptions)
                             {
                                 // Populate the TestDescriptions with posted data
-                                testDescription.Reference = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Reference"];
                                 testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignBy"];
-                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignDate"], "ddMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime signDate))
+                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
                                 {
-                                    testDescription.SignDate = signDate;
+                                    // Use the parsed date
+                                    testDescription.SignDate = date;
                                 }
                                 testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Comment"];
 
@@ -188,8 +196,7 @@ namespace PKFAuditManagement.Controllers
                                 {
                                     QC6FormID = qc6formId,
                                     QC6FormTestDescriptionID = testDescription.QC6FormTestDescriptionID,
-                                    Reference = testDescription.Reference,
-                                    SignOffDate = DateTime.Now,
+                                    SignOffDate = testDescription.SignDate,
                                     SignOffBy = testDescription.SignBy,
                                     Comments = testDescription.Comment
                                 };
@@ -201,6 +208,25 @@ namespace PKFAuditManagement.Controllers
                     }
 
                     // Save all pending changes to QC6FormTest entities at once
+                    _context.SaveChanges();
+
+                    // Process the submitted data
+                    foreach (var service in viewModel.Services)
+                    {
+                        // Save QC6FormFeeDetail
+                        var qC6FormFeeDetail = new QC6FormFeeDetail
+                        {
+                            QC6FormID = qc6formId,
+                            NatureOfService = service.NatureOfService,
+                            Fee = service.Fee.Value,
+                            OtherService = service.OtherService,
+                        };
+
+                        // Add qC6FormFeeDetail to the context and save changes
+                        _context.Add(qC6FormFeeDetail);
+                    }
+
+                    // Save all pending changes to QC6FormFeeDetail entities at once
                     _context.SaveChanges();
 
                     transaction.Commit();
@@ -288,7 +314,6 @@ namespace PKFAuditManagement.Controllers
                             {
                                 QC6FormTestDescriptionID = desc.QC6FormTestDescriptionID,
                                 Description = desc.Description,
-                                Reference = "",
                                 SignDate = DateTime.MinValue,
                                 SignBy = "",
                                 Comment = ""

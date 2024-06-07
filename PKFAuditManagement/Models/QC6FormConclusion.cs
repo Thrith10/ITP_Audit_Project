@@ -7,7 +7,7 @@
         public bool AnySignificantRisk { get; set; }
         public string? SignificantRiskComment { get; set; }
         public required string NewEngagementRiskRating { get; set; }
-        public required string NewEngagementRiskRatingReason { get; set; }
+        public string? NewEngagementRiskRatingReason { get; set; }
         public required string EngagementSubjectedTo { get; set; }
         public required string SafeguardReviewerAssigned { get; set; }
         public required string IsNewEngagementAcceptance { get; set; }
@@ -15,11 +15,11 @@
         public string? SuspiciousTransactionReportFiledRationale { get; set; }
         public required string Satisfaction { get; set; }
         public required string PreparedBy { get; set; }
-        public required DateTime PreparedByDate { get; set; }
-        public required string EPHODApprovedBy { get; set; }
-        public required DateTime EPHODApprovedByDate { get; set; }
-        public required string MPHODQMPApprovedBy { get; set; }
-        public required DateTime MPHODQMPApprovedByDate { get; set; }
+        public DateTime PreparedByDate { get; set; }
+        public string? EPHODApprovedBy { get; set; }
+        public DateTime? EPHODApprovedByDate { get; set; }
+        public string? MPHODQMPApprovedBy { get; set; }
+        public DateTime? MPHODQMPApprovedByDate { get; set; }
         public QC6Form? QC6Form { get; set; }
     }
 }

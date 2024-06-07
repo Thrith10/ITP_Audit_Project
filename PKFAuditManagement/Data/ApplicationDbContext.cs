@@ -19,6 +19,7 @@ namespace PKFAuditManagement.Data
         public DbSet<QC6FormTest> QC6FormTests { get; set; }
         public DbSet<QC6FormConclusion> QC6FormConclusions { get; set; }
         public DbSet<QC6FormTestDescription> QC6FormTestDescriptions { get; set; }
+        public DbSet<QC6FormFeeDetail> QC6FormFeeDetails { get; set; }
 
         // DbSets for QC7 Form
         public DbSet<QC7Form> QC7Forms { get; set; }

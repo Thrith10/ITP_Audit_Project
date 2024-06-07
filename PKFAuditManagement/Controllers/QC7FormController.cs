@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
+using PKFAuditManagement.Services;
 using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
 using System.Globalization;
@@ -12,11 +13,13 @@ namespace PKFAuditManagement.Controllers
 {
     public class QC7FormController : Controller
     {
+        private readonly IUserService _userService;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public QC7FormController(ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager)
+        public QC7FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            _userService = userService;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
@@ -35,10 +38,13 @@ namespace PKFAuditManagement.Controllers
         }
 
         [Authorize(Roles = "User,Admin")]
-        public IActionResult QC7FormCreation()
+        public async Task<IActionResult> QC7FormCreationAsync()
         {
+            // Retrieve user's email
+            var userEmail = await _userService.GetUserEmailAsync(User);
+
             // Retrieve QC7Form data
-            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel());
+            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail } );
             return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
         }
 
@@ -106,15 +112,15 @@ namespace PKFAuditManagement.Controllers
                         FileReference = Helper.GenerateQCFormFileReference(),
                         CreatedBy = userId,
                         Client = viewModel.Client,
-                        PeriodEnded = viewModel.PeriodEnded,
+                        PeriodEnded = viewModel.PeriodEnded.Value,
                         EngagementType = viewModel.EngagementType,
                         PreparedBy = viewModel.PreparedBy,
                         PreparedByDate = viewModel.PreparedByDate,
                         ReviewedBy = viewModel.ReviewedBy,
                         ReviewedByDate = viewModel.ReviewedByDate,
-                        PriorYearFee = viewModel.PriorYearFee,
-                        TimeCosts = viewModel.TimeCosts,
-                        PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate,
+                        PriorYearFee = viewModel.PriorYearFee.Value,
+                        TimeCosts = viewModel.TimeCosts.Value,
+                        PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value,
                         AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees,
                         TypeOfClientActivities = viewModel.TypeOfClientActivities, 
                         RiskRatingPriorYear = viewModel.RiskRatingPriorYear,
@@ -123,14 +129,11 @@ namespace PKFAuditManagement.Controllers
                         SafeguardReviewerName = viewModel.SafeguardReviewerName,
                         AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees,
                         FeeConcentration = viewModel.FeeConcentration,
-                        ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear,
-                        BudgetedTimeCost = viewModel.BudgetedTimeCost,
-                        ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear,
+                        ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value,
+                        BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
+                        ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value,
                         IsPublicInterestEntity = viewModel.IsPublicInterestEntity,
                         PublicInterestEntityType = viewModel.PublicInterestEntityType,
-                        TransnationalEntity = viewModel.TransnationalEntity,
-                        TransnationalAudit = viewModel.TransnationalAudit,
-                        TransnationalAuditComment = viewModel.TransnationalAuditComment,
                         Status = "Pending",
                         FormSubmissionDate = DateTime.Now
                     };
@@ -155,9 +158,9 @@ namespace PKFAuditManagement.Controllers
                         EMPreparedBy = viewModel.EMPreparedBy,
                         EMPreparedByDate = viewModel.EMPreparedByDate.Value,
                         EPHODApprovedBy = viewModel.EPHODApprovedBy,
-                        EPHODApprovedByDate = viewModel.EPHODApprovedByDate.Value,
+                        EPHODApprovedByDate = viewModel.EPHODApprovedByDate,
                         MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy,
-                        MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate.Value
+                        MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate
                     };
 
                     // Add qc7formConclusion data to the database
@@ -172,7 +175,6 @@ namespace PKFAuditManagement.Controllers
                             foreach (var testDescription in objective.TestDescriptions)
                             {
                                 // Populate the TestDescriptions with posted data
-                                testDescription.Reference = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].Reference"];
                                 testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignBy"];
                                 if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignDate"], "ddMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime signDate))
                                 {
@@ -185,8 +187,7 @@ namespace PKFAuditManagement.Controllers
                                 {
                                     QC7FormID = qc7formId,
                                     QC7FormTestDescriptionID = testDescription.QC7FormTestDescriptionID,
-                                    Reference = testDescription.Reference,
-                                    SignOffDate = DateTime.Now,
+                                    SignOffDate = testDescription.SignDate,
                                     SignOffBy = testDescription.SignBy,
                                     Comments = testDescription.Comment
                                 };
@@ -285,7 +286,6 @@ namespace PKFAuditManagement.Controllers
                             {
                                 QC7FormTestDescriptionID = desc.QC7FormTestDescriptionID,
                                 Description = desc.Description,
-                                Reference = "",
                                 SignDate = DateTime.MinValue,
                                 SignBy = "",
                                 Comment = ""
