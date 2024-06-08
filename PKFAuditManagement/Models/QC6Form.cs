@@ -38,6 +38,7 @@ namespace PKFAuditManagement.Models
         public ICollection<QC6FormFeeDetail> QC6FormFeeDetails { get; set; } // One-to-Many
         public ICollection<QC6FormTest> QC6FormTests { get; set; } // One-to-Many
         public QC6FormConclusion QC6FormConclusion { get; set; } // One-to-One
+        public TNATNEAssessment TNATNEAssessment { get; set; } // One-to-One
 
     }
 }

@@ -4,7 +4,7 @@
 <div class="justify-content-center">
     <main id="main" class="main">
         <div class="pagetitle">
-            <h1>Form QC6(3)</h1>
+            <h1>Create Form QC6(3)</h1>
         </div><!-- End Page Title -->
         <section class="section">
             <div class="row">
@@ -259,7 +259,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-2 col-form-label">Is the engagement audit or non-audit?</label>
                                             <div class="col-sm-10 d-flex align-items-center">
-                                                <select class="form-control" id="engagementType">
+                                                <select class="form-control" id="engagementType" asp-for="TNATNEAssessment.SectionB.IsAudit">
                                                     <option value="Audit">Audit</option>
                                                     <option value="Non-Audit">Non-Audit</option>
                                                 </select>
@@ -276,11 +276,11 @@
                                                         <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions? (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q1" id="q1Yes" value="Yes">
+                                                                <input class="form-check-input" type="radio" id="q1Yes" name="TNATNEAssessment.SectionB.Q1" value="true" @(Model.TNATNEAssessment.SectionB.Q1 == true ? "checked" : "")>
                                                                 <label class="form-check-label" for="q1Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q1" id="q1No" value="No">
+                                                                <input class="form-check-input" type="radio" id="q1No" name="TNATNEAssessment.SectionB.Q1" value="false" @(Model.TNATNEAssessment.SectionB.Q1 == false ? "checked" : "")>
                                                                 <label class="form-check-label" for="q1No">No</label>
                                                             </div>
                                                         </td>
@@ -290,11 +290,11 @@
                                                         <td style="width: 45%;">Does the entity have listed (public) equity or debt? (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q2" id="q2Yes" value="Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="true" @(Model.TNATNEAssessment.SectionB.Q2 == true ? "checked" : "") id="q2Yes">
                                                                 <label class="form-check-label" for="q2Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q2" id="q2No" value="No">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="false" @(Model.TNATNEAssessment.SectionB.Q2 == false ? "checked" : "") id="q2No">
                                                                 <label class="form-check-label" for="q2No">No</label>
                                                             </div>
                                                         </td>
@@ -304,11 +304,11 @@
                                                         <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided? (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q3" id="q3Yes" value="Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="true" @(Model.TNATNEAssessment.SectionB.Q3 == true ? "checked" : "") id="q3Yes">
                                                                 <label class="form-check-label" for="q3Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q3" id="q3No" value="No">    
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="false" @(Model.TNATNEAssessment.SectionB.Q3 == false ? "checked" : "") id="q3No">
                                                                 <label class="form-check-label" for="q3No">No</label>
                                                             </div>
                                                         </td>
@@ -318,11 +318,11 @@
                                                         <td style="width: 45%;">Is the entity a significant component of a group which is a TNA (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q4" id="q4Yes" value="Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="true" @(Model.TNATNEAssessment.SectionB.Q4 == true ? "checked" : "") id="q4Yes">
                                                                 <label class="form-check-label" for="q4Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q4" id="q4No" value="No">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="false" @(Model.TNATNEAssessment.SectionB.Q4 == false ? "checked" : "") id="q4No">
                                                                 <label class="form-check-label" for="q4No">No</label>
                                                             </div>
                                                         </td>
@@ -332,11 +332,11 @@
                                                         <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country? (Applies to AUDIT & NON-AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q5" id="q5Yes" value="Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="true" @(Model.TNATNEAssessment.SectionB.Q5 == true ? "checked" : "") id="q5Yes">
                                                                 <label class="form-check-label" for="q5Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="Q5" id="q5No" value="No">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="false" @(Model.TNATNEAssessment.SectionB.Q5 == false ? "checked" : "") id="q5No">
                                                                 <label class="form-check-label" for="q5No">No</label>
                                                             </div>
                                                         </td>
@@ -357,7 +357,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-2 col-form-label">Client entity is assessed as</label>
                                             <div class="col-sm-10 d-flex align-items-center">
-                                                <select class="form-control">
+                                                <select class="form-control" asp-for="TNATNEAssessment.SectionCEvaluation">
                                                     <option value="TNA">TNA</option>
                                                     <option value="TNE">TNE</option>
                                                     <option value="Both a TNA and a TNE">Both a TNA and a TNE</option>
@@ -381,27 +381,37 @@
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q1</th>
                                                         <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions?</td>
-                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q1Comment">
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q2</th>
                                                         <td style="width: 45%;">Does the entity have listed (public) equity or debt?</td>
-                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q2Comment">
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q3</th>
                                                         <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided?</td>
-                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q3Comment">
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q4</th>
                                                         <td style="width: 45%;">Is the entity a significant component of a group which is a TNA?</td>
-                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q4Comment">
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q5</th>
                                                         <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country?</td>
-                                                        <td style="width: 45%;"><input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question"></td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q5Comment">
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>

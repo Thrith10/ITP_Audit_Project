@@ -120,7 +120,7 @@ namespace PKFAuditManagement.Controllers
                     // Get the current user's ID
                     var userId = user?.Id;
 
-                    // Save viewModel data to EngagementTable
+                    // Save viewModel data to QC6Form
                     var qc6form = new QC6Form
                     {
                         FileReference = Helper.GenerateQCFormFileReference(),
@@ -161,6 +161,57 @@ namespace PKFAuditManagement.Controllers
 
                     // Retrieve the QC6FormID from the saved entity
                     int qc6formId = qc6form.QC6FormID;
+
+                    var tnaTneAssessment = new TNATNEAssessment
+                    {
+                        QC6FormID = qc6formId,
+                        SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation,
+                    };
+
+                    // Add tnaTneAssessment data to the database
+                    _context.Add(tnaTneAssessment);
+                    _context.SaveChanges();
+
+                    // Retrieve the tnaTneAssessmentID from the saved entity
+                    int tnaTneAssessmentID = tnaTneAssessment.TNATNEAssessmentID;
+
+                    var tnaTNESectionB = new TNATNESectionB
+                    {
+                        TNATNEAssessmentID = tnaTneAssessmentID,
+                        IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit
+                    };
+
+                    // Save Q1 - Q4 if IsAudit == true, else only Save Q5
+                    if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
+                    {
+                        tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
+                        tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
+                        tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
+                        tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
+                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                    }
+                    else
+                    {
+                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                    }
+
+                    // Add tnaTNESectionB data to the database
+                    _context.Add(tnaTNESectionB);
+                    _context.SaveChanges();
+
+                    var tnaTNESectionD = new TNATNESectionD
+                    {
+                        TNATNEAssessmentID = tnaTneAssessmentID,
+                        Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment,
+                        Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment,
+                        Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment,
+                        Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment,
+                        Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment,
+                    };
+
+                    // Add tnaTNESectionD data to the database
+                    _context.Add(tnaTNESectionD);
+                    _context.SaveChanges();
 
                     var qc6formConclusion = new QC6FormConclusion
                     {
@@ -277,6 +328,24 @@ namespace PKFAuditManagement.Controllers
                 {
                     return NotFound();
                 }
+
+                // Identify TNATNEAssessment for QC6Form
+                var tnaTNEAssessment = _context.TNATNEAssessments.SingleOrDefault(t => t.QC6FormID == id);
+
+                // Identify TNATNESectionB for TNATNEAssessment
+                var tnaTNESectionB = _context.TNATNESectionB.SingleOrDefault(t => t.TNATNEAssessmentID == tnaTNEAssessment.TNATNEAssessmentID);
+
+                // Identify TNATNESectionD for TNATNEAssessment
+                var tnaTNESectionD = _context.TNATNESectionD.SingleOrDefault(t => t.TNATNEAssessmentID == tnaTNEAssessment.TNATNEAssessmentID);
+
+                // Delete TNATNESectionB
+                _context.TNATNESectionB.Remove(tnaTNESectionB);
+
+                // Delete TNATNESectionD
+                _context.TNATNESectionD.Remove(tnaTNESectionD);
+
+                // Delete TNATNEAssessment
+                _context.TNATNEAssessments.Remove(tnaTNEAssessment);
 
                 // Delete from QC6FormTests 
                 var tests = _context.QC6FormTests.Where(t => t.QC6FormID == id);

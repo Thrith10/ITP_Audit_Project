@@ -10,6 +10,8 @@ namespace PKFAuditManagement.ViewModels
             // Initialize the Services list with a default service
             Services = new List<FeeDetailViewModel>();
             Services.Add(new FeeDetailViewModel { NatureOfService = "", Fee = 0 });
+
+            TNATNEAssessment = new TNATNEAssessmentViewModel();
         }
         // User Details
         public string? UserEmail { get; set; }
@@ -87,7 +89,38 @@ namespace PKFAuditManagement.ViewModels
         public bool SubForm2NotApplicable { get; set; }
         public List<SubFormViewModel> SubForms { get; set; }
         public List<FeeDetailViewModel> Services { get; set; }
+        public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
         public List<string>? AdminEmails { get; set; }
+    }
+    public class TNATNEAssessmentViewModel
+    {
+        public TNATNEAssessmentViewModel()
+        {
+            SectionB = new SectionBViewModel();
+            SectionD = new SectionDViewModel();
+        }
+        public string? SectionCEvaluation { get; set; }
+        public SectionBViewModel SectionB { get; set; }
+        public SectionDViewModel SectionD { get; set; }
+    }
+
+    public class SectionBViewModel
+    {
+        public string IsAudit { get; set; }
+        public bool Q1 { get; set; }
+        public bool Q2 { get; set; }
+        public bool Q3 { get; set; }
+        public bool Q4 { get; set; }
+        public bool Q5 { get; set; }
+    }
+
+    public class SectionDViewModel
+    {
+        public string? Q1Comment { get; set; }
+        public string? Q2Comment { get; set; }
+        public string? Q3Comment { get; set; }
+        public string? Q4Comment { get; set; }
+        public string? Q5Comment { get; set; }
     }
 
     public class FeeDetailViewModel
