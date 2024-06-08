@@ -9,6 +9,7 @@ namespace PKFAuditManagement.ViewModels
         public string? UserEmail { get; set; }
 
         // Start of QC7Form data
+        public string? FileReference { get; set; }
         [Required]
         public string? Client { get; set; }
         [Required]
