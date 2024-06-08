@@ -33,6 +33,8 @@ namespace PKFAuditManagement.Models
         public required string ReasonsForDiscontinuance { get; set; }
         public bool PublicInterestEntity { get; set; }
         public string? PublicInterestEntityType { get; set; }
+        public bool IsSubForm2NotApplicable { get; set; }
+        public bool IsSubForm3NotApplicable { get; set; }
         public ICollection<QC6FormFeeDetail> QC6FormFeeDetails { get; set; } // One-to-Many
         public ICollection<QC6FormTest> QC6FormTests { get; set; } // One-to-Many
         public QC6FormConclusion QC6FormConclusion { get; set; } // One-to-One

@@ -44,8 +44,11 @@ namespace PKFAuditManagement.Controllers
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
 
+            // Retrieve all emails for users in the "Admin" role
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
             // Retrieve QC6Form data
-            var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel { UserEmail = userEmail });
+            var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel { UserEmail = userEmail, AdminEmails = adminEmails.OrderBy(email => email).ToList() });
 
             return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
         }
@@ -90,6 +93,13 @@ namespace PKFAuditManagement.Controllers
 
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
+
+            // Retrieve all emails for users in the "Admin" role
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
+            // Append emails to viewModel
+            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+
 
             if (!ModelState.IsValid)
             {
@@ -141,6 +151,8 @@ namespace PKFAuditManagement.Controllers
                         ReasonsForDiscontinuance = viewModel.ReasonsForDiscontinuance,
                         PublicInterestEntity = viewModel.IsPublicInterestEntity,
                         PublicInterestEntityType = viewModel.PublicInterestEntityType,
+                        IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable, // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                        IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
                     };
 
                     // Add qc6form data to intermediary datastore
@@ -273,6 +285,10 @@ namespace PKFAuditManagement.Controllers
                 // Delete from QC6FormConclusions
                 var conclusions = _context.QC6FormConclusions.Where(c => c.QC6FormID == id);
                 _context.QC6FormConclusions.RemoveRange(conclusions);
+
+                // Delete from QC6FormFeeDetails
+                var feeDetails = _context.QC6FormFeeDetails.Where(c => c.QC6FormID == id);
+                _context.QC6FormFeeDetails.RemoveRange(feeDetails);
 
                 // Delete the QC6Form itself
                 _context.QC6Forms.Remove(qc6Form);

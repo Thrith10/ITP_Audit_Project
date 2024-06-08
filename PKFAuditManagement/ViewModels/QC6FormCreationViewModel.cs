@@ -83,8 +83,11 @@ namespace PKFAuditManagement.ViewModels
         public DateTime? EPHODApprovedByDate { get; set; }
         public string? MPHODQMPApprovedBy { get; set; }
         public DateTime? MPHODQMPApprovedByDate { get; set; }
+        public bool SubForm1NotApplicable { get; set; }
+        public bool SubForm2NotApplicable { get; set; }
         public List<SubFormViewModel> SubForms { get; set; }
         public List<FeeDetailViewModel> Services { get; set; }
+        public List<string>? AdminEmails { get; set; }
     }
 
     public class FeeDetailViewModel

@@ -74,6 +74,7 @@
                                     </div>
                                     <br>
                                     <hr class="my-4">
+                                    <h5 class="card-title"> General </h5>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Name of PKF entity proposing for the service<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
@@ -117,6 +118,65 @@
                                                 <span class="input-group-text">%</span>
                                                 <input type="hidden" asp-for="BudgetedFeeRecoveryRate" id="BudgetedFeeRecoveryRateHidden" />
                                             </div>
+                                        </div>
+                                    </div>        
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="OutstandingUnpaidFees">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Conflicts check done?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="ConflictsCheckDone">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Type of activities of prospective client<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="TypeOfActivities" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Complexity of engagement based on preliminary evaluation<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Predecessor Auditor</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="PredecessorAuditor">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3" id="riskLevelRow" style="display:none;">
+                                        <label class="col-sm-2 col-form-label">Type of PIE</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType">
+                                                <option value="Listed">Listed</option>
+                                                <option value="Financial Institution">Financial Institution</option>
+                                                <option value="Large Charity">Large Charity</option>
+                                                <option value="Large Institution of Public Character (“IPC”)">Large Institution of Public Character (“IPC”)</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="card border border-secondary p-3 mb-3">
@@ -184,69 +244,13 @@
                                             <button type="button" class="btn btn-primary mb-3" onclick="calculateTotalAndConcentration()">Calculate</button>
                                         </div>
                                     </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="OutstandingUnpaidFees">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Conflicts check done?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="ConflictsCheckDone">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Type of activities of prospective client<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="TypeOfActivities" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Complexity of engagement based on preliminary evaluation<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Predecessor Auditor</label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="PredecessorAuditor">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3" id="riskLevelRow" style="display:none;">
-                                        <label class="col-sm-2 col-form-label">Type of PIE</label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType">
-                                                <option value="Listed">Listed</option>
-                                                <option value="Financial Institution">Financial Institution</option>
-                                                <option value="Large Charity">Large Charity</option>
-                                                <option value="Large Institution of Public Character (“IPC”)">Large Institution of Public Character (“IPC”)</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    <br>
+                                    <hr class="my-4">
+                                    
                                     <div class="row mb-3" id="TNEForm">
                                         <div class="col-sm-12">
                                             <h5 class="card-title">Section B: TNA / TNE Assessment</h5>
-                                            <hr>
+                                            <hr class="my-4">
                                         </div>
                                         <p>
                                             Client circumstances may change, for continuing engagements, and therefore this <b>Section B</b> must be completed for each engagement continuance assessment.
@@ -343,7 +347,7 @@
                                         <div class="row mb-3">
                                             <div class="col-sm-12">
                                                 <h5 class="card-title">Section C: Overall Evaluation</h5>
-                                                <hr>
+                                                <hr class="my-4">
                                             </div>
                                             <p>
                                                 If the engagement is an audit and any of Section B Q1 – Q4 responses is “Yes”, the entity is a TNA. If the engagement is non-audit and Section B Q5 response is “Yes”, the entity is a TNE. If all responses to Section B Q1 – Q5 are “No”, the entity is neither a TNA nor a TNE.
@@ -364,7 +368,7 @@
                                         <div class="row mb-3">
                                             <div class="col-sm-12">
                                                 <h5 class="card-title">Section D: Judgements applied</h5>
-                                                <hr>
+                                                <hr class="my-4">
                                             </div>
                                             <p>
                                                 This table can be used to document a record of any significant judgements applied when responding to the TNA/TNE questions in the table above. A record of any relevant judgements will be helpful to support the basis of future TNA/TNE assessments for the client as part of continuance procedures for recurring engagements.
@@ -418,7 +422,8 @@
                                     @if (subFormIndex == 1 || subFormIndex == 2)
                                     {
                                         <div class="form-check mb-3">
-                                            <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)">
+                                            <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                            <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" onclick="toggleSubForm(@subFormIndex)">
                                             <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
                                                 Not Applicable
                                             </label>
@@ -567,8 +572,15 @@
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Partner / Head of Division" asp-for="EPHODApprovedBy" disabled>
+                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
+                                            <span class="link-text">To be approved by:</span>
+                                        </label>
+                                        <select asp-for="EPHODApprovedBy" class="form-control">
+                                            @foreach (var email in Model.AdminEmails)
+                                            {
+                                                <option value="@email">@email</option>
+                                            }
+                                        </select>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
@@ -577,8 +589,15 @@
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Managing Partner / Head of Division / Quality Management Partner" asp-for="MPHODQMPApprovedBy" disabled>
+                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
+                                            <span class="link-text">To be approved by:</span>
+                                        </label>
+                                        <select asp-for="MPHODQMPApprovedBy" class="form-control">
+                                            @foreach (var email in Model.AdminEmails)
+                                            {
+                                                <option value="@email">@email</option>
+                                            }
+                                        </select>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:</label>
