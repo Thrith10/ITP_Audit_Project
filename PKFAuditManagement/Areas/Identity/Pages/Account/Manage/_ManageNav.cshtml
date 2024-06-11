@@ -1,4 +1,7 @@
-﻿@inject SignInManager<IdentityUser> SignInManager
+﻿@using Microsoft.AspNetCore.Identity
+@using PKFAuditManagement.Models
+
+@inject SignInManager<CustomUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

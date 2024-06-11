@@ -22,6 +22,7 @@ builder.Services.AddDefaultIdentity<CustomUser>(options => options.SignIn.Requir
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();  // Ensure Razor Pages are mapped
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -40,6 +41,9 @@ builder.Services.AddTransient<IEmailSender, EmailSender>(sp =>
     var smtpOptions = sp.GetRequiredService<IOptions<SmtpOptions>>().Value;
     return new EmailSender(smtpOptions);
 });
+
+// Add SignInManager service
+builder.Services.AddScoped<SignInManager<CustomUser>>();
 
 var app = builder.Build();
 

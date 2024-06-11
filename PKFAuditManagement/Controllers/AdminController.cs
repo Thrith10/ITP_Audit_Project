@@ -67,7 +67,6 @@ namespace PKFAuditManagement.Controllers
 
             return View(userViewModels);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitUserForm(UserViewModel viewModel)
@@ -76,6 +75,7 @@ namespace PKFAuditManagement.Controllers
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
                 ViewBag.Errors = errors;
+                TempData["ErrorMessage"] = "Invalid form submission. Please correct the errors and try again.";
                 return View("~/Views/Admin/CreateAccount.cshtml", viewModel);
             }
 
@@ -92,10 +92,13 @@ namespace PKFAuditManagement.Controllers
 
                     var defaultPassword = GenerateRandomPassword(); // Generate a random password
                     var result = await _userManager.CreateAsync(user, defaultPassword);
-                    //var result = await _userManager.CreateAsync(user, viewModel.UserName);
 
                     if (result.Succeeded)
                     {
+                        // Verify the password to ensure it's stored correctly
+                        var isPasswordValid = await _userManager.CheckPasswordAsync(user, defaultPassword);
+                        Console.WriteLine($"Is password valid after creation: {isPasswordValid}");
+
                         // You can add roles or any other operations here
                         await _userManager.AddToRoleAsync(user, viewModel.Role);
 
@@ -104,15 +107,18 @@ namespace PKFAuditManagement.Controllers
 
                         // Send email with the default password
                         await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been created",
-                            $"Your account has been created. Your temporary password is {defaultPassword}. Please change your password after logging in for the first time.");
+                            $"Your account has been created. Your temporary password is {defaultPassword}. " +
+                            $"Please change your password after logging in for the first time.");
 
                         await transaction.CommitAsync();
-                        return RedirectToAction("AccountManagement", "Admin");
+                        TempData["SuccessMessage"] = "Account created successfully!";
+                        return RedirectToAction("CreateAccount"); // Redirect to the same page
                     }
                     else
                     {
                         transaction.Rollback();
                         ViewBag.Errors = result.Errors;
+                        TempData["ErrorMessage"] = "Failed to create the account. Please try again.";
                         return View("~/Views/Admin/CreateAccount.cshtml", viewModel);
                     }
                 }
@@ -120,6 +126,7 @@ namespace PKFAuditManagement.Controllers
                 {
                     await transaction.RollbackAsync();
                     ViewBag.ErrorMessage = "An error occurred while processing your request. Please try again.";
+                    TempData["ErrorMessage"] = "An error occurred while processing your request. Please try again.";
                     return View("~/Views/Admin/CreateAccount.cshtml", viewModel);
                 }
             }
@@ -132,13 +139,13 @@ namespace PKFAuditManagement.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest("User ID cannot be null or empty.");
+                return Json(new { success = false, message = "User ID cannot be null or empty." });
             }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return NotFound("User not found.");
+                return Json(new { success = false, message = "User not found." });
             }
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
@@ -150,23 +157,22 @@ namespace PKFAuditManagement.Controllers
                     if (result.Succeeded)
                     {
                         await transaction.CommitAsync();
-                        return RedirectToAction("AccountManagement", "Admin");
+                        return Json(new { success = true, message = "User deleted successfully!" });
                     }
                     else
                     {
                         await transaction.RollbackAsync();
-                        ViewBag.Errors = result.Errors;
-                        return RedirectToAction("AccountManagement", "Admin");
+                        return Json(new { success = false, message = "Failed to delete the user. Please try again." });
                     }
                 }
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    ViewBag.ErrorMessage = "An error occurred while processing your request. Please try again.";
-                    return RedirectToAction("AccountManagement", "Admin");
+                    return Json(new { success = false, message = "An error occurred while processing your request. Please try again." });
                 }
             }
         }
+
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -204,13 +210,15 @@ namespace PKFAuditManagement.Controllers
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
                 ViewBag.Errors = errors;
+                TempData["ErrorMessage"] = "Invalid form submission. Please correct the errors and try again.";
                 return View("~/Views/Admin/EditAccount.cshtml", viewModel);
             }
 
             var user = await _userManager.FindByIdAsync(viewModel.UserId);
             if (user == null)
             {
-                return NotFound("User not found.");
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("EditAccount", new { id = viewModel.UserId });
             }
 
             user.UserName = viewModel.UserName;
@@ -223,11 +231,12 @@ namespace PKFAuditManagement.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, viewModel.Role);
-                viewModel.Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-                return RedirectToAction("AccountManagement", "Admin", new { viewModel });
+                TempData["SuccessMessage"] = "Account updated successfully!";
+                return RedirectToAction("EditAccount", new { id = viewModel.UserId });
             }
             else
             {
+                TempData["ErrorMessage"] = "Failed to update the account. Please try again.";
                 ViewBag.Errors = result.Errors;
                 return View("~/Views/Admin/EditAccount.cshtml", viewModel);
             }
@@ -235,21 +244,46 @@ namespace PKFAuditManagement.Controllers
 
         private string GenerateRandomPassword()
         {
-            var options = _userManager.Options.Password;
-            var password = new StringBuilder();
-            var random = new Random();
-
-            password.Append((char)random.Next(65, 91)); // Uppercase
-            password.Append((char)random.Next(97, 123)); // Lowercase
-            password.Append((char)random.Next(48, 58)); // Digit
-            password.Append((char)random.Next(33, 48)); // Special character
-
-            for (int i = 0; i < options.RequiredLength - 4; i++)
+            // Ensure this method generates a password that meets the complexity requirements
+            // Example: 8 characters long with uppercase, lowercase, digits, and special characters
+            var options = new PasswordOptions
             {
-                password.Append((char)random.Next(33, 126));
+                RequiredLength = 8,
+                RequiredUniqueChars = 1,
+                RequireDigit = true,
+                RequireLowercase = true,
+                RequireUppercase = true,
+                RequireNonAlphanumeric = true
+            };
+
+            string[] randomChars = new[] {
+                "ABCDEFGHJKLMNOPQRSTUVWXYZ",    // uppercase 
+                "abcdefghijkmnopqrstuvwxyz",    // lowercase
+                "0123456789",                   // digits
+                "!@$?_-"                        // non-alphanumeric
+            };
+
+            Random rand = new Random(Environment.TickCount);
+            List<char> chars = new List<char>();
+
+            chars.Insert(rand.Next(0, chars.Count),
+                randomChars[0][rand.Next(0, randomChars[0].Length)]);
+            chars.Insert(rand.Next(0, chars.Count),
+                randomChars[1][rand.Next(0, randomChars[1].Length)]);
+            chars.Insert(rand.Next(0, chars.Count),
+                randomChars[2][rand.Next(0, randomChars[2].Length)]);
+            chars.Insert(rand.Next(0, chars.Count),
+                randomChars[3][rand.Next(0, randomChars[3].Length)]);
+
+            for (int i = chars.Count; i < options.RequiredLength
+                || chars.Distinct().Count() < options.RequiredUniqueChars; i++)
+            {
+                string rcs = randomChars[rand.Next(0, randomChars.Length)];
+                chars.Insert(rand.Next(0, chars.Count),
+                    rcs[rand.Next(0, rcs.Length)]);
             }
 
-            return new string(password.ToString().OrderBy(c => random.Next()).ToArray());
+            return new string(chars.ToArray());
         }
 
     }

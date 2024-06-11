@@ -118,11 +118,30 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
+            // Remove the ForcePasswordChange claim after successfully changing the password
+            var forcePasswordChangeClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "ForcePasswordChange");
+            if (forcePasswordChangeClaim != null)
+            {
+                var result = await _userManager.RemoveClaimAsync(user, forcePasswordChangeClaim);
+                if (!result.Succeeded)
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return Page();
+                }
+            }
+
             await _signInManager.RefreshSignInAsync(user);
             _logger.LogInformation("User changed their password successfully.");
             StatusMessage = "Your password has been changed.";
 
+            // Set a flag to indicate success
+            TempData["PasswordChanged"] = true;
+
             return RedirectToPage();
         }
+
     }
 }

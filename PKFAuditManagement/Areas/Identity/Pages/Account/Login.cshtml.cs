@@ -116,29 +116,45 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+                // Log attempt to login
+                _logger.LogInformation($"Attempting to log in user: {Input.Email}");
+
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
-
+                    _logger.LogInformation("User logged in successfully.");
                     var user = await _userManager.FindByEmailAsync(Input.Email);
-                    var roles = await _userManager.GetRolesAsync(user);
 
-                    if (roles.Contains("Admin"))
+                    if (user != null)
                     {
-                        return LocalRedirect(Url.Content("~/Admin/AdminDashboard"));
-                    }
-                    else if (roles.Contains("User"))
-                    {
-                        return LocalRedirect(Url.Content("~/Home/Dashboard"));
+                        var roles = await _userManager.GetRolesAsync(user);
+
+                        // Check if the user has the ForcePasswordChange claim
+                        var claims = await _userManager.GetClaimsAsync(user);
+                        var forcePasswordChangeClaim = claims.FirstOrDefault(c => c.Type == "ForcePasswordChange");
+
+                        if (forcePasswordChangeClaim != null)
+                        {
+                            // Redirect to ChangePassword page
+                            return RedirectToPage("/Account/Manage/ChangePassword");
+                        }
+
+                        if (roles.Contains("Admin"))
+                        {
+                            return LocalRedirect(Url.Content("~/Admin/AdminDashboard"));
+                        }
+                        else if (roles.Contains("User"))
+                        {
+                            return LocalRedirect(Url.Content("~/Home/Dashboard"));
+                        }
                     }
 
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
                 {
+                    _logger.LogInformation("Two-factor authentication required.");
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
                 if (result.IsLockedOut)
@@ -148,6 +164,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    _logger.LogWarning($"Login failed for user: {Input.Email}. Invalid login attempt.");
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
@@ -156,5 +173,6 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
     }
 }

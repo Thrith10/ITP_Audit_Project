@@ -70,6 +70,34 @@
     </main><!-- End #main -->
     <!-- Password Toggle Script -->
     <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var successMessage = '@TempData["SuccessMessage"]';
+            var errorMessage = '@TempData["ErrorMessage"]';
+
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: successMessage,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("AccountManagement", "Admin")';
+                    }
+                });
+            }
+
+            if (errorMessage) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+
         function togglePassword(id) {
             var field = document.getElementById(id);
             var icon = field.nextElementSibling.querySelector('i');
