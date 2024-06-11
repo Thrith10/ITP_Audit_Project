@@ -61,7 +61,7 @@
                                             <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy">
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" value="@Model.UserEmail">
                                             <span asp-validation-for="PreparedBy" class="text-danger"></span>
                                         </div>
                                         <div class="col">
@@ -210,28 +210,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Is this a transnational entity (TNE)?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="TransnationalEntity">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-sm-2 col-form-label">If this is a transnational audit (TNA)?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input me-3" onchange="toggleTransnationalAuditRow()" type="checkbox" id="transnationalAuditCheckbox" asp-for="TransnationalAudit">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3" id="transnationalAuditRow" style="display: none;">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">
-                                            Comments for Transnational Audit
-                                        </label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <textarea class="form-control" id="transnationalAuditComment" rows="4" asp-for="TransnationalAuditComment"></textarea>
-                                        </div>
-                                    </div>
-
                                 </form>
 
                                 <!-- QC7SubForms Beginning -->
@@ -256,11 +234,10 @@
                                         <table class="table table-bordered table-striped">
                                             <thead class="table-light" style="background-color: #f8f9fa;">
                                                 <tr>
-                                                    <th class="text-left pl-3 text-uppercase" style="width: 50%;">Objectives and detailed tests</th>
-                                                    <th class="text-left text-uppercase">Ref</th>
+                                                    <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
                                                     <th class="text-left text-uppercase">Sign</th>
                                                     <th class="text-left text-uppercase">Date</th>
-                                                    <th class="text-left text-uppercase">Ref/Comment</th>
+                                                    <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -269,7 +246,7 @@
                                                     <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives.Index" value="@objective.QC7FormObjectiveID" />
 
                                                     <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                        <td colspan="5"><b>@objective.Objective</b></td>
+                                                        <td colspan="4"><b>@objective.Objective</b></td>
                                                     </tr>
                                                     @foreach (var testDescription in objective.TestDescriptions)
                                                     {
@@ -281,16 +258,13 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control" placeholder="Ref" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Reference" />
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignBy" />
+                                                                <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignBy" value="@Model.UserEmail"/>
                                                             </td>
                                                             <td>
                                                                 <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignDate" />
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment" />
+                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment"></textarea>
                                                             </td>
                                                         </tr>
                                                     }
@@ -386,31 +360,31 @@
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="EMPreparedBy">
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="EMPreparedBy" value="@Model.UserEmail">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate">
+                                        <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" id="inputText" asp-for="EPHODApprovedBy" placeholder="Engagement Partner / Head of Division">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Approved by:</label>
+                                        <input type="text" class="form-control" id="inputText" asp-for="EPHODApprovedBy" placeholder="Engagement Partner / Head of Division" disabled>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
+                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Final Approval by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" asp-for="MPHODQMPApprovedBy" id="inputText" placeholder="Managing Partner / Head of Division / Quality Management Partner">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Final Approval by:</label>
+                                        <input type="text" class="form-control" asp-for="MPHODQMPApprovedBy" id="inputText" placeholder="Managing Partner / Head of Division / Quality Management Partner" disabled>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate">
+                                        <label for="inputPassword3" class="col-form-label">Date:</label>
+                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" disabled>
                                     </div>
                                 </div>
                                 <h5 class="card-title"><u><i>Note</i></u></h5>

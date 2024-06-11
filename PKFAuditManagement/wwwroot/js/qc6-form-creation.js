@@ -1,32 +1,152 @@
+// Add event listener to the "Add Service" button
 document.getElementById('addService').addEventListener('click', addService);
 
-function addService() {
-    const serviceDiv = document.createElement('div');
-    serviceDiv.className = 'row mb-3 service input-field';
-    serviceDiv.innerHTML = `
-        <div class="col-sm-6">
-            <label>Nature of Service:</label>
-            <input type="text" name="nature_of_service[]" class="form-control">
-        </div>
-        <div class="col-sm-6">
-            <label>Fee:</label>
-            <input type="number" name="fee[]" step="0.01" class="form-control">
-        </div>
-    `;
-    document.getElementById('services').appendChild(serviceDiv);
+// Ensure input values are formatted to two decimal places on blur
+$(document).on("blur", "#auditFee, #EstimatedFee, #BudgetedTimeCost, input[name^='Services'][name$='.Fee']", function () {
+    var value = parseFloat($(this).val());
+    if (!isNaN(value)) {
+        $(this).val(convertToMoney(value));
+    }
+});
+
+// Function to round down to two decimal places
+function convertToMoney(val) {
+    return (Math.floor(val * 100).toFixed(0) / 100).toFixed(2);
 }
 
+// Function to add a new service field
+function addService() {
+    const servicesContainer = document.getElementById('services');
+    const lastServiceIndex = servicesContainer.children.length;
+
+    const serviceCard = document.createElement('div');
+    serviceCard.className = 'card border border-secondary p-3 mb-3';
+    serviceCard.innerHTML = `
+        <div class="row mb-3 service input-field card-body">
+            <h6 class="card-title">Service ${lastServiceIndex + 1}</h6>
+            <div class="col-sm-6">
+                <label>Nature of Service:</label>
+                <select class="form-control" name="Services[${lastServiceIndex}].NatureOfService" onchange="showOtherServiceInput(this)">
+                    <option value="Tax Services">Tax Services</option>
+                    <option value="Accounting">Accounting</option>
+                    <option value="Payroll">Payroll</option>
+                    <option value="Secretarial Services">Secretarial Services</option>
+                    <option value="Other Non-Audit Services">Other Non-Audit Services</option>
+                </select>
+            </div>
+            <div class="col-sm-6">
+                <label>Fee:</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control">
+                </div>
+            </div>
+            <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex}" style="display: none;">
+                <label>Name of Non-Audit Service</label>
+                <input type="text" name="Services[${lastServiceIndex}].OtherService" class="form-control">
+            </div>
+            <div class="col-sm-12 mt-3">
+                <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
+            </div>
+        </div>
+    `;
+
+    servicesContainer.appendChild(serviceCard);
+}
+
+// Function to display additional text field based on service field selection
+function showOtherServiceInput(selectElement) {
+    console.log(selectElement);
+    const selectedValue = selectElement.value;
+    const index = selectElement.name.split('[')[1].split(']')[0];
+    const otherServiceInput = document.getElementById(`otherServiceInput-${index}`);
+    console.log(otherServiceInput);
+    if (otherServiceInput) {
+        if (selectedValue === 'Other Non-Audit Services') {
+            otherServiceInput.style.display = 'block';
+        } else {
+            otherServiceInput.style.display = 'none';
+        }
+    }
+}
+
+// Function for removing service
+function removeService(button) {
+    // Find the parent card element
+    const card = button.closest('.card');
+    // Remove the card element
+    card.remove();
+
+    // Update indexes of remaining services
+    const servicesContainer = document.getElementById('services');
+    const serviceCards = servicesContainer.getElementsByClassName('card');
+    for (let i = 0; i < serviceCards.length; i++) {
+        const card = serviceCards[i];
+        const titleElement = card.querySelector('.card-title');
+        titleElement.textContent = `Service ${i + 1}`;
+
+        const inputs = serviceCards[i].getElementsByTagName('input');
+        for (let j = 0; j < inputs.length; j++) {
+            const name = inputs[j].getAttribute('name');
+            const newName = name.replace(/\[\d+\]/g, `[${i}]`);
+            inputs[j].setAttribute('name', newName);
+        }
+
+        const selects = serviceCards[i].getElementsByTagName('select');
+        for (let j = 0; j < selects.length; j++) {
+            const name = selects[j].getAttribute('name');
+            const newName = name.replace(/\[\d+\]/g, `[${i}]`);
+            selects[j].setAttribute('name', newName);
+        }
+
+        const otherServiceInputs = serviceCards[i].querySelectorAll('[id^="otherServiceInput-"]');
+        for (let j = 0; j < otherServiceInputs.length; j++) {
+            const input = otherServiceInputs[j];
+            input.id = `otherServiceInput-${i}`;
+        }
+    }
+}
+
+// Function for disabling all textareas and input on "Not Applicable" selection
+function toggleSubForm(subFormIndex) {
+    const checkbox = document.getElementById(`toggleSubForm${subFormIndex}`);
+    const hiddenInput = document.querySelector(`input[name="SubForm${subFormIndex}NotApplicable"]`);
+
+    hiddenInput.value = checkbox.checked ? 'true' : 'false';
+
+    const tableContainer = document.getElementById(`tableContainer${subFormIndex}`);
+    const inputs = tableContainer.getElementsByTagName('input');
+    const textareas = tableContainer.getElementsByTagName('textarea');
+
+    for (let i = 0; i < inputs.length; i++) {
+        inputs[i].disabled = !inputs[i].disabled;
+    }
+
+    for (let i = 0; i < textareas.length; i++) {
+        textareas[i].disabled = !textareas[i].disabled;
+    }
+}
+
+// Function to calculate the total fee and fee concentration
 function calculateTotalAndConcentration() {
-    const fees = document.getElementsByName('fee[]');
+    // Get all fee input elements
+    const fees = document.querySelectorAll('input[name^="Services["][name$="].Fee"]');
     let totalFee = 0;
+    // Calculate the total fee by summing up all fee values
     for (let fee of fees) {
         totalFee += parseFloat(fee.value) || 0;
     }
+    // Set the total fee in the corresponding input field
     document.getElementById('grandTotal').value = totalFee.toFixed(2);
+    document.getElementById('grandTotalHidden').value = totalFee.toFixed(2);
 
+    // Get the audit fee value
     const auditFee = parseFloat(document.getElementById('auditFee').value) || 0;
+    // Calculate the fee concentration
     const feeConcentration = totalFee / auditFee * 100;
+    // Set the fee concentration in the corresponding input field
     document.getElementById('feeConcentration').value = feeConcentration.toFixed(2);
+    document.getElementById('feeConcentrationHidden').value = feeConcentration.toFixed(2);
 }
 
 // Handles the change of selection for the TNE Form Assessment Dropdown Selection 
@@ -79,9 +199,9 @@ $(document).ready(function () {
     function updateBudgetedFeeRecoveryRate() {
         var estimatedFee = parseFloat($("#EstimatedFee").val());
         var budgetedTimeCost = parseFloat($("#BudgetedTimeCost").val());
-
         if (!isNaN(estimatedFee) && !isNaN(budgetedTimeCost) && budgetedTimeCost !== 0) {
-            var budgetedFeeRecoveryRate = (estimatedFee / budgetedTimeCost).toFixed(2);
+            var budgetedFeeRecoveryRate = (estimatedFee / budgetedTimeCost) * 100;
+            budgetedFeeRecoveryRate = budgetedFeeRecoveryRate.toFixed(2);
             $("#BudgetedFeeRecoveryRate").val(budgetedFeeRecoveryRate);
             $("#BudgetedFeeRecoveryRateHidden").val(budgetedFeeRecoveryRate);
         } else {
@@ -116,27 +236,10 @@ $(document).ready(function () {
         updateBudgetedFeeRecoveryRate();
     });
 
+
     // Initial update of Budgeted fee recovery rate
     updateBudgetedFeeRecoveryRate();
 });
-
-
-
-// Toggling checkbox for transnational audit displays the comment box
-function toggleTransnationalAuditRow() {
-    var transnationalAuditCheckbox = document.getElementById('transnationalAuditCheckbox');
-    var transnationalAuditRow = document.getElementById('transnationalAuditRow');
-    var transnationalAuditComment = document.getElementById('transnationalAuditComment');
-
-    if (transnationalAuditCheckbox.checked) {
-        transnationalAuditRow.style.display = '';
-        transnationalAuditComment.disabled = false;
-    } else {
-        transnationalAuditRow.style.display = 'none';
-        transnationalAuditComment.disabled = true;
-        transnationalAuditComment.value = '';
-    }
-}
 
 // Toggling checkbox for risk level displays the comment box
 function toggleRiskLevel() {

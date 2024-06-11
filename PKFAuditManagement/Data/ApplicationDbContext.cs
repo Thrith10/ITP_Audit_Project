@@ -19,6 +19,7 @@ namespace PKFAuditManagement.Data
         public DbSet<QC6FormTest> QC6FormTests { get; set; }
         public DbSet<QC6FormConclusion> QC6FormConclusions { get; set; }
         public DbSet<QC6FormTestDescription> QC6FormTestDescriptions { get; set; }
+        public DbSet<QC6FormFeeDetail> QC6FormFeeDetails { get; set; }
 
         // DbSets for QC7 Form
         public DbSet<QC7Form> QC7Forms { get; set; }
@@ -27,6 +28,11 @@ namespace PKFAuditManagement.Data
         public DbSet<QC7FormTest> QC7FormTests { get; set; }
         public DbSet<QC7FormConclusion> QC7FormConclusions { get; set; }
         public DbSet<QC7FormTestDescription> QC7FormTestDescriptions { get; set; }
+
+        // DbSets for TNA/TNE Assessment
+        public DbSet<TNATNEAssessment> TNATNEAssessments { get; set; }
+        public DbSet<TNATNESectionB> TNATNESectionB { get; set; }
+        public DbSet<TNATNESectionD> TNATNESectionD { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

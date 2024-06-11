@@ -5,7 +5,7 @@ $(document).ready(function () {
         var timeCosts = parseFloat($("#timeCosts").val());
 
         if (!isNaN(comp1) && !isNaN(timeCosts) && timeCosts !== 0) {
-            var priorYearRecoveryRate = (comp1 / timeCosts).toFixed(2);
+            var priorYearRecoveryRate = (comp1 / timeCosts) * 100;
             $("#PriorYearRecoveryRate").val(priorYearRecoveryRate);
             $("#PriorYearRecoveryRateHidden").val(priorYearRecoveryRate);
         } else {
@@ -19,7 +19,7 @@ $(document).ready(function () {
         var budgetedTimeCost = parseFloat($("#budgetedTimeCost").val());
 
         if (!isNaN(comp1) && !isNaN(budgetedTimeCost) && budgetedTimeCost !== 0) {
-            var proposedRecoveryRateCurrentYear = (comp1 / budgetedTimeCost).toFixed(2);
+            var proposedRecoveryRateCurrentYear = (comp1 / budgetedTimeCost) * 100;
             $("#proposedRecoveryRateCurrentYear").val(proposedRecoveryRateCurrentYear);
             $("#proposedRecoveryRateCurrentYearHidden").val(proposedRecoveryRateCurrentYear);
         } else {
@@ -111,22 +111,6 @@ function toggleRiskLevel() {
         riskLevelRow.style.display = 'none';
         riskLevel.disabled = true;
         riskLevel.value = '';
-    }
-}
-
-// Toggling checkbox for transnational audit displays the comment box
-function toggleTransnationalAuditRow() {
-    var transnationalAuditCheckbox = document.getElementById('transnationalAuditCheckbox');
-    var transnationalAuditRow = document.getElementById('transnationalAuditRow');
-    var transnationalAuditComment = document.getElementById('transnationalAuditComment');
-
-    if (transnationalAuditCheckbox.checked) {
-        transnationalAuditRow.style.display = '';
-        transnationalAuditComment.disabled = false;
-    } else {
-        transnationalAuditRow.style.display = 'none';
-        transnationalAuditComment.disabled = true;
-        transnationalAuditComment.value = '';
     }
 }
 

@@ -75,7 +75,7 @@
                                                     </a>
 
                                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                                        <li><a class="dropdown-item" href="#">View</a></li>
+                                                        <li><a class="dropdown-item" href="@Url.Action("ViewQC6Form", new { id = engagement.QC6FormID })">View</a></li>
                                                         <li><a class="dropdown-item" href="@Url.Action("EditQC6Form", new { id = engagement.QC6FormID })">Edit</a></li>
                                                         <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC6Form", new { id = engagement.QC6FormID })')">Delete</a></li>
                                                     </ul>

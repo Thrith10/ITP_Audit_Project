@@ -4,50 +4,34 @@
 <div class="justify-content-center">
     <main id="main" class="main">
         <div class="pagetitle">
-            <h1>Create Form QC6(3)</h1>
+            <h1>View Form QC6(3) - @Model.FileReference</h1>
         </div><!-- End Page Title -->
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">
-                    <form class="needs-validation" asp-action="SubmitQC6Form" asp-controller="QC6Form" method="post">
-                        <div class="row mb-3">
-                            @if (ViewBag.Errors != null)
-                            {
-                                <ul>
-                                    @foreach (var error in ViewBag.Errors)
-                                    {
-                                        <li>@error.ErrorMessage</li>
-                                    }
-                                </ul>
-                            }
-                            else if (ViewBag.ErrorMessage != null)
-                            {
-                                <span class="alert alert-danger">@ViewBag.ErrorMessage</span>
-                            }
-                        </div>
+                    <form>
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">New engagement / client acceptance checklist</h5>
-                                <span class="text-danger">* indicates a mandatory field</span> 
+                                <span class="text-danger">* indicates a mandatory field</span>
                                 <br><br>
                                 <form>
-                                    @Html.AntiForgeryToken()
                                     <div class="row mb-3">
                                         <label asp-for="ProspectiveClient" class="col-sm-2 col-form-label">Prospective Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ProspectiveClient" required>             
+                                            <input type="text" class="form-control" asp-for="ProspectiveClient" value="@Model.ProspectiveClient" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputEmail3" class="col-sm-2 col-form-label">Period Ended:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="date" class="form-control" asp-for="PeriodEnded" required>
+                                            <input type="date" class="form-control" asp-for="PeriodEnded" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label asp-for="EngagementType" class="col-sm-2 col-form-label">Type of Engagement:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="EngagementType" required>
+                                            <input type="text" class="form-control" asp-for="EngagementType" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -55,10 +39,10 @@
                                             <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" value="@Model.UserEmail" required>
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" disabled>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="PreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                                            <input type="date" class="form-control" asp-for="PreparedByDate" disabled>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -66,10 +50,10 @@
                                             <strong>Reviewed by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" asp-for="ReviewedBy">
+                                            <input type="text" class="form-control" asp-for="ReviewedBy" disabled>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                            <input type="date" class="form-control" asp-for="ReviewedByDate" disabled>
                                         </div>
                                     </div>
                                     <br>
@@ -78,34 +62,34 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Name of PKF entity proposing for the service<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="PKFEntityProposingService" required>
+                                            <input type="text" class="form-control" asp-for="PKFEntityProposingService" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Source of referral of prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="SourceOfReferral" required>
+                                            <input type="text" class="form-control" asp-for="SourceOfReferral" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Indicate the nature of service for estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="NatureOfServiceForEstimateFee" required>
+                                            <input type="text" class="form-control" asp-for="NatureOfServiceForEstimateFee" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -119,59 +103,59 @@
                                                 <input type="hidden" asp-for="BudgetedFeeRecoveryRate" id="BudgetedFeeRecoveryRateHidden" />
                                             </div>
                                         </div>
-                                    </div>        
+                                    </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="OutstandingUnpaidFees">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="OutstandingUnpaidFees" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Conflicts check done?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="ConflictsCheckDone">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="ConflictsCheckDone" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Type of activities of prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="TypeOfActivities" required>
+                                            <input type="text" class="form-control" asp-for="TypeOfActivities" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Complexity of engagement based on preliminary evaluation<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement" required>
+                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Predecessor Auditor</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="PredecessorAuditor">
+                                            <input type="text" class="form-control" asp-for="PredecessorAuditor" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" required>
+                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity">
+                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3" id="riskLevelRow" style="display:none;">
                                         <label class="col-sm-2 col-form-label">Type of PIE</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType">
+                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType" disabled>
                                                 <option value="Listed">Listed</option>
                                                 <option value="Financial Institution">Financial Institution</option>
                                                 <option value="Large Charity">Large Charity</option>
@@ -216,18 +200,17 @@
                                                 }
 
                                             </div>
-                                            <button type="button" class="btn btn-primary mb-3" id="addService">Add New Service</button>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="grandTotal" disabled>
-                                                    <input type="hidden" class="form-control" id="grandTotalHidden" asp-for="GrandTotal">
+                                                    <input type="number" class="form-control" id="grandTotal" asp-for="GrandTotal" disabled>
+                                                    <input type="hidden" class="form-control" id="grandTotalHidden">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" required>
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" disabled>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -236,17 +219,16 @@
                                                     <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="feeConcentration" disabled>
-                                                    <input type="hidden" id="feeConcentrationHidden" asp-for="FeeConcentration">
+                                                    <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration" disabled>
+                                                    <input type="hidden" id="feeConcentrationHidden">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
-                                            <button type="button" class="btn btn-primary mb-3" onclick="calculateTotalAndConcentration()">Calculate</button>
                                         </div>
                                     </div>
                                     <br>
                                     <hr class="my-4">
-                                    
+
                                     <div class="row mb-3" id="TNEForm">
                                         <div class="col-sm-12">
                                             <h5 class="card-title">Section B: TNA / TNE Assessment</h5>
@@ -259,7 +241,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-2 col-form-label">Is the engagement audit or non-audit?</label>
                                             <div class="col-sm-10 d-flex align-items-center">
-                                                <select class="form-control" id="engagementType" asp-for="TNATNEAssessment.SectionB.IsAudit">
+                                                <select class="form-control" id="engagementType" asp-for="TNATNEAssessment.SectionB.IsAudit" disabled>
                                                     <option value="Audit">Audit</option>
                                                     <option value="Non-Audit">Non-Audit</option>
                                                 </select>
@@ -276,11 +258,11 @@
                                                         <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions? (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" id="q1Yes" name="TNATNEAssessment.SectionB.Q1" value="true" @(Model.TNATNEAssessment.SectionB.Q1 == true ? "checked" : "")>
+                                                                <input class="form-check-input" type="radio" id="q1Yes" name="TNATNEAssessment.SectionB.Q1" value="true" @(Model.TNATNEAssessment.SectionB.Q1 == true ? "checked" : "") disabled>
                                                                 <label class="form-check-label" for="q1Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" id="q1No" name="TNATNEAssessment.SectionB.Q1" value="false" @(Model.TNATNEAssessment.SectionB.Q1 == false ? "checked" : "")>
+                                                                <input class="form-check-input" type="radio" id="q1No" name="TNATNEAssessment.SectionB.Q1" value="false" @(Model.TNATNEAssessment.SectionB.Q1 == false ? "checked" : "") disabled>
                                                                 <label class="form-check-label" for="q1No">No</label>
                                                             </div>
                                                         </td>
@@ -290,11 +272,11 @@
                                                         <td style="width: 45%;">Does the entity have listed (public) equity or debt? (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="true" @(Model.TNATNEAssessment.SectionB.Q2 == true ? "checked" : "") id="q2Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="true" @(Model.TNATNEAssessment.SectionB.Q2 == true ? "checked" : "") id="q2Yes" disabled>
                                                                 <label class="form-check-label" for="q2Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="false" @(Model.TNATNEAssessment.SectionB.Q2 == false ? "checked" : "") id="q2No">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="false" @(Model.TNATNEAssessment.SectionB.Q2 == false ? "checked" : "") id="q2No" disabled>
                                                                 <label class="form-check-label" for="q2No">No</label>
                                                             </div>
                                                         </td>
@@ -304,11 +286,11 @@
                                                         <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided? (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="true" @(Model.TNATNEAssessment.SectionB.Q3 == true ? "checked" : "") id="q3Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="true" @(Model.TNATNEAssessment.SectionB.Q3 == true ? "checked" : "") id="q3Yes" disabled>
                                                                 <label class="form-check-label" for="q3Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="false" @(Model.TNATNEAssessment.SectionB.Q3 == false ? "checked" : "") id="q3No">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="false" @(Model.TNATNEAssessment.SectionB.Q3 == false ? "checked" : "") id="q3No" disabled>
                                                                 <label class="form-check-label" for="q3No">No</label>
                                                             </div>
                                                         </td>
@@ -318,11 +300,11 @@
                                                         <td style="width: 45%;">Is the entity a significant component of a group which is a TNA (Only applies to AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="true" @(Model.TNATNEAssessment.SectionB.Q4 == true ? "checked" : "") id="q4Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="true" @(Model.TNATNEAssessment.SectionB.Q4 == true ? "checked" : "") id="q4Yes" disabled>
                                                                 <label class="form-check-label" for="q4Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="false" @(Model.TNATNEAssessment.SectionB.Q4 == false ? "checked" : "") id="q4No">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="false" @(Model.TNATNEAssessment.SectionB.Q4 == false ? "checked" : "") id="q4No" disabled>
                                                                 <label class="form-check-label" for="q4No">No</label>
                                                             </div>
                                                         </td>
@@ -332,11 +314,11 @@
                                                         <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country? (Applies to AUDIT & NON-AUDIT clients)</td>
                                                         <td style="width: 45%;">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="true" @(Model.TNATNEAssessment.SectionB.Q5 == true ? "checked" : "") id="q5Yes">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="true" @(Model.TNATNEAssessment.SectionB.Q5 == true ? "checked" : "") id="q5Yes" disabled>
                                                                 <label class="form-check-label" for="q5Yes">Yes</label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="false" @(Model.TNATNEAssessment.SectionB.Q5 == false ? "checked" : "") id="q5No">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="false" @(Model.TNATNEAssessment.SectionB.Q5 == false ? "checked" : "") id="q5No" disabled>
                                                                 <label class="form-check-label" for="q5No">No</label>
                                                             </div>
                                                         </td>
@@ -357,7 +339,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-2 col-form-label">Client entity is assessed as</label>
                                             <div class="col-sm-10 d-flex align-items-center">
-                                                <select class="form-control" asp-for="TNATNEAssessment.SectionCEvaluation">
+                                                <select class="form-control" asp-for="TNATNEAssessment.SectionCEvaluation" disabled>
                                                     <option value="TNA">TNA</option>
                                                     <option value="TNE">TNE</option>
                                                     <option value="Both a TNA and a TNE">Both a TNA and a TNE</option>
@@ -382,35 +364,35 @@
                                                         <th scope="row" style="width: 10%;">Q1</th>
                                                         <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions?</td>
                                                         <td style="width: 45%;">
-                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q1Comment">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q1Comment" disabled>
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q2</th>
                                                         <td style="width: 45%;">Does the entity have listed (public) equity or debt?</td>
                                                         <td style="width: 45%;">
-                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q2Comment">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q2Comment" disabled>
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q3</th>
                                                         <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided?</td>
                                                         <td style="width: 45%;">
-                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q3Comment">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q3Comment" disabled>
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q4</th>
                                                         <td style="width: 45%;">Is the entity a significant component of a group which is a TNA?</td>
                                                         <td style="width: 45%;">
-                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q4Comment">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q4Comment" disabled>
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row" style="width: 10%;">Q5</th>
                                                         <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country?</td>
                                                         <td style="width: 45%;">
-                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q5Comment">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q5Comment" disabled>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -467,13 +449,13 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignBy" value="@Model.UserEmail" required />
+                                                                <input type="text" class="form-control" placeholder="Signed By" value="@testDescription.SignBy" disabled />
                                                             </td>
                                                             <td>
-                                                                <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignDate" required />
+                                                                <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" disabled />
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment"></textarea>
+                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" value="@testDescription.Comment" disabled></textarea>
                                                             </td>
                                                         </tr>
                                                     }
@@ -489,28 +471,28 @@
                                     </div>
                                     subFormIndex++;
                                 }
-                               
+
                                 <h5 class="card-title">Conclusion</h5>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">
                                         Are there any significant risks associated with the acceptance of the engagement?<span class="text-danger"> *</span>
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input me-3" type="checkbox" onchange="toggleSignificantRisk()" id="significantRiskCheckbox" asp-for="AnySignificantRisk">
+                                        <input class="form-check-input me-3" type="checkbox" onchange="toggleSignificantRisk()" id="significantRiskCheckbox" asp-for="AnySignificantRisk" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3" id="significantRiskRow" style="display: none;">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">
-                                        Describe these risks and what safeguards are required to reduce these risks to an acceptable level before acceptance of this engagement.
+                                        Describe these risks and what safeguards are disabled to reduce these risks to an acceptable level before acceptance of this engagement.
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <textarea class="form-control" id="significantRiskComment" rows="4" asp-for="SignificantRiskComment"></textarea>
+                                        <textarea class="form-control" id="significantRiskComment" rows="4" asp-for="SignificantRiskComment" disabled></textarea>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">New engagement / *client risk rated as: <br> *See <a>Appendix 2</a> for categories of risks<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <select class="form-control" id="riskLevel" asp-for="NewEngagementRiskRating">
+                                        <select class="form-control" id="riskLevel" asp-for="NewEngagementRiskRating" disabled>
                                             <option value="Normal (N)">Normal (N)</option>
                                             <option value="Moderate (M)">Moderate (M)</option>
                                             <option value="High Risk (H1)">High Risk (H1)</option>
@@ -521,13 +503,13 @@
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Reason for the risk rating:<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="NewEngagementRiskRatingReason" required>
+                                        <input type="text" class="form-control" id="inputText" asp-for="NewEngagementRiskRatingReason" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Based on the risk rating above, the engagement should be subject to:<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <select class="form-control" id="safeguardReview" asp-for="EngagementSubjectedTo">
+                                        <select class="form-control" id="safeguardReview" asp-for="EngagementSubjectedTo" disabled>
                                             <option value="No safeguard review (N)">No safeguard review (N)</option>
                                             <option value="Full safeguard review (H1)">Full safeguard review (H1)</option>
                                             <option value="Focused safeguard review on opinion (H2)">Focused safeguard review on opinion (H2)</option>
@@ -538,13 +520,13 @@
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Name of safeguard reviewer assigned by Head of Division/Managing Partner/Quality Management Partner:<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewerAssigned" required>
+                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewerAssigned" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Should new engagement or client be accepted or rejected?<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <select class="form-control" id="engagementClientAcceptance" asp-for="IsNewEngagementAcceptance">
+                                        <select class="form-control" id="engagementClientAcceptance" asp-for="IsNewEngagementAcceptance" disabled>
                                             <option value="Accepted">Accepted</option>
                                             <option value="Rejected">Rejected</option>
                                         </select>
@@ -553,7 +535,7 @@
                                 <div class="row mb-3">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">Should suspicious transaction report (“STR”) be filed with CAD for the prospective client<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input me-3" type="checkbox" onchange="toggleRationaleSTR()" id="strCheckbox" asp-for="IsSuspiciousTransactionReportFiled">
+                                        <input class="form-check-input me-3" type="checkbox" onchange="toggleRationaleSTR()" id="strCheckbox" asp-for="IsSuspiciousTransactionReportFiled" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3" id="rationaleSTRRow" style="display: none;">
@@ -567,17 +549,17 @@
                                 <div class="row mb-3">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">Having considered the objectives above, I am satisfied that we should accept the engagement subject to approval by the Managing Partner/Quality Management Partner/Head of Division<span class="text-danger"> *</span> </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" required>
+                                        <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy" value="@Model.UserEmail" required>
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -585,12 +567,7 @@
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">To be approved by:</span>
                                         </label>
-                                        <select asp-for="EPHODApprovedBy" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        <input type="text" class="form-control" id="inputText" value="@Model.EPHODApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
@@ -602,12 +579,7 @@
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">To be approved by:</span>
                                         </label>
-                                        <select asp-for="MPHODQMPApprovedBy" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        <input type="text" class="form-control" id="inputText" value="@Model.MPHODQMPApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:</label>
@@ -617,8 +589,8 @@
                                 <h5 class="card-title"><u><i>Notes</i></u></h5>
                                 <p>
                                     <i>
-                                        To enable the authorized person to approve, the following are the minimum documentation required to be submitted together with this Form:
-                                        <br> &ensp;(a) Company BizFile search (full search is not required for a newly incorporated company or a company that is dormant)
+                                        To enable the authorized person to approve, the following are the minimum documentation disabled to be submitted together with this Form:
+                                        <br> &ensp;(a) Company BizFile search (full search is not disabled for a newly incorporated company or a company that is dormant)
                                         <br> &ensp;(b) Screening of directors and ultimate beneficial owners owning more than 25% of the ultimate holding company using LexisNexis
                                         <br> &ensp;(c) Notes of meeting(s) or communications with the management of the prospective client or persons knowledgeable about the prospect or notes written in QC6(3)
                                         <br> &ensp;(d) Financial information if available
@@ -632,7 +604,7 @@
                                     </i>
                                 </p>
                                 <div class="text-center">
-                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC6 Form</button>
+                                    <a class="btn btn-primary" href="javascript:history.back()">Back</a>
                                 </div>
                             </div>
                         </div>
@@ -703,6 +675,5 @@
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
     <script src="~/js/qc6-form-creation.js"></script>
 }
