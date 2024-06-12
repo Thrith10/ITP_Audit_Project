@@ -8,7 +8,7 @@ namespace PKFAuditManagement.Util
         public static string GenerateQCFormFileReference()
         {
             const string prefix = "FREF";
-            const int digitsLength = 6;
+            const int digitsLength = 9;
             const string digits = "0123456789";
 
             Random random = new Random();

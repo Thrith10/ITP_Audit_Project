@@ -14,7 +14,7 @@ namespace PKFAuditManagement.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Non-Auditor,User")]
         public IActionResult Dashboard()
         {
             return View("~/Views/General/Home/Dashboard.cshtml");
