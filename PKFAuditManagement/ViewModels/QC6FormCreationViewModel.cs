@@ -17,8 +17,8 @@ namespace PKFAuditManagement.ViewModels
         public string? UserEmail { get; set; }
 
         // Start of QC6Form data
-        [Required]
         public string? FileReference { get; set; }
+        [Required]
         public string? ProspectiveClient { get; set; }
         public DateTime? PeriodEnded { get; set; }
         [Required]

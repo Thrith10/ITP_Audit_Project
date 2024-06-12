@@ -37,6 +37,12 @@ namespace PKFAuditManagement.Controllers
             }
             var userId = user?.Id;
 
+            if (TempData.ContainsKey("ToastMessage"))
+            {
+                string toastMessage;
+                toastMessage = TempData["ToastMessage"].ToString();
+            }
+
             // Retrieve engagement data from database
             var qc6forms = _context.QC6Forms.Where(e => e.CreatedBy.Equals(userId)).ToList();
             return View("~/Views/General/QC6/QC6FormManagement.cshtml", qc6forms);
@@ -262,6 +268,12 @@ namespace PKFAuditManagement.Controllers
                     // Get the current user's ID
                     var userId = user?.Id;
 
+                    // Re-validate form inputs for QC6 Form
+                    if (viewModel.IsPublicInterestEntity == true)
+                    {
+                        viewModel.PublicInterestEntityType = null;
+                    }
+
                     // Save viewModel data to QC6Form
                     var qc6form = new QC6Form
                     {
@@ -435,6 +447,10 @@ namespace PKFAuditManagement.Controllers
                     _context.SaveChanges();
 
                     transaction.Commit();
+
+                    // Set the success message for the toast notification
+                    TempData["ToastMessage"] = "QC6 Form created successfully.";
+
                     if (roles.Contains("Admin"))
                     {
                         // Redirect to admin-specific page

@@ -32,6 +32,7 @@
                                     <th>Prospective Client</th>
                                     <th>Period Ended</th>
                                     <th>Type of Engagement</th>
+                                    <th>Prepared By</th>
                                     <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -49,6 +50,7 @@
                                             <td>@engagement.ProspectiveClient</td>
                                             <td>@engagement.PeriodEnded</td>
                                             <td>@engagement.EngagementType</td>
+                                            <td>@engagement.PreparedBy</td>
                                             <td>@engagement.FormSubmissionDate</td>
                                             <td>
                                                 @if (engagement.Status == "Pending")
@@ -101,6 +103,8 @@
         </div>
     </section>
 </main><!-- End #main -->
+
+<div id="toastMessage" data-message="@TempData["ToastMessage"]"></div>
 
 @section Scripts {
     <script src="~/js/qc6-form-management-user.js"></script>

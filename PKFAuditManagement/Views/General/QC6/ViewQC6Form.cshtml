@@ -98,9 +98,8 @@
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="BudgetedFeeRecoveryRate" disabled>
+                                                <input type="text" class="form-control" id="BudgetedFeeRecoveryRate" asp-for="BudgetedFeeRecoveryRate" disabled>
                                                 <span class="input-group-text">%</span>
-                                                <input type="hidden" asp-for="BudgetedFeeRecoveryRate" id="BudgetedFeeRecoveryRateHidden" />
                                             </div>
                                         </div>
                                     </div>
@@ -176,7 +175,7 @@
                                                             </div>
                                                             <div class="col-sm-6">
                                                                 <label>Nature of Service:</label>
-                                                                <select class="form-control" asp-for="Services[i].NatureOfService" onchange="showOtherServiceInput(this)">
+                                                                <select class="form-control" asp-for="Services[i].NatureOfService" onchange="showOtherServiceInput(this)" disabled>
                                                                     <option value="Tax Services">Tax Services</option>
                                                                     <option value="Accounting">Accounting</option>
                                                                     <option value="Payroll">Payroll</option>
@@ -188,23 +187,24 @@
                                                                 <label>Fee:</label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
-                                                                    <input asp-for="Services[i].Fee" class="form-control" />
+                                                                    <input asp-for="Services[i].Fee" class="form-control" disabled/>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
-                                                                <label>Name of Non-Audit Service</label>
-                                                                <input type="text" name="Services[@i].OtherService" class="form-control">
-                                                            </div>
+                                                            @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
+                                                            {
+                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i">
+                                                                    <label>Name of Non-Audit Service</label>
+                                                                    <input type="text" class="form-control" asp-for="Services[i].OtherService" disabled>
+                                                                </div>
+                                                            }
                                                         </div>
                                                     </div>
                                                 }
-
                                             </div>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
                                                 <div class="col-sm-10 d-flex align-items-center">
                                                     <input type="number" class="form-control" id="grandTotal" asp-for="GrandTotal" disabled>
-                                                    <input type="hidden" class="form-control" id="grandTotalHidden">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -220,7 +220,6 @@
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
                                                     <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration" disabled>
-                                                    <input type="hidden" id="feeConcentrationHidden">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
@@ -413,17 +412,30 @@
                                     <!-- Checkbox for hiding/showing the table -->
                                     @if (subFormIndex == 1 || subFormIndex == 2)
                                     {
-                                        <div class="form-check mb-3">
-                                            <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
-                                            <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" onclick="toggleSubForm(@subFormIndex)">
-                                            <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
-                                                Not Applicable
-                                            </label>
-                                        </div>
+                                        @if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable))
+                                        {
+                                            <div class="form-check mb-3">
+                                                <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" checked disabled>
+                                                <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                    Not Applicable
+                                                </label>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="form-check mb-3">
+                                                <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" disabled>
+                                                <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                    Not Applicable
+                                                </label>
+                                            </div>
+                                        }
                                     }
-                                    <div class="table-responsive" id="tableContainer@(subFormIndex)">
+                                    <div class="table-responsive" id="tableContainer@(subFormIndex)"@if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable)){<text> style="display:none;"</text>}>
                                         <table class="table table-bordered table-striped">
-                                            <thead class="table-light" style="background-color: #f8f9fa;">
+                                            <thead class="table-light" style="background-color: #f8f9fa;">  
                                                 <tr>
                                                     <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
                                                     <th class="text-left text-uppercase">Sign</th>
@@ -455,7 +467,7 @@
                                                                 <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" disabled />
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" value="@testDescription.Comment" disabled></textarea>
+                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" disabled>@testDescription.Comment</textarea>
                                                             </td>
                                                         </tr>
                                                     }
@@ -543,7 +555,7 @@
                                         If yes, please set out the rationale and basis for STR. If in doubt, please seek advice from legal counsel after discussing with Managing Partner and /or Quality Management Partner.
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <textarea class="form-control" id="rationaleSTRRowInput" rows="4" asp-for="SuspiciousTransactionReportFiledRationale"></textarea>
+                                        <textarea class="form-control" id="rationaleSTRRowInput" rows="4" asp-for="SuspiciousTransactionReportFiledRationale" disabled></textarea>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -675,5 +687,5 @@
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 @section Scripts {
-    <script src="~/js/qc6-form-creation.js"></script>
+    <script src="~/js/qc6-form-view.js"></script>
 }
