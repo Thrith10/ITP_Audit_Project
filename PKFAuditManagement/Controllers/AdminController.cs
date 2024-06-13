@@ -286,5 +286,11 @@ namespace PKFAuditManagement.Controllers
             return new string(chars.ToArray());
         }
 
+        [Authorize(Roles = "Admin")]
+        public IActionResult GenerateReport()
+        {
+            return View();
+        }
+
     }
 }
