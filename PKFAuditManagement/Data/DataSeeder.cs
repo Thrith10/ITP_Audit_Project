@@ -354,6 +354,16 @@ namespace PKFAuditManagement.Data
                        Description = "<p><b>When deciding on whether or not to continue with an audit or review engagement:</b><br><br>Consider changes that may alter the original assessment of the acceptability of the client and engagement, including network firm independence.<br><br><i>Examples of changes that shall cause a careful reconsideration are:<ul><li>a significant change in the size, structure or nature of the client's business;</li><li>a major change in the ownership or management of the client; and</li><li>new regulatory reporting requirements.</li></ul></i><br>Network conflict checking shall require direct enquiry of the client management to determine whether there were any:<ul><li>changes in the controlling ownership interests over the entity;</li><li>changes in any controlling interests held by the entity;</li><li>new listings in the group;</li><li>any known change in service providers that may impact independence; or</li><li>changes in classification of the entity as public interest.</li></ul><br>Any such changes will require reconsideration of the relevant firm and network conflict checking procedures as outlined under acceptance above.</p>\r\n"
                    }
              );
+
+            modelBuilder.Entity<QC35FormTestDescription>().HasData(
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 1, QC35FormID = 1, Description = "No. of working paper files" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 2, QC35FormID = 1, Description = "Working papers are transferred from arch files to paper files" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 3, QC35FormID = 1, Description = "Working paper files are numbered sequentially" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 4, QC35FormID = 1, Description = "All working papers in each file is complete (Manager to initial all working papers)" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 5, QC35FormID = 1, Description = "Date of Audit Report" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 6, QC35FormID = 1, Description = "Date of approval of files for archival is within 60 days from date of Audit Report" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 7, QC35FormID = 1, Description = "Date of approval and confirmation that CaseWare Audit files has been locked down within 60 days from the date of the Audit Report (if applicable). Refer to the screenshot of CaseWare below." }
+            );
         }
     }
 }
