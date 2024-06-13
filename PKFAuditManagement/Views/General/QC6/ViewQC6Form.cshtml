@@ -1,5 +1,16 @@
-﻿@using PKFAuditManagement.ViewModels
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<CustomUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+    var role = roles.Any() ? roles[0] : null;
+}
+
+@using PKFAuditManagement.ViewModels
 @model QC6FormCreationViewModel
+
 
 <div class="justify-content-center">
     <main id="main" class="main">
@@ -617,6 +628,11 @@
                                 </p>
                                 <div class="text-center">
                                     <a class="btn btn-primary" href="javascript:history.back()">Back</a>
+                                    @if (role == "Admin")
+                                    {
+                                        <button class="btn btn-success">Approve</button>
+                                        <button class="btn btn-danger">Reject</button>
+                                    }
                                 </div>
                             </div>
                         </div>

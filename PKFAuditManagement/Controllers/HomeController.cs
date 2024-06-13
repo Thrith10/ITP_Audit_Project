@@ -19,6 +19,10 @@ namespace PKFAuditManagement.Controllers
         {
             return View("~/Views/General/Home/Dashboard.cshtml");
         }
+        public IActionResult SampleDashboard()
+        {
+            return View("~/Views/General/Home/SampleDashboard.cshtml");
+        }
         public IActionResult Login()
         {
             return View("~/Views/General/Home/Login.cshtml");

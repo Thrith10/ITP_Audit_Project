@@ -51,15 +51,16 @@ namespace PKFAuditManagement.Controllers
         [Authorize(Roles = "User,Non-Auditor,Admin")]
         public async Task<IActionResult> EditQC6Form(int id)
         {
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+
             try
             {
-                // Get the current user's ID
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
                 var userId = user.Id;
 
                 // Get the selected QC6 Form
@@ -182,22 +183,32 @@ namespace PKFAuditManagement.Controllers
             }
             catch
             {
-                return RedirectToAction("QC6FormManagement");
+                if (roles.Contains("Admin"))
+                {
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC6FormApprovalManagement");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC6FormManagement");
+                }
             }
         }
 
         [Authorize(Roles = "User,Non-Auditor,Admin")]
         public async Task<IActionResult> ViewQC6Form(int id)
         {
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+
             try
             {
-                // Get the current user's ID
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
                 var userId = user.Id;
 
                 // Get the selected QC6 Form
@@ -320,7 +331,16 @@ namespace PKFAuditManagement.Controllers
             }
             catch
             {
-                return RedirectToAction("QC6FormManagement");
+                if (roles.Contains("Admin"))
+                {
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC6FormApprovalManagement");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC6FormManagement");
+                }
             }
         }
 
@@ -340,11 +360,40 @@ namespace PKFAuditManagement.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult QC6FormApprovalManagement()
+        public async Task<IActionResult> QC6FormApprovalManagement()
         {
             // Retrieve engagement data from database
             var qc6forms = _context.QC6Forms.ToList();
-            return View("~/Views/General/QC6/QC6FormApprovalManagement.cshtml", qc6forms);
+
+            // Retrieve user email
+            var userEmail = await _userService.GetUserEmailAsync(User);
+
+            // Retrieve QC6FormConclusions where user is the first approver
+            var qc6FormConclusionsFirstApprover = _context.QC6FormConclusions
+                                        .Where(c => c.EPHODApprovedBy == userEmail)
+                                        .Join(_context.QC6Forms,
+                                            conclusion => conclusion.QC6FormID,
+                                            form => form.QC6FormID,
+                                            (conclusion, form) => new QC6FormCombinedViewModel { Conclusion = conclusion, Form = form })
+                                        .ToList();
+
+            // Retrieve QC6FormConclusions where user is the second approver
+            var qc6FormConclusionsSecondApprover = _context.QC6FormConclusions
+                                        .Where(c => c.MPHODQMPApprovedBy == userEmail)
+                                        .Join(_context.QC6Forms,
+                                            conclusion => conclusion.QC6FormID,
+                                            form => form.QC6FormID,
+                                            (conclusion, form) => new QC6FormCombinedViewModel { Conclusion = conclusion, Form = form })
+                                        .ToList();
+
+            var viewModel = new QC6FormAdminManagementViewModel
+            {
+                FirstApproverConclusions = qc6FormConclusionsFirstApprover,
+                SecondApproverConclusions = qc6FormConclusionsSecondApprover,
+                AllQC6Forms = qc6forms
+            };
+
+            return View("~/Views/General/QC6/QC6FormApprovalManagement.cshtml", viewModel);
         }
 
         [Authorize(Roles = "Admin")]
