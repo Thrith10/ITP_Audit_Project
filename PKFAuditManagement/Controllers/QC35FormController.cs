@@ -259,46 +259,57 @@ namespace PKFAuditManagement.Controllers
                         return NotFound();
                     }
 
-                    // Update the QC35Form fields
-                    qc35Form.AuditFirmName = viewModel.AuditFirmName;
-                    qc35Form.ClientName = viewModel.ClientName;
-                    qc35Form.ReportingYearEnd = viewModel.ReportingYearEnd;
-                    qc35Form.PartnerName = viewModel.PartnerName;
-                    qc35Form.PartnerInitial = viewModel.PartnerInitial;
-                    qc35Form.PartnerDate = viewModel.PartnerDate;
-                    qc35Form.AuditStaffName = viewModel.AuditStaffName;
-                    qc35Form.AuditStaffInitial = viewModel.AuditStaffInitial;
-                    qc35Form.AuditDate = viewModel.AuditDate;
-                    qc35Form.AdminStaffName = viewModel.AdminStaffName;
-                    qc35Form.AdminStaffInitial = viewModel.AdminStaffInitial;
-                    qc35Form.AdminDate = viewModel.AdminDate;
+                    // Check if the request is a PUT operation
+                    var isPutRequest = Request.Method.Equals(HttpMethod.Put.ToString(), StringComparison.OrdinalIgnoreCase)
+                   || Request.Form.ContainsKey("_method") && string.Equals(Request.Form["_method"], "PUT", StringComparison.OrdinalIgnoreCase);
 
-                    // Update the ChecklistItems
-                    foreach (var item in viewModel.ChecklistItems)
+
+                    // Update the QC35Form fields based on the request method
+                    if (isPutRequest)
                     {
-                        var checklistItem = qc35Form.ChecklistItems
-                            .FirstOrDefault(ci => ci.QC35ChecklistItemID == item.QC35ChecklistItemID);
 
-                        if (checklistItem != null)
+                        // Update the QC35Form fields
+                        qc35Form.AuditFirmName = viewModel.AuditFirmName;
+                        qc35Form.ClientName = viewModel.ClientName;
+                        qc35Form.ReportingYearEnd = viewModel.ReportingYearEnd;
+                        qc35Form.PartnerName = viewModel.PartnerName;
+                        qc35Form.PartnerInitial = viewModel.PartnerInitial;
+                        qc35Form.PartnerDate = viewModel.PartnerDate;
+                        qc35Form.AuditStaffName = viewModel.AuditStaffName;
+                        qc35Form.AuditStaffInitial = viewModel.AuditStaffInitial;
+                        qc35Form.AuditDate = viewModel.AuditDate;
+                        qc35Form.AdminStaffName = viewModel.AdminStaffName;
+                        qc35Form.AdminStaffInitial = viewModel.AdminStaffInitial;
+                        qc35Form.AdminDate = viewModel.AdminDate;
+
+                        // Update the ChecklistItems
+                        foreach (var item in viewModel.ChecklistItems)
                         {
-                            checklistItem.Description = item.Description;
-                            checklistItem.Response = item.Response;
-                            checklistItem.ManagerInitial = item.ManagerInitial;
-                            checklistItem.PartnerInitial = item.PartnerInitial;
-                        }
-                        else
-                        {
-                            // Add new ChecklistItem if it doesn't exist
-                            qc35Form.ChecklistItems.Add(new QC35ChecklistItem
+                            var checklistItem = qc35Form.ChecklistItems
+                                .FirstOrDefault(ci => ci.QC35ChecklistItemID == item.QC35ChecklistItemID);
+
+                            if (checklistItem != null)
                             {
-                                Description = item.Description,
-                                Response = item.Response,
-                                ManagerInitial = item.ManagerInitial,
-                                PartnerInitial = item.PartnerInitial
-                            });
+                                checklistItem.Description = item.Description;
+                                checklistItem.Response = item.Response;
+                                checklistItem.ManagerInitial = item.ManagerInitial;
+                                checklistItem.PartnerInitial = item.PartnerInitial;
+                            }
+                            else
+                            {
+                                // Add new ChecklistItem if it doesn't exist
+                                qc35Form.ChecklistItems.Add(new QC35ChecklistItem
+                                {
+                                    Description = item.Description,
+                                    Response = item.Response,
+                                    ManagerInitial = item.ManagerInitial,
+                                    PartnerInitial = item.PartnerInitial
+                                });
+                            }
                         }
                     }
-
+                
+                    
                     _context.QC35Forms.Update(qc35Form);
                     await _context.SaveChangesAsync();
 

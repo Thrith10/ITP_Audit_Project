@@ -1,4 +1,5 @@
 ﻿@model PKFAuditManagement.ViewModels.QC35FormViewModel
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
 
 <div class="justify-content-center">
     <main id="main" class="main">
@@ -28,8 +29,12 @@
                                 <span class="text-danger">* indicates a mandatory field</span>
                                 <br><br>
                                 @Html.AntiForgeryToken()
+                                <input type="hidden" name="_method" value="PUT" /> <!-- Add this line -->
+
                                 <!-- Hidden input for QC35FormID -->
-                                <input type="hidden" asp-for="QC35FormID" />
+                                <input type="hidden" asp-for="QC35FormID"/>
+                                <!-- Hidden input for _method to support PUT operation -->
+
                                 <div class="form-group">
                                     <label asp-for="AuditFirmName">Audit Firm Name:<span class="text-danger"> *</span></label>
                                     <div class="input-group">
