@@ -32,7 +32,7 @@ namespace PKFAuditManagement
                             context.Response.Redirect("/Admin/AdminDashboard");
                             return;
                         }
-                        else if (roles.Contains("User"))
+                        else
                         {
                             context.Response.Redirect("/Home/Dashboard");
                             return;

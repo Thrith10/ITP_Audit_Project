@@ -38,7 +38,7 @@ function addService() {
                 <label>Fee:</label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control">
+                    <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control" required>
                 </div>
             </div>
             <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex}" style="display: none;">
@@ -253,7 +253,6 @@ function toggleRiskLevel() {
     } else {
         riskLevelRow.style.display = 'none';
         riskLevel.disabled = true;
-        riskLevel.value = '';
     }
 }
 

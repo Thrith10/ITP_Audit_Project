@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.Services;
@@ -9,6 +11,7 @@ using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
 using System.Data;
 using System.Globalization;
+using System.Text;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -26,7 +29,7 @@ namespace PKFAuditManagement.Controllers
             _roleManager = roleManager;
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Non-Auditor,User")]
         public async Task<IActionResult> QC6FormManagement()
         {
             // Get the current user's ID
@@ -37,23 +40,30 @@ namespace PKFAuditManagement.Controllers
             }
             var userId = user?.Id;
 
+            if (TempData.ContainsKey("ToastMessage"))
+            {
+                string toastMessage;
+                toastMessage = TempData["ToastMessage"].ToString();
+            }
+
             // Retrieve engagement data from database
             var qc6forms = _context.QC6Forms.Where(e => e.CreatedBy.Equals(userId)).ToList();
             return View("~/Views/General/QC6/QC6FormManagement.cshtml", qc6forms);
         }
 
-        [Authorize(Roles = "User,Admin")]
-        public async Task<IActionResult> ViewQC6Form(int id)
+        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        public async Task<IActionResult> EditQC6Form(int id)
         {
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+
             try
             {
-                // Get the current user's ID
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
                 var userId = user.Id;
 
                 // Get the selected QC6 Form
@@ -104,6 +114,159 @@ namespace PKFAuditManagement.Controllers
                 }
 
                 // Append new data for QC6Form General Portion
+                viewModel.Status = qc6formData.Status;
+                viewModel.RejectionReason = qc6formData.RejectionReason;
+                viewModel.FileReference = qc6formData.FileReference;
+                viewModel.ProspectiveClient = qc6formData.ProspectiveClient;
+                viewModel.PeriodEnded = qc6formData.PeriodEnded;
+                viewModel.EngagementType = qc6formData.EngagementType;
+                viewModel.PreparedBy = qc6formData.PreparedBy;
+                viewModel.PreparedByDate = qc6formData.PreparedByDate;
+                viewModel.ReviewedBy = qc6formData.ReviewedBy;
+                viewModel.ReviewedByDate = qc6formData.ReviewedByDate.Value;
+                viewModel.PKFEntityProposingService = qc6formData.PKFEntityProposingService;
+                viewModel.SourceOfReferral = qc6formData.SourceOfReferral;
+                viewModel.NatureOfServiceForEstimateFee = qc6formData.NatureOfServiceForEstimateFee;
+                viewModel.EstimatedFee = qc6formData.EstimatedFee;
+                viewModel.BudgetedTimeCost = qc6formData.BudgetedTimeCost;
+                viewModel.BudgetedFeeRecoveryRate = qc6formData.BudgetedFeeRecoveryRate;
+                viewModel.OutstandingUnpaidFees = qc6formData.OutstandingUnpaidFees;
+                viewModel.GrandTotal = qc6formData.GrandTotal;
+                viewModel.AuditFee = qc6formData.AuditFee;
+                viewModel.FeeConcentration = qc6formData.FeeConcentration;
+                viewModel.ConflictsCheckDone = qc6formData.ConflictsCheckDone;
+                viewModel.TypeOfActivities = qc6formData.TypeOfActivities;
+                viewModel.ComplexityOfEngagement = qc6formData.ComplexityOfEngagement;
+                viewModel.PredecessorAuditor = qc6formData.PredecessorAuditor;
+                viewModel.ReasonsForDiscontinuance = qc6formData.ReasonsForDiscontinuance;
+                viewModel.IsPublicInterestEntity = qc6formData.PublicInterestEntity;
+                viewModel.PublicInterestEntityType = qc6formData.PublicInterestEntityType;
+                viewModel.SubForm1NotApplicable = qc6formData.IsSubForm2NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                viewModel.SubForm2NotApplicable = qc6formData.IsSubForm3NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+
+                // Append ConclusionData for QC6FormConclusion
+                viewModel.AnySignificantRisk = conclusionData.AnySignificantRisk;
+                viewModel.SignificantRiskComment = conclusionData.SignificantRiskComment;
+                viewModel.NewEngagementRiskRating = conclusionData.NewEngagementRiskRating;
+                viewModel.NewEngagementRiskRatingReason = conclusionData.NewEngagementRiskRatingReason;
+                viewModel.EngagementSubjectedTo = conclusionData.EngagementSubjectedTo;
+                viewModel.SafeguardReviewerAssigned = conclusionData.SafeguardReviewerAssigned;
+                viewModel.IsNewEngagementAcceptance = conclusionData.IsNewEngagementAcceptance;
+                viewModel.IsSuspiciousTransactionReportFiled = conclusionData.IsSuspiciousTransactionReportFiled;
+                viewModel.SuspiciousTransactionReportFiledRationale = conclusionData.SuspiciousTransactionReportFiledRationale;
+                viewModel.Satisfaction = conclusionData.Satisfaction;
+                viewModel.ConclusionPreparedBy = conclusionData.PreparedBy;
+                viewModel.ConclusionPreparedByDate = conclusionData.PreparedByDate;
+                viewModel.EPHODApprovedBy = conclusionData.EPHODApprovedBy;
+                viewModel.MPHODQMPApprovedBy = conclusionData.MPHODQMPApprovedBy;
+
+                // Append TNATNEAssessment data for TNATNEAssessmentViewModel
+                viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
+                viewModel.TNATNEAssessment.SectionB.IsAudit = tnaTNESectionBData.IsAudit;
+                viewModel.TNATNEAssessment.SectionB.Q1 = tnaTNESectionBData.Q1;
+                viewModel.TNATNEAssessment.SectionB.Q2 = tnaTNESectionBData.Q2;
+                viewModel.TNATNEAssessment.SectionB.Q3 = tnaTNESectionBData.Q3;
+                viewModel.TNATNEAssessment.SectionB.Q4 = tnaTNESectionBData.Q4;
+                viewModel.TNATNEAssessment.SectionB.Q5 = tnaTNESectionBData.Q5;
+                viewModel.TNATNEAssessment.SectionD.Q1Comment = tnaTNESectionDData.Q1Comment;
+                viewModel.TNATNEAssessment.SectionD.Q2Comment = tnaTNESectionDData.Q2Comment;
+                viewModel.TNATNEAssessment.SectionD.Q3Comment = tnaTNESectionDData.Q3Comment;
+                viewModel.TNATNEAssessment.SectionD.Q4Comment = tnaTNESectionDData.Q4Comment;
+                viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
+
+                // Append FeeDetail data for Services
+                foreach (var feeDetail in feeDetailData)
+                {
+                    viewModel.Services.Add(new FeeDetailViewModel
+                    {
+                        NatureOfService = feeDetail.NatureOfService,
+                        OtherService = feeDetail.OtherService,
+                        Fee = feeDetail.Fee
+                    });
+                }
+                return View("~/Views/General/QC6/EditQC6Form.cshtml", viewModel);
+            }
+            catch
+            {
+                if (roles.Contains("Admin"))
+                {
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC6FormApprovalManagement");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC6FormManagement");
+                }
+            }
+        }
+
+        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        public async Task<IActionResult> ViewQC6Form(int id)
+        {
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+
+            try
+            {
+                var userId = user.Id;
+
+                // Get the selected QC6 Form
+                var qc6formData = _context.QC6Forms.FirstOrDefault(e => e.QC6FormID.Equals(id));
+
+                // Populate Sub Forms
+                var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel());
+
+                // Retrieve TNATNEAssessment data
+                var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC6FormID.Equals(id));
+
+                // Retrieve TNATNEAssessment Section B data
+                var tnaTNESectionBData = _context.TNATNESectionB.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+
+                // Retrieve TNATNEAssessment Section D data
+                var tnaTNESectionDData = _context.TNATNESectionD.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+
+                // Retrieve Conclusion data
+                var conclusionData = _context.QC6FormConclusions.FirstOrDefault(e => e.QC6FormID.Equals(id));
+
+                // Retrieve FeeDetail data
+                var feeDetailData = _context.QC6FormFeeDetails.Where(e => e.QC6FormID.Equals(id)).ToList();
+
+                // Retrieve QC6 Form Test data
+                var testData = _context.QC6FormTests.Where(e => e.QC6FormID.Equals(id)).ToList();
+
+                // Loop through each SubForm in the viewModel
+                foreach (var subForm in viewModel.SubForms)
+                {
+                    // Loop through each Objective in the SubForm
+                    foreach (var objective in subForm.Objectives)
+                    {
+                        // Loop through each TestDescription in the Objective
+                        foreach (var testDescription in objective.TestDescriptions)
+                        {
+                            // Find the corresponding QC6FormTest data for the TestDescription
+                            var test = testData.FirstOrDefault(t => t.QC6FormTestDescriptionID == testDescription.QC6FormTestDescriptionID);
+
+                            if (test != null)
+                            {
+                                // Populate the TestDescription with QC6FormTest data
+                                testDescription.SignBy = test.SignOffBy;
+                                testDescription.SignDate = test.SignOffDate.Value;
+                                testDescription.Comment = test.Comments;
+                            }
+                        }
+                    }
+                }
+
+                // Append new data for QC6Form General Portion
+                viewModel.QC6FormID = qc6formData.QC6FormID.ToString();
+                viewModel.Status = qc6formData.Status;
+                viewModel.RejectionReason = qc6formData.RejectionReason;
                 viewModel.FileReference = qc6formData.FileReference;
                 viewModel.ProspectiveClient = qc6formData.ProspectiveClient;
                 viewModel.PeriodEnded = qc6formData.PeriodEnded;
@@ -176,11 +339,20 @@ namespace PKFAuditManagement.Controllers
             }
             catch
             {
-                return RedirectToAction("QC6FormCreationAsync");
+                if (roles.Contains("Admin"))
+                {
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC6FormApprovalManagement");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC6FormManagement");
+                }
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
         public async Task<IActionResult> QC6FormCreationAsync()
         {
             // Retrieve user email
@@ -196,11 +368,40 @@ namespace PKFAuditManagement.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult QC6FormApprovalManagement()
+        public async Task<IActionResult> QC6FormApprovalManagement()
         {
             // Retrieve engagement data from database
             var qc6forms = _context.QC6Forms.ToList();
-            return View("~/Views/General/QC6/QC6FormApprovalManagement.cshtml", qc6forms);
+
+            // Retrieve user email
+            var userEmail = await _userService.GetUserEmailAsync(User);
+
+            // Retrieve QC6FormConclusions where user is the first approver
+            var qc6FormConclusionsFirstApprover = _context.QC6FormConclusions
+                                        .Where(c => c.EPHODApprovedBy == userEmail)
+                                        .Join(_context.QC6Forms,
+                                            conclusion => conclusion.QC6FormID,
+                                            form => form.QC6FormID,
+                                            (conclusion, form) => new QC6FormCombinedViewModel { Conclusion = conclusion, Form = form })
+                                        .ToList();
+
+            // Retrieve QC6FormConclusions where user is the second approver
+            var qc6FormConclusionsSecondApprover = _context.QC6FormConclusions
+                                        .Where(c => c.MPHODQMPApprovedBy == userEmail)
+                                        .Join(_context.QC6Forms,
+                                            conclusion => conclusion.QC6FormID,
+                                            form => form.QC6FormID,
+                                            (conclusion, form) => new QC6FormCombinedViewModel { Conclusion = conclusion, Form = form })
+                                        .ToList();
+
+            var viewModel = new QC6FormAdminManagementViewModel
+            {
+                FirstApproverConclusions = qc6FormConclusionsFirstApprover,
+                SecondApproverConclusions = qc6FormConclusionsSecondApprover,
+                AllQC6Forms = qc6forms
+            };
+
+            return View("~/Views/General/QC6/QC6FormApprovalManagement.cshtml", viewModel);
         }
 
         [Authorize(Roles = "Admin")]
@@ -216,11 +417,60 @@ namespace PKFAuditManagement.Controllers
                 return NotFound();
             }
 
-            // Update the engagement status to "Approved"
-            engagement.Status = "Approved";
-            _context.SaveChanges();
+            try
+            {
+                // Update the engagement status to "Approved"
+                engagement.Status = "Approved";
+                _context.SaveChanges();
+
+                // Set the success message for the toast notification
+                TempData["ApprovalToastMessage"] = "QC6 Form approved successfully.";
+                TempData["ToastType"] = "success"; // Use this to differentiate between success and error messages
+            }
+            catch (Exception ex)
+            {
+                // Set the error message for the toast notification
+                TempData["ApprovalToastMessage"] = "An error occurred while approving the QC6 Form. Please try again later.";
+                TempData["ToastType"] = "error";
+            }
+
 
             return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("/QC6Form/RejectQC6Form/{id}")]
+        public async Task<IActionResult> RejectQC6Form(int id)
+        {
+            // Get the request body as a string
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+
+                // Parse the request body JSON to extract the QC6FormID and RejectionReason
+                JObject jsonBody = JObject.Parse(requestBody);
+                int qc6FormId = (int)jsonBody["QC6FormID"];
+                string rejectionReason = (string)jsonBody["RejectionReason"];
+
+                // Retrieve engagement data from the database
+                var engagement = _context.QC6Forms.FirstOrDefault(e => e.QC6FormID == qc6FormId);
+
+                if (engagement == null)
+                {
+                    return NotFound();
+                }
+
+                // Update the engagement status to "Rejected"
+                engagement.Status = "Rejected";
+                engagement.RejectionReason = rejectionReason; // Set the rejection reason
+                _context.SaveChanges();
+
+                // Set the success message for the toast notification
+                TempData["ToastMessage"] = "QC6 Form rejected successfully.";
+
+                return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+            }
         }
 
         [HttpPost]
@@ -262,10 +512,25 @@ namespace PKFAuditManagement.Controllers
                     // Get the current user's ID
                     var userId = user?.Id;
 
+                    // Re-validate form inputs for QC6 Form
+                    if (viewModel.IsPublicInterestEntity == true)
+                    {
+                        viewModel.PublicInterestEntityType = null;
+                    }
+
+                    // QCForm File Reference will contain _NAS for Non-Auditor role creation
+                    string fileReference = Helper.GenerateQCFormFileReference();
+
+                    if (roles.Contains("Non-Auditor"))
+                    {
+                        // Modify the fileReference if the "Non-Auditor" role is present
+                        fileReference += "_NAS";
+                    }
+
                     // Save viewModel data to QC6Form
                     var qc6form = new QC6Form
                     {
-                        FileReference = Helper.GenerateQCFormFileReference(),
+                        FileReference = fileReference,
                         CreatedBy = userId,
                         ProspectiveClient = viewModel.ProspectiveClient,
                         PeriodEnded = viewModel.PeriodEnded.Value,
@@ -435,6 +700,10 @@ namespace PKFAuditManagement.Controllers
                     _context.SaveChanges();
 
                     transaction.Commit();
+
+                    // Set the success message for the toast notification
+                    TempData["ToastMessage"] = "QC6 Form created successfully.";
+
                     if (roles.Contains("Admin"))
                     {
                         // Redirect to admin-specific page
@@ -457,7 +726,7 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
         public IActionResult DeleteQC6Form(int id)
         {
             using var transaction = _context.Database.BeginTransaction();

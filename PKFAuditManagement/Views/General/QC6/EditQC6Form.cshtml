@@ -4,50 +4,42 @@
 <div class="justify-content-center">
     <main id="main" class="main">
         <div class="pagetitle">
-            <h1>Create Form QC6(3)</h1>
+            <h1>Edit Form QC6(3) - @Model.FileReference</h1>
         </div><!-- End Page Title -->
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">
-                    <form class="needs-validation" asp-action="SubmitQC6Form" asp-controller="QC6Form" id="qc6Form" method="post">
-                        <div class="row mb-3">
-                            @if (ViewBag.Errors != null)
-                            {
-                                <ul>
-                                    @foreach (var error in ViewBag.Errors)
-                                    {
-                                        <li>@error.ErrorMessage</li>
-                                    }
-                                </ul>
-                            }
-                            else if (ViewBag.ErrorMessage != null)
-                            {
-                                <span class="alert alert-danger">@ViewBag.ErrorMessage</span>
-                            }
-                        </div>
+                    <form class="needs-validation" asp-action="UpdateQC6Form" asp-controller="QC6Form" id="qc6Form" method="post">
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">New engagement / client acceptance checklist</h5>
-                                <span class="text-danger">* indicates a mandatory field</span> 
+                                <span class="text-danger">* indicates a mandatory field</span>
                                 <br><br>
+                                @if (@Model.Status == "Rejected")
+                                {
+                                    <div class="alert alert-warning fade show" role="alert">
+                                        <h4 class="alert-heading">The form has been rejected</h4>
+                                        <hr>
+                                        <p class="mb-0">@Model.RejectionReason</p>
+                                    </div>
+                                }
                                 <form>
-                                    @Html.AntiForgeryToken()
                                     <div class="row mb-3">
                                         <label asp-for="ProspectiveClient" class="col-sm-2 col-form-label">Prospective Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ProspectiveClient" required>             
+                                            <input type="text" class="form-control" asp-for="ProspectiveClient" value="@Model.ProspectiveClient">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputEmail3" class="col-sm-2 col-form-label">Period Ended:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="date" class="form-control" asp-for="PeriodEnded" required>
+                                            <input type="date" class="form-control" asp-for="PeriodEnded">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label asp-for="EngagementType" class="col-sm-2 col-form-label">Type of Engagement:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="EngagementType" required>
+                                            <input type="text" class="form-control" asp-for="EngagementType">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -55,10 +47,10 @@
                                             <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" value="@Model.UserEmail" required>
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy">
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="PreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                                            <input type="date" class="form-control" asp-for="PreparedByDate">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -69,7 +61,7 @@
                                             <input type="text" class="form-control" asp-for="ReviewedBy">
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                            <input type="date" class="form-control" asp-for="ReviewedByDate">
                                         </div>
                                     </div>
                                     <br>
@@ -78,34 +70,34 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Name of PKF entity proposing for the service<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="PKFEntityProposingService" required>
+                                            <input type="text" class="form-control" asp-for="PKFEntityProposingService">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Source of referral of prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="SourceOfReferral" required>
+                                            <input type="text" class="form-control" asp-for="SourceOfReferral">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Indicate the nature of service for estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="NatureOfServiceForEstimateFee" required>
+                                            <input type="text" class="form-control" asp-for="NatureOfServiceForEstimateFee">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -114,12 +106,11 @@
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="BudgetedFeeRecoveryRate" disabled>
+                                                <input type="text" class="form-control" id="BudgetedFeeRecoveryRate" asp-for="BudgetedFeeRecoveryRate">
                                                 <span class="input-group-text">%</span>
-                                                <input type="hidden" asp-for="BudgetedFeeRecoveryRate" id="BudgetedFeeRecoveryRateHidden" />
                                             </div>
                                         </div>
-                                    </div>        
+                                    </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
@@ -136,14 +127,14 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Type of activities of prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="TypeOfActivities" required>
+                                            <input type="text" class="form-control" asp-for="TypeOfActivities">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Complexity of engagement based on preliminary evaluation<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement" required>
+                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement">
                                         </div>
                                     </div>
 
@@ -157,7 +148,7 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" required>
+                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance">
                                         </div>
                                     </div>
 
@@ -204,30 +195,30 @@
                                                                 <label>Fee:</label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
-                                                                    <input asp-for="Services[i].Fee" class="form-control" required/>
+                                                                    <input asp-for="Services[i].Fee" class="form-control" />
                                                                 </div>
                                                             </div>
-                                                            <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
-                                                                <label>Name of Non-Audit Service</label>
-                                                                <input type="text" name="Services[@i].OtherService" class="form-control">
-                                                            </div>
+                                                            @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
+                                                            {
+                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i">
+                                                                    <label>Name of Non-Audit Service</label>
+                                                                    <input type="text" class="form-control" asp-for="Services[i].OtherService">
+                                                                </div>
+                                                            }
                                                         </div>
                                                     </div>
                                                 }
-
                                             </div>
-                                            <button type="button" class="btn btn-primary mb-3" id="addService">Add New Service</button>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="grandTotal" disabled>
-                                                    <input type="hidden" class="form-control" id="grandTotalHidden" asp-for="GrandTotal">
+                                                    <input type="number" class="form-control" id="grandTotal" asp-for="GrandTotal">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" required>
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -236,17 +227,15 @@
                                                     <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="feeConcentration" disabled>
-                                                    <input type="hidden" id="feeConcentrationHidden" asp-for="FeeConcentration">
+                                                    <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
-                                            <button type="button" class="btn btn-primary mb-3" onclick="calculateTotalAndConcentration()">Calculate</button>
                                         </div>
                                     </div>
                                     <br>
                                     <hr class="my-4">
-                                    
+
                                     <div class="row mb-3" id="TNEForm">
                                         <div class="col-sm-12">
                                             <h5 class="card-title">Section B: TNA / TNE Assessment</h5>
@@ -431,65 +420,81 @@
                                     <!-- Checkbox for hiding/showing the table -->
                                     @if (subFormIndex == 1 || subFormIndex == 2)
                                     {
-                                        <div class="form-check mb-3">
-                                            <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
-                                            <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" onclick="toggleSubForm(@subFormIndex)">
-                                            <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
-                                                Not Applicable
-                                            </label>
-                                        </div>
+                                        @if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable))
+                                        {
+                                            <div class="form-check mb-3">
+                                                <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" checked>
+                                                <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                    Not Applicable
+                                                </label>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="form-check mb-3">
+                                                <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true">
+                                                <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                    Not Applicable
+                                                </label>
+                                            </div>
+                                        }
                                     }
-                                    <div class="table-responsive" id="tableContainer@(subFormIndex)">
-                                        <table class="table table-bordered table-striped">
-                                            <thead class="table-light" style="background-color: #f8f9fa;">
-                                                <tr>
-                                                    <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
-                                                    <th class="text-left text-uppercase">Sign</th>
-                                                    <th class="text-left text-uppercase">Date</th>
-                                                    <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
+                                    <div class="table-responsive" id="tableContainer@(subFormIndex)" @if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable))
+                                    {
+                                        <text> style="display:none;"</text>
+                                    }>
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="table-light" style="background-color: #f8f9fa;">
+                                                    <tr>
+                                                        <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
+                                                        <th class="text-left text-uppercase">Sign</th>
+                                                        <th class="text-left text-uppercase">Date</th>
+                                                        <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
                                                 @foreach (var objective in subForm.Objectives)
                                                 {
-                                                    <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives.Index" value="@objective.QC6FormObjectiveID" />
+                                                            <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives.Index" value="@objective.QC6FormObjectiveID" />
 
-                                                    <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                        <td colspan="4"><b>@objective.Objective</b></td>
-                                                    </tr>
+                                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                                <td colspan="4"><b>@objective.Objective</b></td>
+                                                            </tr>
                                                     @foreach (var testDescription in objective.TestDescriptions)
                                                     {
-                                                        <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC6FormTestDescriptionID" />
-                                                        <tr class="text-zinc-700 dark:text-zinc-400">
-                                                            <td>
-                                                                <div>
-                                                                    <p>@Html.Raw(@testDescription.Description)</p>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignBy" value="@Model.UserEmail" required />
-                                                            </td>
-                                                            <td>
-                                                                <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignDate" required />
-                                                            </td>
-                                                            <td>
-                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment"></textarea>
-                                                            </td>
-                                                        </tr>
+                                                                    <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC6FormTestDescriptionID" />
+                                                                    <tr class="text-zinc-700 dark:text-zinc-400">
+                                                                        <td>
+                                                                            <div>
+                                                                                <p>@Html.Raw(@testDescription.Description)</p>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="text" class="form-control" placeholder="Signed By" value="@testDescription.SignBy" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <textarea class="form-control" rows="3" placeholder="Ref/Comment">@testDescription.Comment</textarea>
+                                                                        </td>
+                                                                    </tr>
                                                     }
                                                 }
                                                 @if (subFormIndex == 0)
                                                 {
-                                                    <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                        <td colspan="4"><b>Note:</b> For PEPs that are linked to Peoples’ Action Party in Singapore and PEPs where their wealth is known publicly, there is no need to establish their source of funds for their operations.  </td>
-                                                    </tr>
+                                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                                <td colspan="4"><b>Note:</b> For PEPs that are linked to Peoples’ Action Party in Singapore and PEPs where their wealth is known publicly, there is no need to establish their source of funds for their operations.  </td>
+                                                            </tr>
                                                 }
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     subFormIndex++;
                                 }
-                               
+
                                 <h5 class="card-title">Conclusion</h5>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">
@@ -501,7 +506,7 @@
                                 </div>
                                 <div class="row mb-3" id="significantRiskRow" style="display: none;">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">
-                                        Describe these risks and what safeguards are required to reduce these risks to an acceptable level before acceptance of this engagement.
+                                        Describe these risks and what safeguards are disabled to reduce these risks to an acceptable level before acceptance of this engagement.
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
                                         <textarea class="form-control" id="significantRiskComment" rows="4" asp-for="SignificantRiskComment"></textarea>
@@ -521,7 +526,7 @@
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Reason for the risk rating:<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="NewEngagementRiskRatingReason" required>
+                                        <input type="text" class="form-control" id="inputText" asp-for="NewEngagementRiskRatingReason">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -538,7 +543,7 @@
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Name of safeguard reviewer assigned by Head of Division/Managing Partner/Quality Management Partner:<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewerAssigned" required>
+                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewerAssigned">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -567,17 +572,17 @@
                                 <div class="row mb-3">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">Having considered the objectives above, I am satisfied that we should accept the engagement subject to approval by the Managing Partner/Quality Management Partner/Head of Division<span class="text-danger"> *</span> </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" required>
+                                        <input type="text" class="form-control" id="inputText" asp-for="Satisfaction">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy" value="@Model.UserEmail" required>
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -585,12 +590,7 @@
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">To be approved by:</span>
                                         </label>
-                                        <select asp-for="EPHODApprovedBy" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        <input type="text" class="form-control" id="inputText" value="@Model.EPHODApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
@@ -602,12 +602,7 @@
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">To be approved by:</span>
                                         </label>
-                                        <select asp-for="MPHODQMPApprovedBy" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        <input type="text" class="form-control" id="inputText" value="@Model.MPHODQMPApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:</label>
@@ -617,8 +612,8 @@
                                 <h5 class="card-title"><u><i>Notes</i></u></h5>
                                 <p>
                                     <i>
-                                        To enable the authorized person to approve, the following are the minimum documentation required to be submitted together with this Form:
-                                        <br> &ensp;(a) Company BizFile search (full search is not required for a newly incorporated company or a company that is dormant)
+                                        To enable the authorized person to approve, the following are the minimum documentation disabled to be submitted together with this Form:
+                                        <br> &ensp;(a) Company BizFile search (full search is not disabled for a newly incorporated company or a company that is dormant)
                                         <br> &ensp;(b) Screening of directors and ultimate beneficial owners owning more than 25% of the ultimate holding company using LexisNexis
                                         <br> &ensp;(c) Notes of meeting(s) or communications with the management of the prospective client or persons knowledgeable about the prospect or notes written in QC6(3)
                                         <br> &ensp;(d) Financial information if available
@@ -632,7 +627,7 @@
                                     </i>
                                 </p>
                                 <div class="text-center">
-                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC6 Form</button>
+                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Update QC6 Form</button>
                                 </div>
                             </div>
                         </div>
@@ -704,5 +699,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/qc6-form-creation.js"></script>
+    <script src="~/js/qc6-form-edit.js"></script>
 }

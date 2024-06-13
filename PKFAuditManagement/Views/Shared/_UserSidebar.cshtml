@@ -19,6 +19,11 @@
         </a>
         <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
             <li>
+                <a class="nav-link @(currentController == "Home" && currentAction == "SampleDashboard" ? "active" : "collapsed")" asp-controller="Home" asp-action="SampleDashboard">
+                    <i class="bi bi-circle"></i><span>Sample Dashboar</span>
+                </a>
+            </li>
+            <li>
                 <a class="nav-link @(currentController == "Home" && currentAction == "Alerts" ? "active" : "collapsed")" asp-controller="Home" asp-action="Alerts">
                     <i class="bi bi-circle"></i><span>Alerts</span>
                 </a>
@@ -187,15 +192,15 @@
 
     <li class="nav-item">
         <a class="nav-link @(currentController == "QC6Form" && currentAction == "QC6FormManagement" ? "active" : "collapsed")" asp-controller="QC6Form" asp-action="QC6FormManagement">
-            <i class="bi bi-person"></i>
-            <span>QC6 Form Management</span>
+            <i class="bi bi-layout-text-window-reverse"></i>
+            <span>Manage QC6 Forms</span>
         </a>
     </li><!-- End Profile Page Nav -->
 
     <li class="nav-item">
         <a class="nav-link @(currentController == "QC7Form" && currentAction == "QC7FormManagement" ? "active" : "collapsed")" asp-controller="QC7Form" asp-action="QC7FormManagement">
-            <i class="bi bi-person"></i>
-            <span>QC7 Form Management</span>
+            <i class="bi bi-layout-text-window-reverse"></i>
+            <span>Manage QC7 Forms</span>
         </a>
     </li><!-- End Profile Page Nav -->
 

@@ -46,3 +46,15 @@ function confirmDelete(deleteUrl) {
         }
     });
 }
+
+const notyf = new Notyf({
+    position: { x: 'center', y: 'top' }
+});
+
+// Read the data-message attribute value
+var toastMessage = document.getElementById("toastMessage").getAttribute("data-message");
+
+if (toastMessage) {
+    // Display the toast message
+    notyf.success(toastMessage);
+}
