@@ -15,6 +15,7 @@ namespace PKFAuditManagement.Models
         public string? ReviewedBy { get; set; }
         public DateTime? ReviewedByDate { get; set; }
         public required string Status { get; set; }
+        public string? RejectionReason { get; set; }
         public DateTime FormSubmissionDate { get; set; }
         public required string PKFEntityProposingService { get; set; }
         public required string SourceOfReferral { get; set; }

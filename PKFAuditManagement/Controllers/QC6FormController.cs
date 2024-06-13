@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.Services;
@@ -9,6 +11,7 @@ using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
 using System.Data;
 using System.Globalization;
+using System.Text;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -111,6 +114,8 @@ namespace PKFAuditManagement.Controllers
                 }
 
                 // Append new data for QC6Form General Portion
+                viewModel.Status = qc6formData.Status;
+                viewModel.RejectionReason = qc6formData.RejectionReason;
                 viewModel.FileReference = qc6formData.FileReference;
                 viewModel.ProspectiveClient = qc6formData.ProspectiveClient;
                 viewModel.PeriodEnded = qc6formData.PeriodEnded;
@@ -259,6 +264,9 @@ namespace PKFAuditManagement.Controllers
                 }
 
                 // Append new data for QC6Form General Portion
+                viewModel.QC6FormID = qc6formData.QC6FormID.ToString();
+                viewModel.Status = qc6formData.Status;
+                viewModel.RejectionReason = qc6formData.RejectionReason;
                 viewModel.FileReference = qc6formData.FileReference;
                 viewModel.ProspectiveClient = qc6formData.ProspectiveClient;
                 viewModel.PeriodEnded = qc6formData.PeriodEnded;
@@ -409,11 +417,60 @@ namespace PKFAuditManagement.Controllers
                 return NotFound();
             }
 
-            // Update the engagement status to "Approved"
-            engagement.Status = "Approved";
-            _context.SaveChanges();
+            try
+            {
+                // Update the engagement status to "Approved"
+                engagement.Status = "Approved";
+                _context.SaveChanges();
+
+                // Set the success message for the toast notification
+                TempData["ApprovalToastMessage"] = "QC6 Form approved successfully.";
+                TempData["ToastType"] = "success"; // Use this to differentiate between success and error messages
+            }
+            catch (Exception ex)
+            {
+                // Set the error message for the toast notification
+                TempData["ApprovalToastMessage"] = "An error occurred while approving the QC6 Form. Please try again later.";
+                TempData["ToastType"] = "error";
+            }
+
 
             return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("/QC6Form/RejectQC6Form/{id}")]
+        public async Task<IActionResult> RejectQC6Form(int id)
+        {
+            // Get the request body as a string
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+
+                // Parse the request body JSON to extract the QC6FormID and RejectionReason
+                JObject jsonBody = JObject.Parse(requestBody);
+                int qc6FormId = (int)jsonBody["QC6FormID"];
+                string rejectionReason = (string)jsonBody["RejectionReason"];
+
+                // Retrieve engagement data from the database
+                var engagement = _context.QC6Forms.FirstOrDefault(e => e.QC6FormID == qc6FormId);
+
+                if (engagement == null)
+                {
+                    return NotFound();
+                }
+
+                // Update the engagement status to "Rejected"
+                engagement.Status = "Rejected";
+                engagement.RejectionReason = rejectionReason; // Set the rejection reason
+                _context.SaveChanges();
+
+                // Set the success message for the toast notification
+                TempData["ToastMessage"] = "QC6 Form rejected successfully.";
+
+                return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+            }
         }
 
         [HttpPost]

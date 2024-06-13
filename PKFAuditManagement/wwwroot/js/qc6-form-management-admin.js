@@ -84,3 +84,17 @@ if (toastMessage) {
     // Display the toast message
     notyf.success(toastMessage);
 }
+
+// Read the data-message attribute value for approval/rejection of form
+var approvalToastMessage = document.getElementById("approvalToastMessage").getAttribute("data-message");
+
+if (approvalToastMessage) {
+    // Display the toast message
+    if (toastType === "success") {
+        // Display success toast
+        notyf.success(approvalToastMessage);
+    } else if (toastType === "error") {
+        // Display error toast
+        notyf.error(approvalToastMessage);
+    }
+}

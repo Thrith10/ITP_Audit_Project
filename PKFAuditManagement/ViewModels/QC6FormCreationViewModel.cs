@@ -17,6 +17,7 @@ namespace PKFAuditManagement.ViewModels
         public string? UserEmail { get; set; }
 
         // Start of QC6Form data
+        public string? QC6FormID { get; set; }
         public string? FileReference { get; set; }
         [Required]
         public string? ProspectiveClient { get; set; }
@@ -30,6 +31,7 @@ namespace PKFAuditManagement.ViewModels
         public string? ReviewedBy { get; set; }
         public DateTime ReviewedByDate { get; set; }
         public string? Status { get; set; }
+        public string? RejectionReason { get; set; }
         public DateTime FormSubmissionDate { get; set; }
         [Required]
         public string? PKFEntityProposingService { get; set; }

@@ -230,7 +230,6 @@
 
                                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                                         <li><a class="dropdown-item" href="@Url.Action("ViewQC6Form", new { id = form.QC6FormID })">View</a></li>
-                                                        <li><a class="dropdown-item approveLink" href="#" data-engagement-id="@form.QC6FormID">Approve</a></li>
                                                         <li><a class="dropdown-item" href="@Url.Action("EditQC6Form", new { id = form.QC6FormID })">Edit</a></li>
                                                         <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC6Form", new { id = form.QC6FormID })')">Delete</a></li>
                                                     </ul>
@@ -254,6 +253,8 @@
 </main>
 
 <div id="toastMessage" data-message="@TempData["ToastMessage"]"></div>
+<div id="approvalToastMessage" data-message="@TempData["ApprovalToastMessage"]"></div>
+<div id="toastType" data-message="@TempData["ToastType"]"></div>
 
 @section Scripts {
     <script src="~/js/qc6-form-management-admin.js"></script>
