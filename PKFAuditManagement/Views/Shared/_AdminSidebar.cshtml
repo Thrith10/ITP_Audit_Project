@@ -38,5 +38,11 @@
             <i class="bi bi-person"></i>
             <span>Account Management</span>
         </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "Report" && currentAction == "GenerateReport" ? "active" : "collapsed")" asp-controller="Report" asp-action="GenerateReport">
+            <i class="bi bi-file-earmark-text"></i>
+            <span>Generate Report</span>
+        </a>
     </li><!-- End Profile Page Nav -->
 </ul>
