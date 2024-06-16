@@ -1,60 +1,56 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement.Data;
+using PKFAuditManagement.Models;
+using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
+using ClosedXML.Excel;
+using System.Data;
+using System.Linq.Dynamic.Core;
 
-public class ReportController : Controller
 {
-    private readonly ApplicationDbContext _context;
-
-    public ReportController(ApplicationDbContext context)
+    
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ReportController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    [Authorize(Roles = "User,Admin")]
-    public IActionResult GenerateReport()
-    {
-        var viewModel = new ReportViewModel
+        
+        public ReportController(ApplicationDbContext context)
         {
-            QC6Forms = _context.QC6Forms.ToList(),
-            QC7Forms = _context.QC7Forms.ToList()
-        };
-        return View("~/Views/General/Report/GenerateReport.cshtml", viewModel);
-    }
-
-    [Authorize(Roles = "Admin")]
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> GenerateReport(ReportViewModel viewModel)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View("~/Views/Reports/GenerateReport.cshtml", viewModel);
+            _context = context;
         }
 
-        // Handle selected form IDs, fields, and generate report logic here 
-        try
         {
-            // Example logic to generate report  
-            var reportData = await GenerateReportDataAsync(viewModel);
-            viewModel.ReportData = reportData.ToString(); // Update based on actual report data format 
+            {
+            }
+            // Start with the base query
+            var query = _context.QC6Forms.AsQueryable();
 
-            // If you want to save the report to the database, you can do it here  
+            {
+                {
+                }
 
-            return View("~/Views/Reports/ReportResult.cshtml", viewModel);
-        }
+                    {
+
+
+                }
         catch (Exception ex)
         {
             // Log the error  
             viewModel.ErrorMessage = "An error occurred while generating the report. Please try again.";
             return View("~/Views/Reports/GenerateReport.cshtml", viewModel);
+            }
+
         }
-    }
 
     private Task<object> GenerateReportDataAsync(ReportViewModel viewModel)
     {
         // Mock implementation, replace with actual report generation logic  
         return Task.FromResult((object)new { ReportName = "Sample Report", Data = "Report Data" });
     }
+
 }

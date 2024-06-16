@@ -1,0 +1,174 @@
+﻿@model PKFAuditManagement.ViewModels.QC35FormViewModel
+
+<div class="justify-content-center">
+    <main id="main" class="main">
+        <div class="pagetitle">
+            <h1>Form QC35</h1>
+        </div><!-- End Page Title -->
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+                    <form asp-action="SubmitQC35Form" asp-controller="QC35Form" method="post">
+                        @if (ViewBag.Errors != null)
+                        {
+                            <ul>
+                                @foreach (var error in ViewBag.Errors)
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        }
+                        else if (ViewBag.ErrorMessage != null)
+                        {
+                            <span class="alert alert-danger">@ViewBag.ErrorMessage</span>
+                        }
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">File Archival Form</h5>
+                                <span class="text-danger">* indicates a mandatory field</span>
+                                <br><br>
+                                @Html.AntiForgeryToken()
+
+                                <div class="form-group">
+                                    <label asp-for="AuditFirmName">Audit Firm Name:<span class="text-danger"> *</span></label>
+                                    <div class="input-group">
+                                        <select class="form-control" asp-for="AuditFirmName" asp-items="Model.AuditFirms"></select>
+                                        <span asp-validation-for="AuditFirmName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label asp-for="ClientName">Client Name:<span class="text-danger"> *</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" asp-for="ClientName">
+                                        <span asp-validation-for="ClientName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="ReportingYearEnd">Reporting Year End:<span class="text-danger"> *</span></label>
+                                    <div class="input-group">
+                                        <input type="date" class="form-control" asp-for="ReportingYearEnd">
+                                        <span asp-validation-for="ReportingYearEnd" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+                                <style>
+                                    .form-group {
+                                        display: flex;
+                                        flex-wrap: nowrap;
+                                        align-items: center;
+                                        margin-bottom: 1rem;
+                                    }
+
+                                        .form-group label {
+                                            width: 16%;
+                                            margin-bottom: 0;
+                                            margin-right: 2.5em;
+                                        }
+
+                                        .form-group .input-group {
+                                            display: flex;
+                                            flex-wrap: nowrap;
+                                            width: 84%;
+                                        }
+
+                                    .input-group > .form-control {
+                                        flex: 1;
+                                        margin-right: 0.5rem;
+                                    }
+
+                                        .input-group > .form-control:last-child {
+                                            margin-right: 0;
+                                        }
+                                </style>
+
+                                <div class="form-group">
+                                    <label>Files approved for filing by Partner after completion of checklist below:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" asp-for="PartnerName" placeholder="Partner's Name">
+                                        <input type="text" class="form-control" asp-for="PartnerInitial" placeholder="Partner's Initial">
+                                        <input type="date" class="form-control" asp-for="PartnerDate">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Files given to Audit Staff for passing the files to Administrative Staff for filing:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" asp-for="AuditStaffName" placeholder="Audit Staff Name">
+                                        <input type="text" class="form-control" asp-for="AuditStaffInitial" placeholder="Audit Staff Initial">
+                                        <input type="date" class="form-control" asp-for="AuditDate">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Working paper files given to Administrative Staff for filing:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" asp-for="AdminStaffName" placeholder="Admin Staff Name">
+                                        <input type="text" class="form-control" asp-for="AdminStaffInitial" placeholder="Admin Staff Initial">
+                                        <input type="date" class="form-control" asp-for="AdminDate">
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive" id="tableContainer">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-light" style="background-color: #f8f9fa;">
+                                            <tr>
+                                                <th class="text-left pl-3 text-uppercase" style="width: 30%;">Checklist - Description</th>
+                                                <th class="text-left text-uppercase" style="width: 40%;">Response</th>
+                                                <th class="text-left text-uppercase">Manager Initial</th>
+                                                <th class="text-left text-uppercase">Partner Initial</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < Model.ChecklistItems.Count; i++)
+                                            {
+                                                <tr class="text-zinc-700 dark:text-zinc-400">
+                                                    <td>
+                                                        <div>
+                                                            <p>@Model.ChecklistItems[i].Description</p>
+                                                            <input type="hidden" name="ChecklistItems[@i].Description" value="@Model.ChecklistItems[i].Description" />
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        @if (Model.ChecklistItems[i].Description == "Date of Audit Report" ||
+                                                       Model.ChecklistItems[i].Description == "Date of approval of files for archival is within 60 days from date of Audit Report" ||
+                                                       Model.ChecklistItems[i].Description == "Date of approval and confirmation that CaseWare Audit files has been locked down within 60 days from the date of the Audit Report (if applicable). Refer to the screenshot of CaseWare below.")
+                                                        {
+                                                            <input type="date" class="form-control" name="ChecklistItems[@i].Response" asp-for="@Model.ChecklistItems[i].Response" required />
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="text" class="form-control" name="ChecklistItems[@i].Response" asp-for="@Model.ChecklistItems[i].Response" value="" required />
+                                                        }
+
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" name="ChecklistItems[@i].ManagerInitial" asp-for="@Model.ChecklistItems[i].ManagerInitial" value="" required />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" name="ChecklistItems[@i].PartnerInitial" asp-for="@Model.ChecklistItems[i].PartnerInitial" value="" required />
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="text-center">
+                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC35 Form</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main><!-- End #main -->
+</div>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+@section Scripts {
+    <script src="~/js/qc6-form-creation.js"></script>
+}
