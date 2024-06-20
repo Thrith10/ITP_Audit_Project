@@ -205,6 +205,13 @@
     </li><!-- End Profile Page Nav -->
 
     <li class="nav-item">
+        <a class="nav-link @(currentController == "QC35Form" && currentAction == "QC35FormManagement" ? "active" : "collapsed")" asp-controller="QC35Form" asp-action="QC35FormManagement">
+            <i class="bi bi-person"></i>
+            <span>Manage QC35 Forms</span>
+        </a>
+    </li><!-- End Profile Page Nav -->
+
+    <li class="nav-item">
         <a class="nav-link @(currentController == "Home" && currentAction == "Profile" ? "active" : "collapsed")" asp-controller="Home" asp-action="Profile">
             <i class="bi bi-person"></i>
             <span>Profile</span>

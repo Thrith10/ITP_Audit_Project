@@ -349,6 +349,15 @@ namespace PKFAuditManagement.Data
                    }
              );
 
+            modelBuilder.Entity<QC35FormTestDescription>().HasData(
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 1, QC35FormID = 1, Description = "No. of working paper files" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 2, QC35FormID = 1, Description = "Working papers are transferred from arch files to paper files" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 3, QC35FormID = 1, Description = "Working paper files are numbered sequentially" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 4, QC35FormID = 1, Description = "All working papers in each file is complete (Manager to initial all working papers)" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 5, QC35FormID = 1, Description = "Date of Audit Report" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 6, QC35FormID = 1, Description = "Date of approval of files for archival is within 60 days from date of Audit Report" },
+                new QC35FormTestDescription { QC35FormTestDescriptionID = 7, QC35FormID = 1, Description = "Date of approval and confirmation that CaseWare Audit files has been locked down within 60 days from the date of the Audit Report (if applicable). Refer to the screenshot of CaseWare below." }
+            );
              modelBuilder.Entity<QC6Form>().HasData(
                 new QC6Form
                 {

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,14 +13,14 @@ using System.Linq.Dynamic.Core;
 
 namespace PKFAuditManagement.Controllers
 {
-    
+
     [Route("api/[controller]")]
     [ApiController]
     public class ReportController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        
+
         public ReportController(ApplicationDbContext context)
         {
             _context = context;

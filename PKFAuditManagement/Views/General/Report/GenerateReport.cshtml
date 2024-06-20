@@ -1,0 +1,109 @@
+﻿@model PKFAuditManagement.ViewModels.ReportViewModel 
+ 
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Generate Report</title> 
+    <!-- Include Bootstrap CSS --> 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> 
+    <style> 
+        /* Add custom styles here if needed */ 
+    </style> 
+</head> 
+<body> 
+    <main id="main" class="main"> 
+        <div class="pagetitle"> 
+            <h1>Generate Report</h1> 
+        </div><!-- End Page Title --> 
+ 
+        <section class="section"> 
+            <div class="row"> 
+                <div class="col-lg-12"> 
+ 
+                    <div class="card"> 
+                        <div class="card-body"> 
+                            <div class="row"> 
+                                <div class="col-6"> 
+                                    <h5 class="card-title">Select Forms</h5> 
+                                </div> 
+                            </div> 
+                            <div class="form-group"> 
+                                <label for="formType">Select Form Type</label> 
+                                <select asp-for="SelectedFormType" class="form-control"> 
+                                    <option value="QC6">QC6 Forms</option> 
+                                    <option value="QC7">QC7 Forms</option> 
+                                </select> 
+                            </div> 
+                            <p>The table displays all the selected forms.</p> 
+                            <!-- Table with stripped rows --> 
+                            <table class="table datatable"> 
+                                <thead> 
+                                    <tr> 
+                                        <th></th> 
+                                        <th>File Reference</th> 
+                                        <th>Prospective Client</th> 
+                                    </tr> 
+                                </thead> 
+                                <tbody> 
+                                    @if (Model.SelectedFormType == "QC6" && Model.QC6Forms != null) 
+                                    { 
+                                        foreach (var form in Model.QC6Forms) 
+                                        { 
+                                            <tr> 
+                                                <td><input type="checkbox" name="SelectedFormIds" value="@form.QC6FormID" /></td> 
+                                                <td>@form.FileReference</td> 
+                                                <td>@form.ProspectiveClient</td> 
+                                            </tr> 
+                                        } 
+                                    } 
+                                    else if (Model.SelectedFormType == "QC7" && Model.QC7Forms != null) 
+                                    { 
+                                        foreach (var form in Model.QC7Forms) 
+                                        { 
+                                            <tr> 
+                                                <td><input type="checkbox" name="SelectedFormIds" value="@form.QC7FormID" /></td> 
+                                                <td>@form.FileReference</td> 
+                                                <td>@form.Client</td> 
+                                            </tr> 
+                                        } 
+                                    } 
+                                </tbody> 
+                            </table> 
+                            <!-- End Table with stripped rows --> 
+                            <button class="btn btn-primary">Next</button> 
+                        </div> 
+                    </div> 
+ 
+                    <!-- Fields Selection --> 
+                    <div class="card mt-3"> 
+                        <div class="card-body"> 
+                            <h5 class="card-title">Select Fields</h5>
+                            <div class="form-group">
+                                <label><input type="checkbox" name="SelectedFields" value="Client" /> Client Name</label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="PeriodEnded" /> Period Ended</label><br />
+                                <label>
+                                    <input type="checkbox" name="SelectedFields" value="EngagementType" /> Type of
+                                    Engagement
+                                </label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="EstimateOfFee" /> Estimate of Fee</label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="BudgetedFeeRecoveryRate" /> Budgeted Fee Recovery Rate</label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="RiskRating" /> Risk Rating</label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="RiskReason" /> Reason for Risk Rating</label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="SafeguardReviewer" /> Name of Safeguard Reviewer</label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="EngagementManager" /> Engagement Manager</label><br />
+                                <label><input type="checkbox" name="SelectedFields" value="EngagementPartner" /> Engagement Partner</label><br />
+                            </div>
+                            <button class="btn btn-primary">Generate Report</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main><!-- End #main -->
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -87,10 +87,10 @@ namespace PKFAuditManagement.Controllers
                 var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC6FormID.Equals(id));
 
                 // Retrieve TNATNEAssessment Section B data
-                var tnaTNESectionBData = _context.TNATNESectionB.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+                var tnaTNESectionBData = _context.TNATNESectionBs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
 
                 // Retrieve TNATNEAssessment Section D data
-                var tnaTNESectionDData = _context.TNATNESectionD.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+                var tnaTNESectionDData = _context.TNATNESectionDs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
 
                 // Retrieve Conclusion data
                 var conclusionData = _context.QC6FormConclusions.FirstOrDefault(e => e.QC6FormID.Equals(id));
@@ -498,10 +498,10 @@ namespace PKFAuditManagement.Controllers
                 var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC6FormID.Equals(id));
 
                 // Retrieve TNATNEAssessment Section B data
-                var tnaTNESectionBData = _context.TNATNESectionB.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+                //var tnaTNESectionBData = _context.TNATNESectionB.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
 
                 // Retrieve TNATNEAssessment Section D data
-                var tnaTNESectionDData = _context.TNATNESectionD.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+                //var tnaTNESectionDData = _context.TNATNESectionD.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
 
                 // Retrieve Conclusion data
                 var conclusionData = _context.QC6FormConclusions.FirstOrDefault(e => e.QC6FormID.Equals(id));
@@ -593,7 +593,7 @@ namespace PKFAuditManagement.Controllers
                     viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
                 }
 
-                // Append TNATNEAssessment data for TNATNEAssessmentViewModel
+                /* Append TNATNEAssessment data for TNATNEAssessmentViewModel
                 viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
                 viewModel.TNATNEAssessment.SectionB.IsAudit = tnaTNESectionBData.IsAudit;
                 viewModel.TNATNEAssessment.SectionB.Q1 = tnaTNESectionBData.Q1;
@@ -606,6 +606,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.TNATNEAssessment.SectionD.Q3Comment = tnaTNESectionDData.Q3Comment;
                 viewModel.TNATNEAssessment.SectionD.Q4Comment = tnaTNESectionDData.Q4Comment;
                 viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
+                */
 
                 // Append FeeDetail data for Services
                 foreach (var feeDetail in feeDetailData)
@@ -1065,16 +1066,16 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                 var tnaTNEAssessment = _context.TNATNEAssessments.SingleOrDefault(t => t.QC6FormID == id);
 
                 // Identify TNATNESectionB for TNATNEAssessment
-                var tnaTNESectionB = _context.TNATNESectionB.SingleOrDefault(t => t.TNATNEAssessmentID == tnaTNEAssessment.TNATNEAssessmentID);
+                var tnaTNESectionB = _context.TNATNESectionBs.SingleOrDefault(t => t.TNATNEAssessmentID == tnaTNEAssessment.TNATNEAssessmentID);
 
                 // Identify TNATNESectionD for TNATNEAssessment
-                var tnaTNESectionD = _context.TNATNESectionD.SingleOrDefault(t => t.TNATNEAssessmentID == tnaTNEAssessment.TNATNEAssessmentID);
+                var tnaTNESectionD = _context.TNATNESectionDs.SingleOrDefault(t => t.TNATNEAssessmentID == tnaTNEAssessment.TNATNEAssessmentID);
 
                 // Delete TNATNESectionB
-                _context.TNATNESectionB.Remove(tnaTNESectionB);
+                _context.TNATNESectionBs.Remove(tnaTNESectionB);
 
                 // Delete TNATNESectionD
-                _context.TNATNESectionD.Remove(tnaTNESectionD);
+                _context.TNATNESectionDs.Remove(tnaTNESectionD);
 
                 // Delete TNATNEAssessment
                 _context.TNATNEAssessments.Remove(tnaTNEAssessment);
@@ -1240,19 +1241,19 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
             var qc6FormTestDescriptions = _context.QC6FormTestDescriptions.ToList();
 
             // Populate SubForms
-            viewModel.SubForms = qc6SubForms.Select(subForm => new SubFormViewModel
+            viewModel.SubForms = qc6SubForms.Select(subForm => new ViewModels.SubFormViewModel
             {
                 QC6SubFormID = subForm.QC6SubFormID,
                 SubFormType = subForm.SubFormType,
                 Objectives = qc6FormObjectives
                     .Where(obj => obj.QC6SubFormID == subForm.QC6SubFormID)
-                    .Select(obj => new ObjectiveViewModel
+                    .Select(obj => new ViewModels.ObjectiveViewModel
                     {
                         QC6FormObjectiveID = obj.QC6FormObjectiveID,
                         Objective = obj.Objective,
                         TestDescriptions = qc6FormTestDescriptions
                             .Where(desc => desc.QC6FormObjectiveID == obj.QC6FormObjectiveID)
-                            .Select(desc => new TestDescriptionViewModel
+                            .Select(desc => new ViewModels.TestDescriptionViewModel
                             {
                                 QC6FormTestDescriptionID = desc.QC6FormTestDescriptionID,
                                 Description = desc.Description,
