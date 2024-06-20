@@ -287,3 +287,60 @@ function toggleRationaleSTR() {
         rationaleSTRRowInput.value = '';
     }
 }
+// Display NAS modal
+document.getElementById('retrieveFeeDetailsButton').addEventListener('click', function (e) {
+
+    e.preventDefault(); // Prevent default button behavior
+
+    $.ajax({
+        url: '/QC6Form/RetrieveNASFeeDetails',
+        method: 'GET',
+        success: function (data) {
+            console.log('Data:', data);
+
+            // Group fee details by QC6FormID
+            var groupedFeeDetails = {};
+            data.forEach(function (feeDetail) {
+                if (!groupedFeeDetails.hasOwnProperty(feeDetail.qC6FormID)) {
+                    groupedFeeDetails[feeDetail.qC6FormID] = [];
+                }
+                groupedFeeDetails[feeDetail.qC6FormID].push(feeDetail);
+            });
+            console.log('Grouped Fee Details:', groupedFeeDetails);
+
+            // Build the tbody HTML
+            var tbodyHtml = '';
+            Object.keys(groupedFeeDetails).forEach(function (qc6FormID) {
+                var feeDetailsList = groupedFeeDetails[qc6FormID];
+                console.log('QC6FormID:', qc6FormID, 'Fee Details List:', feeDetailsList);
+
+                // Display the QC6 Form File reference in one row
+                tbodyHtml += '<tr>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].fileReference + '</td>' +
+                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td>' + feeDetailsList[0].natureOfService + '</td>' +
+                    '</tr>';
+
+                // Display the fee details for this QC6 form in subsequent rows
+                for (var i = 1; i < feeDetailsList.length; i++) {
+                    var feeDetail = feeDetailsList[i];
+                    tbodyHtml += '<tr>' +
+                        '<td>' + feeDetail.fee + '</td>' +
+                        '<td>' + feeDetail.natureOfService + '</td>' +
+                        '</tr>';
+                }
+            });
+
+            // Set the tbody HTML to the table
+            $('#feeDetailsTable tbody').html(tbodyHtml);
+
+            // Show the modal
+            $('#feeDetailsModal').modal('show');
+        },
+
+        error: function (error) {
+            console.log('Error:', error);
+        }
+    });
+});
+

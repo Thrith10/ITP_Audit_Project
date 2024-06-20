@@ -310,7 +310,7 @@ namespace PKFAuditManagement.Controllers
                     }
 
                     // Update TNATNESectionB with foreign key linking the two tables (TNATNESectionB and TNATNEAssessment)
-                    var tnaTNESectionB = await _context.TNATNESectionB.FirstOrDefaultAsync(b => b.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
+                    var tnaTNESectionB = await _context.TNATNESectionBs.FirstOrDefaultAsync(b => b.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
                     if (tnaTNESectionB != null)
                     {
                         tnaTNESectionB.IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit;
@@ -330,7 +330,7 @@ namespace PKFAuditManagement.Controllers
                     }
 
                     // Update TNATNESectionD with foreign key linking the two tables (TNATNESectionD and TNATNEAssessment)
-                    var tnaTNESectionD = await _context.TNATNESectionD.FirstOrDefaultAsync(d => d.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
+                    var tnaTNESectionD = await _context.TNATNESectionDs.FirstOrDefaultAsync(d => d.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
                     if (tnaTNESectionD != null)
                     {
                         tnaTNESectionD.Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment;
@@ -451,7 +451,7 @@ namespace PKFAuditManagement.Controllers
                     transaction.Commit();
 
                     // Set the success message for the toast notification
-                    TempData["QC6FormUpdateToastMessage"] = "QC6 Form updated successfully.";
+                    ViewData["QC6FormUpdateToastMessage"] = "QC6 Form updated successfully.";
                     if (roles.Contains("Admin"))
                     {
                         // Redirect to admin-specific page
@@ -714,7 +714,7 @@ namespace PKFAuditManagement.Controllers
 $"A new QC6 Form has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
 
                     // Set the success message for the toast notification
-                    TempData["ApprovalToastMessage"] = "QC6 Form approved successfully, an email has been sent to the 2nd approver for approval.";
+                    ViewData["ApprovalToastMessage"] = "QC6 Form approved successfully, an email has been sent to the 2nd approver for approval.";
                 }
                 // If EPHOD approval date is already set, check if MPHODQMP approval date is not set
                 else if (conclusion.MPHODQMPApprovedByDate == null)
@@ -731,18 +731,18 @@ $"A new QC6 Form has been approved by: {conclusion.EPHODApprovedBy} and you've b
 $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC6 Form.");
 
                     // Set the success message for the toast notification
-                    TempData["ApprovalToastMessage"] = "QC6 Form approved successfully.";
+                    ViewData["ApprovalToastMessage"] = "QC6 Form approved successfully.";
                 }
 
                 _context.SaveChanges();
 
-                TempData["ToastType"] = "success"; // Use this to differentiate between success and error messages
+                ViewData["ToastType"] = "success"; // Use this to differentiate between success and error messages
             }
             catch (Exception ex)
             {
                 // Set the error message for the toast notification
-                TempData["ApprovalToastMessage"] = "An error occurred while approving the QC6 Form. Please try again later.";
-                TempData["ToastType"] = "error";
+                ViewData["ApprovalToastMessage"] = "An error occurred while approving the QC6 Form. Please try again later.";
+                ViewData["ToastType"] = "error";
             }
 
 
@@ -786,7 +786,7 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                 _context.SaveChanges();
 
                 // Set the success message for the toast notification
-                TempData["ToastMessage"] = "QC6 Form rejected successfully.";
+                ViewData["ToastMessage"] = "QC6 Form rejected successfully.";
 
                 return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
             }
@@ -1266,6 +1266,37 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
             }).ToList();
 
             return viewModel;
+        }
+
+        public IActionResult RetrieveNASFeeDetails()
+        {
+            // Retrieve QC6 Forms where FileReference contains "NAS"
+            var qc6Forms = _context.QC6Forms
+                .Where(e => e.FileReference.Contains("NAS"))
+                .Select(f => f.QC6FormID)
+                .ToList();
+
+            // Join QC6Forms with QC6FormFeeDetails
+            var feeDetails = _context.QC6FormFeeDetails
+                .Where(fd => qc6Forms.Contains(fd.QC6FormID))
+                .Join(
+                    _context.QC6Forms,
+                    fd => fd.QC6FormID,
+                    f => f.QC6FormID,
+                    (fd, f) => new
+                    {
+                        fd.QC6FormFeeDetailID,
+                        fd.QC6FormID,
+                        fd.Fee,
+                        fd.NatureOfService,
+                        f.FileReference,
+                        f.PeriodEnded,
+                        f.Status
+                    })
+                .ToList();
+
+            // Return the combined data as JSON
+            return Json(feeDetails);
         }
     }
 }

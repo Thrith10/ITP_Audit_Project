@@ -47,7 +47,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = qc6Forms.QC6FormID })" style="color: #007bff; text-decoration: underline;">@qc6Forms.FileReference</a>
                                                 </td>
                                                 <td>@qc6Forms.ProspectiveClient</td>
-                                                <td>@qc6Forms.PeriodEnded</td>
+                                                <td>@qc6Forms.PeriodEnded.ToString("dd/MM/yyyy")</td>
                                                 <td>@qc6Forms.EngagementType</td>
                                                 <td>@qc6Forms.PreparedBy</td>
                                                 <td>@qc6Forms.FormSubmissionDate</td>
@@ -110,6 +110,20 @@
 
                         <div class="table-responsive">
                             <table class="table datatable table-responsive" id="firstApproverTable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            File Reference
+                                        </th>
+                                        <th>Prospective Client</th>
+                                        <th>Period Ended</th>
+                                        <th>Type of Engagement</th>
+                                        <th>Prepared By</th>
+                                        <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                     @if (Model.FirstApproverConclusions != null && Model.FirstApproverConclusions.Any())
                                     {
@@ -122,7 +136,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = form.QC6FormID })" style="color: #007bff; text-decoration: underline;">@form.FileReference</a>
                                                 </td>
                                                 <td>@form.ProspectiveClient</td>
-                                                <td>@form.PeriodEnded</td>
+                                                <td>@form.PeriodEnded.ToString("dd/MM/yyyy")</td>
                                                 <td>@form.EngagementType</td>
                                                 <td>@form.PreparedBy</td>
                                                 <td>@form.FormSubmissionDate</td>
@@ -207,7 +221,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = form.QC6FormID })" style="color: #007bff; text-decoration: underline;">@form.FileReference</a>
                                                 </td>
                                                 <td>@form.ProspectiveClient</td>
-                                                <td>@form.PeriodEnded</td>
+                                                <td>@form.PeriodEnded.ToString("dd/MM/yyyy")</td>
                                                 <td>@form.EngagementType</td>
                                                 <td>@form.PreparedBy</td>
                                                 <td>@form.FormSubmissionDate</td>
@@ -263,17 +277,10 @@
         </div>
     </section>
 </main>
-<div id="QC6FormUpdateToastMessage" data-message="@TempData["QC6FormUpdateToastMessage"]"></div>
-<div id="toastMessage" data-message="@TempData["ToastMessage"]"></div>
-<div id="approvalToastMessage" data-message="@TempData["ApprovalToastMessage"]"></div>
-<div id="toastType" data-message="@TempData["ToastType"]"></div>
-
-@{
-    TempData.Keep("QC6FormUpdateToastMessage");
-    TempData.Keep("ToastMessage");
-    TempData.Keep("ApprovalToastMessage");
-    TempData.Keep("ToastType");
-}
+<div id="QC6FormUpdateToastMessage" data-message="@ViewData["QC6FormUpdateToastMessage"]"></div>
+<div id="toastMessage" data-message="@ViewData["ToastMessage"]"></div>
+<div id="approvalToastMessage" data-message="@ViewData["ApprovalToastMessage"]"></div>
+<div id="toastType" data-message="@ViewData["ToastType"]"></div>
 
 @section Scripts {
     <script src="~/js/qc6-form-management-admin.js"></script>

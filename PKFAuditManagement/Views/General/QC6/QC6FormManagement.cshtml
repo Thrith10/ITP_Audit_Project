@@ -49,7 +49,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = engagement.QC6FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
                                                 </td>
                                                 <td>@engagement.ProspectiveClient</td>
-                                                <td>@engagement.PeriodEnded</td>
+                                                <td>@engagement.PeriodEnded.ToString("dd/MM/yyyy")</td>
                                                 <td>@engagement.EngagementType</td>
                                                 <td>@engagement.PreparedBy</td>
                                                 <td>@engagement.FormSubmissionDate</td>
@@ -109,14 +109,21 @@
         </div>
     </section>
 </main><!-- End #main -->
-<div id="QC6FormUpdateToastMessage" data-message="@TempData["QC6FormUpdateToastMessage"]"></div>
-<div id="toastMessage" data-message="@TempData["ToastMessage"]"></div>
-
-@{
-    TempData.Keep("QC6FormUpdateToastMessage");
-    TempData.Keep("ToastMessage");
-}
+<div id="QC6FormUpdateToastMessage" data-message="@ViewData["QC6FormUpdateToastMessage"]"></div>
+<div id="toastMessage" data-message="@ViewData["ToastMessage"]"></div>
 
 @section Scripts {
     <script src="~/js/qc6-form-management-user.js"></script>
 }
+
+                <style>
+    /* Ensure the dropdown menu has a higher z-index */
+    .dropdown-menu {
+        z-index: 1000; /* Adjust the value as needed */
+    }
+
+    /* Ensure the dropdown menu is positioned correctly */
+    .dropdown-menu {
+        position: absolute;
+    }
+                    </style>
