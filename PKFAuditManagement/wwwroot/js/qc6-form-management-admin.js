@@ -98,3 +98,11 @@ if (approvalToastMessage) {
         notyf.error(approvalToastMessage);
     }
 }
+
+// Read the data-message attribute value
+var QC6FormUpdateToastMessage = document.getElementById("QC6FormUpdateToastMessage").getAttribute("data-message");
+
+if (QC6FormUpdateToastMessage) {
+    // Display the toast message
+    notyf.success(QC6FormUpdateToastMessage);
+}

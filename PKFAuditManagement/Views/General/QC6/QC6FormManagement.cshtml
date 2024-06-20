@@ -23,75 +23,81 @@
                         </div>
                         <p>The table displays the QC6 Forms that have been created by you. Users are able to create, edit and delete QC6 Forms.</p>
                         <!-- Table with stripped rows -->
-                        <table class="table datatable">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        File Reference
-                                    </th>
-                                    <th>Prospective Client</th>
-                                    <th>Period Ended</th>
-                                    <th>Type of Engagement</th>
-                                    <th>Prepared By</th>
-                                    <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model != null)
-                                {
-                                    foreach (var engagement in Model)
+                        <div class="table-responsive">
+                            <table class="table datatable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            File Reference
+                                        </th>
+                                        <th>Prospective Client</th>
+                                        <th>Period Ended</th>
+                                        <th>Type of Engagement</th>
+                                        <th>Prepared By</th>
+                                        <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null)
                                     {
-                                        <tr>
-                                            <td>
-                                                <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = engagement.QC6FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
-                                            </td>
-                                            <td>@engagement.ProspectiveClient</td>
-                                            <td>@engagement.PeriodEnded</td>
-                                            <td>@engagement.EngagementType</td>
-                                            <td>@engagement.PreparedBy</td>
-                                            <td>@engagement.FormSubmissionDate</td>
-                                            <td>
-                                                @if (engagement.Status == "Pending")
-                                                {
-                                                    <span class="badge bg-warning">Pending</span>
-                                                }
-                                                else if (engagement.Status == "Approved")
-                                                {
-                                                    <span class="badge bg-success">Approved</span>
-                                                }
-                                                else if (engagement.Status == "Rejected")
-                                                {
-                                                    <span class="badge bg-danger">Rejected</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-secondary">@engagement.Status</span>
-                                                }
-                                            </td>
-                                            <td>
-                                                <div class="dropdown">
-                                                    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        Actions
-                                                    </a>
+                                        foreach (var engagement in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = engagement.QC6FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
+                                                </td>
+                                                <td>@engagement.ProspectiveClient</td>
+                                                <td>@engagement.PeriodEnded</td>
+                                                <td>@engagement.EngagementType</td>
+                                                <td>@engagement.PreparedBy</td>
+                                                <td>@engagement.FormSubmissionDate</td>
+                                                <td>
+                                                    @if (engagement.Status == "Pending")
+                                                    {
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    }
+                                                    else if (engagement.Status == "Pending 2nd Approval")
+                                                    {
+                                                        <span class="badge bg-warning">Pending 2nd Approval</span>
+                                                    }
+                                                    else if (engagement.Status == "Approved")
+                                                    {
+                                                        <span class="badge bg-success">Approved</span>
+                                                    }
+                                                    else if (engagement.Status == "Rejected")
+                                                    {
+                                                        <span class="badge bg-danger">Rejected</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">@engagement.Status</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </a>
 
-                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                                        <li><a class="dropdown-item" href="@Url.Action("ViewQC6Form", new { id = engagement.QC6FormID })">View</a></li>
-                                                        <li><a class="dropdown-item" href="@Url.Action("EditQC6Form", new { id = engagement.QC6FormID })">Edit</a></li>
-                                                        <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC6Form", new { id = engagement.QC6FormID })')">Delete</a></li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                            <li><a class="dropdown-item" href="@Url.Action("ViewQC6Form", new { id = engagement.QC6FormID })">View</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC6Form", new { id = engagement.QC6FormID })">Edit</a></li>
+                                                            <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC6Form", new { id = engagement.QC6FormID })')">Delete</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    <tr><td colspan="7">No data found.</td></tr>
-                                }
-                            </tbody>
-                        </table>
+                                    else
+                                    {
+                                        <tr><td colspan="7">No data found.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                         <!-- End Table with stripped rows -->
                     </div>
                 </div>
@@ -103,8 +109,13 @@
         </div>
     </section>
 </main><!-- End #main -->
-
+<div id="QC6FormUpdateToastMessage" data-message="@TempData["QC6FormUpdateToastMessage"]"></div>
 <div id="toastMessage" data-message="@TempData["ToastMessage"]"></div>
+
+@{
+    TempData.Keep("QC6FormUpdateToastMessage");
+    TempData.Keep("ToastMessage");
+}
 
 @section Scripts {
     <script src="~/js/qc6-form-management-user.js"></script>

@@ -10,12 +10,13 @@
             <div class="row">
                 <div class="col-lg-12">
                     <form class="needs-validation" asp-action="UpdateQC6Form" asp-controller="QC6Form" id="qc6Form" method="post">
+                        <input type="hidden" class="form-control" asp-for="QC6FormID" value="@Model.QC6FormID">
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">New engagement / client acceptance checklist</h5>
                                 <span class="text-danger">* indicates a mandatory field</span>
                                 <br><br>
-                                @if (@Model.Status == "Rejected")
+                                @if (!string.IsNullOrEmpty(Model.RejectionReason))
                                 {
                                     <div class="alert alert-warning fade show" role="alert">
                                         <h4 class="alert-heading">The form has been rejected</h4>
@@ -27,19 +28,19 @@
                                     <div class="row mb-3">
                                         <label asp-for="ProspectiveClient" class="col-sm-2 col-form-label">Prospective Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ProspectiveClient" value="@Model.ProspectiveClient">
+                                            <input type="text" class="form-control" asp-for="ProspectiveClient" value="@Model.ProspectiveClient" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputEmail3" class="col-sm-2 col-form-label">Period Ended:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="date" class="form-control" asp-for="PeriodEnded">
+                                            <input type="date" class="form-control" asp-for="PeriodEnded" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label asp-for="EngagementType" class="col-sm-2 col-form-label">Type of Engagement:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="EngagementType">
+                                            <input type="text" class="form-control" asp-for="EngagementType" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -47,10 +48,10 @@
                                             <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy">
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" required>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="PreparedByDate">
+                                            <input type="date" class="form-control" asp-for="PreparedByDate" required>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -70,34 +71,34 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Name of PKF entity proposing for the service<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="PKFEntityProposingService">
+                                            <input type="text" class="form-control" asp-for="PKFEntityProposingService" required>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Source of referral of prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="SourceOfReferral">
+                                            <input type="text" class="form-control" asp-for="SourceOfReferral" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Indicate the nature of service for estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="NatureOfServiceForEstimateFee">
+                                            <input type="text" class="form-control" asp-for="NatureOfServiceForEstimateFee" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00">
+                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00">
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -106,7 +107,7 @@
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="BudgetedFeeRecoveryRate" asp-for="BudgetedFeeRecoveryRate">
+                                                <input type="text" class="form-control" id="BudgetedFeeRecoveryRate" asp-for="BudgetedFeeRecoveryRate" required>
                                                 <span class="input-group-text">%</span>
                                             </div>
                                         </div>
@@ -127,14 +128,14 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Type of activities of prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="TypeOfActivities">
+                                            <input type="text" class="form-control" asp-for="TypeOfActivities" required>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Complexity of engagement based on preliminary evaluation<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement">
+                                            <input type="text" class="form-control" asp-for="ComplexityOfEngagement" required>
                                         </div>
                                     </div>
 
@@ -148,7 +149,7 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance">
+                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" required>
                                         </div>
                                     </div>
 
@@ -212,13 +213,13 @@
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="grandTotal" asp-for="GrandTotal">
+                                                    <input type="number" class="form-control" id="grandTotal" asp-for="GrandTotal" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee">
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -227,7 +228,7 @@
                                                     <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration">
+                                                    <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration" required>
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
@@ -472,13 +473,13 @@
                                                                             </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" class="form-control" placeholder="Signed By" value="@testDescription.SignBy" />
+                                                                            <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignBy" value="@testDescription.SignBy"/>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" />
+                                                                            <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignDate"/>
                                                                         </td>
                                                                         <td>
-                                                                            <textarea class="form-control" rows="3" placeholder="Ref/Comment">@testDescription.Comment</textarea>
+                                                                             <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment">@testDescription.Comment.Replace("<br>", "\n")</textarea>
                                                                         </td>
                                                                     </tr>
                                                     }
@@ -543,7 +544,7 @@
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Name of safeguard reviewer assigned by Head of Division/Managing Partner/Quality Management Partner:<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewerAssigned">
+                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewerAssigned" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -572,17 +573,17 @@
                                 <div class="row mb-3">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">Having considered the objectives above, I am satisfied that we should accept the engagement subject to approval by the Managing Partner/Quality Management Partner/Head of Division<span class="text-danger"> *</span> </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="Satisfaction">
+                                        <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy">
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy" required>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate">
+                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -590,7 +591,12 @@
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">To be approved by:</span>
                                         </label>
-                                        <input type="text" class="form-control" id="inputText" value="@Model.EPHODApprovedBy" disabled>
+                                        <select asp-for="EPHODApprovedBy" class="form-control" value="TEST">
+                                            @foreach (var email in Model.AdminEmails)
+                                            {
+                                                <option value="@email">@email</option>
+                                            }
+                                        </select>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
@@ -602,7 +608,12 @@
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">To be approved by:</span>
                                         </label>
-                                        <input type="text" class="form-control" id="inputText" value="@Model.MPHODQMPApprovedBy" disabled>
+                                        <select asp-for="MPHODQMPApprovedBy" class="form-control">
+                                            @foreach (var email in Model.AdminEmails)
+                                            {
+                                                <option value="@email">@email</option>
+                                            }
+                                        </select>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:</label>

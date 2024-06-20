@@ -11,6 +11,18 @@
                 <div class="col-lg-12">
                     <form class="needs-validation" asp-action="SubmitQC6Form" asp-controller="QC6Form" id="qc6Form" method="post">
                         <div class="row mb-3">
+                            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: '@Model.ErrorMessage'
+                                        });
+                                    });
+                                </script>
+                            }
                             @if (ViewBag.Errors != null)
                             {
                                 <ul>
@@ -27,7 +39,14 @@
                         </div>
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">New engagement / client acceptance checklist</h5>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <h5 class="card-title">New engagement / client acceptance checklist</h5>
+                                    </div>
+                                    <div class="col-6 mt-3 text-end">
+                                        <a asp-controller="QC6Form" asp-action="GenerateDefaultTemplate" class="btn btn-primary btn-lg">Generate Default Template</a>
+                                    </div>
+                                </div>
                                 <span class="text-danger">* indicates a mandatory field</span> 
                                 <br><br>
                                 <form>
@@ -473,7 +492,7 @@
                                                                 <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignDate" required />
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment"></textarea>
+                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment">@testDescription.Comment.Replace("<br>", "\n")</textarea>
                                                             </td>
                                                         </tr>
                                                     }

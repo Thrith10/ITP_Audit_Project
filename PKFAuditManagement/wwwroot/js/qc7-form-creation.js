@@ -1,3 +1,4 @@
+
 $(document).ready(function () {
     // Function to update the Prior year’s recovery rate
     function updatePriorYearRecoveryRate() {

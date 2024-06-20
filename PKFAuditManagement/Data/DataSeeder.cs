@@ -33,10 +33,11 @@ namespace PKFAuditManagement.Data
                    new QC6FormObjective() { QC6FormObjectiveID = 3, QC6SubFormID = 1, ObjectiveNo = 3, Objective = "Objective - To ensure that the firm has the ability to perform the professional services properly" },
                    new QC6FormObjective() { QC6FormObjectiveID = 4, QC6SubFormID = 1, ObjectiveNo = 4, Objective = "Objective - To ensure that our appointment is properly effected and that the scope of our work is acknowledged by the client" },
                    new QC6FormObjective() { QC6FormObjectiveID = 5, QC6SubFormID = 1, ObjectiveNo = 5, Objective = "Objective – To ensure that the entity has been properly constituted in compliance with relevant legislation." },
+                   new QC6FormObjective() { QC6FormObjectiveID = 6, QC6SubFormID = 1, ObjectiveNo = 6, Objective = "Objective – To establish the identity of the client to assist in identifying possible instances of money laundering (“AML”) and terrorism financing activities (“CTF”)." },
                    // Seeding for QC6 Second Sub Form
-                   new QC6FormObjective() { QC6FormObjectiveID = 6, QC6SubFormID = 2, ObjectiveNo = 6, Objective = "Objective – Acceptance Procedures" },
+                   new QC6FormObjective() { QC6FormObjectiveID = 7, QC6SubFormID = 2, ObjectiveNo = 7, Objective = "Objective – Acceptance Procedures" },
                    // Seeding for QC6 Third Sub Form
-                   new QC6FormObjective() { QC6FormObjectiveID = 7, QC6SubFormID = 3, ObjectiveNo = 7, Objective = "Objective – Acceptance Procedures" }
+                   new QC6FormObjective() { QC6FormObjectiveID = 8, QC6SubFormID = 3, ObjectiveNo = 8, Objective = "Objective – Acceptance Procedures" }
             );
 
             modelBuilder.Entity<QC6FormTestDescription>().HasData(
@@ -60,181 +61,174 @@ namespace PKFAuditManagement.Data
                        QC6FormTestDescriptionID = 3,
                        QC6FormObjectiveID = 2,
                        DescriptionNo = 3,
-                       Description = "<p>3. Consider whether the firm can comply with relevant ethical requirements, including the firm’s independence. Include in your consideration potential independence or conflicts of interest problems arising from relationships with other clients, firm members, or their families; providing non-assurance services; or unpaid fees.</p>\r\n"
+                       Description = "<p>3. Consider whether the firm can comply with relevant ethical requirements, including the firm’s independence. Include in your consideration potential independence or conflicts of interest problems arising from relationships with other clients, firm members, or their families; providing non-assurance services; or unpaid fees.</p>\r\n<p>4. Regarding the proposed relationship between the firm and the client or any associated companies, decide whether we are, and can be seen to be, independent of the client.  Consider:</p><ul><li>Undue dependence</li><li>Proposed contingent fees</li><li>Preparation of accounting records</li><li>Receipt of hospitality, goods, or services</li><li>Voting on audit appointments</li><li>Director or senior employee joining client</li><li>Participation in affairs of client</li><li>Influences from the outside practice (including associated firms)</li><li>Litigation (actual or threatened)</li><li>Family or professional relationships</li><li>Prohibited services</li><li>Financial involvement, including trustee investments, mutual business interests, loans, beneficial interests- shares/trusts, overdue fees</li><li>Network form independence conflict checking procedures performed (i.e. conflict of interest to be considered by completing either “Audit and Review Engagements – Firm and Network Independence” or “Non-assurance Engagements – Firm and Network Independence,” which are part of this form.</li></ul>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 4,
-                       QC6FormObjectiveID = 2,
+                       QC6FormObjectiveID = 3,
                        DescriptionNo = 4,
-                       Description = "<p>4. Regarding the proposed relationship between the firm and the client or any associated companies, decide whether we are, and can be seen to be, independent of the client.  Consider:</p><ul><li>Undue dependence</li><li>Proposed contingent fees</li><li>Preparation of accounting records</li><li>Receipt of hospitality, goods, or services</li><li>Voting on audit appointments</li><li>Director or senior employee joining client</li><li>Participation in affairs of client</li><li>Influences from the outside practice (including associated firms)</li><li>Litigation (actual or threatened)</li><li>Family or professional relationships</li><li>Prohibited services</li><li>Financial involvement, including trustee investments, mutual business interests, loans, beneficial interests- shares/trusts, overdue fees</li><li>Network form independence conflict checking procedures performed (i.e. conflict of interest to be considered by completing either “Audit and Review Engagements – Firm and Network Independence” or “Non-assurance Engagements – Firm and Network Independence,” which are part of this form.</li></ul>\r\n"
+                       Description = "<p>5. Decide whether we have the competence to carry out the professional services properly. Consider whether special skills are needed to deal with the particular features or specialised reporting requirements of the client.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 5,
                        QC6FormObjectiveID = 3,
                        DescriptionNo = 5,
-                       Description = "<p>5. Decide whether we have the competence to carry out the professional services properly. Consider whether special skills are needed to deal with the particular features or specialised reporting requirements of the client.</p>\r\n"
+                       Description = "<p>6. Is there any reason to believe that management will not provide access to all information of which management is aware that is relevant to the preparation of the financial statements including access to information relevant to disclosures?</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 6,
                        QC6FormObjectiveID = 3,
                        DescriptionNo = 6,
-                       Description = "<p>6. Is there any reason to believe that management will not provide access to all information of which management is aware that is relevant to the preparation of the financial statements including access to information relevant to disclosures?</p>\r\n"
+                       Description = "<p>7. Confirm that the firm will have adequate resources to be able to do the work properly at the time the client needs it. <br /> Note:  For example, to indicate if the engagement will be performed by outsourced staff.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 7,
-                       QC6FormObjectiveID = 3,
+                       QC6FormObjectiveID = 4,
                        DescriptionNo = 7,
-                       Description = "<p>7. Confirm that the firm will have adequate resources to be able to do the work properly at the time the client needs it. <br /> Note:  For example, to indicate if the engagement will be performed by outsourced staff.</p>\r\n"
+                       Description = "<p>8. Send, and obtain a response to, a professional enquiry letter to the previous auditors/reporting accountants <b>(if any)</b>.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 8,
                        QC6FormObjectiveID = 4,
                        DescriptionNo = 8,
-                       Description = "<p>8. Send, and obtain a response to, a professional enquiry letter to the previous auditors/reporting accountants <b>(if any)</b>.</p>\r\n"
+                       Description = "<p>9. Obtain and review the previous auditor’s letter of resignation <b>(if applicable)</b> and statement of circumstances connected with their leaving office.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 9,
                        QC6FormObjectiveID = 4,
                        DescriptionNo = 9,
-                       Description = "<p>9. Obtain and review the previous auditor’s letter of resignation <b>(if applicable)</b> and statement of circumstances connected with their leaving office.</p>\r\n"
+                       Description = "<p>10. Obtain a copy of the minutes appointing PKF as auditors.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 10,
                        QC6FormObjectiveID = 4,
                        DescriptionNo = 10,
-                       Description = "<p>10. Obtain a copy of the minutes appointing PKF as auditors.</p>\r\n"
+                       Description = "<p>11. Send an engagement letter and obtain the client’s agreement to its terms before starting work.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 11,
                        QC6FormObjectiveID = 4,
                        DescriptionNo = 11,
-                       Description = "<p>11. Send an engagement letter and obtain the client’s agreement to its terms before starting work.</p>\r\n"
+                       Description = "<p>12. Carry out other tests necessary to meet this objective and document such additional considerations.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 12,
-                       QC6FormObjectiveID = 4,
+                       QC6FormObjectiveID = 5,
                        DescriptionNo = 12,
-                       Description = "<p>12. Carry out other tests necessary to meet this objective and document such additional considerations.</p>\r\n"
+                       Description = "<p>13. Obtain and file documents of constitution and certificate of incorporation <b>(where applicable)</b>.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 13,
                        QC6FormObjectiveID = 5,
                        DescriptionNo = 13,
-                       Description = "<p>13. Obtain and file documents of constitution and certificate of incorporation <b>(where applicable)</b>.</p>\r\n"
+                       Description = "<p>14. Where possible, verify that appropriate documents have been filed with the relevant authorities and that these support the information provided by the entity’s records.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
                        QC6FormTestDescriptionID = 14,
                        QC6FormObjectiveID = 5,
                        DescriptionNo = 14,
-                       Description = "<p>14. Where possible, verify that appropriate documents have been filed with the relevant authorities and that these support the information provided by the entity’s records.</p>\r\n"
-                   },
-                   new QC6FormTestDescription()
-                   {
-                       QC6FormTestDescriptionID = 15,
-                       QC6FormObjectiveID = 5,
-                       DescriptionNo = 15,
                        Description = "<p>15. Carry out other tests if necessary to achieve this objective.</p>\r\n"
                    },
                     new QC6FormTestDescription()
                     {
-                        QC6FormTestDescriptionID = 16,
-                        QC6FormObjectiveID = 5,
-                        DescriptionNo = 16,
+                        QC6FormTestDescriptionID = 15,
+                        QC6FormObjectiveID = 6,
+                        DescriptionNo = 15,
                         Description = "<p>16. Carry out procedures for establishing/verifying the identity of new clients for possible instances of money laundering if there are indicators or suspicion of such activities based on the evaluation of integrity of the new client set out above. <ol class=\"list-decimal pl-4\"><li>Perform a search of the company’s name, all directors and ultimate beneficial owners owning more than 25% equity interest in the ultimate holding company using LexisNexis. This screening covers not only identifying any PEPs but also terrorist names, terrorist organisations and names sanctioned by United States / United Nations. A copy of the screening should be attached to QC6(3).</li> <br> <li>Carry out a google check on the company’s name, names of the directors and ultimate BOs owning more than 25% equity interest in the ultimate holding company. A copy of the google check should be attached to QC6(3).</li> <br> <li>For audit clients whereby the companies are incorporated by our related entities, PKF-CAP Corporate Services Pte Ltd (“CS”) or PKF-Khoo Management Services Pte Ltd (“KMS”), then carry out a review of the screening and google checking that have been carried out by CS or KMS. If the result is satisfactory, then document the review that you have performed. No further screening or checking is required unless work performed is considered not adequate for our purposes. This placing of reliance is acceptable so long as the screening carried out by CS or KMS is current within 12 months from our client/engagement evaluation date.</li></ol> <i><b>Note:</b> If the prospective client is - (a) an entity listed on the Singapore Exchange; (b) an entity listed on a stock exchange outside Singapore; (c) a Singapore financial institution; (d) a financial institution incorporated or established outside Singapore; or (e) an investment vehicle, the managers of which are — (i) Singapore financial institutions; or (ii) financial institutions incorporated or established outside Singapore, under the Accountants Act 2004, Accountants (Prevention of Money Laundering and Financing of Terrorism) Rules 2023, an accounting entity need not inquire if there exists any beneficial owner unless the accounting entity has doubts about the veracity of the information obtained by the accounting entity in carrying out customer due diligence measures under these Rules or suspects that the client is carrying out or facilitating money laundering or the financing of terrorism. <br><br> “Beneficial owner” means — (a) an individual who ultimately owns all of the assets or undertakings of the client (whether or not the client is a body corporate); (b) an individual who has ultimate control or ultimate effective control over, or has executive authority in, the client; or (c) an individual on whose behalf the client has employed or engaged the services of an accounting entity.</i></p>"
                     },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 17,
-                       QC6FormObjectiveID = 5,
-                       DescriptionNo = 17,
+                       QC6FormTestDescriptionID = 16,
+                       QC6FormObjectiveID = 6,
+                       DescriptionNo = 16,
                        Description = "<p>Are the directors identified to be a Political Exposed Person(“PEP”)? If yes,please establish where the source of funds are obtained?</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 18,
-                       QC6FormObjectiveID = 5,
-                       DescriptionNo = 18,
+                       QC6FormTestDescriptionID = 17,
+                       QC6FormObjectiveID = 6,
+                       DescriptionNo = 17,
                        Description = "<p>Are the ultimate beneficial owners (individuals owning more than 25% equity interest in the ultimate holding company) a PEP? If yes, please establish where the source of funds are obtained?</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 19,
-                       QC6FormObjectiveID = 6,
-                       DescriptionNo = 19,
+                       QC6FormTestDescriptionID = 18,
+                       QC6FormObjectiveID = 7,
+                       DescriptionNo = 18,
                        Description = "<p><b>When proposing for an audit or review engagement: </b><br><br>a) Is the potential client listed (public)? If yes, proceed to (c). If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group.<br><br>If there are listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (d).</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 20,
-                       QC6FormObjectiveID = 6,
-                       DescriptionNo = 20,
+                       QC6FormTestDescriptionID = 19,
+                       QC6FormObjectiveID = 7,
+                       DescriptionNo = 19,
                        Description = "<p>b) If there are listed entities in the group, investigate whether the firm or other PKF Member Firms provide audit or review services to these listed entities.<br><br>This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities (this is not required).<br><br>If the firm or other Member Firms provide audit or review services to listed entities in the group, proceed to (c). If not, proceed to (d).</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 21,
-                       QC6FormObjectiveID = 6,
-                       DescriptionNo = 21,
+                       QC6FormTestDescriptionID = 20,
+                       QC6FormObjectiveID = 7,
+                       DescriptionNo = 20,
                        Description = "<p>c) If the potential client is listed, or the firm or other Member Firms provide audit or review services to listed entities in the group, independence considerations must include all related entities as defined in the IESBA Code for Professional Accountants.<br><br>Enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or any related entities. This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these related entities.<br><br>If the firm or other Member Firms provide non-assurance services to the potential client or any related entities, proceed to (f). If not, no further action is required.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 22,
-                       QC6FormObjectiveID = 6,
-                       DescriptionNo = 22,
+                       QC6FormTestDescriptionID = 21,
+                       QC6FormObjectiveID = 7,
+                       DescriptionNo = 21,
                        Description = "<p>d) If the potential client is not listed and there are no listed entities in the group or the firm or other Member Firms do not provide audit or review services to any listed entities in the group, enquire as to whether the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control.<br><br>This enquiry shall be direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.<br><br>If the firm or other Member Firms provide non-assurance services to the potential client or entities over which the potential client has direct or indirect control, proceed to (f). If not, proceed to (e).</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 23,
-                       QC6FormObjectiveID = 6,
-                       DescriptionNo = 23,
+                       QC6FormTestDescriptionID = 22,
+                       QC6FormObjectiveID = 7,
+                       DescriptionNo = 22,
                        Description = "<p>e) Is there reason to believe that a relationship or circumstance involving any other related entity of the potential client is relevant to the evaluation of the firm’s independence from the client? If yes, apply step (f) below to that related entity. If not, no further action is required.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 24,
-                       QC6FormObjectiveID = 6,
-                       DescriptionNo = 24,
+                       QC6FormTestDescriptionID = 23,
+                       QC6FormObjectiveID = 7,
+                       DescriptionNo = 23,
                        Description = "<p>f) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.<br><br>Carry out the evaluation under the IESBA International Code of Ethics for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 25,
-                       QC6FormObjectiveID = 7,
-                       DescriptionNo = 25,
+                       QC6FormTestDescriptionID = 24,
+                       QC6FormObjectiveID = 8,
+                       DescriptionNo = 24,
                        Description = "<p><b>When proposing for a non-assurance engagement:</b><br><br>a) Is the potential client listed (public)? If not, research the family tree and ascertain if there is a listed (or publicly traded) entity or entities in the group.<br><br>If the potential client is listed or there are other listed entities in the group, proceed to (b). If the potential client is not listed and there are no listed entities in the group, proceed to (c).</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 26,
-                       QC6FormObjectiveID = 7,
-                       DescriptionNo = 26,
+                       QC6FormTestDescriptionID = 25,
+                       QC6FormObjectiveID = 8,
+                       DescriptionNo = 25,
                        Description = "<p>b) If the potential client is listed or there are other listed entities in the group, investigate whether the firms or other PKF Member Firms provide audit or review services to these listed entities. This investigation shall include direct enquiry of client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these listed entities.<br><br>If the firm or other Member Firms do not provide audit or review services to listed entities in the group, proceed to (c).<br><br>If the firm or other Member Firms provide audit or review services to these listed entities, independence considerations must include all related entities as defined in the IESBA International Code for Professional Accountants, including International Independence Standards. Proceed to (d).</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 27,
-                       QC6FormObjectiveID = 7,
-                       DescriptionNo = 27,
+                       QC6FormTestDescriptionID = 26,
+                       QC6FormObjectiveID = 8,
+                       DescriptionNo = 26,
                        Description = "<p>c) If the potential client is not listed and there are no other listed entities in the group, or the firm or other Member Firms do not provide audit or review services to the listed entities in the group, enquire as to whether the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client.<br><br>This enquiry shall be direct enquiry of the client management and review of the transnational entity listing and may be supplemented by an email to the Member Firm(s) geographically close to these entities.<br><br>If the firm or other Member Firms provide audit or review services to the potential client or entities that have direct or indirect control over the potential client, proceed to (d). If not, no further action is required.</p>\r\n"
                    },
                    new QC6FormTestDescription()
                    {
-                       QC6FormTestDescriptionID = 28,
-                       QC6FormObjectiveID = 7,
-                       DescriptionNo = 28,
+                       QC6FormTestDescriptionID = 27,
+                       QC6FormObjectiveID = 8,
+                       DescriptionNo = 27,
                        Description = "<p>d) Evaluate the significance of the threats identified and apply safeguards when necessary to eliminate the threat or reduce it to an acceptable level. This may include not accepting the engagement.<br><br>Carry out the evaluation under the IESBA International Code for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter.</p>"
                    }
              );
@@ -359,37 +353,37 @@ namespace PKFAuditManagement.Data
                 new QC6Form
                 {
                     QC6FormID = 1,
-                    CreatedBy = "User1",
-                    FileReference = "FileRef001",
-                    ProspectiveClient = "ClientA",
-                    PeriodEnded = new DateTime(2023, 12, 31, 23, 59, 59, 999),
-                    EngagementType = "Audit",
-                    PreparedBy = "User1",
+                    CreatedBy = "",
+                    FileReference = "",
+                    ProspectiveClient = "ABC Corporation Ltd. (the “Company”) and its subsidiaries (the “Group”)",
+                    PeriodEnded = new DateTime(2024, 12, 31, 23, 59, 59, 999),
+                    EngagementType = "Statutory audit of financial statements",
+                    PreparedBy = "",
                     PreparedByDate = new DateTime(2023, 11, 15, 10, 30, 0, 0),
-                    ReviewedBy = "User2",
-                    ReviewedByDate = new DateTime(2023, 11, 25, 10, 30, 0, 0),
-                    Status = "Submitted",
+                    ReviewedBy = "",
+                    Status = "Pending",
                     RejectionReason = null,
                     FormSubmissionDate = new DateTime(2023, 12, 1, 9, 0, 0, 0),
-                    PKFEntityProposingService = "EntityA",
-                    SourceOfReferral = "ReferralA",
-                    NatureOfServiceForEstimateFee = "Audit Services",
-                    EstimatedFee = 5000.00m,
-                    BudgetedTimeCost = 3000.00m,
-                    BudgetedFeeRecoveryRate = 0.60m,
+                    PKFEntityProposingService = "PKF-CAP LLP",
+                    SourceOfReferral = "During the year, PKF-CAP LLP were requested to submit a proposal for the provision of audit services for the financial year ended 31 December 2024.",
+                    NatureOfServiceForEstimateFee = "Audit Fees",
+                    EstimatedFee = 165000.00m,
+                    BudgetedTimeCost = 550000.00m,
+                    BudgetedFeeRecoveryRate = 30.00m,
                     OutstandingUnpaidFees = false,
-                    AuditFee = 2000.00m,
-                    GrandTotal = 7000.00m,
-                    FeeConcentration = 0.10m,
+                    AuditFee = 0.00m,
+                    GrandTotal = 0.00m,
+                    FeeConcentration = 0.00m,
                     ConflictsCheckDone = true,
-                    TypeOfActivities = "Financial Audit",
-                    ComplexityOfEngagement = "High",
-                    PredecessorAuditor = "AuditorA",
-                    ReasonsForDiscontinuance = "Client request",
+                    TypeOfActivities = "The principal activities of the Company and its subsidiaries are (i) to provide contract\r\n\r\nmanufacturing, design, engineering and assembly for the electronics industry; (ii) to provide design, manufacture and sale of automated machines, apparatus, systems and equipment; and (iii) provision of fund management services and conducting investment activities in equity securities and funds.",
+                    ComplexityOfEngagement = "Not a complex engagement.",
+                    PredecessorAuditor = "XYZ LLP",
+                    ReasonsForDiscontinuance = "XYZ LLP has been the Independent Auditor since the listing of the shares of the Company in 2018. The Board is of the view that, as a good corporate governance measure that the Company should consider change of auditors after an appropriate period of time. Such change would enhance the independence and objectivity of the external audit services on the Company and would be in the best interest of the Company and the Shareholders as a whole.",
                     PublicInterestEntity = true,
-                    PublicInterestEntityType = "TypeA",
+                    PublicInterestEntityType = "The Company is a limited liability company incorporated and domiciled in Singapore and is listed on the Main Board of the Stock Exchange of Singapore Limited (the “SGX”).",
                     IsSubForm2NotApplicable = false,
-                    IsSubForm3NotApplicable = false
+                    IsSubForm3NotApplicable = false,
+                    IsTemplate = true
                 },
                 new QC6Form
                 {
@@ -533,6 +527,224 @@ namespace PKFAuditManagement.Data
                 }
             );
 
+            modelBuilder.Entity<QC6FormConclusion>().HasData(
+               new QC6FormConclusion
+               {
+                   QC6FormID = 1,
+                   QC6FormConclusionID = 1,
+                   AnySignificantRisk = false,
+                   NewEngagementRiskRating = "High Risk 1 (H1)",
+                   NewEngagementRiskRatingReason = "The Company being a limited liability company incorporated and domiciled in Singapore and is listed on\r\n\r\nthe Main Board of the Stock Exchange of Singapore Limited (the “SGX”) is automatically marked as high\r\n\r\nrisk client.",
+                   EngagementSubjectedTo = "Full safeguard review (H1)",
+                   SafeguardReviewerAssigned = "Titus Kuan",
+                   IsNewEngagementAcceptance = "Accepted",
+                   IsSuspiciousTransactionReportFiled = false,
+                   Satisfaction = "Yes.",
+                   PreparedBy = ""
+                }
+            );
+
+            modelBuilder.Entity<QC6FormFeeDetail>().HasData(
+               new QC6FormFeeDetail
+               {
+                   QC6FormFeeDetailID = 1,
+                   QC6FormID = 1,
+                   Fee = 0.00m,
+                   NatureOfService = "Non-audit services"
+               }
+            );
+
+            modelBuilder.Entity<QC6FormTest>().HasData(
+               new QC6FormTest
+               {
+                   QC6FormTestID = 1,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 1,
+                   Comments = "We have carried out the following procedures during our evaluation: <br><br> 1) Obtained the Accounting and Corporate Regulatory Authority (“ACRA”) records from the government in Singapore and there was no trace of adverse or negative profile/news noted. <br><br> 2) We have screened in Google search the Company name and names of directors of the Company and no adverse news was noted. <br><br> 3) We have screened in Lexis Nexis the Company name and names of directors of the Company and no adverse news was noted. <br><br> 4) We did not identify any conflict of interest in (TREND – Network Conflict Search) for conflict search; and <br><br> 5) We have sent out and cleared any potential conflict through email communications within PKF Singapore. <br><br> As such, we are not aware of any significant matters that would give rise to concerns over integrity of management, based on our discussion with the Management, to our reputation as a firm from our association with the Company and the Group as their external auditor."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 2,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 2,
+                   Comments = "From the above information, we have not noted any indicators that would cause concern for us in taking up this audit engagement."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 3,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 3,
+                   Comments = "Based on the procedures as cited above, we have not noted any threats to independence and/or conflicts of interest with the Company and the Group.<br><br>We have assessed and are not aware of any independence or conflict of interest that requires additional precautions.<br><br>We concluded that we are in compliance with the relevant ethical requirements, including the firm’s independence."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 4,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 4,
+                   Comments = "We have the necessary competency to carry out the engagement."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 5,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 5,
+                   Comments = "None."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 6,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 6,
+                   Comments = "We have adequate resources to carry out the engagement."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 7,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 7,
+                   Comments = "We have obtained professional clearance from XYZ LLP dated 17 April 2024."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 8,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 8,
+                   Comments = "Not applicable. The reasons for change of auditor were made public in their Company announcement."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 9,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 9,
+                   Comments = "Not applicable. The reasons for change of auditor were made public in their Company announcement."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 10,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 10,
+                   Comments = "The engagement letter will be prepared and sent to management to be signed upon the approval of QC6(3)."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 11,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 11,
+                   Comments = "No further procedures are considered to be necessary. Our acceptance procedures as performed above are adequate.<br><br>The application as external auditor was reviewed and accepted/approved by the Accounting and Financial Reporting Council of Singapore, following a rigorous process."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 12,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 12,
+                   Comments = "We have obtained and reviewed the Questnet profile search of the Company.<br><br>The review of the Articles and Memorandum of Association will be performed subsequently as part of our statutory audit procedures after the satisfactory\r\n\r\ncompletion of the client acceptance evaluation and appointment of PKF-CAP LLP as the auditor of the Company."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 13,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 13,
+                   Comments = "This procedure will be performed subsequently as part of our statutory audit procedures after the satisfactory completion of the client acceptance evaluation and appointment of PKF- CAP LLP as the auditor of the Company."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 14,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 14,
+                   Comments = "Not applicable since no exceptions are noted in our procedures performed above."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 15,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 15,
+                   Comments = "We have carried out the following procedures:<br><br>1. We have performed searches of the Company names and names of all the directors using Lexi Nexis Screening and Google Searches.<br><br>2. We have performed google checks on the Company name and names of the directors.<br>The Company is a limited liability company incorporated and domiciled in Singapore and is listed on the Main Board of the Stock Exchange of Singapore.<br><br>3. Not applicable. The Company is not incorporated by our related entities, PKF-CAP corporate Services Pte Ltd (“CS”) or PKF- Khoo Management Services Pte Ltd (“KMS”).<br><br>From the above procedures, we have not noted any indicator or suspicion of any possible instances of money laundering and terrorism financing activities."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 16,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 16,
+                   Comments = "Yes. 3 out of 10 Directors are PEP. Since the Company is listed in Singapore Exchange, it is deemed not necessary to obtain their source of funds.<br><br>1. Ang PH - PEP<br>2. Du XT - PEP<br>3. F ZNG - PEP<br>4. GN Gwn – Non PEP<br>5. H Chee – No exact match<br>6. LKM – No exact match<br>7. L Choi – No exact match<br>8. Loh Kin – No exact match<br>9. Tee Kim – No exact match<br>10. Sunil – No exact match"
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 17,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 17,
+                   Comments = "Since the Company is listed in Singapore Exchange, it is deemed not necessary to identify the ultimate beneficial owners of the Company.<br>Please refer to the Company’s Annual Report which is publicly available."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 18,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 18,
+                   Comments = "Yes."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 19,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 19,
+                   Comments = "N/A."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 20,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 20,
+                   Comments = "We made direct enquiries to the Company and the Group as to whether the firm or other Member Firms provide non-assurance services to the Company or any related entities. And we have also cleared and reviewed our TREND Database search. <br><br> None."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 21,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 21,
+                   Comments = "NA."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 22,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 22,
+                   Comments = "NA."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 23,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 23,
+                   Comments = "We have not noted any threats to independence and/or conflicts of interest with the Company and the Group.<br><br>We are not aware of any independence or conflict of interest that requires additional precautions.<br><br>We conclude that we are in compliance with the relevant ethical requirements (IESBA International Code of Ethics for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter), including the firm’s independence."
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 24,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 24,
+                   Comments = "NA"
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 25,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 25,
+                   Comments = "NA"
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 26,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 26,
+                   Comments = "NA"
+               },
+               new QC6FormTest
+               {
+                   QC6FormTestID = 27,
+                   QC6FormID = 1,
+                   QC6FormTestDescriptionID = 27,
+                   Comments = "NA"
+               }
+            );
         }
     }
 }

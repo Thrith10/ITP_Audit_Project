@@ -51,10 +51,16 @@ const notyf = new Notyf({
     position: { x: 'center', y: 'top' }
 });
 
-// Read the data-message attribute value
+// Read the data-message attribute value for QC6FormUpdateToastMessage
+var QC6FormUpdateToastMessage = document.getElementById("QC6FormUpdateToastMessage").getAttribute("data-message");
+
+// Read the data-message attribute value for ToastMessage
 var toastMessage = document.getElementById("toastMessage").getAttribute("data-message");
 
-if (toastMessage) {
-    // Display the toast message
+if (QC6FormUpdateToastMessage) {
+    // Display the QC6FormUpdateToastMessage
+    notyf.success(QC6FormUpdateToastMessage);
+} else if (toastMessage) {
+    // Display the toastMessage
     notyf.success(toastMessage);
 }
