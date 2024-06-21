@@ -31,7 +31,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
 });
-
+builder.Services.AddHostedService<EmailBackgroundService>();
 builder.Configuration.AddEnvironmentVariables();
 var emailPassword = builder.Configuration["SMTP_PASSWORD"];
 
@@ -43,7 +43,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>(sp =>
 {
     var smtpOptions = sp.GetRequiredService<IOptions<SmtpOptions>>().Value;
-    return new EmailSender(smtpOptions);
+    return new EmailSender(smtpOptions); 
 });
 
 // Add SignInManager service

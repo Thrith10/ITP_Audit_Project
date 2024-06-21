@@ -37,6 +37,9 @@ namespace PKFAuditManagement.Data
         public DbSet<QC35FormTestDescription> QC35FormTestDescriptions { get; set; }
         public DbSet<QC35ChecklistItem> QC35ChecklistItems { get; set; }
 
+        public DbSet<SignedFSForm> SignedFSForm { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
