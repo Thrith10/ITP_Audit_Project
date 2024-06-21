@@ -1,0 +1,95 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PKFAuditManagement.Data;
+using PKFAuditManagement.Models;
+using PKFAuditManagement.ViewModels;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+
+namespace PKFAuditManagement.Controllers
+{
+    public class SignedFSFormController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public SignedFSFormController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        [HttpGet]
+        public IActionResult ScheduleEmails()
+        {
+            var model = new SignedFSFormViewModel
+            {
+                UserEmail = User.Identity.Name // Assuming the user email is set in the identity
+            };
+            return View("~/Views/General/SignedFS/SignedFSForm.cshtml", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ScheduleEmails(SignedFSFormViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Save the uploaded file (Financial Statement)
+                var filePath = string.Empty;
+                if (model.FinancialStatement != null)
+                {
+                    filePath = Path.Combine(filePath, model.FinancialStatement.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.FinancialStatement.CopyToAsync(stream);
+                    }
+                }
+
+                // Create the scheduled job entries
+                var jobs = new List<SignedFSForm>
+                {
+                    new SignedFSForm
+                    {
+                        AuditedReportDate = model.AuditedReportDate,
+                        PartnerEmail = model.PartnerEmail,
+                        UserEmail = model.UserEmail,
+                        FilePath = filePath,
+                        ScheduleDate = DateTime.Now.AddMinutes(1), // ScheduleDate for demo
+                        EmailType = "First Reminder",
+                        EmailBody = "This is the first reminder. Please take necessary actions.",
+                        IsProcessed = false
+                    },
+                    new SignedFSForm
+                    {
+                        AuditedReportDate = model.AuditedReportDate,
+                        PartnerEmail = model.PartnerEmail,
+                        UserEmail = model.UserEmail,
+                        FilePath = filePath,
+                        ScheduleDate = DateTime.Now.AddMinutes(2), // ScheduleDate for demo
+                        EmailType = "Second Reminder",
+                        EmailBody = "This is the second reminder. Please take necessary actions.",
+                        IsProcessed = false
+                    },
+                    new SignedFSForm
+                    {
+                        AuditedReportDate = model.AuditedReportDate,
+                        PartnerEmail = model.PartnerEmail,
+                        UserEmail = model.UserEmail,
+                        FilePath = filePath,
+                        ScheduleDate = DateTime.Now.AddMinutes(3), // ScheduleDate for demo
+                        EmailType = "Final Reminder",
+                        EmailBody = "This is the final reminder. Please take necessary actions.",
+                        IsProcessed = false
+                    }
+                };
+
+                _context.SignedFSForm.AddRange(jobs);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Form submitted successfully!";
+
+                return RedirectToAction("ScheduleEmails");
+            }
+            return View(model);
+        }
+    }
+}
