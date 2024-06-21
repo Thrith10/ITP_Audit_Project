@@ -361,7 +361,8 @@ namespace PKFAuditManagement.Controllers
                     transaction.Commit();
 
                     // Set the success message for the toast notification
-                    ViewData["QC7FormUpdateToastMessage"] = "QC7 Form updated successfully.";
+                    TempData["QC7UpdateMessage"] = "QC7 Form updated successfully.";
+
                     if (roles.Contains("Admin"))
                     {
                         // Redirect to admin-specific page
@@ -702,6 +703,9 @@ namespace PKFAuditManagement.Controllers
                     await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC7 Form Creation",
 $"A new QC7 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
 
+                    // Set the success message for the toast notification
+                    TempData["QC7CreateMessage"] = "QC7 Form created successfully.";
+
                     if (roles.Contains("Admin"))
                     {
                         // Redirect to admin-specific page
@@ -788,8 +792,6 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
                     await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC7 Form Creation",
 $"A new QC7 Form has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
 
-                    // Set the success message for the toast notification
-                    ViewData["ApprovalToastMessage"] = "QC7 Form approved successfully, an email has been sent to the 2nd approver for approval.";
                 }
                 // If EPHOD approval date is already set, check if MPHODQMP approval date is not set
                 else if (conclusion.MPHODQMPApprovedByDate == null)
@@ -805,19 +807,13 @@ $"A new QC7 Form has been approved by: {conclusion.EPHODApprovedBy} and you've b
                     await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
 $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC7 Form.");
 
-                    // Set the success message for the toast notification
-                    ViewData["ApprovalToastMessage"] = "QC7 Form approved successfully.";
                 }
 
                 _context.SaveChanges();
 
-                ViewData["ToastType"] = "success"; // Use this to differentiate between success and error messages
             }
             catch (Exception ex)
             {
-                // Set the error message for the toast notification
-                ViewData["ApprovalToastMessage"] = "An error occurred while approving the QC7 Form. Please try again later.";
-                ViewData["ToastType"] = "error";
             }
 
 
@@ -859,9 +855,6 @@ $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                 conclusion.MPHODQMPApprovedByDate = null;
 
                 _context.SaveChanges();
-
-                // Set the success message for the toast notification
-                ViewData["ToastMessage"] = "QC7 Form rejected successfully.";
 
                 return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
             }

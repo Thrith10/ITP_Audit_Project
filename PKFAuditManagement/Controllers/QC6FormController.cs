@@ -45,12 +45,6 @@ namespace PKFAuditManagement.Controllers
             }
             var userId = user?.Id;
 
-            if (TempData.ContainsKey("ToastMessage"))
-            {
-                string toastMessage;
-                toastMessage = TempData["ToastMessage"].ToString();
-            }
-
             // Retrieve engagement data from database
             var qc6forms = _context.QC6Forms.Where(e => e.CreatedBy.Equals(userId) && !e.IsTemplate).ToList();
             return View("~/Views/General/QC6/QC6FormManagement.cshtml", qc6forms);
@@ -451,7 +445,11 @@ namespace PKFAuditManagement.Controllers
                     transaction.Commit();
 
                     // Set the success message for the toast notification
-                    ViewData["QC6FormUpdateToastMessage"] = "QC6 Form updated successfully.";
+                    TempData["QC6UpdateMessage"] = "QC6 Form updated successfully.";
+
+                    await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Update",
+$"The QC6 Form {viewModel.FileReference} has been updated and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+
                     if (roles.Contains("Admin"))
                     {
                         // Redirect to admin-specific page
@@ -712,9 +710,6 @@ namespace PKFAuditManagement.Controllers
 
                     await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC6 Form Creation",
 $"A new QC6 Form has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
-
-                    // Set the success message for the toast notification
-                    ViewData["ApprovalToastMessage"] = "QC6 Form approved successfully, an email has been sent to the 2nd approver for approval.";
                 }
                 // If EPHOD approval date is already set, check if MPHODQMP approval date is not set
                 else if (conclusion.MPHODQMPApprovedByDate == null)
@@ -729,20 +724,13 @@ $"A new QC6 Form has been approved by: {conclusion.EPHODApprovedBy} and you've b
 
                     await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
 $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC6 Form.");
-
-                    // Set the success message for the toast notification
-                    ViewData["ApprovalToastMessage"] = "QC6 Form approved successfully.";
                 }
 
                 _context.SaveChanges();
-
-                ViewData["ToastType"] = "success"; // Use this to differentiate between success and error messages
             }
             catch (Exception ex)
             {
-                // Set the error message for the toast notification
-                ViewData["ApprovalToastMessage"] = "An error occurred while approving the QC6 Form. Please try again later.";
-                ViewData["ToastType"] = "error";
+
             }
 
 
@@ -784,9 +772,6 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                 conclusion.MPHODQMPApprovedByDate = null;
 
                 _context.SaveChanges();
-
-                // Set the success message for the toast notification
-                ViewData["ToastMessage"] = "QC6 Form rejected successfully.";
 
                 return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
             }
@@ -1024,7 +1009,7 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                     $"A new QC6 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
 
                     // Set the success message for the toast notification
-                    TempData["ToastMessage"] = "QC6 Form created successfully.";
+                    TempData["QC6CreateMessage"] = "QC6 Form created successfully.";
 
                     if (roles.Contains("Admin"))
                     {

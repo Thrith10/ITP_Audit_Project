@@ -1,6 +1,36 @@
 ﻿@using PKFAuditManagement.ViewModels
 @model QC6FormAdminManagementViewModel
 
+<!-- Start of Alerts -->
+@{
+    var createMessage = TempData["QC6CreateMessage"] as string;
+    var updateMessage = TempData["QC6UpdateMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
+{
+    <div class="alert alert-info">
+        @createMessage @updateMessage
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notyf = new Notyf({
+                position: { x: 'center', y: 'top' }
+            });
+
+            var createMessage = '@createMessage';
+            if (createMessage) {
+                notyf.success(createMessage);
+            }
+
+            var updateMessage = '@updateMessage';
+            if (updateMessage) {
+                notyf.success(updateMessage);
+            }
+        });
+    </script>
+}
+<!-- End of Alerts -->
+
 <main id="main" class="main">
     <div class="pagetitle">
         <h1>Manage QC6 Forms</h1>
@@ -277,10 +307,6 @@
         </div>
     </section>
 </main>
-<div id="QC6FormUpdateToastMessage" data-message="@ViewData["QC6FormUpdateToastMessage"]"></div>
-<div id="toastMessage" data-message="@ViewData["ToastMessage"]"></div>
-<div id="approvalToastMessage" data-message="@ViewData["ApprovalToastMessage"]"></div>
-<div id="toastType" data-message="@ViewData["ToastType"]"></div>
 
 @section Scripts {
     <script src="~/js/qc6-form-management-admin.js"></script>
