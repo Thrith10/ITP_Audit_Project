@@ -1,65 +1,55 @@
-﻿@using PKFAuditManagement.ViewModels
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<CustomUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+    var role = roles.Any() ? roles[0] : null;
+}
+
+@using PKFAuditManagement.ViewModels
 @model QC7FormCreationViewModel
 
 <div class="justify-content-center">
     <main id="main" class="main">
         <div class="pagetitle">
-            <h1>Form QC7(3)</h1>
+            <h1>View Form QC7(3) - @Model.FileReference</h1>
         </div><!-- End Page Title -->
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">
-                    <form class="needs-validation" asp-action="SubmitQC7Form" asp-controller="QC7Form" method="post">
-                        <div class="row mb-3">
-                            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                            {
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function () {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Error',
-                                            text: '@Model.ErrorMessage'
-                                        });
-                                    });
-                                </script>
-                            }
-                            @if (ViewBag.Errors != null)
-                            {
-                                <ul>
-                                    @foreach (var error in ViewBag.Errors)
-                                    {
-                                        <li>@error.ErrorMessage</li>
-                                    }
-                                </ul>
-                            }
-                            else if (ViewBag.ErrorMessage != null)
-                            {
-                                <span class="alert alert-danger">@ViewBag.ErrorMessage</span>
-                            }
-                        </div>
+                    <form>
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Continuing engagement / client evaluation checklist</h5>
                                 <span class="text-danger">* indicates a mandatory field</span>
                                 <br><br>
+                                @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                                {
+                                    <div class="alert alert-warning fade show" role="alert">
+                                        <h4 class="alert-heading">The form has been rejected</h4>
+                                        <hr>
+                                        <p class="mb-0">@Model.RejectionReason</p>
+                                    </div>
+                                }
                                 <form>
-                                    @Html.AntiForgeryToken()
                                     <div class="row mb-3">
                                         <label asp-for="Client" class="col-sm-2 col-form-label">Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="Client" required>
+                                            <input type="text" class="form-control" asp-for="Client" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputEmail3" class="col-sm-2 col-form-label">Period Ended:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="date" class="form-control" asp-for="PeriodEnded" required>
+                                            <input type="date" class="form-control" asp-for="PeriodEnded" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label asp-for="EngagementType" class="col-sm-2 col-form-label">Type of Engagement:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="EngagementType" required>
+                                            <input type="text" class="form-control" asp-for="EngagementType" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -67,10 +57,10 @@
                                             <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" value="@Model.UserEmail" required>
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" disabled>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="PreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                                            <input type="date" class="form-control" asp-for="PreparedByDate" disabled>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -78,11 +68,11 @@
                                             <strong>Reviewed by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="ReviewedBy">
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="ReviewedBy" disabled>
                                             <span asp-validation-for="ReviewedBy" class="text-danger"></span>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                            <input type="date" class="form-control" asp-for="ReviewedByDate" disabled>
                                             <span asp-validation-for="ReviewedByDate" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -92,72 +82,71 @@
                                         <label class="col-sm-2 col-form-label">Prior year’s fee<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="PriorYearFee" placeholder="0.00" id="comp1" required>
+                                            <input type="number" class="form-control" asp-for="PriorYearFee" placeholder="0.00" id="comp1" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Time Costs<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="TimeCosts" placeholder="0.00" id="timeCosts" required>
+                                            <input type="number" class="form-control" asp-for="TimeCosts" placeholder="0.00" id="timeCosts" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Prior year’s recovery rate (Net fee / time costs)<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="number" class="form-control" disabled placeholder="0.00" id="PriorYearRecoveryRate">
+                                            <input type="number" class="form-control" asp-for="PriorYearRecoveryRate" placeholder=" 0.00" id="PriorYearRecoveryRate" disabled>
                                             <span class="input-group-text">%</span>
-                                            <input type="hidden" asp-for="PriorYearRecoveryRate" id="PriorYearRecoveryRateHidden">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid audit fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidAuditFees">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidAuditFees" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Type of activities of client<span class="text-danger"> *</span> </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="TypeOfClientActivities" required>
+                                            <input type="text" class="form-control" asp-for="TypeOfClientActivities" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Risk rating in prior year<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="RiskRatingPriorYear" required>
+                                            <input type="text" class="form-control" asp-for="RiskRatingPriorYear" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any Suspicious Transaction Report filed with CAD in prior year(s)?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" onchange="toggleSuspiciousTransactionReportPriorYear()" id="suspiciousTransactionReportPriorYearCheckbox" asp-for="AnySuspiciousTransactionReportFiled">
+                                            <input class="form-check-input" type="checkbox" asp-for="AnySuspiciousTransactionReportFiled" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3" id="suspiciousTransactionReportPriorYearRow" style="display: none;">
                                         <label class="col-sm-2 col-form-label">Comment for Suspicious Transaction Report filed</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <textarea class="form-control" asp-for="SuspiciousTransactionReportFiledComment" id="suspiciousTransactionReportFiledComment"></textarea>
+                                            <textarea class="form-control" asp-for="SuspiciousTransactionReportFiledComment" id="suspiciousTransactionReportFiledComment" disabled></textarea>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Name of safeguard reviewer (if applicable)</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="SafeguardReviewerName">
+                                            <input type="text" class="form-control" asp-for="SafeguardReviewerName" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Non-audit fees charged for this client (tax, accounting, secretarial, XBRL etc)<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="text" class="form-control">
+                                            <input type="text" class="form-control" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid non-audit fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidNonAuditFees">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidNonAuditFees" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -166,21 +155,21 @@
                                             <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)<span class="text-danger"> *</span></span>
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="FeeConcentration" placeholder="0.00">
+                                            <input type="text" class="form-control" asp-for="FeeConcentration" placeholder="0.00" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Proposed fee for current year<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" placeholder="0.00" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" id="budgetedTimeCost" required>
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" id="budgetedTimeCost" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -190,21 +179,21 @@
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <input type="number" class="form-control" disabled id="proposedRecoveryRateCurrentYear" placeholder="0.00">
-                                            <input type="hidden" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden">
+                                            <input type="hidden" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden" disabled>
                                             <span class="input-group-text">%</span>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity">
+                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity" disabled>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3" id="riskLevelRow" style="display:none;">
                                         <label class="col-sm-2 col-form-label">Type of PIE</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType">
+                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType" disabled>
                                                 <option value="Listed">Listed</option>
                                                 <option value="Financial Institution">Financial Institution</option>
                                                 <option value="Large Charity">Large Charity</option>
@@ -226,56 +215,72 @@
                                     <!-- Checkbox for hiding/showing the table -->
                                     @if (subFormIndex == 1 || subFormIndex == 2)
                                     {
-                                        <div class="form-check mb-3">
-                                            <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
-                                            <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" onclick="toggleSubForm(@subFormIndex)">
-                                            <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
-                                                Not Applicable
-                                            </label>
-                                        </div>
+                                        @if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable))
+                                        {
+                                            <div class="form-check mb-3">
+                                                <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" checked disabled>
+                                                <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                    Not Applicable
+                                                </label>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="form-check mb-3">
+                                                <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" disabled>
+                                                <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                    Not Applicable
+                                                </label>
+                                            </div>
+                                        }
                                     }
-                                    <div class="table-responsive" id="tableContainer@(subFormIndex)">
-                                        <table class="table table-bordered table-striped">
-                                            <thead class="table-light" style="background-color: #f8f9fa;">
-                                                <tr>
-                                                    <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
-                                                    <th class="text-left text-uppercase">Sign</th>
-                                                    <th class="text-left text-uppercase">Date</th>
-                                                    <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
+                                    <div class="table-responsive" id="tableContainer@(subFormIndex)" @if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable))
+                                    {
+                                        <text> style="display:none;"</text>
+                                    }>
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="table-light" style="background-color: #f8f9fa;">
+                                                    <tr>
+                                                        <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
+                                                        <th class="text-left text-uppercase">Sign</th>
+                                                        <th class="text-left text-uppercase">Date</th>
+                                                        <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
                                                 @foreach (var objective in subForm.Objectives)
                                                 {
-                                                    <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives.Index" value="@objective.QC7FormObjectiveID" />
+                                                            <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives.Index" value="@objective.QC7FormObjectiveID" />
 
-                                                    <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                        <td colspan="4"><b>@objective.Objective</b></td>
-                                                    </tr>
+                                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                                <td colspan="4"><b>@objective.Objective</b></td>
+                                                            </tr>
                                                     @foreach (var testDescription in objective.TestDescriptions)
                                                     {
-                                                        <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC7FormTestDescriptionID" />
-                                                        <tr class="text-zinc-700 dark:text-zinc-400">
-                                                            <td>
-                                                                <div>
-                                                                    <p>@Html.Raw(@testDescription.Description)</p>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" class="form-control" placeholder="Signed By" value="@Model.UserEmail" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignBy" />
-                                                            </td>
-                                                            <td>
-                                                                <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignDate" />
-                                                            </td>
-                                                            <td>
-                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment"></textarea>
-                                                            </td>
-                                                        </tr>
+                                                                    <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC7FormTestDescriptionID" />
+                                                                    <tr class="text-zinc-700 dark:text-zinc-400">
+                                                                        <td>
+                                                                            <div>
+                                                                                <p>@Html.Raw(@testDescription.Description)</p>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="text" class="form-control" placeholder="Signed By" value="@testDescription.SignBy" disabled />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" disabled />
+                                                                        </td>
+                                                                        <td>
+                                                                                        <textarea class="form-control" rows="3" placeholder="Ref/Comment" disabled>@testDescription.Comment</textarea>
+                                                                        </td>
+                                                                    </tr>
                                                     }
                                                 }
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     subFormIndex++;
                                 }
                                 <h5 class="card-title">Conclusion</h5>
@@ -295,33 +300,33 @@
                                         <br>
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input" type="checkbox" id="risksAssociatedCheckbox" onchange="toggleRisksAssociated()" asp-for="AnyRiskAssociated">
+                                        <input class="form-check-input" type="checkbox" id="risksAssociatedCheckbox" onchange="toggleRisksAssociated()" asp-for="AnyRiskAssociated" disabled>
                                     </div>
                                 </div>
                                 <div id="risksAssociatedRow" style="display:none;">
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">(a) Explain what is the risk in current year compared to prior year:</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <textarea class="form-control" rows="4" asp-for="RiskExplanationCurrentYearPriorYear" id="riskExplanationCurrentYearPriorYear"></textarea>
+                                            <textarea class="form-control" rows="4" asp-for="RiskExplanationCurrentYearPriorYear" id="riskExplanationCurrentYearPriorYear" disabled></textarea>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">(b)	Are there any safeguards that should be applied?</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="isSafeguardApplied" asp-for="IsSafeguardApplied">
+                                            <input class="form-check-input" type="checkbox" id="isSafeguardApplied" asp-for="IsSafeguardApplied" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">(c)	Specify the nature of the safeguard to address the issue(s) identified in the evaluation of continuance of engagement or client: </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="NatureOfSafeguard" id="natureOfSafeguard">
+                                            <input type="text" class="form-control" asp-for="NatureOfSafeguard" id="natureOfSafeguard" disabled>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Continuing engagement / client *risk rated in current year as:<span class="text-danger"> *</span>  <br> *See <a>Appendix 1</a> for categories of risks</label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <select class="form-control" id="riskLevel" asp-for="ContinuingEngagementRiskRated">
+                                        <select class="form-control" id="riskLevel" asp-for="ContinuingEngagementRiskRated" disabled>
                                             <option value="Normal (N)">Normal (N)</option>
                                             <option value="Moderate (M)">Moderate (M)</option>
                                             <option value="High Risk (H1)">High Risk (H1)</option>
@@ -332,7 +337,7 @@
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Safeguard review partner assigned (if applicable): </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewPartnerAssigned">
+                                        <input type="text" class="form-control" id="inputText" asp-for="SafeguardReviewPartnerAssigned" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -341,7 +346,7 @@
                                         <i><u>Note</u><br>If yes, please set out the rationale and basis for STR in a separate memo. If in doubt, please discuss with the firm’s Money Laundering Reporting Officer (MLRO) and if necessary, seek advice from legal counsel after discussing with Managing Partner and /or Quality Management Partner.</i><br>
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input" type="checkbox" id="isSuspiciousTransactionReportFiled" onchange="toggleSuspiciousTransactionReport()" asp-for="IsSuspiciousTransactionReportFiled">
+                                        <input class="form-check-input" type="checkbox" id="isSuspiciousTransactionReportFiled" onchange="toggleSuspiciousTransactionReport()" asp-for="IsSuspiciousTransactionReportFiled" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3" id="strRationale" style="display:none;">
@@ -349,13 +354,13 @@
                                         Rationale and Basis for STR
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <textarea class="form-control" id="strRationaleComment" rows="4" asp-for="SuspiciousTransactionReportFiledRationale"></textarea>
+                                        <textarea class="form-control" id="strRationaleComment" rows="4" asp-for="SuspiciousTransactionReportFiledRationale" disabled></textarea>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Should engagement or client be retained or rejected?<span class="text-danger"> *</span> </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <select class="form-control" id="riskLevel" asp-for="EngagementRetainedRejected">
+                                        <select class="form-control" id="riskLevel" asp-for="EngagementRetainedRejected" disabled>
                                             <option value="Retained">Retained</option>
                                             <option value="Rejected">Rejected</option>
                                         </select>
@@ -364,11 +369,11 @@
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="EMPreparedBy" value="@Model.UserEmail">
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="EMPreparedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                        <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -376,12 +381,7 @@
                                         <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC7 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">Approval by:</span>
                                         </label>
-                                        <select asp-for="EPHODApprovedBy" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        <input type="text" class="form-control" id="inputText" asp-for="EPHODApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
@@ -393,12 +393,7 @@
                                         <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC7 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">Final Approval by:</span>
                                         </label>
-                                        <select asp-for="MPHODQMPApprovedBy" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        <input type="text" class="form-control" id="inputText" asp-for="MPHODQMPApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:</label>
@@ -418,7 +413,15 @@
                                     </i>
                                 </p>
                                 <div class="text-center">
-                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC7 Form</button>
+                                    <a class="btn btn-primary" href="javascript:history.back()">Back</a>
+                                    @if (role == "Admin")
+                                    {
+                                        if (Model.Status == "Pending" || Model.Status == "Pending 2nd Approval")
+                                        {
+                                            <button class="btn btn-success" id="approveButton" value="@Model.QC7FormID">Approve</button>
+                                            <button class="btn btn-danger" id="rejectButton" value="@Model.QC7FormID">Reject</button>
+                                        }
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -490,5 +493,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/qc7-form-creation.js"></script>
+    <script src="~/js/qc7-form-view.js"></script>
 }

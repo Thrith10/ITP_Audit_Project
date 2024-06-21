@@ -5,10 +5,17 @@ namespace PKFAuditManagement.ViewModels
 {
     public class QC7FormCreationViewModel
     {
+        public QC7FormCreationViewModel()
+        {
+            TNATNEAssessment = new TNATNEAssessmentViewModel();
+        }
         // User Details
         public string? UserEmail { get; set; }
 
         // Start of QC7Form data
+        public string? QC7FormID { get; set; }
+        public string? Status { get; set; }
+        public string? RejectionReason { get; set; }
         public string? FileReference { get; set; }
         [Required]
         public string? Client { get; set; }
@@ -27,7 +34,6 @@ namespace PKFAuditManagement.ViewModels
         public decimal? PriorYearFee { get; set; }
         [Required]
         public decimal? TimeCosts { get; set; }
-        [Required]
         public decimal? PriorYearRecoveryRate { get; set; }
         public bool AnyOutstandingUnpaidAuditFees { get; set; }
         [Required]
@@ -36,7 +42,6 @@ namespace PKFAuditManagement.ViewModels
         public string? RiskRatingPriorYear { get; set; }
         public bool AnySuspiciousTransactionReportFiled { get; set; }
         public string? SuspiciousTransactionReportFiledComment { get; set; }
-        [Required]
         public string? SafeguardReviewerName { get; set; }
         public bool AnyOutstandingUnpaidNonAuditFees { get; set; }
         [Required]
@@ -55,28 +60,27 @@ namespace PKFAuditManagement.ViewModels
 
         // Start of QC7FormConclusion date
         public bool AnyRiskAssociated { get; set; }
-        [Required]
         public string? RiskExplanationCurrentYearPriorYear { get; set; }
         public bool IsSafeguardApplied { get; set; }
-        [Required]
         public string? NatureOfSafeguard { get; set; }
         [Required]
         public string? ContinuingEngagementRiskRated { get; set; }
-        [Required]
         public string? SafeguardReviewPartnerAssigned { get; set; }
         public bool IsSuspiciousTransactionReportFiled { get; set; }
         public string? SuspiciousTransactionReportFiledRationale { get; set; }
         [Required]
         public string? EngagementRetainedRejected { get; set; }
-        [Required]
         public string? EMPreparedBy { get; set; }
-        [Required]
         public DateTime? EMPreparedByDate { get; set; }
         public string? EPHODApprovedBy { get; set; }
         public DateTime? EPHODApprovedByDate { get; set; }
         public string? MPHODQMPApprovedBy { get; set; }
         public DateTime? MPHODQMPApprovedByDate { get; set; }
+        public bool SubForm1NotApplicable { get; set; }
+        public bool SubForm2NotApplicable { get; set; }
         public List<QC7SubFormViewModel> SubForms { get; set; }
+        public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
+        public List<string>? AdminEmails { get; set; }
     }
 
     public class QC7SubFormViewModel

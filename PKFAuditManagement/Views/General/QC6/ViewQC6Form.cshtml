@@ -486,7 +486,7 @@
                                                                 <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" disabled />
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" disabled>@testDescription.Comment</textarea>
+                                                                            <textarea class="form-control" rows="3" placeholder="Ref/Comment" disabled>@testDescription.Comment.Replace("<br>", "\n")</textarea>
                                                             </td>
                                                         </tr>
                                                     }

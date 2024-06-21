@@ -1,3 +1,22 @@
+// Function for disabling all textareas and input on "Not Applicable" selection
+function toggleSubForm(subFormIndex) {
+    const checkbox = document.getElementById(`toggleSubForm${subFormIndex}`);
+    const hiddenInput = document.querySelector(`input[name="SubForm${subFormIndex}NotApplicable"]`);
+
+    hiddenInput.value = checkbox.checked ? 'true' : 'false';
+
+    const tableContainer = document.getElementById(`tableContainer${subFormIndex}`);
+    const inputs = tableContainer.getElementsByTagName('input');
+    const textareas = tableContainer.getElementsByTagName('textarea');
+
+    for (let i = 0; i < inputs.length; i++) {
+        inputs[i].disabled = !inputs[i].disabled;
+    }
+
+    for (let i = 0; i < textareas.length; i++) {
+        textareas[i].disabled = !textareas[i].disabled;
+    }
+}
 
 $(document).ready(function () {
     // Function to update the Prior year’s recovery rate
@@ -111,7 +130,6 @@ function toggleRiskLevel() {
     } else {
         riskLevelRow.style.display = 'none';
         riskLevel.disabled = true;
-        riskLevel.value = '';
     }
 }
 

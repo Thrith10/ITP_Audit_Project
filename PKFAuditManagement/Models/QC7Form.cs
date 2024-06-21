@@ -15,6 +15,7 @@ namespace PKFAuditManagement.Models
         public string? ReviewedBy { get; set; }
         public DateTime ReviewedByDate { get; set; }
         public required string Status { get; set; }
+        public string? RejectionReason { get; set; }
         public DateTime FormSubmissionDate { get; set; }
         public required decimal PriorYearFee { get; set; }
         public required decimal TimeCosts { get; set; }
@@ -24,7 +25,7 @@ namespace PKFAuditManagement.Models
         public required string RiskRatingPriorYear { get; set; }
         public bool AnySuspiciousTransactionReportFiled { get; set; }
         public string? SuspiciousTransactionReportFiledComment { get; set; }
-        public required string SafeguardReviewerName { get; set; }
+        public string? SafeguardReviewerName { get; set; }
         public bool AnyOutstandingUnpaidNonAuditFees { get; set; }
         public decimal? FeeConcentration { get; set; }
         public required decimal ProposedFeeCurrentYear { get; set; }
@@ -32,6 +33,9 @@ namespace PKFAuditManagement.Models
         public required decimal ProposedRecoveryRateCurrentYear { get; set; }
         public bool IsPublicInterestEntity { get; set; }
         public string? PublicInterestEntityType { get; set; }
+        public bool IsSubForm2NotApplicable { get; set; }
+        public bool IsSubForm3NotApplicable { get; set; }
+
         public ICollection<QC7FormTest> QC7FormTests { get; set; } // One-to-Many
         public QC7FormConclusion QC7FormConclusion { get; set; } // One-to-One
 

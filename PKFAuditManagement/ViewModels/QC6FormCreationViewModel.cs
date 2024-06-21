@@ -109,7 +109,7 @@ namespace PKFAuditManagement.ViewModels
 
     public class SectionBViewModel
     {
-        public string IsAudit { get; set; }
+        public string? IsAudit { get; set; }
         public bool Q1 { get; set; }
         public bool Q2 { get; set; }
         public bool Q3 { get; set; }
