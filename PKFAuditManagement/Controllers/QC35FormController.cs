@@ -132,12 +132,8 @@ namespace PKFAuditManagement.Controllers
         },
                 ChecklistItems = new List<QC35ChecklistItemViewModel>
         {
-            new QC35ChecklistItemViewModel { Description = "No. of working paper files" },
-            new QC35ChecklistItemViewModel { Description = "Working papers are transferred from arch files to paper files" },
-            new QC35ChecklistItemViewModel { Description = "Working paper files are numbered sequentially" },
-            new QC35ChecklistItemViewModel { Description = "All working papers in each file is complete (Manager to initial all working papers)" },
+            new QC35ChecklistItemViewModel { Description = "All working papers in each file is reviewed and completed (Manager to initial or sign all working papers)" },
             new QC35ChecklistItemViewModel { Description = "Date of Audit Report" },
-            new QC35ChecklistItemViewModel { Description = "Date of approval of files for archival is within 60 days from date of Audit Report" },
             new QC35ChecklistItemViewModel { Description = "Date of approval and confirmation that CaseWare Audit files has been locked down within 60 days from the date of the Audit Report (if applicable). Refer to the screenshot of CaseWare below." }
         }
             };
@@ -370,6 +366,27 @@ namespace PKFAuditManagement.Controllers
                 throw;
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return Content("file not selected");
+            }
+
+            var path = Path.Combine(
+                        Directory.GetCurrentDirectory(), "wwwroot/uploads",
+                        file.FileName); // Use the FileName property directly
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return Ok(new { file.FileName }); // Return a JSON response
+        }
+
 
     }
 }

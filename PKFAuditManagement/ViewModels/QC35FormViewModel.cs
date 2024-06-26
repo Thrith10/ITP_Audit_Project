@@ -21,7 +21,7 @@ namespace PKFAuditManagement.ViewModels
 
         [Required]
         public DateTime ReportingYearEnd { get; set; }
-
+        public string ManagerName { get; set; }
         public string PartnerName { get; set; }
         public string PartnerInitial { get; set; }
         public DateTime? PartnerDate { get; set; }
