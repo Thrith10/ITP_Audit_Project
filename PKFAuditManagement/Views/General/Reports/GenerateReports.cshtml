@@ -47,11 +47,9 @@
                                     <!-- Remove the Create Report button -->
                                 </div>
                             </div>
-                            <!-- Description or additional information -->
-                            <p>As an admin, you can generate reports for QC6 and QC7 forms.</p>
 
                             <!-- Dropdown for selecting form type -->
-                            <div class="mb-3">
+                            <div class="mb-3" id="formTypeContainer">
                                 <label for="formType" class="form-label">Select Form Type:</label>
                                 <select id="formType" class="form-select" onchange="filterForms()">
                                     <option value="QC6" selected>QC6 Forms</option>
@@ -241,6 +239,7 @@
                 table.style.display = "none"; // Hide the table
                 checkboxForm.style.display = "block"; // Show the checkbox form
                 document.querySelector('.next-button').style.display = "none"; // Hide the Next button
+                document.getElementById('formTypeContainer').style.display = "none"; // Hide the form type dropdown
             }
         </script>
     }
