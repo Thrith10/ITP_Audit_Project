@@ -21,6 +21,7 @@ namespace PKFAuditManagement.Controllers
             // Step 1: Retrieve the QC6 forms from the database
             var qc6Forms = _context.QC6Forms.ToList();
             var qc7Forms = _context.QC7Forms.ToList();
+            var qc35Forms = _context.QC35Forms.ToList();
             // Step 2: Map the data to the ViewModel
             var reportDataQC6 = qc6Forms.Select(qc6Form => new ReportsViewModel
             {
@@ -92,7 +93,26 @@ namespace PKFAuditManagement.Controllers
                 // Add other fields as needed
             }).ToList();
 
-            var reportData = reportDataQC6.Concat(reportDataQC7).ToList();
+            var reportDataQC35 = qc35Forms.Select(form => new ReportsViewModel
+            {
+                FormType = "QC35",
+                QC35FormID = form.QC35FormID,
+                CreatedBy = form.CreatedBy,
+                AuditFirmName = form.AuditFirmName,
+                ClientName = form.ClientName,
+                ReportingYearEnd = form.ReportingYearEnd,
+                PartnerName = form.PartnerName,
+                PartnerInitial = form.PartnerInitial,
+                PartnerDate = form.PartnerDate,
+                AuditStaffName = form.AuditStaffName,
+                AuditStaffInitial = form.AuditStaffInitial,
+                AuditDate = form.AuditDate,
+                AdminStaffName = form.AdminStaffName,
+                AdminStaffInitial = form.AdminStaffInitial,
+                AdminDate = form.AdminDate
+            }).ToList();
+            var reportData = reportDataQC6.Concat(reportDataQC7).Concat(reportDataQC35).ToList();
+
 
             // Step 3: Pass the report data to the view
             return View("~/Views/General/Reports/GenerateReports.cshtml", reportData);

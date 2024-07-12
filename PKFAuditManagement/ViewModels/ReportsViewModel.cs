@@ -66,6 +66,21 @@ namespace PKFAuditManagement.ViewModels
         public string PublicInterestEntityTypeQC7 { get; set; }
         public bool IsSubForm2NotApplicable { get; set; }
         public bool IsSubForm3NotApplicable { get; set; }
-        // Add other properties if needed
+
+        // QC35
+        public int QC35FormID { get; set; }
+        public string CreatedBy { get; set; }
+        public string? AuditFirmName { get; set; }
+        public string? ClientName { get; set; }
+        public DateTime? ReportingYearEnd { get; set; }
+        public string? PartnerName { get; set; }
+        public string? PartnerInitial { get; set; }
+        public DateTime? PartnerDate { get; set; }
+        public string? AuditStaffName { get; set; }
+        public string? AuditStaffInitial { get; set; }
+        public DateTime? AuditDate { get; set; }
+        public string? AdminStaffName { get; set; }
+        public string? AdminStaffInitial { get; set; }
+        public DateTime? AdminDate { get; set; }
     }
 }
