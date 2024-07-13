@@ -24,7 +24,7 @@ namespace PKFAuditManagement.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IAmazonS3 _s3Client;
         private readonly IConfiguration _configuration;
-        private readonly string _bucketName = "pkfauditmanagement"; // replace with your bucket name
+        private readonly string _bucketName;
 
         public QC35FormController(IUserService userService, ApplicationDbContext context, 
             UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, 
@@ -36,6 +36,7 @@ namespace PKFAuditManagement.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
             _s3Client = s3Client;
+            _bucketName = _configuration.GetValue<string>("AWS:BucketName");
         }
 
         [Authorize(Roles = "User")]
@@ -320,11 +321,18 @@ namespace PKFAuditManagement.Controllers
                         }
                     }
 
-                    if (viewModel.File != null && viewModel.File.Length > 0)
+                    // Handle file upload and deletion of old image
+                    if (file != null && file.Length > 0)
                     {
-                        var fileName = await UploadFileAsync(viewModel.File, _bucketName, "qc35forms");
+                        // Delete the old image from S3
+                        if (!string.IsNullOrEmpty(qc35Form.ImageFileName))
+                        {
+                            await DeleteFileAsync(qc35Form.ImageFileName);
+                        }
+
+                        // Upload the new image
+                        var fileName = await UploadFileAsync(file, _bucketName, "qc35forms");
                         qc35Form.ImageFileName = fileName;
-                        //await _context.SaveChangesAsync();
                     }
 
 
@@ -393,7 +401,12 @@ namespace PKFAuditManagement.Controllers
             var accesskey = _configuration.GetValue<string>("AWS:AccessKey");
             var secretkey = _configuration.GetValue<string>("AWS:SecretKey");
             var s3client = new AmazonS3Client(accesskey, secretkey, Amazon.RegionEndpoint.APSoutheast2);
-            var fileName = $"{prefix?.TrimEnd('/')}/{file.FileName}";
+
+            // Generate a unique filename using GUID
+            var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var fileName = $"{prefix?.TrimEnd('/')}/{uniqueFileName}";
+
+            //var fileName = $"{prefix?.TrimEnd('/')}/{file.FileName}";
             var request = new PutObjectRequest()
             {
                 BucketName = bucketName,
@@ -404,6 +417,24 @@ namespace PKFAuditManagement.Controllers
             await s3client.PutObjectAsync(request);
             //return Ok($"File {prefix}/{file.FileName} uploaded to S3 successfully!");
             return fileName;
+        }
+
+        private async Task DeleteFileAsync(string fileName)
+        {
+            try
+            {
+                var deleteObjectRequest = new DeleteObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = fileName
+                };
+
+                await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+            }
+            catch (AmazonS3Exception ex)
+            {
+                // Handle exception (e.g., log it)
+            }
         }
 
 

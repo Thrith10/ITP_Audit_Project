@@ -98,18 +98,9 @@ namespace PKFAuditManagement.Controllers
                 FormType = "QC35",
                 QC35FormID = form.QC35FormID,
                 CreatedBy = form.CreatedBy,
-                AuditFirmName = form.AuditFirmName,
                 ClientName = form.ClientName,
                 ReportingYearEnd = form.ReportingYearEnd,
-                PartnerName = form.PartnerName,
-                PartnerInitial = form.PartnerInitial,
-                PartnerDate = form.PartnerDate,
-                AuditStaffName = form.AuditStaffName,
-                AuditStaffInitial = form.AuditStaffInitial,
-                AuditDate = form.AuditDate,
-                AdminStaffName = form.AdminStaffName,
-                AdminStaffInitial = form.AdminStaffInitial,
-                AdminDate = form.AdminDate
+                PartnerName = form.PartnerName
             }).ToList();
             var reportData = reportDataQC6.Concat(reportDataQC7).Concat(reportDataQC35).ToList();
 
