@@ -199,20 +199,11 @@ namespace PKFAuditManagement.Controllers
                     var qc35Form = new QC35Form
                     {
                         CreatedBy = userId,
-                        //AuditFirmName = viewModel.AuditFirmName,
                         ClientName = viewModel.ClientName,
                         ReportingYearEnd = viewModel.ReportingYearEnd,
                         PartnerName = viewModel.PartnerName,
-                        //PartnerInitial = viewModel.PartnerInitial,
-                        //PartnerDate = viewModel.PartnerDate,
                         ManagerName = viewModel.ManagerName,
                         ImageFileName = viewModel.ImageFileName,
-                        //AuditStaffName = viewModel.AuditStaffName,
-                        //AuditStaffInitial = viewModel.AuditStaffInitial,
-                        //AuditDate = viewModel.AuditDate,
-                        //AdminStaffName = viewModel.AdminStaffName,
-                        //AdminStaffInitial = viewModel.AdminStaffInitial,
-                        //AdminDate = viewModel.AdminDate,
                         Status = "Pending"
                     };
 
@@ -339,9 +330,7 @@ namespace PKFAuditManagement.Controllers
 
                     _context.QC35Forms.Update(qc35Form);
                     await _context.SaveChangesAsync();
-
                     await transaction.CommitAsync();
-
 
                     if (roles.Contains("Admin"))
                     {
