@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,13 +22,20 @@ namespace PKFAuditManagement.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IAmazonS3 _s3Client;
+        private readonly IConfiguration _configuration;
+        private readonly string _bucketName = "pkfauditmanagement"; // replace with your bucket name
 
-        public QC35FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager)
+        public QC35FormController(IUserService userService, ApplicationDbContext context, 
+            UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, 
+            IConfiguration configuration, IAmazonS3 s3Client)
         {
             _userService = userService;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _configuration = configuration;
+            _s3Client = s3Client;
         }
 
         [Authorize(Roles = "User")]
@@ -87,32 +97,51 @@ namespace PKFAuditManagement.Controllers
             {
                 QC35FormID = qc35Form.QC35FormID,
                 CreatedBy = qc35Form.CreatedBy,
-                AuditFirmName = qc35Form.AuditFirmName,
                 ClientName = qc35Form.ClientName,
                 ReportingYearEnd = (DateTime)qc35Form.ReportingYearEnd,
                 PartnerName = qc35Form.PartnerName,
-                PartnerInitial = qc35Form.PartnerInitial,
-                PartnerDate = qc35Form.PartnerDate,
-                AuditStaffName = qc35Form.AuditStaffName,
-                AuditStaffInitial = qc35Form.AuditStaffInitial,
-                AuditDate = qc35Form.AuditDate,
-                AdminStaffName = qc35Form.AdminStaffName,
-                AdminStaffInitial = qc35Form.AdminStaffInitial,
-                AdminDate = qc35Form.AdminDate,
+                ManagerName = qc35Form.ManagerName,
                 Status = qc35Form.Status,
+                ImageFileName = qc35Form.ImageFileName,
                 ChecklistItems = qc35Form.ChecklistItems.Select(ci => new QC35ChecklistItemViewModel
                 {
                     QC35ChecklistItemID = ci.QC35ChecklistItemID,
                     Description = ci.Description,
-                    Response = ci.Response,
-                    ManagerInitial = ci.ManagerInitial,
-                    PartnerInitial = ci.PartnerInitial
+                    Response = ci.Response
                 }).ToList()
             };
 
             ViewBag.Roles = roles;
 
             return View("~/Views/General/QC35/ViewQC35Form.cshtml", viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetImage(string key)
+        {
+            try
+            {
+                var request = new GetObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key
+                };
+
+                using (var response = await _s3Client.GetObjectAsync(request))
+                using (var responseStream = response.ResponseStream)
+                using (var memoryStream = new MemoryStream())
+                {
+                    await responseStream.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+
+                    return File(memoryStream.ToArray(), response.Headers.ContentType);
+                }
+            }
+            catch (AmazonS3Exception ex)
+            {
+                // Handle exception (e.g., log it, return a default image, etc.)
+                return NotFound();
+            }
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -144,7 +173,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitQC35Form(QC35FormViewModel viewModel)
+        public async Task<IActionResult> SubmitQC35Form(QC35FormViewModel viewModel, IFormFile file)
         {
             var user = await _userManager.GetUserAsync(User);
             var roles = await _userManager.GetRolesAsync(user);
@@ -170,18 +199,20 @@ namespace PKFAuditManagement.Controllers
                     var qc35Form = new QC35Form
                     {
                         CreatedBy = userId,
-                        AuditFirmName = viewModel.AuditFirmName,
+                        //AuditFirmName = viewModel.AuditFirmName,
                         ClientName = viewModel.ClientName,
                         ReportingYearEnd = viewModel.ReportingYearEnd,
                         PartnerName = viewModel.PartnerName,
-                        PartnerInitial = viewModel.PartnerInitial,
-                        PartnerDate = viewModel.PartnerDate,
-                        AuditStaffName = viewModel.AuditStaffName,
-                        AuditStaffInitial = viewModel.AuditStaffInitial,
-                        AuditDate = viewModel.AuditDate,
-                        AdminStaffName = viewModel.AdminStaffName,
-                        AdminStaffInitial = viewModel.AdminStaffInitial,
-                        AdminDate = viewModel.AdminDate,
+                        //PartnerInitial = viewModel.PartnerInitial,
+                        //PartnerDate = viewModel.PartnerDate,
+                        ManagerName = viewModel.ManagerName,
+                        ImageFileName = viewModel.ImageFileName,
+                        //AuditStaffName = viewModel.AuditStaffName,
+                        //AuditStaffInitial = viewModel.AuditStaffInitial,
+                        //AuditDate = viewModel.AuditDate,
+                        //AdminStaffName = viewModel.AdminStaffName,
+                        //AdminStaffInitial = viewModel.AdminStaffInitial,
+                        //AdminDate = viewModel.AdminDate,
                         Status = "Pending"
                     };
 
@@ -195,13 +226,18 @@ namespace PKFAuditManagement.Controllers
                             QC35FormID = qc35Form.QC35FormID,
                             Description = item.Description,
                             Response = item.Response,
-                            ManagerInitial = item.ManagerInitial,
-                            PartnerInitial = item.PartnerInitial
                         };
                         _context.QC35ChecklistItems.Add(checklistItem);
                     }
 
-                    await _context.SaveChangesAsync();
+
+                    if (viewModel.File != null && viewModel.File.Length > 0)
+                    {
+                        var fileName = await UploadFileAsync(viewModel.File, _bucketName, "qc35forms");
+                        qc35Form.ImageFileName = fileName;
+                        await _context.SaveChangesAsync();
+                    }
+                    
                     await transaction.CommitAsync();
 
                     if (roles.Contains("Admin"))
@@ -226,7 +262,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateQC35Form(QC35FormViewModel viewModel)
+        public async Task<IActionResult> UpdateQC35Form(QC35FormViewModel viewModel, IFormFile file)
         {
             var user = await _userManager.GetUserAsync(User);
             var roles = await _userManager.GetRolesAsync(user);
@@ -265,18 +301,10 @@ namespace PKFAuditManagement.Controllers
                     {
 
                         // Update the QC35Form fields
-                        qc35Form.AuditFirmName = viewModel.AuditFirmName;
                         qc35Form.ClientName = viewModel.ClientName;
                         qc35Form.ReportingYearEnd = viewModel.ReportingYearEnd;
                         qc35Form.PartnerName = viewModel.PartnerName;
-                        qc35Form.PartnerInitial = viewModel.PartnerInitial;
-                        qc35Form.PartnerDate = viewModel.PartnerDate;
-                        qc35Form.AuditStaffName = viewModel.AuditStaffName;
-                        qc35Form.AuditStaffInitial = viewModel.AuditStaffInitial;
-                        qc35Form.AuditDate = viewModel.AuditDate;
-                        qc35Form.AdminStaffName = viewModel.AdminStaffName;
-                        qc35Form.AdminStaffInitial = viewModel.AdminStaffInitial;
-                        qc35Form.AdminDate = viewModel.AdminDate;
+                        qc35Form.ManagerName = viewModel.ManagerName;
 
                         // Update the ChecklistItems
                         foreach (var item in viewModel.ChecklistItems)
@@ -288,8 +316,6 @@ namespace PKFAuditManagement.Controllers
                             {
                                 checklistItem.Description = item.Description;
                                 checklistItem.Response = item.Response;
-                                checklistItem.ManagerInitial = item.ManagerInitial;
-                                checklistItem.PartnerInitial = item.PartnerInitial;
                             }
                             else
                             {
@@ -297,15 +323,20 @@ namespace PKFAuditManagement.Controllers
                                 qc35Form.ChecklistItems.Add(new QC35ChecklistItem
                                 {
                                     Description = item.Description,
-                                    Response = item.Response,
-                                    ManagerInitial = item.ManagerInitial,
-                                    PartnerInitial = item.PartnerInitial
+                                    Response = item.Response
                                 });
                             }
                         }
                     }
-                
-                    
+
+                    if (viewModel.File != null && viewModel.File.Length > 0)
+                    {
+                        var fileName = await UploadFileAsync(viewModel.File, _bucketName, "qc35forms");
+                        qc35Form.ImageFileName = fileName;
+                        //await _context.SaveChangesAsync();
+                    }
+
+
                     _context.QC35Forms.Update(qc35Form);
                     await _context.SaveChangesAsync();
 
@@ -368,23 +399,22 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<string> UploadFileAsync(IFormFile file, string bucketName, string? prefix)
         {
-            if (file == null || file.Length == 0)
+            var accesskey = _configuration.GetValue<string>("AWS:AccessKey");
+            var secretkey = _configuration.GetValue<string>("AWS:SecretKey");
+            var s3client = new AmazonS3Client(accesskey, secretkey, Amazon.RegionEndpoint.APSoutheast2);
+            var fileName = $"{prefix?.TrimEnd('/')}/{file.FileName}";
+            var request = new PutObjectRequest()
             {
-                return Content("file not selected");
-            }
-
-            var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "wwwroot/uploads",
-                        file.FileName); // Use the FileName property directly
-
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return Ok(new { file.FileName }); // Return a JSON response
+                BucketName = bucketName,
+                Key = fileName,
+                InputStream = file.OpenReadStream()
+            };
+            request.Metadata.Add("Content-Type", file.ContentType);
+            await s3client.PutObjectAsync(request);
+            //return Ok($"File {prefix}/{file.FileName} uploaded to S3 successfully!");
+            return fileName;
         }
 
 

@@ -8,7 +8,7 @@
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">
-                    <form asp-action="SubmitQC35Form" asp-controller="QC35Form" method="post">
+                    <form asp-action="SubmitQC35Form" asp-controller="QC35Form" method="post" enctype="multipart/form-data">
                         @if (ViewBag.Errors != null)
                         {
                             <ul>
@@ -86,7 +86,7 @@
                                             margin-right: 0;
                                         }
 
-                                    .hero {
+                                    .imageUpload {
                                         width: 100%;
                                         display: flex;
                                         align-items: center;
@@ -167,9 +167,9 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="hero">
+                                <div class="imageUpload">
                                     <label for="input-file" id="drop-area">
-                                        <input type="file" accept="image/*" id="input-file" hidden>
+                                        <input type="file" name="file" accept="image/*" id="input-file" hidden>
                                         <div id="img-view">
                                             <img src="~/img/upload-icon.png" alt="Upload Icon">
                                             <p>Drag and drop or click here<br>to upload image</p>
