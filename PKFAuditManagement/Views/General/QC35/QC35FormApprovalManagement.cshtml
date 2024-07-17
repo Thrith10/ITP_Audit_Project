@@ -32,11 +32,9 @@
                                         <th>
                                             File Reference
                                         </th>
-                                        <th>Audit Firm Name</th>
                                         <th>Client Name</th>
                                         <th>Reporting Year End</th>
                                         <th>Partner Name</th>
-                                        <th data-type="date" data-format="DD/MM/YYYY">Partner Date</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -80,7 +78,6 @@
                                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                                             <li><a class="dropdown-item" href="@Url.Action("ViewQC35Form", new { id = engagement.QC35FormID })">View</a></li>
                                                             <li><a class="dropdown-item approveLink" href="#" data-engagement-id="@engagement.QC35FormID">Approve</a></li>
-                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC35Form", new { id = engagement.QC35FormID })">Edit</a></li>
                                                             <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC35Form", new { id = engagement.QC35FormID })')">Delete</a></li>
                                                         </ul>
 
