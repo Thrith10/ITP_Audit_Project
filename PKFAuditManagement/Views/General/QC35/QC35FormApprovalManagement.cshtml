@@ -50,11 +50,9 @@
                                                 <td>
                                                     <a href="@Url.Action("ViewQC35Form", "QC35Form", new { id = engagement.QC35FormID })" style="color: #007bff; text-decoration: underline;">FileReference</a>
                                                 </td>
-                                                <td>@engagement.AuditFirmName</td>
                                                 <td>@engagement.ClientName</td>
                                                 <td>@engagement.ReportingYearEnd</td>
                                                 <td>@engagement.PartnerName</td>
-                                                <td>@engagement.PartnerDate</td>
                                                 <td>
                                                     @if (engagement.Status == "Pending")
                                                     {

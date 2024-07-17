@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using PKFAuditManagement.Models;
+using PKFAuditManagement.Interface;
+using IEmailSender = PKFAuditManagement.Interface.IEmailSender;
 
 namespace PKFAuditManagement.Areas.Identity.Pages.Account
 {
@@ -21,11 +23,13 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
     {
         private readonly UserManager<CustomUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly ILogger<ForgotPasswordModel> _logger;
 
-        public ForgotPasswordModel(UserManager<CustomUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(UserManager<CustomUser> userManager, IEmailSender emailSender, ILogger<ForgotPasswordModel> logger)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _logger = logger;
         }
 
         /// <summary>
@@ -55,10 +59,11 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+                if (user == null)
                 {
                     // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToPage("./ForgotPasswordConfirmation");
+                    TempData["EmailSent"] = "true";
+                    return Page();
                 }
 
                 // For more information on how to enable account confirmation and password reset please
@@ -71,12 +76,21 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
                     values: new { area = "Identity", code },
                     protocol: Request.Scheme);
 
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                try
+                {
+                    await _emailSender.SendEmailAsync(
+                        Input.Email,
+                        "Reset Password",
+                        $"To reset your password, please click on the following <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>link</a>.");
+                    TempData["EmailSent"] = "true";
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error sending password reset email: {ex.Message}");
+                    TempData["EmailSent"] = "true";
+                }
 
-                return RedirectToPage("./ForgotPasswordConfirmation");
+                return Page();
             }
 
             return Page();

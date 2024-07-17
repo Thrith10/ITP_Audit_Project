@@ -9,6 +9,7 @@ using PKFAuditManagement.Interface;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using PKFAuditManagement.Services;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,11 @@ builder.Services.AddTransient<IEmailSender, EmailSender>(sp =>
 
 // Add SignInManager service
 builder.Services.AddScoped<SignInManager<CustomUser>>();
+
+//AWS S3 Configurations
+var awsOptions = builder.Configuration.GetAWSOptions("AWS");
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 
 var app = builder.Build();
 
@@ -123,7 +129,5 @@ using (var scope = app.Services.CreateScope())
     }
 
 }
-
-
 
 app.Run();

@@ -400,3 +400,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /PKFAuditManagement/appsettings.json
+/PKFAuditManagement/appsettings.json
