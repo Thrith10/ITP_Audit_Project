@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace PKFAuditManagement.ViewModels
 {
@@ -74,7 +75,7 @@ namespace PKFAuditManagement.ViewModels
         public string? ClientName { get; set; }
         public DateTime? ReportingYearEnd { get; set; }
         public string? PartnerName { get; set; }
-        public string? PartnerInitial { get; set; }
+        public string? ManagerName { get; set; }
         public DateTime? PartnerDate { get; set; }
         public string? AuditStaffName { get; set; }
         public string? AuditStaffInitial { get; set; }
@@ -82,5 +83,17 @@ namespace PKFAuditManagement.ViewModels
         public string? AdminStaffName { get; set; }
         public string? AdminStaffInitial { get; set; }
         public DateTime? AdminDate { get; set; }
+
+        //Signed FS
+        // Add SignedFSForm fields
+        public int? SignedFSFormID { get; set; }
+        public DateTime? AuditedReportDate { get; set; }
+        public string PartnerEmail { get; set; }
+        public string UserEmail { get; set; }
+        public string FilePath { get; set; }
+        public DateTime? ScheduleDate { get; set; }
+        public string EmailType { get; set; }
+        public string EmailBody { get; set; }
+        public bool IsProcessed { get; set; }
     }
 }
