@@ -20,6 +20,8 @@
         public DateTime? EPHODApprovedByDate { get; set; }
         public string? MPHODQMPApprovedBy { get; set; }
         public DateTime? MPHODQMPApprovedByDate { get; set; }
+        public bool IsFirstApproved { get; set; }
+        public bool IsSecondApproved { get; set; }
         public QC6Form? QC6Form { get; set; }
     }
 }

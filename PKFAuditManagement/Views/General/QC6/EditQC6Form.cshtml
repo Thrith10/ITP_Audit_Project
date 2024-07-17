@@ -579,17 +579,17 @@
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
-                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy" required>
+                                        <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" required>
+                                        <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
-                                            <span class="link-text">To be approved by:</span>
+                                            <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>
                                         <select asp-for="EPHODApprovedBy" class="form-control" value="TEST">
                                             @foreach (var email in Model.AdminEmails)
@@ -599,14 +599,14 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" disabled>
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
-                                            <span class="link-text">To be approved by:</span>
+                                            <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>
                                         <select asp-for="MPHODQMPApprovedBy" class="form-control">
                                             @foreach (var email in Model.AdminEmails)
@@ -616,8 +616,8 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-form-label">Date:</label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" disabled>
+                                        <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
+                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate">
                                     </div>
                                 </div>
                                 <h5 class="card-title"><u><i>Notes</i></u></h5>

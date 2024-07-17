@@ -165,16 +165,8 @@ namespace PKFAuditManagement.Controllers
                 viewModel.ConclusionPreparedByDate = conclusionData.PreparedByDate;
                 viewModel.EPHODApprovedBy = conclusionData.EPHODApprovedBy;
                 viewModel.MPHODQMPApprovedBy = conclusionData.MPHODQMPApprovedBy;
-
-                if (conclusionData.EPHODApprovedByDate != null)
-                {
-                    viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
-                }
-
-                if (conclusionData.MPHODQMPApprovedByDate != null)
-                {
-                    viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
-                }
+                viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
+                viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
 
                 // Append TNATNEAssessment data for TNATNEAssessmentViewModel
                 viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
@@ -296,7 +288,10 @@ namespace PKFAuditManagement.Controllers
                     qc6form.IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable;
 
                     // Reset status to "Pending" if previously rejected
-                    qc6form.Status = "Pending";
+                    if (qc6form.Status == "Rejected")
+                    {
+                        qc6form.Status = "Pending";
+                    }
 
                     // Update TNATNEAssessment
                     var tnaTneAssessment = await _context.TNATNEAssessments.FirstOrDefaultAsync(a => a.QC6FormID == qc6form.QC6FormID);
@@ -351,16 +346,12 @@ namespace PKFAuditManagement.Controllers
                         qc6formConclusion.IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled;
                         qc6formConclusion.SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale;
                         qc6formConclusion.Satisfaction = viewModel.Satisfaction;
-                        /*                      
-        *                      qc6formConclusion.PreparedBy = viewModel.ConclusionPreparedBy;
-                            qc6formConclusion.PreparedByDate = viewModel.ConclusionPreparedByDate.Value;
-                            qc6formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
-                            qc6formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
-                        */
-
-                        // Reset the approval dates on every update request 
-                        qc6formConclusion.EPHODApprovedByDate = null;
-                        qc6formConclusion.MPHODQMPApprovedByDate = null;
+/*                        qc6formConclusion.PreparedBy = viewModel.ConclusionPreparedBy;
+                        qc6formConclusion.PreparedByDate = viewModel.ConclusionPreparedByDate.Value;*/
+                        qc6formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
+                        qc6formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
+                        qc6formConclusion.EPHODApprovedByDate = viewModel.EPHODApprovedByDate;
+                        qc6formConclusion.MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate;
                     }
 
                     // Update QC6FormTest entities
@@ -450,8 +441,22 @@ namespace PKFAuditManagement.Controllers
                     // Set the success message for the toast notification
                     TempData["QC6UpdateMessage"] = "QC6 Form updated successfully.";
 
-                    await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Update",
-$"The QC6 Form {viewModel.FileReference} has been updated and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+                    // List of recipients
+                    var recipients = new List<string>
+                    {
+                        viewModel.EPHODApprovedBy,
+                        viewModel.MPHODQMPApprovedBy
+                    };
+
+                    // Subject and body of the email
+                    var subject = "QC6 Form Update";
+                    var body = $"The QC6 Form {viewModel.FileReference} has been updated. Please login to the Audit Management System to review the QC6 Form.";
+
+                    // Send the email to each recipient
+                    foreach (var recipient in recipients)
+                    {
+                        await _emailSender.SendEmailAsync(recipient, subject, body);
+                    }
 
                     if (roles.Contains("Admin"))
                     {
@@ -722,30 +727,54 @@ $"The QC6 Form {viewModel.FileReference} has been updated and you've been design
 
             try
             {
-                // Check if EPHOD approval date is not set
-                if (conclusion.EPHODApprovedByDate == null)
+                // Check if EPHOD approved is not set
+                if (conclusion.IsFirstApproved == false)
                 {
-                    conclusion.EPHODApprovedByDate = DateTime.Now;
+                    conclusion.IsFirstApproved = true;
 
                     // Update the engagement status to "Pending 2nd Approval"
                     engagement.Status = "Pending 2nd Approval";
 
-                    await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC6 Form Creation",
-$"A new QC6 Form has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
-                }
-                // If EPHOD approval date is already set, check if MPHODQMP approval date is not set
-                else if (conclusion.MPHODQMPApprovedByDate == null)
-                {
-                    conclusion.MPHODQMPApprovedByDate = DateTime.Now;
 
-                    // Update the engagement status to "Pending 2nd Approval"
+                    // Send email to creator to notify on approval
+                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
+                        $"Your new QC6 Form has been approved by: {conclusion.EPHODApprovedBy}. The QC6 Form is awaiting the second approval.");
+
+                    // Send email to 2nd approver on action to take
+                    await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC6 Form Creation",
+                        $"A new QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+                }
+                // If EPHOD approval is already set, check if MPHODQMP approval date is not set
+                else if (conclusion.IsSecondApproved == false)
+                {
+                    conclusion.IsSecondApproved = true;
+
+                    // Update the engagement status to "Approved"
                     engagement.Status = "Approved";
 
                     // Clear Rejection Reason
                     engagement.RejectionReason = null;
 
+                    // Send email to creator to notify on creation
                     await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
-$"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC6 Form.");
+                        $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC6 Form.");
+
+                    // List of approvers
+                    var recipients = new List<string>
+                    {
+                        conclusion.EPHODApprovedBy,
+                        conclusion.MPHODQMPApprovedBy
+                    };
+
+                    // Subject and body of the email
+                    var subject = "QC6 Form Update";
+                    var body = $"The QC6 Form {engagement.FileReference} has been successfully approved and is currently active.";
+
+                    // Send the email to all approvers on the creation of the QC6 form
+                    foreach (var recipient in recipients)
+                    {
+                        await _emailSender.SendEmailAsync(recipient, subject, body);
+                    }
                 }
 
                 _context.SaveChanges();
@@ -789,9 +818,9 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                 engagement.Status = "Rejected";
                 engagement.RejectionReason = rejectionReason; // Set the rejection reason
 
-                // Reset the dates to null to repeat approval process
-                conclusion.EPHODApprovedByDate = null;
-                conclusion.MPHODQMPApprovedByDate = null;
+                // Reset the status to false to repeat approval process
+                conclusion.IsFirstApproved = false;
+                conclusion.IsSecondApproved = false;
 
                 _context.SaveChanges();
 

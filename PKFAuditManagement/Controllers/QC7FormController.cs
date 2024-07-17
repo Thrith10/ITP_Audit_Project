@@ -30,7 +30,7 @@ namespace PKFAuditManagement.Controllers
             _emailSender = emailSender;
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Non-Auditor")]
         public async Task<IActionResult> QC7FormManagement()
         {
             // Get the current user's ID
@@ -42,7 +42,7 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/QC7/QC7FormManagement.cshtml", engagements);
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin")]
         public async Task<IActionResult> QC7FormCreationAsync()
         {
             // Retrieve user email
@@ -95,6 +95,18 @@ namespace PKFAuditManagement.Controllers
                 // Retrieve Conclusion data
                 var conclusionData = _context.QC7FormConclusions.FirstOrDefault(e => e.QC7FormID.Equals(id));
 
+                // Retrieve FeeDetail data
+                var feeDetailData = _context.QC7FormFeeDetails.Where(e => e.QC7FormID.Equals(id)).ToList();
+
+                // Retrieve TNATNEAssessment data
+                var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC7FormID.Equals(id));
+
+                // Retrieve TNATNEAssessment Section B data
+                var tnaTNESectionBData = _context.TNATNESectionBs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+
+                // Retrieve TNATNEAssessment Section D data
+                var tnaTNESectionDData = _context.TNATNESectionDs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+
                 // Retrieve QC7 Form Test data
                 var testData = _context.QC7FormTests.Where(e => e.QC7FormID.Equals(id)).ToList();
 
@@ -143,6 +155,8 @@ namespace PKFAuditManagement.Controllers
                 viewModel.SuspiciousTransactionReportFiledComment = qc7formData.SuspiciousTransactionReportFiledComment;
                 viewModel.SafeguardReviewerName = qc7formData.SafeguardReviewerName;
                 viewModel.AnyOutstandingUnpaidNonAuditFees = qc7formData.AnyOutstandingUnpaidNonAuditFees;
+                viewModel.GrandTotal = qc7formData.GrandTotal;
+                viewModel.AuditFee = qc7formData.AuditFee;
                 viewModel.FeeConcentration = qc7formData.FeeConcentration;
                 viewModel.ProposedFeeCurrentYear = qc7formData.ProposedFeeCurrentYear;
                 viewModel.BudgetedTimeCost = qc7formData.BudgetedTimeCost;
@@ -175,15 +189,35 @@ namespace PKFAuditManagement.Controllers
                 viewModel.EMPreparedByDate = conclusionData.EMPreparedByDate;
                 viewModel.EPHODApprovedBy = conclusionData.EPHODApprovedBy;
                 viewModel.MPHODQMPApprovedBy = conclusionData.MPHODQMPApprovedBy;
+                viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
+                viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
 
-                if (conclusionData.EPHODApprovedByDate != null)
-                {
-                    viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
-                }
+                // Append TNATNEAssessment data for TNATNEAssessmentViewModel
+                viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
+                viewModel.TNATNEAssessment.SectionB.IsAudit = tnaTNESectionBData.IsAudit;
+                viewModel.TNATNEAssessment.SectionB.Q1 = tnaTNESectionBData.Q1;
+                viewModel.TNATNEAssessment.SectionB.Q2 = tnaTNESectionBData.Q2;
+                viewModel.TNATNEAssessment.SectionB.Q3 = tnaTNESectionBData.Q3;
+                viewModel.TNATNEAssessment.SectionB.Q4 = tnaTNESectionBData.Q4;
+                viewModel.TNATNEAssessment.SectionB.Q5 = tnaTNESectionBData.Q5;
+                viewModel.TNATNEAssessment.SectionD.Q1Comment = tnaTNESectionDData.Q1Comment;
+                viewModel.TNATNEAssessment.SectionD.Q2Comment = tnaTNESectionDData.Q2Comment;
+                viewModel.TNATNEAssessment.SectionD.Q3Comment = tnaTNESectionDData.Q3Comment;
+                viewModel.TNATNEAssessment.SectionD.Q4Comment = tnaTNESectionDData.Q4Comment;
+                viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
 
-                if (conclusionData.MPHODQMPApprovedByDate != null)
+                // Clear the existing Services list
+                viewModel.Services.Clear();
+
+                // Append FeeDetail data for Services
+                foreach (var feeDetail in feeDetailData)
                 {
-                    viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
+                    viewModel.Services.Add(new FeeDetailViewModel
+                    {
+                        NatureOfService = feeDetail.NatureOfService,
+                        OtherService = feeDetail.OtherService,
+                        Fee = feeDetail.Fee
+                    });
                 }
 
                 return View("~/Views/General/QC7/EditQC7Form.cshtml", viewModel);
@@ -268,7 +302,7 @@ namespace PKFAuditManagement.Controllers
                     qc7form.SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment;
                     qc7form.SafeguardReviewerName = viewModel.SafeguardReviewerName;
                     qc7form.AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees;
-                    qc7form.FeeConcentration = viewModel.FeeConcentration;
+                    qc7form.FeeConcentration = viewModel.FeeConcentration.Value;
                     qc7form.ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value;
                     qc7form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
                     qc7form.ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value;
@@ -279,6 +313,45 @@ namespace PKFAuditManagement.Controllers
 
                     // Reset status to "Pending" if previously rejected
                     qc7form.Status = "Pending";
+
+                    // Update TNATNEAssessment
+                    var tnaTneAssessment = await _context.TNATNEAssessments.FirstOrDefaultAsync(a => a.QC7FormID == qc7form.QC7FormID);
+                    if (tnaTneAssessment != null)
+                    {
+                        tnaTneAssessment.SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation;
+
+                    }
+
+                    // Update TNATNESectionB with foreign key linking the two tables (TNATNESectionB and TNATNEAssessment)
+                    var tnaTNESectionB = await _context.TNATNESectionBs.FirstOrDefaultAsync(b => b.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
+                    if (tnaTNESectionB != null)
+                    {
+                        tnaTNESectionB.IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit;
+
+                        if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
+                        {
+                            tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
+                            tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
+                            tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
+                            tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
+                            tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                        }
+                        else
+                        {
+                            tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                        }
+                    }
+
+                    // Update TNATNESectionD with foreign key linking the two tables (TNATNESectionD and TNATNEAssessment)
+                    var tnaTNESectionD = await _context.TNATNESectionDs.FirstOrDefaultAsync(d => d.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
+                    if (tnaTNESectionD != null)
+                    {
+                        tnaTNESectionD.Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment;
+                        tnaTNESectionD.Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment;
+                        tnaTNESectionD.Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment;
+                        tnaTNESectionD.Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment;
+                        tnaTNESectionD.Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment;
+                    }
 
                     // Update QC7FormConclusion
                     var qc7formConclusion = await _context.QC7FormConclusions.FirstOrDefaultAsync(c => c.QC7FormID == qc7form.QC7FormID);
@@ -303,16 +376,12 @@ namespace PKFAuditManagement.Controllers
                         }
 
                         qc7formConclusion.EngagementRetainedRejected = viewModel.EngagementRetainedRejected;
-                        /*                      
-        *                      qc6formConclusion.PreparedBy = viewModel.ConclusionPreparedBy;
-                            qc6formConclusion.PreparedByDate = viewModel.ConclusionPreparedByDate.Value;
-                            qc6formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
-                            qc6formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
-                        */
-
-                        // Reset the approval dates on every update request 
-                        qc7formConclusion.EPHODApprovedByDate = null;
-                        qc7formConclusion.MPHODQMPApprovedByDate = null;
+/*                        qc7formConclusion.EMPreparedBy = viewModel.EMPreparedBy;
+                        qc7formConclusion.EMPreparedByDate = viewModel.EMPreparedByDate;*/
+                        qc7formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
+                        qc7formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
+                        qc7formConclusion.EPHODApprovedByDate = viewModel.EPHODApprovedByDate;
+                        qc7formConclusion.MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate;
                     }
 
                     // Update QC7FormTest entities
@@ -363,6 +432,23 @@ namespace PKFAuditManagement.Controllers
                     // Set the success message for the toast notification
                     TempData["QC7UpdateMessage"] = "QC7 Form updated successfully.";
 
+                    // List of recipients
+                    var recipients = new List<string>
+                    {
+                        viewModel.EPHODApprovedBy,
+                        viewModel.MPHODQMPApprovedBy
+                    };
+
+                    // Subject and body of the email
+                    var subject = "QC7 Form Update";
+                    var body = $"The QC7 Form {viewModel.FileReference} has been updated. Please login to the Audit Management System to review the QC7 Form.";
+
+                    // Send the email to each recipient
+                    foreach (var recipient in recipients)
+                    {
+                        await _emailSender.SendEmailAsync(recipient, subject, body);
+                    }
+
                     if (roles.Contains("Admin"))
                     {
                         // Redirect to admin-specific page
@@ -379,7 +465,16 @@ namespace PKFAuditManagement.Controllers
                     transaction.Rollback();
                     // Log the error
                     viewModel.ErrorMessage = "Error updating the form, please try again!";
-                    return View("~/Views/General/QC7/EditQC7Form.cshtml", viewModel);
+                    if (roles.Contains("Admin"))
+                    {
+                        // Redirect to admin-specific page
+                        return RedirectToAction("QC7FormApprovalManagement");
+                    }
+                    else
+                    {
+                        // Redirect to user-specific page
+                        return RedirectToAction("QC7FormManagement");
+                    }
                 }
             }
         }
@@ -405,8 +500,8 @@ namespace PKFAuditManagement.Controllers
                 // Populate Sub Forms
                 var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel());
 
-/*                // Retrieve TNATNEAssessment data
-                var tnaTneAssessmentData = _context.TNATNEA7ssessments.FirstOrDefault(e => e.QC7FormID.Equals(id));*/
+                // Retrieve TNATNEAssessment data
+                var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC7FormID.Equals(id));
 
                 // Retrieve TNATNEAssessment Section B data
                 //var tnaTNESectionBData = _context.TNATNESectionB.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
@@ -417,8 +512,8 @@ namespace PKFAuditManagement.Controllers
                 // Retrieve Conclusion data
                 var conclusionData = _context.QC7FormConclusions.FirstOrDefault(e => e.QC7FormID.Equals(id));
 
-/*                // Retrieve FeeDetail data
-                var feeDetailData = _context.QC7FormFeeDetails.Where(e => e.QC7FormID.Equals(id)).ToList();*/
+                // Retrieve FeeDetail data
+                var feeDetailData = _context.QC7FormFeeDetails.Where(e => e.QC7FormID.Equals(id)).ToList();
 
                 // Retrieve QC7 Form Test data
                 var testData = _context.QC7FormTests.Where(e => e.QC7FormID.Equals(id)).ToList();
@@ -468,6 +563,8 @@ namespace PKFAuditManagement.Controllers
                 viewModel.SuspiciousTransactionReportFiledComment = QC7formData.SuspiciousTransactionReportFiledComment;
                 viewModel.SafeguardReviewerName = QC7formData.SafeguardReviewerName;
                 viewModel.AnyOutstandingUnpaidNonAuditFees = QC7formData.AnyOutstandingUnpaidNonAuditFees;
+                viewModel.GrandTotal = QC7formData.GrandTotal;
+                viewModel.AuditFee = QC7formData.AuditFee;
                 viewModel.FeeConcentration = QC7formData.FeeConcentration;
                 viewModel.ProposedFeeCurrentYear = QC7formData.ProposedFeeCurrentYear;
                 viewModel.BudgetedTimeCost = QC7formData.BudgetedTimeCost;
@@ -499,16 +596,8 @@ namespace PKFAuditManagement.Controllers
                 viewModel.EMPreparedByDate = conclusionData.EMPreparedByDate;
                 viewModel.EPHODApprovedBy = conclusionData.EPHODApprovedBy;
                 viewModel.MPHODQMPApprovedBy = conclusionData.MPHODQMPApprovedBy;
-
-                if (conclusionData.EPHODApprovedByDate != null)
-                {
-                    viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
-                }
-
-                if (conclusionData.MPHODQMPApprovedByDate != null)
-                {
-                    viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
-                }
+                viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
+                viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
 
                 /* Append TNATNEAssessment data for TNATNEAssessmentViewModel
                 viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
@@ -525,7 +614,10 @@ namespace PKFAuditManagement.Controllers
                 viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
                 */
 
-/*                // Append FeeDetail data for Services
+                // Clear the existing Services list
+                viewModel.Services.Clear();
+
+                // Append FeeDetail data for Services
                 foreach (var feeDetail in feeDetailData)
                 {
                     viewModel.Services.Add(new FeeDetailViewModel
@@ -534,7 +626,8 @@ namespace PKFAuditManagement.Controllers
                         OtherService = feeDetail.OtherService,
                         Fee = feeDetail.Fee
                     });
-                }*/
+                }
+
                 return View("~/Views/General/QC7/ViewQC7Form.cshtml", viewModel);
             }
             catch
@@ -554,7 +647,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin")]
         public async Task<IActionResult> SubmitQC7Form(QC7FormCreationViewModel viewModel)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -623,7 +716,9 @@ namespace PKFAuditManagement.Controllers
                         SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment,
                         SafeguardReviewerName = viewModel.SafeguardReviewerName,
                         AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees,
-                        FeeConcentration = viewModel.FeeConcentration,
+                        GrandTotal = viewModel.GrandTotal.Value,
+                        AuditFee = viewModel.AuditFee.Value,
+                        FeeConcentration = viewModel.FeeConcentration.Value,
                         ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value,
                         BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
                         ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value,
@@ -664,6 +759,57 @@ namespace PKFAuditManagement.Controllers
                     _context.Add(qc7formConclusion);
                     _context.SaveChanges();
 
+                    var tnaTneAssessment = new TNATNEAssessment
+                    {
+                        QC7FormID = qc7formId,
+                        SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation,
+                    };
+
+                    // Add tnaTneAssessment data to the database
+                    _context.Add(tnaTneAssessment);
+                    _context.SaveChanges();
+
+                    // Retrieve the tnaTneAssessmentID from the saved entity
+                    int tnaTneAssessmentID = tnaTneAssessment.TNATNEAssessmentID;
+
+                    var tnaTNESectionB = new TNATNESectionB
+                    {
+                        TNATNEAssessmentID = tnaTneAssessmentID,
+                        IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit
+                    };
+
+                    // Save Q1 - Q4 if IsAudit == true, else only Save Q5
+                    if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
+                    {
+                        tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
+                        tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
+                        tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
+                        tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
+                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                    }
+                    else
+                    {
+                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                    }
+
+                    // Add tnaTNESectionB data to the database
+                    _context.Add(tnaTNESectionB);
+                    _context.SaveChanges();
+
+                    var tnaTNESectionD = new TNATNESectionD
+                    {
+                        TNATNEAssessmentID = tnaTneAssessmentID,
+                        Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment,
+                        Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment,
+                        Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment,
+                        Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment,
+                        Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment,
+                    };
+
+                    // Add tnaTNESectionD data to the database
+                    _context.Add(tnaTNESectionD);
+                    _context.SaveChanges();
+
                     // Process the submitted data
                     foreach (var subForm in viewModel.SubForms)
                     {
@@ -694,6 +840,22 @@ namespace PKFAuditManagement.Controllers
                                 _context.Add(qc7formTest);
                             }
                         }
+                    }
+
+                    // Process the submitted data
+                    foreach (var service in viewModel.Services)
+                    {
+                        // Save QC7FormFeeDetail
+                        var qC7FormFeeDetail = new QC7FormFeeDetail
+                        {
+                            QC7FormID = qc7formId,
+                            NatureOfService = service.NatureOfService,
+                            Fee = service.Fee.Value,
+                            OtherService = service.OtherService,
+                        };
+
+                        // Add qC7FormFeeDetail to the context and save changes
+                        _context.Add(qC7FormFeeDetail);
                     }
 
                     // Save all pending changes to QC7FormTest entities at once
@@ -728,7 +890,7 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
         }
 
         [HttpDelete]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin,Non-Auditor")]
         public IActionResult DeleteQC7Form(int id)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -781,10 +943,10 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
 
             try
             {
-                // Check if EPHOD approval date is not set
-                if (conclusion.EPHODApprovedByDate == null)
+                // Check if EPHOD approval is not set
+                if (conclusion.IsFirstApproved == false)
                 {
-                    conclusion.EPHODApprovedByDate = DateTime.Now;
+                    conclusion.IsFirstApproved = true;
 
                     // Update the engagement status to "Pending 2nd Approval"
                     engagement.Status = "Pending 2nd Approval";
@@ -793,10 +955,10 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
 $"A new QC7 Form has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
 
                 }
-                // If EPHOD approval date is already set, check if MPHODQMP approval date is not set
-                else if (conclusion.MPHODQMPApprovedByDate == null)
+                // If EPHOD approval is already set, check if MPHODQMP approval is not set
+                else if (conclusion.IsSecondApproved == false)
                 {
-                    conclusion.MPHODQMPApprovedByDate = DateTime.Now;
+                    conclusion.IsSecondApproved = true;
 
                     // Update the engagement status to "Pending 2nd Approval"
                     engagement.Status = "Approved";
@@ -832,11 +994,11 @@ $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPH
 
                 // Parse the request body JSON to extract the QC7FormID and RejectionReason
                 JObject jsonBody = JObject.Parse(requestBody);
-                int qc6FormId = (int)jsonBody["QC7FormID"];
+                int qc7FormId = (int)jsonBody["QC7FormID"];
                 string rejectionReason = (string)jsonBody["RejectionReason"];
 
                 // Retrieve engagement data from the database
-                var engagement = _context.QC7Forms.FirstOrDefault(e => e.QC7FormID == qc6FormId);
+                var engagement = _context.QC7Forms.FirstOrDefault(e => e.QC7FormID == qc7FormId);
 
                 // Retrieve conclusion data from the database
                 var conclusion = _context.QC7FormConclusions.FirstOrDefault(e => e.QC7FormID == engagement.QC7FormID);
@@ -850,9 +1012,9 @@ $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                 engagement.Status = "Rejected";
                 engagement.RejectionReason = rejectionReason; // Set the rejection reason
 
-                // Reset the dates to null to repeat approval process
-                conclusion.EPHODApprovedByDate = null;
-                conclusion.MPHODQMPApprovedByDate = null;
+                // Reset the status to false to repeat approval process
+                conclusion.IsFirstApproved = false;
+                conclusion.IsSecondApproved = false;
 
                 _context.SaveChanges();
 
@@ -893,6 +1055,37 @@ $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPH
             }).ToList();
 
             return viewModel;
+        }
+
+        public IActionResult RetrieveNASFeeDetails()
+        {
+            // Retrieve QC7 Forms where FileReference contains "NAS"
+            var qc7Forms = _context.QC7Forms
+                .Where(e => e.FileReference.Contains("NAS"))
+                .Select(f => f.QC7FormID)
+                .ToList();
+
+            // Join QC7Forms with QC7FormFeeDetails
+            var feeDetails = _context.QC7FormFeeDetails
+                .Where(fd => qc7Forms.Contains(fd.QC7FormID))
+                .Join(
+                    _context.QC7Forms,
+                    fd => fd.QC7FormID,
+                    f => f.QC7FormID,
+                    (fd, f) => new
+                    {
+                        fd.QC7FormFeeDetailID,
+                        fd.QC7FormID,
+                        fd.Fee,
+                        fd.NatureOfService,
+                        f.FileReference,
+                        f.PeriodEnded,
+                        f.Status
+                    })
+                .ToList();
+
+            // Return the combined data as JSON
+            return Json(feeDetails);
         }
     }
 }

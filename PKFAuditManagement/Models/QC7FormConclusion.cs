@@ -13,12 +13,14 @@
         public bool IsSuspiciousTransactionReportFiled { get; set; }
         public string? SuspiciousTransactionReportFiledRationale { get; set; }
         public required string EngagementRetainedRejected { get; set; }
-        public required string EMPreparedBy { get; set; }
-        public required DateTime EMPreparedByDate { get; set; }
+        public string? EMPreparedBy { get; set; }
+        public DateTime? EMPreparedByDate { get; set; }
         public string? EPHODApprovedBy { get; set; }
         public DateTime? EPHODApprovedByDate { get; set; }
         public string? MPHODQMPApprovedBy { get; set; }
         public DateTime? MPHODQMPApprovedByDate { get; set; }
+        public bool IsFirstApproved { get; set; }
+        public bool IsSecondApproved { get; set; }
         public QC7Form? QC7Form { get; set; }
     }
 }

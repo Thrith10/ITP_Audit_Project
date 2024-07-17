@@ -34,11 +34,17 @@
         </a>
     </li>
     <li class="nav-item">
+        <a class="nav-link @(currentController == "SignedFSForm" && currentAction == "SignedFSFormManagement" ? "active" : "collapsed")" asp-controller="SignedFSForm" asp-action="SignedFSFormManagement">
+            <i class="bi bi-layout-text-window-reverse"></i>
+            <span>Manage Signed FS Forms</span>
+        </a>
+    </li>
+@*     <li class="nav-item">
         <a class="nav-link @(currentController == "Admin" && currentAction == "GenerateReport" ? "active" : "collapsed")" asp-controller="Admin" asp-action="GenerateReport">
             <i class="bi bi-person"></i>
             <span>Generate Report</span>
         </a>
-    </li>
+    </li> *@
     <li class="nav-item">
         <a class="nav-link @(currentController == "Admin" && currentAction == "AccountManagement" ? "active" : "collapsed")" asp-controller="Admin" asp-action="AccountManagement">
             <i class="bi bi-person"></i>

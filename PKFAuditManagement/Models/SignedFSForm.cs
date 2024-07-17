@@ -7,6 +7,7 @@ namespace PKFAuditManagement.Models
     {
         [Key]
         public int Id { get; set; }
+        public string Client { get; set; }
         public DateTime AuditedReportDate { get; set; }
         public string PartnerEmail { get; set; }
         public string UserEmail { get; set; }

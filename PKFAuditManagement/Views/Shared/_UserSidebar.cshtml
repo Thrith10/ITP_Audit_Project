@@ -206,10 +206,17 @@
 
     <li class="nav-item">
         <a class="nav-link @(currentController == "QC35Form" && currentAction == "QC35FormManagement" ? "active" : "collapsed")" asp-controller="QC35Form" asp-action="QC35FormManagement">
-            <i class="bi bi-person"></i>
+            <i class="bi bi-layout-text-window-reverse"></i>
             <span>Manage QC35 Forms</span>
         </a>
-    </li><!-- End Profile Page Nav -->
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "SignedFSForm" && currentAction == "SignedFSFormManagement" ? "active" : "collapsed")" asp-controller="SignedFSForm" asp-action="SignedFSFormManagement">
+            <i class="bi bi-layout-text-window-reverse"></i>
+            <span>Manage Signed FS Forms</span>
+        </a>
+    </li>
+    <!-- End Profile Page Nav -->
 
 @*     <li class="nav-item">
         <a class="nav-link @(currentController == "Home" && currentAction == "Profile" ? "active" : "collapsed")" asp-controller="Home" asp-action="Profile">

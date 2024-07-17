@@ -1,0 +1,75 @@
+﻿@using PKFAuditManagement.Models
+@model List<SignedFSForm>
+
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <main id="main" class="main">
+
+        <div class="pagetitle">
+            <h1>Manage Signed FS Forms</h1>
+        </div><!-- End Page Title -->
+
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="card-title">Manage Signed FS Forms</h5>
+                                </div>
+                                <div class="col-6 mt-3 text-end">
+                                    <a asp-controller="SignedFSForm" asp-action="ScheduleEmails" class="btn btn-primary btn-lg btn-floating">Create Form</a>
+                                </div>
+                            </div>
+                            <p>As a User, you will be able to view and upload signed FS forms.</p>
+
+                            <table class="table datatable" id="engagementTable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Client Name
+                                        </th>
+                                        <th>Partner Email</th>
+                                        <th>Audited Report Date</th>
+                                        <th>File Uploaded</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null)
+                                    {
+                                        foreach (var engagement in Model)
+                                        {
+                                            <tr>
+                                                <td>@engagement.Client</td>
+                                                <td>@engagement.PartnerEmail</td>
+                                                <td>@engagement.AuditedReportDate</td>
+                                                <td>@engagement.FilePath</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="4">No data found.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main><!-- End #main -->
+</body>
+
+</html>
+
+@section Scripts {
+    <script src="~/js/qc6-form-management-admin.js"></script>
+}
+

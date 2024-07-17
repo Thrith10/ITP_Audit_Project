@@ -83,9 +83,7 @@ namespace PKFAuditManagement.ViewModels
         public string? SuspiciousTransactionReportFiledRationale { get; set; }
         [Required]
         public string? Satisfaction { get; set; }
-        [Required]
         public string? ConclusionPreparedBy { get; set; }
-        [Required]
         public DateTime? ConclusionPreparedByDate { get; set; }
         public string? EPHODApprovedBy { get; set; }
         public DateTime? EPHODApprovedByDate { get; set; }
