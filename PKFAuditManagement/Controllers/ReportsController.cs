@@ -101,7 +101,9 @@ namespace PKFAuditManagement.Controllers
                 CreatedBy = form.CreatedBy,
                 ClientName = form.ClientName,
                 ReportingYearEnd = form.ReportingYearEnd,
-                PartnerName = form.PartnerName
+                PartnerName = form.PartnerName,
+                ManagerName = form.ManagerName,
+                Status = form.Status
             }).ToList();
 
             // Map SignedFSForm data to ViewModel

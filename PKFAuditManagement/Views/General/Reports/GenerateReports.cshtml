@@ -86,19 +86,57 @@
                                 <label for="endDate">End Date:</label>
                                 <input type="date" id="endDate">
                                 <button class="btn btn-primary" onclick="filterByDate()">Filter</button>
+                                <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
                             </div>
 
                             <!-- Table to display report data -->
+                            <!-- Table to display report data -->
                             <table class="table datatable" id="reportTable">
                                 <thead>
-                                    <tr>
+                                    <!-- QC6 Headers -->
+                                    <tr class="qc6-header">
                                         <th>Select</th>
                                         <th>Form ID</th>
-                                        <th>File Reference / Client / Client Name</th>
-                                        <th>Prospective Client / Engagement Type / Audit Firm Name</th>
-                                        <th>Period Ended / Reporting Year End</th>
+                                        <th>File Reference</th>
+                                        <th>Prospective Client</th>
+                                        <th>Period Ended</th>
+                                        <th>Engagement Type</th>
                                         <th>Form Submission Date</th>
                                         <th>Prepared By Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    <!-- QC7 Headers -->
+                                    <tr class="qc7-header" style="display: none;">
+                                        <th>Select</th>
+                                        <th>Form ID</th>
+                                        <th>Prospective Client</th>
+                                        <th>Engagement Type</th>
+                                        <th>Period Ended</th>
+                                        <th>Form Submission Date</th>
+                                        <th>Prepared By Date</th>
+                                        <th>Status</th>
+
+                                    </tr>
+                                    <!-- QC35 Headers -->
+                                    <tr class="qc35-header" style="display: none;">
+                                        <th>Select</th>
+                                        <th>Form ID</th>
+                                        <th>Client Name</th>
+                                        <th>Partner Name</th>
+                                        <th>Reporting Year End</th>
+                                        <th>Manager Name</th>
+                                        <th>Status</th>
+
+
+                                    </tr>
+                                    <!-- SignedFS Headers -->
+                                    <tr class="signedfs-header" style="display: none;">
+                                        <th>Select</th>
+                                        <th>Form ID</th>
+                                        <th>User Email</th>
+                                        <th>Partner Email</th>
+                                        <th>Schedule Date</th>
+                                        <th>Email Type</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -182,10 +220,9 @@
                                                     <td><input type="checkbox" name="selectedForms" value="@form.QC35FormID" /></td>
                                                     <td>@form.QC35FormID</td>
                                                     <td>@form.ClientName</td>
-                                                    <td>@form.AuditFirmName</td>
+                                                    <td>@form.PartnerName</td>
                                                     <td>@form.ReportingYearEnd?.ToShortDateString()</td>
-                                                    <td>@form.FormSubmissionDate.ToShortDateString()</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
+                                                    <td>@form.ManagerName</td>
                                                     <td>
                                                         @if (form.Status == "Pending")
                                                         {
@@ -212,35 +249,23 @@
                                             }
                                             else if (form.FormType == "SignedFS")
                                             {
-                                                <tr id="@form.SignedFSFormID" class="signed-fs-form" style="display: none;">
+                                                <tr id="@form.SignedFSFormID" class="signedfs-form" style="display: none;">
                                                     <td><input type="checkbox" name="selectedForms" value="@form.SignedFSFormID" /></td>
                                                     <td>@form.SignedFSFormID</td>
-                                                    <td>@form.ClientName</td>
-                                                    <td>@form.AuditFirmName</td>
-                                                    <td>@form.ReportingYearEnd?.ToShortDateString()</td>
-                                                    <td>@form.FormSubmissionDate.ToShortDateString()</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
+                                                    <td>@form.UserEmail</td>
+                                                    <td>@form.PartnerEmail</td>
+                                                    <td>@form.ScheduleDate?.ToShortDateString()</td>
+                                                    <td>@form.EmailType</td>
                                                     <td>
-                                                        @if (form.Status == "Pending")
+                                                        @if (form.IsProcessed)
                                                         {
-                                                            <span class="badge bg-warning">Pending</span>
-                                                        }
-                                                        else if (form.Status == "Pending 2nd Approval")
-                                                        {
-                                                            <span class="badge bg-warning">Pending 2nd Approval</span>
-                                                        }
-                                                        else if (form.Status == "Approved")
-                                                        {
-                                                            <span class="badge bg-success">Approved</span>
-                                                        }
-                                                        else if (form.Status == "Rejected")
-                                                        {
-                                                            <span class="badge bg-danger">Rejected</span>
+                                                            <span class="badge bg-warning">Email Sent</span>
                                                         }
                                                         else
                                                         {
-                                                            <span class="badge bg-secondary">@form.Status</span>
+                                                            <span class="badge bg-success">Yet to send</span>
                                                         }
+
                                                     </td>
                                                 </tr>
                                             }
@@ -248,10 +273,13 @@
                                     }
                                     else
                                     {
-                                        <tr><td colspan="8">No data found.</td></tr>
+                                        <tr>
+                                            <td colspan="8" class="text-center">No forms found.</td>
+                                        </tr>
                                     }
                                 </tbody>
                             </table>
+                 
 
                             <!-- Form with checkboxes -->
                             <form id="checkboxForm" class="form-checkboxes">
@@ -295,12 +323,26 @@
             var qc6Forms = document.querySelectorAll(".qc6-form");
             var qc7Forms = document.querySelectorAll(".qc7-form");
             var qc35Forms = document.querySelectorAll(".qc35-form");
-            var signedFSForms = document.querySelectorAll(".signed-fs-form");
+            var signedFSForms = document.querySelectorAll(".signedfs-form");
 
+            var headers = {
+                qc6: document.querySelectorAll(".qc6-header"),
+                qc7: document.querySelectorAll(".qc7-header"),
+                qc35: document.querySelectorAll(".qc35-header"),
+                signedfs: document.querySelectorAll(".signedfs-header")
+            };
+
+            // Hide all headers initially
+            Object.values(headers).forEach(header => {
+                header.forEach(h => h.style.display = "none");
+            });
+
+            // Show header based on selected form type
             if (formType === "QC6") {
                 qc6Forms.forEach(function (form) {
                     form.style.display = "";
                 });
+                headers.qc6.forEach(h => h.style.display = "");
                 qc7Forms.forEach(function (form) {
                     form.style.display = "none";
                 });
@@ -315,6 +357,7 @@
                 qc6Forms.forEach(function (form) {
                     form.style.display = "none";
                 });
+                headers.qc7.forEach(h => h.style.display = "");
                 qc7Forms.forEach(function (form) {
                     form.style.display = "";
                 });
@@ -329,11 +372,12 @@
                 qc6Forms.forEach(function (form) {
                     form.style.display = "none";
                 });
-                qc7Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
+                headers.qc35.forEach(h => h.style.display = "");
                 qc35Forms.forEach(function (form) {
                     form.style.display = "";
+                });
+                qc7Forms.forEach(function (form) {
+                    form.style.display = "none";
                 });
                 signedFSForms.forEach(function (form) {
                     form.style.display = "none";
@@ -343,18 +387,20 @@
                 qc6Forms.forEach(function (form) {
                     form.style.display = "none";
                 });
-                qc7Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
+                headers.signedfs.forEach(h => h.style.display = "");
                 qc35Forms.forEach(function (form) {
                     form.style.display = "none";
                 });
                 signedFSForms.forEach(function (form) {
                     form.style.display = "";
                 });
+                qc7Forms.forEach(function (form) {
+                    form.style.display = "none";
+                });
                 document.querySelector('.date-filter').classList.add('hidden');
             }
         }
+
 
         function parseDate(dateStr) {
             if (!dateStr) return null;
@@ -407,6 +453,26 @@
             $('#reportTable').DataTable().draw(); // Redraw the DataTable to reflect changes
         }
 
+        function clearFilters() {
+            // Clear date inputs
+            document.getElementById("startDate").value = '';
+            document.getElementById("endDate").value = '';
+
+            // Show all rows in the table
+            var rows = document.querySelectorAll("#reportTable tbody tr");
+            rows.forEach(function (row) {
+                row.style.display = "";
+            });
+
+            // Reapply form type filter
+            filterForms();
+
+            // Redraw the DataTable to reflect changes
+            $('#reportTable').DataTable().draw();
+        }
+
+
+
         function showCheckboxForm() {
             var table = document.getElementById("reportTable");
             var checkboxForm = document.getElementById("checkboxForm");
@@ -426,4 +492,3 @@
     </script>
 </body>
 </html>
-

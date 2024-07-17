@@ -75,7 +75,7 @@ namespace PKFAuditManagement.ViewModels
         public string? ClientName { get; set; }
         public DateTime? ReportingYearEnd { get; set; }
         public string? PartnerName { get; set; }
-        public string? PartnerInitial { get; set; }
+        public string? ManagerName { get; set; }
         public DateTime? PartnerDate { get; set; }
         public string? AuditStaffName { get; set; }
         public string? AuditStaffInitial { get; set; }
