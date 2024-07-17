@@ -9,6 +9,17 @@ $(document).on("blur", "#auditFee, #EstimatedFee, #BudgetedTimeCost, input[name^
     }
 });
 
+var tags = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"];
+$("#autocomplete").autocomplete({
+    source: function (request, response) {
+        var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
+        response($.grep(tags, function (item) {
+            return matcher.test(item);
+        }));
+    }
+});
+
+
 // Function to round down to two decimal places
 function convertToMoney(val) {
     return (Math.floor(val * 100).toFixed(0) / 100).toFixed(2);

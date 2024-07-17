@@ -190,6 +190,9 @@ namespace PKFAuditManagement.Controllers
                 viewModel.TNATNEAssessment.SectionD.Q4Comment = tnaTNESectionDData.Q4Comment;
                 viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
 
+                // Clear the existing Services list
+                viewModel.Services.Clear();
+
                 // Append FeeDetail data for Services
                 foreach (var feeDetail in feeDetailData)
                 {
@@ -606,6 +609,9 @@ $"The QC6 Form {viewModel.FileReference} has been updated and you've been design
                 viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
                 */
 
+                // Clear the existing Services list
+                viewModel.Services.Clear();
+
                 // Append FeeDetail data for Services
                 foreach (var feeDetail in feeDetailData)
                 {
@@ -633,6 +639,17 @@ $"The QC6 Form {viewModel.FileReference} has been updated and you've been design
             }
         }
 
+        [HttpGet]
+        public IActionResult GetProspectiveClients(string term)
+        {
+            var prospectiveClients = _context.QC6Forms
+                .Where(q => q.ProspectiveClient.Contains(term)) // Adjust based on your data model and filtering logic
+                .Select(q => q.ProspectiveClient)
+                .ToList();
+
+            return Json(prospectiveClients);
+        }
+
         [Authorize(Roles = "Non-Auditor,User,Admin")]
         public async Task<IActionResult> QC6FormCreationAsync()
         {
@@ -642,8 +659,13 @@ $"The QC6 Form {viewModel.FileReference} has been updated and you've been design
             // Retrieve all emails for users in the "Admin" role
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
 
+            // Retrieve all prospective clients
+            var prospectiveClients = await _context.QC6Forms
+                .Select(q => q.ProspectiveClient)
+                .ToListAsync();
+
             // Retrieve QC6Form data
-            var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel { UserEmail = userEmail, AdminEmails = adminEmails.OrderBy(email => email).ToList() });
+            var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel { ProspectiveClients = prospectiveClients, UserEmail = userEmail, AdminEmails = adminEmails.OrderBy(email => email).ToList() });
 
             return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
         }
@@ -1199,7 +1221,7 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                 viewModel.SuspiciousTransactionReportFiledRationale = conclusionData.SuspiciousTransactionReportFiledRationale;
                 viewModel.Satisfaction = conclusionData.Satisfaction;
 
-                // Append FeeDetail data for Services
+/*                // Append FeeDetail data for Services
                 foreach (var feeDetail in feeDetailData)
                 {
                     viewModel.Services.Add(new FeeDetailViewModel
@@ -1208,7 +1230,7 @@ $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                         OtherService = feeDetail.OtherService,
                         Fee = feeDetail.Fee
                     });
-                }
+                }*/
                 return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
             }
             catch

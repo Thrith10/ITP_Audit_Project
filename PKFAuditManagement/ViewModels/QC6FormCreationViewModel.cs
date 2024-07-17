@@ -13,6 +13,9 @@ namespace PKFAuditManagement.ViewModels
 
             TNATNEAssessment = new TNATNEAssessmentViewModel();
         }
+        // Prospective Client Details
+        public List<string>? ProspectiveClients { get; set; }
+
         // User Details
         public string? UserEmail { get; set; }
 
