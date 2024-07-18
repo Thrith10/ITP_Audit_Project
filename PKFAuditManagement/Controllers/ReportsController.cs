@@ -28,35 +28,34 @@ namespace PKFAuditManagement.Controllers
             {
                 FormType = "QC6",
                 QC6FormID = qc6Form.QC6FormID,
-                FileReference = qc6Form.FileReference,
-                ProspectiveClient = qc6Form.ProspectiveClient,
-                PeriodEnded = qc6Form.PeriodEnded.Value,
-                EngagementType = qc6Form.EngagementType,
-                PreparedBy = qc6Form.PreparedBy,
-                PreparedByDate = qc6Form.PreparedByDate,
-                ReviewedBy = qc6Form.ReviewedBy,
-                ReviewedByDate = qc6Form.ReviewedByDate,
-                Status = qc6Form.Status,
-                RejectionReason = qc6Form.RejectionReason,
-                FormSubmissionDate = qc6Form.FormSubmissionDate,
-                PKFEntityProposingService = qc6Form.PKFEntityProposingService,
-                SourceOfReferral = qc6Form.SourceOfReferral,
-                NatureOfServiceForEstimateFee = qc6Form.NatureOfServiceForEstimateFee,
-                EstimatedFee = qc6Form.EstimatedFee,
-                BudgetedTimeCost = qc6Form.BudgetedTimeCost,
-                BudgetedFeeRecoveryRate = qc6Form.BudgetedFeeRecoveryRate,
-                OutstandingUnpaidFees = qc6Form.OutstandingUnpaidFees,
-                AuditFee = qc6Form.AuditFee,
-                GrandTotal = qc6Form.GrandTotal,
-                FeeConcentration = qc6Form.FeeConcentration,
-                ConflictsCheckDone = qc6Form.ConflictsCheckDone,
-                TypeOfActivities = qc6Form.TypeOfActivities,
-                ComplexityOfEngagement = qc6Form.ComplexityOfEngagement,
-                PredecessorAuditor = qc6Form.PredecessorAuditor,
-                ReasonsForDiscontinuance = qc6Form.ReasonsForDiscontinuance,
-                IsPublicInterestEntity = qc6Form.PublicInterestEntity,
-                PublicInterestEntityType = qc6Form.PublicInterestEntityType,
-                // Add other fields as needed
+                FileReference = qc6Form.FileReference ?? string.Empty,  // Provide default value if null
+                ProspectiveClient = qc6Form.ProspectiveClient ?? string.Empty,  // Provide default value if null
+                PeriodEnded = qc6Form.PeriodEnded ?? DateTime.MinValue,  // Provide default value if null
+                EngagementType = qc6Form.EngagementType ?? string.Empty,  // Provide default value if null
+                PreparedBy = qc6Form.PreparedBy ?? string.Empty,  // Provide default value if null
+                PreparedByDate = qc6Form.PreparedByDate,  // Non-nullable, use directly
+                ReviewedBy = qc6Form.ReviewedBy ?? string.Empty,  // Provide default value if null
+                ReviewedByDate = qc6Form.ReviewedByDate ?? DateTime.MinValue,  // Provide default value if null
+                Status = qc6Form.Status ?? string.Empty,  // Provide default value if null
+                RejectionReason = qc6Form.RejectionReason ?? string.Empty,  // Provide default value if null
+                FormSubmissionDate = qc6Form.FormSubmissionDate,  // Non-nullable, use directly
+                PKFEntityProposingService = qc6Form.PKFEntityProposingService ?? string.Empty,  // Provide default value if null
+                SourceOfReferral = qc6Form.SourceOfReferral ?? string.Empty,  // Provide default value if null
+                NatureOfServiceForEstimateFee = qc6Form.NatureOfServiceForEstimateFee ?? string.Empty,  // Provide default value if null
+                EstimatedFee = qc6Form.EstimatedFee,  // Provide default value if null
+                BudgetedTimeCost = qc6Form.BudgetedTimeCost,  // Provide default value if null
+                BudgetedFeeRecoveryRate = qc6Form.BudgetedFeeRecoveryRate,  // Provide default value if null
+                OutstandingUnpaidFees = qc6Form.OutstandingUnpaidFees,  // Non-nullable, use directly
+                AuditFee = qc6Form.AuditFee,  // Provide default value if null
+                GrandTotal = qc6Form.GrandTotal,  // Provide default value if null
+                FeeConcentration = qc6Form.FeeConcentration,  // Provide default value if null
+                ConflictsCheckDone = qc6Form.ConflictsCheckDone,  // Non-nullable, use directly
+                TypeOfActivities = qc6Form.TypeOfActivities ?? string.Empty,  // Provide default value if null
+                ComplexityOfEngagement = qc6Form.ComplexityOfEngagement ?? string.Empty,  // Provide default value if null
+                PredecessorAuditor = qc6Form.PredecessorAuditor ?? string.Empty,  // Provide default value if null
+                ReasonsForDiscontinuance = qc6Form.ReasonsForDiscontinuance ?? string.Empty,  // Provide default value if null
+                IsPublicInterestEntity = qc6Form.PublicInterestEntity,  // Non-nullable, use directly
+                PublicInterestEntityType = qc6Form.PublicInterestEntityType ?? string.Empty  // Provide default value if null
             }).ToList();
 
             var reportDataQC7 = qc7Forms.Select(qc7Form => new ReportsViewModel
