@@ -506,10 +506,10 @@ namespace PKFAuditManagement.Controllers
                 var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC6FormID.Equals(id));
 
                 // Retrieve TNATNEAssessment Section B data
-                //var tnaTNESectionBData = _context.TNATNESectionB.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+                var tnaTNESectionBData = _context.TNATNESectionBs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
 
                 // Retrieve TNATNEAssessment Section D data
-                //var tnaTNESectionDData = _context.TNATNESectionD.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+                var tnaTNESectionDData = _context.TNATNESectionDs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
 
                 // Retrieve Conclusion data
                 var conclusionData = _context.QC6FormConclusions.FirstOrDefault(e => e.QC6FormID.Equals(id));
@@ -601,7 +601,8 @@ namespace PKFAuditManagement.Controllers
                     viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
                 }
 
-                /* Append TNATNEAssessment data for TNATNEAssessmentViewModel
+                // Append TNATNEAssessment data for TNATNEAssessmentViewModel
+
                 viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
                 viewModel.TNATNEAssessment.SectionB.IsAudit = tnaTNESectionBData.IsAudit;
                 viewModel.TNATNEAssessment.SectionB.Q1 = tnaTNESectionBData.Q1;
@@ -614,7 +615,6 @@ namespace PKFAuditManagement.Controllers
                 viewModel.TNATNEAssessment.SectionD.Q3Comment = tnaTNESectionDData.Q3Comment;
                 viewModel.TNATNEAssessment.SectionD.Q4Comment = tnaTNESectionDData.Q4Comment;
                 viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
-                */
 
                 // Clear the existing Services list
                 viewModel.Services.Clear();
