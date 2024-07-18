@@ -490,6 +490,34 @@
                         header.innerText = 'Select Fields to Include in the Report';
                         form.appendChild(header);
 
+                        // Add a "Select All" checkbox
+                        const selectAllDiv = document.createElement('div');
+                        selectAllDiv.classList.add('form-group');
+
+                        const selectAllCheckbox = document.createElement('input');
+                        selectAllCheckbox.type = 'checkbox';
+                        selectAllCheckbox.id = 'selectAllCheckbox';
+                        selectAllCheckbox.name = 'selectAllCheckbox';
+
+                        const selectAllLabel = document.createElement('label');
+                        selectAllLabel.htmlFor = 'selectAllCheckbox';
+                        selectAllLabel.innerText = 'Select All Checkboxes';
+                        selectAllLabel.style.fontSize = '1.2em'; // Adjust font size as needed
+                        selectAllLabel.style.marginLeft = '5px'; // Add some left margin for space
+                        // Add a bit of space below the checkbox and label
+                        selectAllDiv.style.marginBottom = '10px'; // Adjust margin bottom as needed
+
+                        selectAllDiv.appendChild(selectAllCheckbox);
+                        selectAllDiv.appendChild(selectAllLabel);
+                        form.appendChild(selectAllDiv);
+
+                        selectAllCheckbox.addEventListener('change', function() {
+                            const checkboxes = form.querySelectorAll('input[type="checkbox"][name="selectedFields"]');
+                            checkboxes.forEach(checkbox => {
+                                checkbox.checked = selectAllCheckbox.checked;
+                            });
+                        });
+
                         filteredFields.forEach(field => {
                             console.log('fieldsections:', field.section);
 
@@ -504,6 +532,7 @@
                                 if (!formConclusionHeader && field.section === `${selectedFormType}FormConclusions`) {
                                     const header = document.createElement('h5');
                                     header.innerText = `${selectedFormType}Form Conclusion`;
+                                    header.style.marginTop = '10px'; // Add some top margin for space
                                     form.appendChild(header);
                                     formConclusionHeader = true;
                                 }
@@ -529,6 +558,7 @@
                                 const label = document.createElement('label');
                                 label.htmlFor = field.fieldName;
                                 label.innerText = field.fieldLabel;
+                                label.style.marginLeft = '5px'; // Add some left margin for space
 
                                 div.appendChild(checkbox);
                                 div.appendChild(label);
@@ -563,6 +593,11 @@
                 console.log('Selected fields:', selectedFields);
                 console.log('Selected form IDs:', selectedFormIds);
 
+                if (selectedFields.length === 0) {
+                    alert('Please select at least one field to include in the report.');
+                    return;
+                }
+
                 const data = {
                     selectedFormIds: selectedFormIds,
                     fields: selectedFields
@@ -587,6 +622,19 @@
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
+
+                    clearCheckboxes();
+                    // Show the table
+                    table.style.display = "block";
+                    // Hide the checkbox form
+                    checkboxFieldsForm.style.display = "none";
+                    // Show the Next button
+                    document.querySelector('.next-button').style.display = "block";
+                    // Show the form type dropdown
+                    document.getElementById('formTypeContainer').style.display = "block";
+                    // Show the date filter
+                    document.querySelector('.date-filter').classList.remove('hidden');
+
                 })
                 .catch(error => {
                     console.error('Error generating report:', error);
@@ -601,6 +649,21 @@
             document.querySelector('.date-filter').classList.add('hidden'); // Hide the date filter
 
             filterFormFields();
+
+        }
+
+        function clearCheckboxes() {
+            // Clear selectedFields checkboxes
+            const selectedFieldsCheckboxes = document.querySelectorAll('input[name="selectedFields"]:checked');
+            selectedFieldsCheckboxes.forEach(cb => {
+                cb.checked = false;
+            });
+
+            // Clear selectedForms checkboxes
+            const selectedFormsCheckboxes = document.querySelectorAll('input[name="selectedForms"]:checked');
+            selectedFormsCheckboxes.forEach(cb => {
+                cb.checked = false;
+            });
         }
         
     </script>
