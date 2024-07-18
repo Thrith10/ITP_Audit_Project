@@ -39,12 +39,12 @@
             <span>Manage Signed FS Forms</span>
         </a>
     </li>
-@*     <li class="nav-item">
-        <a class="nav-link @(currentController == "Admin" && currentAction == "GenerateReport" ? "active" : "collapsed")" asp-controller="Admin" asp-action="GenerateReport">
-            <i class="bi bi-person"></i>
-            <span>Generate Report</span>
-        </a>
-    </li> *@
+    @*     <li class="nav-item">
+            <a class="nav-link @(currentController == "Admin" && currentAction == "GenerateReport" ? "active" : "collapsed")" asp-controller="Admin" asp-action="GenerateReport">
+                <i class="bi bi-person"></i>
+                <span>Generate Report</span>
+            </a>
+        </li> *@
     <li class="nav-item">
         <a class="nav-link @(currentController == "Admin" && currentAction == "AccountManagement" ? "active" : "collapsed")" asp-controller="Admin" asp-action="AccountManagement">
             <i class="bi bi-person"></i>
@@ -56,5 +56,12 @@
             <i class="bi bi-file-earmark-text"></i>
             <span>Generate Report</span>
         </a>
-    </li><!-- End Profile Page Nav -->
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "Quizzes" && currentAction == "ViewAllQuiz" ? "active" : "collapsed")" asp-controller="Quizzes" asp-action="ViewAllQuiz">
+            <i class="bi bi-person"></i>
+            <span>View Quizzes</span>
+        </a>
+    </li>
+    <!-- End Profile Page Nav -->
 </ul>

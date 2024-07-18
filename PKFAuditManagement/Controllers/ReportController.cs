@@ -76,12 +76,10 @@ namespace PKFAuditManagement.Controllers
                     {"Satisfaction", "Satisfaction"},
                     {"PreparedBy", "Prepared By"},
                     {"PreparedByDate", "Prepared By Date"},
-                    {"ReviewedBy", "Reviewed By"},
-                    {"ReviewedByDate", "Reviewed By Date"},
-                    {"EPHODApprovedBy", "EPHOD Approved By"},
-                    {"EPHODApprovedByDate", "EPHOD Approved By Date"},
-                    {"MPHODQMPApprovedBy", "MPHOD QMP Approved By"},
-                    {"MPHODQMPApprovedByDate", "MPHOD QMP Approved By Date"},
+                    {"EPHODApprovedBy", "Approved By Engagment Partner/Head of Division"},
+                    {"EPHODApprovedByDate", "Engagment Partner/Head of Division Approved By Date"},
+                    {"MPHODQMPApprovedBy", "Approved By Managing Partner/Head of Division/Quality Management Partner"},
+                    {"MPHODQMPApprovedByDate", "Managing Partner/Head of Division/Quality Management Partner Approved By Date"}
                 },
                 ["QC7Forms"] = new Dictionary<string, string>
                 {
@@ -126,12 +124,12 @@ namespace PKFAuditManagement.Controllers
                     {"IsSuspiciousTransactionReportFiled", "Is Suspicious Transaction Report Filed"},
                     {"SuspiciousTransactionReportFiledRationale", "Suspicious Transaction Report Filed Rationale"},
                     {"EngagementRetainedRejected", "Engagement Retained Rejected"},
-                    {"EMPreparedBy", "EM Prepared By"},
-                    {"EMPreparedByDate", "EM Prepared By Date"},
-                    {"EPHODApprovedBy", "EPHOD Approved By"},
-                    {"EPHODApprovedByDate", "EPHOD Approved By Date"},
-                    {"MPHODQMPApprovedBy", "MPHOD QMP Approved By"},
-                    {"MPHODQMPApprovedByDate", "MPHOD QMP Approved By Date"}
+                    {"EMPreparedBy", "Prepared By Engagement Manager"},
+                    {"EMPreparedByDate", "Engagement Manager Prepared By Date"},
+                    {"EPHODApprovedBy", "Approved By Engagment Partner/Head of Division"},
+                    {"EPHODApprovedByDate", "Engagment Partner/Head of Division Approved By Date"},
+                    {"MPHODQMPApprovedBy", "Approved By Managing Partner/Head of Division/Quality Management Partner"},
+                    {"MPHODQMPApprovedByDate", "Managing Partner/Head of Division/Quality Management Partner Approved By Date"}
                 },
                 ["QC35Forms"] = new Dictionary<string, string>
                 {
@@ -142,19 +140,29 @@ namespace PKFAuditManagement.Controllers
                     {"ManagerName", "Manager Name"},
                     {"ImageFileName", "Image File Name"},
                     {"Status", "Status"},
+                },
+                ["QC35ChecklistItems"] = new Dictionary<string, string>
+                {
+                    {"QC35FormID", "QC35 Form ID"},
+                    {"Description", "Description"},
+                    {"Response", "Response"},
+                    {"DaysUntilDue", "Days Until Due"}
+                },
+                ["SignedFSForm"] = new Dictionary<string, string>
+                {
+                    {"Client", "Client"},
+                    {"AuditedReportDate", "Audited Report Date"},
+                    {"PartnerEmail", "Partner Email"},
+                    {"UserEmail", "User Email"},
+                    {"FilePath", "File Path"},
+                    {"ScheduleDate", "Schedule Date"},
+                    {"EmailType", "Email Type"},
+                    {"EmailBody", "Email Body"},
+                    {"IsProcessed", "Is Processed"},
                 }
 
                 
-
-                
             };
-
-            // var fields = combinedQC6Fields.Select(f => new FieldCheckbox
-            // {
-            //     FieldName = f.Key,
-            //     FieldLabel = f.Value,
-            //     IsSelected = false
-            // }).ToList();
 
             var fields = formsFields
                 .SelectMany(section => section.Value.Select(f => new FieldCheckbox
@@ -171,8 +179,6 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost("GenerateReport")]
         public async Task<IActionResult> GenerateReport([FromBody] SelectFieldsViewModel request)
-
-        //public IActionResult GenerateReport([FromBody] SelectFieldsViewModel request)
         {
             if (request == null || request.SelectedFormIds == null || request.Fields == null)
             {
@@ -203,6 +209,15 @@ namespace PKFAuditManagement.Controllers
                 else if (f.StartsWith("QC35Forms")) {
                     return $"QC35Forms.{f.Substring("QC35Forms_".Length)}";
                 }
+                else if (f.Contains("DaysUntilDue")) {
+                    return $"DATEDIFF(DAY, GETDATE(), CAST(QC35ChecklistItems.Response AS DATE)) AS DaysUntilDue";
+                }
+                else if (f.StartsWith("QC35ChecklistItems")) {
+                    return $"QC35ChecklistItems.{f.Substring("QC35ChecklistItems_".Length)}";
+                }
+                else if (f.StartsWith("SignedFSForm")) {
+                    return $"SignedFSForm.{f.Substring("SignedFSForm_".Length)}";
+                }
                 else {
                     return null;
                 }
@@ -228,17 +243,28 @@ namespace PKFAuditManagement.Controllers
                     WHERE QC7Forms.QC7FormID IN ({selectedFormIds})";
             }
 
-            if (selectedSections.Contains("QC35Form")) {
+            if (selectedSections.Contains("QC35Form") || selectedSections.Contains("DaysUntilDue")) {
                 query += $@"
                     SELECT {selectClause}
                     FROM QC35Forms
+                    LEFT JOIN QC35ChecklistItems ON QC35Forms.QC35FormID = QC35ChecklistItems.QC35FormID
+                    AND QC35CheckListItems.Description = 'Date of Audit Report'
                     WHERE QC35Forms.QC35FormID IN ({selectedFormIds})";
+            }
+
+            if (selectedSections.Contains("SignedFSForm")) {
+                query += $@"
+                    SELECT {selectClause}
+                    FROM SignedFSForm
+                    WHERE SignedFSForm.Id IN ({selectedFormIds})";
             }
 
             // Log the received data
             Console.WriteLine("Selected Form IDs: " + string.Join(", ", selectedFormIds));
             Console.WriteLine("Selected Fields: " + string.Join(", ", selectedFields));
             Console.WriteLine("Selected Sections: " + string.Join(", ", selectedSections));
+
+            Console.WriteLine("Query: " + selectClause);
 
             using (var connection = new SqlConnection(_context.Database.GetDbConnection().ConnectionString))
             {
@@ -256,10 +282,6 @@ namespace PKFAuditManagement.Controllers
                     {
                         worksheet.Cell(currentRow, i + 1).Value = headers[i];
                     }
-
-                    // Create a table first
-                    var range = worksheet.Range(currentRow, 1, currentRow, headers.Count);
-                    //var table = worksheet.Tables.Add(range, "DataTable");
                     
                     // Add data
                     foreach (var row in result)
@@ -269,7 +291,8 @@ namespace PKFAuditManagement.Controllers
                         for (int i = 0; i < dictRow.Values.Count; i++)
                         {
                             var value = dictRow.Values.ElementAt(i);
-                            worksheet.Cell(currentRow, i + 1).Value = value != null ? value.ToString() : "Null";                        }
+                            worksheet.Cell(currentRow, i + 1).Value = value != null ? value.ToString() : "Null";
+                        }
                     }
 
                     // Prepare the response
