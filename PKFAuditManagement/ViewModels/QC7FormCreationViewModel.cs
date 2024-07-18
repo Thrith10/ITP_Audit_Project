@@ -88,6 +88,7 @@ namespace PKFAuditManagement.ViewModels
         public List<QC7SubFormViewModel> SubForms { get; set; }
         public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
         public List<string>? AdminEmails { get; set; }
+        public bool IsNewForm { get; set; }
     }
 
     public class QC7SubFormViewModel

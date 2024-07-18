@@ -47,7 +47,7 @@
                                     <div class="row mb-3">
                                         <label asp-for="Client" class="col-sm-2 col-form-label">Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="Client" required>
+                                            <input type="text" class="form-control" asp-for="Client" id="autocomplete" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -449,62 +449,145 @@
                                 }
                                 @foreach (var subForm in Model.SubForms)
                                 {
-                                    <input type="hidden" name="SubForms.Index" value="@subForm.QC7SubFormID" />
-                                    <h5 class="card-title">@subForm.SubFormType</h5>
-                                    <!-- Checkbox for hiding/showing the table -->
-                                    @if (subFormIndex == 1 || subFormIndex == 2)
-                                    {
-                                        <div class="form-check mb-3">
-                                            <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
-                                            <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" onclick="toggleSubForm(@subFormIndex)">
-                                            <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
-                                                Not Applicable
-                                            </label>
-                                        </div>
-                                    }
-                                    <div class="table-responsive" id="tableContainer@(subFormIndex)">
-                                        <table class="table table-bordered table-striped">
-                                            <thead class="table-light" style="background-color: #f8f9fa;">
-                                                <tr>
-                                                    <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
-                                                    <th class="text-left text-uppercase">Sign</th>
-                                                    <th class="text-left text-uppercase">Date</th>
-                                                    <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var objective in subForm.Objectives)
-                                                {
-                                                    <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives.Index" value="@objective.QC7FormObjectiveID" />
+                                    // Check if any Objectives have TestDescriptions
+                                    var hasTestDescriptions = subForm.Objectives.Any(o => o.TestDescriptions.Any());
 
-                                                    <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                        <td colspan="4"><b>@objective.Objective</b></td>
-                                                    </tr>
-                                                    @foreach (var testDescription in objective.TestDescriptions)
-                                                    {
-                                                        <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC7FormTestDescriptionID" />
-                                                        <tr class="text-zinc-700 dark:text-zinc-400">
-                                                            <td>
-                                                                <div>
-                                                                    <p>@Html.Raw(@testDescription.Description)</p>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" class="form-control" placeholder="Signed By" value="@Model.UserEmail" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignBy" />
-                                                            </td>
-                                                            <td>
-                                                                <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignDate" />
-                                                            </td>
-                                                            <td>
-                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment"></textarea>
-                                                            </td>
+                                    if (!@Model.IsNewForm)
+                                    {
+                                        <input type="hidden" name="SubForms.Index" value="@subForm.QC7SubFormID" />
+                                        <h5 class="card-title">@subForm.SubFormType</h5>
+                                        <!-- Checkbox for hiding/showing the table -->
+                                        @if (subFormIndex == 1 || subFormIndex == 2)
+                                        {
+                                            @if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable))
+                                            {
+                                                <div class="form-check mb-3">
+                                                    <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                    <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" checked>
+                                                    <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                        Not Applicable
+                                                    </label>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="form-check mb-3">
+                                                    <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                    <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true">
+                                                    <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                        Not Applicable
+                                                    </label>
+                                                </div>
+                                            }
+                                        }
+                                        <div class="table-responsive" id="tableContainer@(subFormIndex)" @if ((subFormIndex == 1 && Model.SubForm1NotApplicable) || (subFormIndex == 2 && Model.SubForm2NotApplicable))
+                                        {
+                                            <text> style="display:none;"</text>
+                                        }>
+                                                <table class="table table-bordered table-striped">
+                                                    <thead class="table-light" style="background-color: #f8f9fa;">
+                                                        <tr>
+                                                            <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
+                                                            <th class="text-left text-uppercase">Sign</th>
+                                                            <th class="text-left text-uppercase">Date</th>
+                                                            <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
                                                         </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach (var objective in subForm.Objectives)
+                                                    {
+                                                        <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives.Index" value="@objective.QC7FormObjectiveID" />
+
+                                                        <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                            <td colspan="4"><b>@objective.Objective</b></td>
+                                                        </tr>
+                                                        @foreach (var testDescription in objective.TestDescriptions)
+                                                        {
+                                                            <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC7FormTestDescriptionID" />
+                                                            <tr class="text-zinc-700 dark:text-zinc-400">
+                                                                <td>
+                                                                    <div>
+                                                                        <p>@Html.Raw(@testDescription.Description)</p>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignBy" value="@testDescription.SignBy"/>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignDate"/>
+                                                                </td>
+                                                                <td>
+                                                                        <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment">@testDescription.Comment.Replace("<br>", "\n")</textarea>
+                                                                </td>
+                                                            </tr>
+                                                        }
                                                     }
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    subFormIndex++;
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        subFormIndex++;
+                                    } else
+                                    {
+                                        <input type="hidden" name="SubForms.Index" value="@subForm.QC7SubFormID" />
+                                        <h5 class="card-title">@subForm.SubFormType</h5>
+                                        <!-- Checkbox for hiding/showing the table -->
+                                        @if (subFormIndex == 1 || subFormIndex == 2)
+                                        {
+                                            <div class="form-check mb-3">
+                                                <input type="hidden" name="SubForms[@subFormIndex].SubFormNotApplicable" value="false" />
+                                                <input class="form-check-input" type="checkbox" id="toggleSubForm@(subFormIndex)" name="SubForm@(subFormIndex)NotApplicable" value="true" onclick="toggleSubForm(@subFormIndex)">
+                                                <label class="form-check-label" for="toggleSubForm@(subFormIndex)">
+                                                    Not Applicable
+                                                </label>
+                                            </div>
+                                        }
+                                        <div class="table-responsive" id="tableContainer@(subFormIndex)">
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="table-light" style="background-color: #f8f9fa;">
+                                                    <tr>
+                                                        <th class="text-left pl-3 text-uppercase" style="width: 40%;">Objectives and detailed tests</th>
+                                                        <th class="text-left text-uppercase">Sign</th>
+                                                        <th class="text-left text-uppercase">Date</th>
+                                                        <th class="text-left text-uppercase" style="width: 40%;">Ref/Comment</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var objective in subForm.Objectives)
+                                                    {
+                                                        @if (objective.TestDescriptions.Any())
+                                                        {
+                                                            <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives.Index" value="@objective.QC7FormObjectiveID" />
+
+                                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                                <td colspan="4"><b>@objective.Objective</b></td>
+                                                            </tr>
+                                                            @foreach (var testDescription in objective.TestDescriptions)
+                                                            {
+                                                                <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC7FormTestDescriptionID" />
+                                                                <tr class="text-zinc-700 dark:text-zinc-400">
+                                                                    <td>
+                                                                        <div>
+                                                                            <p>@Html.Raw(@testDescription.Description)</p>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control" placeholder="Signed By" value="@Model.UserEmail" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignBy" />
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignDate" />
+                                                                    </td>
+                                                                    <td>
+                                                                        <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment"></textarea>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        subFormIndex++;
+                                    }
                                 }
                                 <h5 class="card-title">Conclusion</h5>
                                 <div class="row mb-3">
@@ -748,6 +831,8 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/qc7-form-creation.js"></script>
 }

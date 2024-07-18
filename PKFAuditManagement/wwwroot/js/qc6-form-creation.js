@@ -18,7 +18,15 @@ $("#autocomplete").autocomplete({
         }));
     }
 });
-
+document.getElementById("add-more-docs").addEventListener("click", function () {
+    var container = document.getElementById("other-documents-container");
+    var input = document.createElement("input");
+    input.type = "file";
+    input.name = "OtherDocuments";
+    input.accept = "application/pdf";
+    input.classList.add("form-control", "mb-2");
+    container.appendChild(input);
+});
 
 // Function to round down to two decimal places
 function convertToMoney(val) {

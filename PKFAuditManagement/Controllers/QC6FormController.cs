@@ -25,13 +25,15 @@ namespace PKFAuditManagement.Controllers
         private readonly UserManager<CustomUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
-        public QC6FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender)
+        private readonly IWebHostEnvironment _environment;
+        public QC6FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender, IWebHostEnvironment environment)
         {
             _userService = userService;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _emailSender = emailSender;
+            _environment = environment;
         }
 
         [Authorize(Roles = "Non-Auditor,User")]
@@ -1054,6 +1056,41 @@ namespace PKFAuditManagement.Controllers
                     // Save all pending changes to QC6FormFeeDetail entities at once
                     _context.SaveChanges();
 
+                    var uploadsRootFolder = Path.Combine(_environment.WebRootPath, "uploads");
+
+                    if (viewModel.BusinessProfile != null)
+                    {
+                        var filePath = Path.Combine(uploadsRootFolder, "BusinessProfile", viewModel.BusinessProfile.FileName);
+                        await SaveFileAsync(viewModel.BusinessProfile, filePath);
+                    }
+
+                    if (viewModel.TrendSearch != null)
+                    {
+                        var filePath = Path.Combine(uploadsRootFolder, "TrendSearch", viewModel.TrendSearch.FileName);
+                        await SaveFileAsync(viewModel.TrendSearch, filePath);
+                    }
+
+                    if (viewModel.GoogleSearch != null)
+                    {
+                        var filePath = Path.Combine(uploadsRootFolder, "GoogleSearch", viewModel.GoogleSearch.FileName);
+                        await SaveFileAsync(viewModel.GoogleSearch, filePath);
+                    }
+
+                    if (viewModel.LexisNexisSearch != null)
+                    {
+                        var filePath = Path.Combine(uploadsRootFolder, "LexisNexisSearch", viewModel.LexisNexisSearch.FileName);
+                        await SaveFileAsync(viewModel.LexisNexisSearch, filePath);
+                    }
+
+                    if (viewModel.OtherDocuments != null && viewModel.OtherDocuments.Count > 0)
+                    {
+                        foreach (var file in viewModel.OtherDocuments)
+                        {
+                            var filePath = Path.Combine(uploadsRootFolder, "OtherDocuments", file.FileName);
+                            await SaveFileAsync(file, filePath);
+                        }
+                    }
+
                     transaction.Commit();
 
                     await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Creation",
@@ -1304,6 +1341,15 @@ namespace PKFAuditManagement.Controllers
             return viewModel;
         }
 
+        private async Task SaveFileAsync(IFormFile file, string filePath)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+        }
         public IActionResult RetrieveNASFeeDetails()
         {
             // Retrieve QC6 Forms where FileReference contains "NAS"

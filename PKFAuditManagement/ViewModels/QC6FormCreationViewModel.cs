@@ -95,6 +95,14 @@ namespace PKFAuditManagement.ViewModels
         public List<FeeDetailViewModel> Services { get; set; }
         public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
         public List<string>? AdminEmails { get; set; }
+
+        // File Uploads
+
+        public IFormFile? BusinessProfile { get; set; }
+        public IFormFile? TrendSearch { get; set; }
+        public IFormFile? GoogleSearch { get; set; }
+        public IFormFile? LexisNexisSearch { get; set; }
+        public List<IFormFile>? OtherDocuments { get; set; } = new List<IFormFile>();
     }
     public class TNATNEAssessmentViewModel
     {

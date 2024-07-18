@@ -52,7 +52,7 @@ namespace PKFAuditManagement.Controllers
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
 
             // Retrieve QC7Form data
-            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, AdminEmails = adminEmails.OrderBy(email => email).ToList() });
+            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, AdminEmails = adminEmails.OrderBy(email => email).ToList(), IsNewForm = true });
 
             return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
         }
@@ -476,6 +476,176 @@ namespace PKFAuditManagement.Controllers
                         return RedirectToAction("QC7FormManagement");
                     }
                 }
+            }
+        }
+
+        public async Task<IActionResult> RetrievePastQC7Data(string selectedClient)
+        {
+            // Populate Sub Forms
+            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel());
+
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Populate Sub Forms
+            viewModel = RetrieveSubFormData(viewModel);
+
+            // Append UserEmail to viewModel
+            viewModel.UserEmail = user.Email;
+
+            // Retrieve all emails for users in the "Admin" role
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
+            // Append emails to viewModel
+            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+
+            // Retrieve QC7Form data from the database
+            try
+            {
+                // Get the selected QC7 Form that matches the clientName
+                var qc7formData = _context.QC7Forms.FirstOrDefault(q => q.Client == selectedClient);
+
+                if (qc7formData == null)
+                {
+                    viewModel.ErrorMessage = "No client found!";
+                    return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
+                }
+
+                // Get the selected QC7 Form ID 
+
+                var id = qc7formData.QC7FormID;
+
+                // Retrieve Conclusion data
+                var conclusionData = _context.QC7FormConclusions.FirstOrDefault(e => e.QC7FormID.Equals(id));
+
+                // Retrieve FeeDetail data
+                var feeDetailData = _context.QC7FormFeeDetails.Where(e => e.QC7FormID.Equals(id)).ToList();
+
+                // Append emails to viewModel
+                viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+
+                // Retrieve TNATNEAssessment data
+                var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC7FormID.Equals(id));
+
+                // Retrieve TNATNEAssessment Section B data
+                var tnaTNESectionBData = _context.TNATNESectionBs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+
+                // Retrieve TNATNEAssessment Section D data
+                var tnaTNESectionDData = _context.TNATNESectionDs.FirstOrDefault(e => e.TNATNEAssessmentID.Equals(tnaTneAssessmentData.TNATNEAssessmentID));
+
+                // Retrieve QC7 Form Test data
+                var testData = _context.QC7FormTests.Where(e => e.QC7FormID.Equals(id)).ToList();
+
+                // Loop through each SubForm in the viewModel
+                foreach (var subForm in viewModel.SubForms)
+                {
+                    // Loop through each Objective in the SubForm
+                    foreach (var objective in subForm.Objectives)
+                    {
+                        // Loop through each TestDescription in the Objective
+                        foreach (var testDescription in objective.TestDescriptions)
+                        {
+                            // Find the corresponding QC7FormTest data for the TestDescription
+                            var test = testData.FirstOrDefault(t => t.QC7FormTestDescriptionID == testDescription.QC7FormTestDescriptionID);
+
+                            if (test != null)
+                            {
+                                // Populate the TestDescription with QC7FormTest data
+                                testDescription.SignBy = test.SignOffBy;
+                                testDescription.SignDate = test.SignOffDate.Value;
+                                testDescription.Comment = test.Comments;
+                            }
+                        }
+                    }
+                }
+
+                // Append new data for QC7Form General Portion
+                viewModel.QC7FormID = qc7formData.QC7FormID.ToString();
+                viewModel.Status = qc7formData.Status;
+                viewModel.Client = qc7formData.Client;
+                viewModel.PeriodEnded = qc7formData.PeriodEnded;
+                viewModel.EngagementType = qc7formData.EngagementType;
+                viewModel.PriorYearFee = qc7formData.PriorYearFee;
+                viewModel.TimeCosts = qc7formData.TimeCosts;
+                viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
+                viewModel.AnyOutstandingUnpaidAuditFees = qc7formData.AnyOutstandingUnpaidAuditFees;
+                viewModel.TypeOfClientActivities = qc7formData.TypeOfClientActivities;
+                viewModel.RiskRatingPriorYear = qc7formData.RiskRatingPriorYear;
+                viewModel.AnySuspiciousTransactionReportFiled = qc7formData.AnySuspiciousTransactionReportFiled;
+                viewModel.SuspiciousTransactionReportFiledComment = qc7formData.SuspiciousTransactionReportFiledComment;
+                viewModel.SafeguardReviewerName = qc7formData.SafeguardReviewerName;
+                viewModel.AnyOutstandingUnpaidNonAuditFees = qc7formData.AnyOutstandingUnpaidNonAuditFees;
+                viewModel.GrandTotal = qc7formData.GrandTotal;
+                viewModel.AuditFee = qc7formData.AuditFee;
+                viewModel.FeeConcentration = qc7formData.FeeConcentration;
+                viewModel.ProposedFeeCurrentYear = qc7formData.ProposedFeeCurrentYear;
+                viewModel.BudgetedTimeCost = qc7formData.BudgetedTimeCost;
+                viewModel.ProposedRecoveryRateCurrentYear = qc7formData.ProposedRecoveryRateCurrentYear;
+                viewModel.IsPublicInterestEntity = qc7formData.IsPublicInterestEntity;
+                viewModel.PublicInterestEntityType = qc7formData.PublicInterestEntityType;
+                viewModel.SubForm1NotApplicable = qc7formData.IsSubForm2NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                viewModel.SubForm2NotApplicable = qc7formData.IsSubForm3NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+
+                // Append ConclusionData for QC7FormConclusion
+                viewModel.AnyRiskAssociated = conclusionData.AnyRiskAssociated;
+
+                if (viewModel.AnyRiskAssociated == true)
+                {
+                    viewModel.RiskExplanationCurrentYearPriorYear = conclusionData.RiskExplanationCurrentYearPriorYear;
+                    viewModel.IsSafeguardApplied = conclusionData.IsSafeguardApplied;
+                    viewModel.NatureOfSafeguard = conclusionData.NatureOfSafeguard;
+                }
+
+                viewModel.ContinuingEngagementRiskRated = conclusionData.ContinuingEngagementRiskRated;
+                viewModel.SafeguardReviewPartnerAssigned = conclusionData.SafeguardReviewPartnerAssigned;
+
+                if (viewModel.IsSuspiciousTransactionReportFiled == true)
+                {
+                    viewModel.SuspiciousTransactionReportFiledRationale = conclusionData.SuspiciousTransactionReportFiledRationale;
+                }
+
+                viewModel.EngagementRetainedRejected = conclusionData.EngagementRetainedRejected;
+/*                viewModel.EMPreparedBy = conclusionData.EMPreparedBy;
+                viewModel.EMPreparedByDate = conclusionData.EMPreparedByDate;
+                viewModel.EPHODApprovedBy = conclusionData.EPHODApprovedBy;
+                viewModel.MPHODQMPApprovedBy = conclusionData.MPHODQMPApprovedBy;
+                viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
+                viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;*/
+
+                // Append TNATNEAssessment data for TNATNEAssessmentViewModel
+                viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
+                viewModel.TNATNEAssessment.SectionB.IsAudit = tnaTNESectionBData.IsAudit;
+                viewModel.TNATNEAssessment.SectionB.Q1 = tnaTNESectionBData.Q1;
+                viewModel.TNATNEAssessment.SectionB.Q2 = tnaTNESectionBData.Q2;
+                viewModel.TNATNEAssessment.SectionB.Q3 = tnaTNESectionBData.Q3;
+                viewModel.TNATNEAssessment.SectionB.Q4 = tnaTNESectionBData.Q4;
+                viewModel.TNATNEAssessment.SectionB.Q5 = tnaTNESectionBData.Q5;
+                viewModel.TNATNEAssessment.SectionD.Q1Comment = tnaTNESectionDData.Q1Comment;
+                viewModel.TNATNEAssessment.SectionD.Q2Comment = tnaTNESectionDData.Q2Comment;
+                viewModel.TNATNEAssessment.SectionD.Q3Comment = tnaTNESectionDData.Q3Comment;
+                viewModel.TNATNEAssessment.SectionD.Q4Comment = tnaTNESectionDData.Q4Comment;
+                viewModel.TNATNEAssessment.SectionD.Q5Comment = tnaTNESectionDData.Q5Comment;
+
+                // Clear the existing Services list
+                viewModel.Services.Clear();
+
+                // Append FeeDetail data for Services
+                foreach (var feeDetail in feeDetailData)
+                {
+                    viewModel.Services.Add(new FeeDetailViewModel
+                    {
+                        NatureOfService = feeDetail.NatureOfService,
+                        OtherService = feeDetail.OtherService,
+                        Fee = feeDetail.Fee
+                    });
+                }
+
+                return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
+            }
+            catch
+            {
+                viewModel.ErrorMessage = "There was an error while handling your request, please try again!";
+                return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
             }
         }
 

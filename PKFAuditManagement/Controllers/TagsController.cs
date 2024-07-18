@@ -22,5 +22,17 @@ namespace PKFAuditManagement.Controllers
 
             return Ok(tags);
         }
+
+        [HttpGet]
+        public IActionResult GetQC7Tags()
+        {
+            // Retrieve all unique client names
+            var tags = _context.QC7Forms
+                .Select(q => q.Client)
+                .Distinct()
+                .ToList();
+
+            return Ok(tags);
+        }
     }
 }

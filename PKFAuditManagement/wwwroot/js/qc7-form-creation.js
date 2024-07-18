@@ -1,3 +1,38 @@
+$("#autocomplete").autocomplete({
+    source: function (request, response) {
+        $.ajax({
+            url: '/Tags/GetQC7Tags',
+            type: 'GET',
+            success: function (data) {
+                var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
+                response($.grep(data, function (item) {
+                    return matcher.test(item);
+                }));
+            }
+        });
+    },
+    select: function (event, ui) {
+        // Perform an action when an item is selected
+        var selectedValue = ui.item.value;
+
+        // Make another AJAX call using the selected value
+        $.ajax({
+            url: '/QC7Form/RetrievePastQC7Data',
+            type: 'GET',
+            data: { selectedClient: selectedValue },
+            success: function (data) {
+                // Process the data returned from the second AJAX call
+                console.log(data);
+
+                // Redirect to the new page and trigger a full page reload
+                window.location.href = '/QC7Form/RetrievePastQC7Data?selectedClient=' + encodeURIComponent(selectedValue);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error: " + error);
+            }
+        });
+    }
+});
 // Add event listener to the "Add Service" button
 document.getElementById('addService').addEventListener('click', addService);
 
