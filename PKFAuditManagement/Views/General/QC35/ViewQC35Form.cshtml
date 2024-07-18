@@ -39,7 +39,7 @@
                                 <div class="form-group">
                                     <label asp-for="ClientName">Client Name:<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" asp-for="ClientName">
+                                        <input type="text" class="form-control" asp-for="ClientName" id="autocomplete">
                                         <span asp-validation-for="ClientName" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -53,14 +53,24 @@
                                 <div class="form-group">
                                     <label asp-for="ClientName">Approved by (Manager):<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" asp-for="ManagerName">
+                                        <select asp-for="ManagerName" class="form-control">
+                                            @foreach (var email in Model.AdminEmails)
+                                            {
+                                                <option value="@email">@email</option>
+                                            }
+                                        </select>
                                         <span asp-validation-for="ManagerName" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ClientName">Approved by (Partner):<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" asp-for="PartnerName">
+                                        <select asp-for="PartnerName" class="form-control">
+                                            @foreach (var email in Model.AdminEmails)
+                                            {
+                                                <option value="@email">@email</option>
+                                            }
+                                        </select>
                                         <span asp-validation-for="PartnerName" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -228,8 +238,25 @@
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 @section Scripts {
-    <script src="~/js/qc6-form-creation.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <script>
+
+        $("#autocomplete").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Tags/GetTags',
+                    type: 'GET',
+                    success: function (data) {
+                        var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
+                        response($.grep(data, function (item) {
+                            return matcher.test(item);
+                        }));
+                    }
+                });
+            }
+        });
+
         const dropArea = document.getElementById("drop-area");
         const inputFile = document.getElementById("input-file");
         const imageView = document.getElementById("img-view");

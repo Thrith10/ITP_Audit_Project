@@ -364,37 +364,37 @@ namespace PKFAuditManagement.Data
                     QC6FormID = 1,
                     CreatedBy = "",
                     FileReference = "",
-                    ProspectiveClient = "ABC Corporation Ltd. (the “Company”) and its subsidiaries (the “Group”)",
-                    PeriodEnded = new DateTime(2024, 12, 31, 23, 59, 59, 999),
-                    EngagementType = "Statutory audit of financial statements",
+                    ProspectiveClient = "",
+                    PeriodEnded = null,
+                    EngagementType = "",
                     PreparedBy = "",
-                    PreparedByDate = new DateTime(2023, 11, 15, 10, 30, 0, 0),
+                    PreparedByDate = DateTime.MinValue,
                     ReviewedBy = "",
                     Status = "Pending",
                     RejectionReason = null,
-                    FormSubmissionDate = new DateTime(2023, 12, 1, 9, 0, 0, 0),
-                    PKFEntityProposingService = "PKF-CAP LLP",
-                    SourceOfReferral = "During the year, PKF-CAP LLP were requested to submit a proposal for the provision of audit services for the financial year ended 31 December 2024.",
-                    NatureOfServiceForEstimateFee = "Audit Fees",
-                    EstimatedFee = 165000.00m,
-                    BudgetedTimeCost = 550000.00m,
-                    BudgetedFeeRecoveryRate = 30.00m,
+                    FormSubmissionDate = DateTime.MinValue,
+                    PKFEntityProposingService = "",
+                    SourceOfReferral = "",
+                    NatureOfServiceForEstimateFee = "",
+                    EstimatedFee = 0.00m,
+                    BudgetedTimeCost = 0.00m,
+                    BudgetedFeeRecoveryRate = 0.00m,
                     OutstandingUnpaidFees = false,
                     AuditFee = 0.00m,
                     GrandTotal = 0.00m,
                     FeeConcentration = 0.00m,
                     ConflictsCheckDone = true,
-                    TypeOfActivities = "The principal activities of the Company and its subsidiaries are (i) to provide contract\r\n\r\nmanufacturing, design, engineering and assembly for the electronics industry; (ii) to provide design, manufacture and sale of automated machines, apparatus, systems and equipment; and (iii) provision of fund management services and conducting investment activities in equity securities and funds.",
-                    ComplexityOfEngagement = "Not a complex engagement.",
-                    PredecessorAuditor = "XYZ LLP",
-                    ReasonsForDiscontinuance = "XYZ LLP has been the Independent Auditor since the listing of the shares of the Company in 2018. The Board is of the view that, as a good corporate governance measure that the Company should consider change of auditors after an appropriate period of time. Such change would enhance the independence and objectivity of the external audit services on the Company and would be in the best interest of the Company and the Shareholders as a whole.",
-                    PublicInterestEntity = true,
-                    PublicInterestEntityType = "The Company is a limited liability company incorporated and domiciled in Singapore and is listed on the Main Board of the Stock Exchange of Singapore Limited (the “SGX”).",
+                    TypeOfActivities = "",
+                    ComplexityOfEngagement = "",
+                    PredecessorAuditor = "",
+                    ReasonsForDiscontinuance = "",
+                    PublicInterestEntity = false,
+                    PublicInterestEntityType = "",
                     IsSubForm2NotApplicable = false,
                     IsSubForm3NotApplicable = false,
                     IsTemplate = true
-                },
-                new QC6Form
+                }
+                /*new QC6Form
                 {
                     QC6FormID = 2,
                     CreatedBy = "User2",
@@ -533,7 +533,7 @@ namespace PKFAuditManagement.Data
                     PublicInterestEntityType = "TypeC",
                     IsSubForm2NotApplicable = false,
                     IsSubForm3NotApplicable = false
-                }
+                }*/
             );
 
             modelBuilder.Entity<QC6FormConclusion>().HasData(
@@ -542,25 +542,15 @@ namespace PKFAuditManagement.Data
                    QC6FormID = 1,
                    QC6FormConclusionID = 1,
                    AnySignificantRisk = false,
-                   NewEngagementRiskRating = "High Risk 1 (H1)",
-                   NewEngagementRiskRatingReason = "The Company being a limited liability company incorporated and domiciled in Singapore and is listed on\r\n\r\nthe Main Board of the Stock Exchange of Singapore Limited (the “SGX”) is automatically marked as high\r\n\r\nrisk client.",
+                   NewEngagementRiskRating = "High Risk (H1)",
+                   NewEngagementRiskRatingReason = "The Company being a limited liability company incorporated and domiciled in Singapore and is listed on the Main Board of the Stock Exchange of Singapore Limited (the “SGX”) is automatically marked as high risk client.",
                    EngagementSubjectedTo = "Full safeguard review (H1)",
-                   SafeguardReviewerAssigned = "Titus Kuan",
+                   SafeguardReviewerAssigned = "",
                    IsNewEngagementAcceptance = "Accepted",
                    IsSuspiciousTransactionReportFiled = false,
                    Satisfaction = "Yes.",
                    PreparedBy = ""
                 }
-            );
-
-            modelBuilder.Entity<QC6FormFeeDetail>().HasData(
-               new QC6FormFeeDetail
-               {
-                   QC6FormFeeDetailID = 1,
-                   QC6FormID = 1,
-                   Fee = 0.00m,
-                   NatureOfService = "Non-audit services"
-               }
             );
 
             modelBuilder.Entity<QC6FormTest>().HasData(
@@ -569,28 +559,28 @@ namespace PKFAuditManagement.Data
                    QC6FormTestID = 1,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 1,
-                   Comments = "We have carried out the following procedures during our evaluation: <br><br> 1) Obtained the Accounting and Corporate Regulatory Authority (“ACRA”) records from the government in Singapore and there was no trace of adverse or negative profile/news noted. <br><br> 2) We have screened in Google search the Company name and names of directors of the Company and no adverse news was noted. <br><br> 3) We have screened in Lexis Nexis the Company name and names of directors of the Company and no adverse news was noted. <br><br> 4) We did not identify any conflict of interest in (TREND – Network Conflict Search) for conflict search; and <br><br> 5) We have sent out and cleared any potential conflict through email communications within PKF Singapore. <br><br> As such, we are not aware of any significant matters that would give rise to concerns over integrity of management, based on our discussion with the Management, to our reputation as a firm from our association with the Company and the Group as their external auditor."
+                   Comments = "We have carried out the following procedures during our evaluation: <br><br>1) Public Record Review - Verified the company profile with the Accounting and Corporate Regulatory Authority (ACRA) business register and found no negative information. <br><br>2) Web Screening - Conducted web searches on the company name and its directors and authorised representatives, identifying no adverse news or concerns.<br><br>3) Database Screening - Conducted Lexis Nexis searches on the company name and its directors and authorised representatives, identifying no adverse news or concerns.<br><br>4) Conflict of Interest Check - Our internal TREND network conflict check confirmed no conflicts of interest.<br><br>5) Internal Conflict of Interest Check - Addressed and cleared any potential conflicts within PKF Singapore through email communication.<br><br>Based on these due diligence procedures, including discussions with management, we have identified no significant issues that could raise concerns regarding the company's integrity or potential reputational risks for PKF Singapore in association with them."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 2,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 2,
-                   Comments = "From the above information, we have not noted any indicators that would cause concern for us in taking up this audit engagement."
+                   Comments = "Our due diligence review, including a review of the company profile with ACRA, web and database screening, conflict checks, and discussions with management, identified no significant concerns that would hinder our ability to accept this engagement."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 3,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 3,
-                   Comments = "Based on the procedures as cited above, we have not noted any threats to independence and/or conflicts of interest with the Company and the Group.<br><br>We have assessed and are not aware of any independence or conflict of interest that requires additional precautions.<br><br>We concluded that we are in compliance with the relevant ethical requirements, including the firm’s independence."
+                   Comments = "Our due diligence procedures, outlined above, identified no threats to our independence or conflicts of interest with the Company. Based on this assessment, we confirm compliance with all relevant ethical requirements, including those regarding firm independence."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 4,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 4,
-                   Comments = "We have the necessary competency to carry out the engagement."
+                   Comments = "Our team possesses the necessary skills and experience to successfully complete this engagement."
                },
                new QC6FormTest
                {
@@ -604,28 +594,28 @@ namespace PKFAuditManagement.Data
                    QC6FormTestID = 6,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 6,
-                   Comments = "We have adequate resources to carry out the engagement."
+                   Comments = "Our team is well-resourced and prepared to handle this engagement effectively."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 7,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 7,
-                   Comments = "We have obtained professional clearance from XYZ LLP dated 17 April 2024."
+                   Comments = "We have obtained professional clearance from _______."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 8,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 8,
-                   Comments = "Not applicable. The reasons for change of auditor were made public in their Company announcement."
+                   Comments = "Not applicable. <br><br> For audit engagement, if applicable: The reasons for the change of auditor were made public in their Company announcement."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 9,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 9,
-                   Comments = "Not applicable. The reasons for change of auditor were made public in their Company announcement."
+                   Comments = "Not applicable. <br><br> For audit engagement, if applicable: The reasons for the change of auditor were made public in their Company announcement."
                },
                new QC6FormTest
                {
@@ -639,21 +629,21 @@ namespace PKFAuditManagement.Data
                    QC6FormTestID = 11,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 11,
-                   Comments = "No further procedures are considered to be necessary. Our acceptance procedures as performed above are adequate.<br><br>The application as external auditor was reviewed and accepted/approved by the Accounting and Financial Reporting Council of Singapore, following a rigorous process."
+                   Comments = "Having completed our due diligence procedures, we are confident that no further steps are necessary. Our robust acceptance process, as outlined above, ensures we can effectively serve the company."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 12,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 12,
-                   Comments = "We have obtained and reviewed the Questnet profile search of the Company.<br><br>The review of the Articles and Memorandum of Association will be performed subsequently as part of our statutory audit procedures after the satisfactory\r\n\r\ncompletion of the client acceptance evaluation and appointment of PKF-CAP LLP as the auditor of the Company."
+                   Comments = "Our client acceptance evaluation, including a review of the company's ACRA Business Profile, identified no concerns. A detailed review of the Articles and Memorandum of Association will be conducted as part of our standard statutory audit procedures after our appointment is confirmed."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 13,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 13,
-                   Comments = "This procedure will be performed subsequently as part of our statutory audit procedures after the satisfactory completion of the client acceptance evaluation and appointment of PKF- CAP LLP as the auditor of the Company."
+                   Comments = "A review of the Articles and Memorandum of Association is a standard part of our statutory audit procedures and will be conducted after our appointment is confirmed."
                },
                new QC6FormTest
                {
@@ -667,21 +657,21 @@ namespace PKFAuditManagement.Data
                    QC6FormTestID = 15,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 15,
-                   Comments = "We have carried out the following procedures:<br><br>1. We have performed searches of the Company names and names of all the directors using Lexi Nexis Screening and Google Searches.<br><br>2. We have performed google checks on the Company name and names of the directors.<br>The Company is a limited liability company incorporated and domiciled in Singapore and is listed on the Main Board of the Stock Exchange of Singapore.<br><br>3. Not applicable. The Company is not incorporated by our related entities, PKF-CAP corporate Services Pte Ltd (“CS”) or PKF- Khoo Management Services Pte Ltd (“KMS”).<br><br>From the above procedures, we have not noted any indicator or suspicion of any possible instances of money laundering and terrorism financing activities."
+                   Comments = "We have carried out the following procedures during our evaluation:<br><br>1) Public Record Review - Verified the company profile with the Accounting and Corporate Regulatory Authority (ACRA) business register and found no negative information.<br><br>2) Web Screening - Conducted web searches on the company name and its directors and authorised representatives, identifying no adverse news or concerns.<br><br>3) Database Screening - Conducted Lexis Nexis searches on the company name and its directors and authorised representatives, identifying no adverse news or concerns.<br><br>4) Conflict of Interest Check - Our internal TREND network conflict check confirmed no conflicts of interest.<br><br>5) Internal Conflict of Interest Check - Addressed and cleared any potential conflicts within PKF Singapore through email communication.<br><br>Our due diligence process includes a thorough review of public records, web screening, and database checks. This specifically focuses on identifying and screening ultimate beneficial owners with over 25% ownership in the ultimate holding company.  We screen for potential red flags, including Politically Exposed Persons (PEPs), individuals or organisations on terrorist watchlists, and those sanctioned by authorities.<br><br>Based on these thorough due diligence procedures, including discussions with management, we have identified no significant issues that could raise concerns regarding the company's integrity or potential reputational risks for PKF Singapore in association with them."
                },
                new QC6FormTest
                {
                    QC6FormTestID = 16,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 16,
-                   Comments = "Yes. 3 out of 10 Directors are PEP. Since the Company is listed in Singapore Exchange, it is deemed not necessary to obtain their source of funds.<br><br>1. Ang PH - PEP<br>2. Du XT - PEP<br>3. F ZNG - PEP<br>4. GN Gwn – Non PEP<br>5. H Chee – No exact match<br>6. LKM – No exact match<br>7. L Choi – No exact match<br>8. Loh Kin – No exact match<br>9. Tee Kim – No exact match<br>10. Sunil – No exact match"
+                   Comments = ""
                },
                new QC6FormTest
                {
                    QC6FormTestID = 17,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 17,
-                   Comments = "Since the Company is listed in Singapore Exchange, it is deemed not necessary to identify the ultimate beneficial owners of the Company.<br>Please refer to the Company’s Annual Report which is publicly available."
+                   Comments = "For listed companies: Given the Company's listing on the Stock Exchange of __________, identifying ultimate beneficial owners beyond the information available in their publicly accessible annual report is not necessary.  We recommend referring to the Company's most recent annual report for details on significant shareholders."
                },
                new QC6FormTest
                {
@@ -702,7 +692,7 @@ namespace PKFAuditManagement.Data
                    QC6FormTestID = 20,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 20,
-                   Comments = "We made direct enquiries to the Company and the Group as to whether the firm or other Member Firms provide non-assurance services to the Company or any related entities. And we have also cleared and reviewed our TREND Database search. <br><br> None."
+                   Comments = "Our due diligence included inquiries with the Company to confirm that neither PKF Singapore nor any other member firm provides non-assurance services to them or any related entities. We also conducted a comprehensive check through our TREND network database to verify this. <br><br> None."
                },
                new QC6FormTest
                {
@@ -723,7 +713,7 @@ namespace PKFAuditManagement.Data
                    QC6FormTestID = 23,
                    QC6FormID = 1,
                    QC6FormTestDescriptionID = 23,
-                   Comments = "We have not noted any threats to independence and/or conflicts of interest with the Company and the Group.<br><br>We are not aware of any independence or conflict of interest that requires additional precautions.<br><br>We conclude that we are in compliance with the relevant ethical requirements (IESBA International Code of Ethics for Professional Accountants, including International Independence Standards and any local ethical code if it is stricter), including the firm’s independence."
+                   Comments = "Our due diligence procedures identified no threats to our independence or conflicts of interest with the Company or the Group. This assessment confirms our compliance with all relevant ethical requirements, including the International Code of Ethics for Professional Accountants (IESBA Code) and International Independence Standards, along with any stricter local ethical codes."
                },
                new QC6FormTest
                {

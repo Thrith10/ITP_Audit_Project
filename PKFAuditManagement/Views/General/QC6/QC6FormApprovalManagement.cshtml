@@ -1,6 +1,36 @@
 ﻿@using PKFAuditManagement.ViewModels
 @model QC6FormAdminManagementViewModel
 
+<!-- Start of Alerts -->
+@{
+    var createMessage = TempData["QC6CreateMessage"] as string;
+    var updateMessage = TempData["QC6UpdateMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
+{
+    <div class="alert alert-info">
+        @createMessage @updateMessage
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notyf = new Notyf({
+                position: { x: 'center', y: 'top' }
+            });
+
+            var createMessage = '@createMessage';
+            if (createMessage) {
+                notyf.success(createMessage);
+            }
+
+            var updateMessage = '@updateMessage';
+            if (updateMessage) {
+                notyf.success(updateMessage);
+            }
+        });
+    </script>
+}
+<!-- End of Alerts -->
+
 <main id="main" class="main">
     <div class="pagetitle">
         <h1>Manage QC6 Forms</h1>
@@ -47,7 +77,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = qc6Forms.QC6FormID })" style="color: #007bff; text-decoration: underline;">@qc6Forms.FileReference</a>
                                                 </td>
                                                 <td>@qc6Forms.ProspectiveClient</td>
-                                                <td>@qc6Forms.PeriodEnded.ToString("dd/MM/yyyy")</td>
+                                                <td>@qc6Forms.PeriodEnded</td>
                                                 <td>@qc6Forms.EngagementType</td>
                                                 <td>@qc6Forms.PreparedBy</td>
                                                 <td>@qc6Forms.FormSubmissionDate</td>
@@ -136,7 +166,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = form.QC6FormID })" style="color: #007bff; text-decoration: underline;">@form.FileReference</a>
                                                 </td>
                                                 <td>@form.ProspectiveClient</td>
-                                                <td>@form.PeriodEnded.ToString("dd/MM/yyyy")</td>
+                                                <td>@form.PeriodEnded</td>
                                                 <td>@form.EngagementType</td>
                                                 <td>@form.PreparedBy</td>
                                                 <td>@form.FormSubmissionDate</td>
@@ -221,7 +251,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = form.QC6FormID })" style="color: #007bff; text-decoration: underline;">@form.FileReference</a>
                                                 </td>
                                                 <td>@form.ProspectiveClient</td>
-                                                <td>@form.PeriodEnded.ToString("dd/MM/yyyy")</td>
+                                                <td>@form.PeriodEnded</td>
                                                 <td>@form.EngagementType</td>
                                                 <td>@form.PreparedBy</td>
                                                 <td>@form.FormSubmissionDate</td>
@@ -277,10 +307,6 @@
         </div>
     </section>
 </main>
-<div id="QC6FormUpdateToastMessage" data-message="@ViewData["QC6FormUpdateToastMessage"]"></div>
-<div id="toastMessage" data-message="@ViewData["ToastMessage"]"></div>
-<div id="approvalToastMessage" data-message="@ViewData["ApprovalToastMessage"]"></div>
-<div id="toastType" data-message="@ViewData["ToastType"]"></div>
 
 @section Scripts {
     <script src="~/js/qc6-form-management-admin.js"></script>

@@ -137,25 +137,9 @@
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Non-audit fees charged for this client (tax, accounting, secretarial, XBRL etc)<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <span class="input-group-text">$</span>
-                                            <input type="text" class="form-control" disabled>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid non-audit fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidNonAuditFees" disabled>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
-                                                Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.">
-                                            <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)<span class="text-danger"> *</span></span>
-                                        </label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="FeeConcentration" placeholder="0.00" disabled>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -201,7 +185,243 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="card border border-secondary p-3 mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title"> Non-audit fees charged for this client (tax, accounting, secretarial, XBRL etc) </h5>
+                                            <div class="row mb-3 service input-field" id="services">
+                                                @for (int i = 0; i < Model.Services.Count; i++)
+                                                {
+                                                    <div class="card border border-secondary p-3 mb-3">
+                                                        <div class="row mb-3 service input-field card-body">
+                                                            <div class="col-sm-12">
+                                                                <h6 class="card-title">Service @(i + 1)</h6>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <label>Nature of Service:</label>
+                                                                <select class="form-control" asp-for="Services[i].NatureOfService" onchange="showOtherServiceInput(this)" disabled>
+                                                                    <option value="Tax Services">Tax Services</option>
+                                                                    <option value="Accounting">Accounting</option>
+                                                                    <option value="Payroll">Payroll</option>
+                                                                    <option value="Secretarial Services">Secretarial Services</option>
+                                                                    <option value="Other Non-Audit Services">Other Non-Audit Services</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <label>Fee:</label>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text">$</span>
+                                                                    <input asp-for="Services[i].Fee" class="form-control" disabled />
+                                                                </div>
+                                                            </div>
+                                                            @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
+                                                            {
+                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i">
+                                                                    <label>Name of Non-Audit Service</label>
+                                                                    <input type="text" class="form-control" asp-for="Services[i].OtherService" disabled>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="grandTotal" asp-for="GrandTotal" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
+                                                    Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.">
+                                                    <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
+                                                </label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration" disabled>
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <hr class="my-4">
 
+                                    <div class="row mb-3" id="TNEForm">
+                                        <div class="col-sm-12">
+                                            <h5 class="card-title">Section B: TNA / TNE Assessment</h5>
+                                            <hr class="my-4">
+                                        </div>
+                                        <p>
+                                            Client circumstances may change, for continuing engagements, and therefore this <b>Section B</b> must be completed for each engagement continuance assessment.
+                                        </p>
+                                        <br>
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 col-form-label">Is the engagement audit or non-audit?</label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <select class="form-control" id="engagementType" asp-for="TNATNEAssessment.SectionB.IsAudit" disabled>
+                                                    <option value="Audit">Audit</option>
+                                                    <option value="Non-Audit">Non-Audit</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <tr>
+                                                        <td colspan="3"><b>If “Audit” complete Section B Q1-Q5, if “Non-audit” jump to Section B Q5</b></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q1</th>
+                                                        <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions? (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" id="q1Yes" name="TNATNEAssessment.SectionB.Q1" value="true" @(Model.TNATNEAssessment.SectionB.Q1 == true ? "checked" : "") disabled>
+                                                                <label class="form-check-label" for="q1Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" id="q1No" name="TNATNEAssessment.SectionB.Q1" value="false" @(Model.TNATNEAssessment.SectionB.Q1 == false ? "checked" : "") disabled>
+                                                                <label class="form-check-label" for="q1No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q2</th>
+                                                        <td style="width: 45%;">Does the entity have listed (public) equity or debt? (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="true" @(Model.TNATNEAssessment.SectionB.Q2 == true ? "checked" : "") id="q2Yes" disabled>
+                                                                <label class="form-check-label" for="q2Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q2" value="false" @(Model.TNATNEAssessment.SectionB.Q2 == false ? "checked" : "") id="q2No" disabled>
+                                                                <label class="form-check-label" for="q2No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q3</th>
+                                                        <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided? (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="true" @(Model.TNATNEAssessment.SectionB.Q3 == true ? "checked" : "") id="q3Yes" disabled>
+                                                                <label class="form-check-label" for="q3Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q3" value="false" @(Model.TNATNEAssessment.SectionB.Q3 == false ? "checked" : "") id="q3No" disabled>
+                                                                <label class="form-check-label" for="q3No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q4</th>
+                                                        <td style="width: 45%;">Is the entity a significant component of a group which is a TNA (Only applies to AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="true" @(Model.TNATNEAssessment.SectionB.Q4 == true ? "checked" : "") id="q4Yes" disabled>
+                                                                <label class="form-check-label" for="q4Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q4" value="false" @(Model.TNATNEAssessment.SectionB.Q4 == false ? "checked" : "") id="q4No" disabled>
+                                                                <label class="form-check-label" for="q4No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q5</th>
+                                                        <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country? (Applies to AUDIT & NON-AUDIT clients)</td>
+                                                        <td style="width: 45%;">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="true" @(Model.TNATNEAssessment.SectionB.Q5 == true ? "checked" : "") id="q5Yes" disabled>
+                                                                <label class="form-check-label" for="q5Yes">Yes</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="TNATNEAssessment.SectionB.Q5" value="false" @(Model.TNATNEAssessment.SectionB.Q5 == false ? "checked" : "") id="q5No" disabled>
+                                                                <label class="form-check-label" for="q5No">No</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title">Section C: Overall Evaluation</h5>
+                                                <hr class="my-4">
+                                            </div>
+                                            <p>
+                                                If the engagement is an audit and any of Section B Q1 – Q4 responses is “Yes”, the entity is a TNA. If the engagement is non-audit and Section B Q5 response is “Yes”, the entity is a TNE. If all responses to Section B Q1 – Q5 are “No”, the entity is neither a TNA nor a TNE.
+                                            </p>
+                                            <br>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 col-form-label">Client entity is assessed as</label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <select class="form-control" asp-for="TNATNEAssessment.SectionCEvaluation" disabled>
+                                                    <option value="TNA">TNA</option>
+                                                    <option value="TNE">TNE</option>
+                                                    <option value="Both a TNA and a TNE">Both a TNA and a TNE</option>
+                                                    <option value="Neither a TNA nor a TNE">Neither a TNA nor a TNE</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title">Section D: Judgements applied</h5>
+                                                <hr class="my-4">
+                                            </div>
+                                            <p>
+                                                This table can be used to document a record of any significant judgements applied when responding to the TNA/TNE questions in the table above. A record of any relevant judgements will be helpful to support the basis of future TNA/TNE assessments for the client as part of continuance procedures for recurring engagements.
+                                            </p>
+                                            <br>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q1</th>
+                                                        <td style="width: 45%;">Are the financial statements relied upon outside the entity’s home jurisdiction for purposes of significant lending, investment or regulatory decisions?</td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q1Comment" disabled>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q2</th>
+                                                        <td style="width: 45%;">Does the entity have listed (public) equity or debt?</td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q2Comment" disabled>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q3</th>
+                                                        <td style="width: 45%;">Is the entity a Public Interest Entity which attracts particular public attention because of its size, products or services provided?</td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q3Comment" disabled>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q4</th>
+                                                        <td style="width: 45%;">Is the entity a significant component of a group which is a TNA?</td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q4Comment" disabled>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row" style="width: 10%;">Q5</th>
+                                                        <td style="width: 45%;">Is the entity registered, or has facilities, operations, branches, associate companies, associate company shareholder, subsidiaries, parent company (whether intermediate or ultimate) or joint arrangements outside of the entity’s home country?</td>
+                                                        <td style="width: 45%;">
+                                                            <input type="text" class="form-control" placeholder="Consider documenting any significant judgements applied in determining the answer to this question" asp-for="TNATNEAssessment.SectionD.Q5Comment" disabled>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </div>
                                 </form>
 
                                 <!-- QC7SubForms Beginning -->
@@ -379,24 +599,24 @@
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC7 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
-                                            <span class="link-text">Approval by:</span>
+                                            <span class="link-text">Approval by:<span class="text-danger"> *</span></span>
                                         </label>
                                         <input type="text" class="form-control" id="inputText" asp-for="EPHODApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
                                         <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC7 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
-                                            <span class="link-text">Final Approval by:</span>
+                                            <span class="link-text">Final Approval by:<span class="text-danger"> *</span></span>
                                         </label>
                                         <input type="text" class="form-control" id="inputText" asp-for="MPHODQMPApprovedBy" disabled>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-form-label">Date:</label>
+                                        <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
                                         <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" disabled>
                                     </div>
                                 </div>

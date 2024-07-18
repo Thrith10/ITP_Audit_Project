@@ -1,6 +1,36 @@
 ﻿@using PKFAuditManagement.Models
 @model List<QC6Form>
 
+<!-- Start of Alerts -->
+@{
+    var createMessage = TempData["QC6CreateMessage"] as string;
+    var updateMessage = TempData["QC6UpdateMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
+{
+    <div class="alert alert-info">
+        @createMessage @updateMessage
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notyf = new Notyf({
+                position: { x: 'center', y: 'top' }
+            });
+
+            var createMessage = '@createMessage';
+            if (createMessage) {
+                notyf.success(createMessage);
+            }
+
+            var updateMessage = '@updateMessage';
+            if (updateMessage) {
+                notyf.success(updateMessage);
+            }
+        });
+    </script>
+}
+<!-- End of Alerts -->
+
 <main id="main" class="main">
 
     <div class="pagetitle">
@@ -49,7 +79,7 @@
                                                     <a href="@Url.Action("ViewQC6Form", "QC6Form", new { id = engagement.QC6FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
                                                 </td>
                                                 <td>@engagement.ProspectiveClient</td>
-                                                <td>@engagement.PeriodEnded.ToString("dd/MM/yyyy")</td>
+                                                <td>@engagement.PeriodEnded</td>
                                                 <td>@engagement.EngagementType</td>
                                                 <td>@engagement.PreparedBy</td>
                                                 <td>@engagement.FormSubmissionDate</td>
@@ -109,21 +139,7 @@
         </div>
     </section>
 </main><!-- End #main -->
-<div id="QC6FormUpdateToastMessage" data-message="@ViewData["QC6FormUpdateToastMessage"]"></div>
-<div id="toastMessage" data-message="@ViewData["ToastMessage"]"></div>
 
 @section Scripts {
     <script src="~/js/qc6-form-management-user.js"></script>
 }
-
-                <style>
-    /* Ensure the dropdown menu has a higher z-index */
-    .dropdown-menu {
-        z-index: 1000; /* Adjust the value as needed */
-    }
-
-    /* Ensure the dropdown menu is positioned correctly */
-    .dropdown-menu {
-        position: absolute;
-    }
-                    </style>

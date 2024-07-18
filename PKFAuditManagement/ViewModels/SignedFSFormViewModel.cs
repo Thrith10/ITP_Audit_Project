@@ -8,6 +8,9 @@ namespace PKFAuditManagement.ViewModels
     public class SignedFSFormViewModel
     {
         [Required]
+        [Display(Name = "Client")]
+        public string Client { get; set; }
+        [Required]
         [Display(Name = "Audited Report Date")]
         public DateTime AuditedReportDate { get; set; }
 

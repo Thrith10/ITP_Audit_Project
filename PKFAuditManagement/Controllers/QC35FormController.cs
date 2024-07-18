@@ -39,7 +39,7 @@ namespace PKFAuditManagement.Controllers
             _bucketName = _configuration.GetValue<string>("AWS:BucketName");
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Non-Auditor")]
         public async Task<IActionResult> QC35FormManagement()
         {
             // Get the current user's ID
@@ -79,7 +79,7 @@ namespace PKFAuditManagement.Controllers
             return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin,Non-Auditor")]
         public async Task<IActionResult> ViewQC35Form(int id)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -94,6 +94,9 @@ namespace PKFAuditManagement.Controllers
                 return NotFound();
             }
 
+            // Retrieve all emails for users in the "Admin" role
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
             var viewModel = new QC35FormViewModel
             {
                 QC35FormID = qc35Form.QC35FormID,
@@ -104,6 +107,7 @@ namespace PKFAuditManagement.Controllers
                 ManagerName = qc35Form.ManagerName,
                 Status = qc35Form.Status,
                 ImageFileName = qc35Form.ImageFileName,
+                AdminEmails = adminEmails.ToList(),
                 ChecklistItems = qc35Form.ChecklistItems.Select(ci => new QC35ChecklistItemViewModel
                 {
                     QC35ChecklistItemID = ci.QC35ChecklistItemID,
@@ -145,12 +149,15 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin,Non-Auditor")]
         public async Task<IActionResult> QC35FormCreationAsync()
         {
 
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
+
+            // Retrieve all emails for users in the "Admin" role
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
 
             var viewModel = new QC35FormViewModel
             {
@@ -168,6 +175,8 @@ namespace PKFAuditManagement.Controllers
         }
             };
 
+            // Append emails to viewModel
+            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
 
             return View("~/Views/General/QC35/QC35FormCreation.cshtml", viewModel);
         }
@@ -263,6 +272,12 @@ namespace PKFAuditManagement.Controllers
             {
                 // Access validation errors
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
+
+                // Retrieve all emails for users in the "Admin" role
+                var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
+                // Append emails to viewModel
+                viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
 
                 // Pass the errors to the view
                 ViewBag.Errors = errors;
@@ -361,7 +376,7 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin,Non-Auditor")]
         public IActionResult DeleteQC35Form(int id)
         {
             using var transaction = _context.Database.BeginTransaction();

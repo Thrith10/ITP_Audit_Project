@@ -8,7 +8,7 @@ namespace PKFAuditManagement.Models
         public required string CreatedBy { get; set; }
         public required string FileReference { get; set; }
         public required string ProspectiveClient { get; set; }
-        public DateTime PeriodEnded { get; set; }
+        public DateTime? PeriodEnded { get; set; }
         public required string EngagementType { get; set; }
         public required string PreparedBy { get; set; }
         public DateTime PreparedByDate { get; set; }

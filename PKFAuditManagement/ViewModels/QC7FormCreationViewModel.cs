@@ -7,6 +7,8 @@ namespace PKFAuditManagement.ViewModels
     {
         public QC7FormCreationViewModel()
         {
+            // Initialize the Services list with a default service
+            Services = new List<FeeDetailViewModel>();
             TNATNEAssessment = new TNATNEAssessmentViewModel();
         }
         // User Details
@@ -45,6 +47,10 @@ namespace PKFAuditManagement.ViewModels
         public string? SafeguardReviewerName { get; set; }
         public bool AnyOutstandingUnpaidNonAuditFees { get; set; }
         [Required]
+        public decimal? AuditFee { get; set; }
+        [Required]
+        public decimal? GrandTotal { get; set; }
+        [Required]
         public decimal? FeeConcentration { get; set; }
         [Required]
         public decimal? ProposedFeeCurrentYear { get; set; }
@@ -78,9 +84,11 @@ namespace PKFAuditManagement.ViewModels
         public DateTime? MPHODQMPApprovedByDate { get; set; }
         public bool SubForm1NotApplicable { get; set; }
         public bool SubForm2NotApplicable { get; set; }
+        public List<FeeDetailViewModel> Services { get; set; }
         public List<QC7SubFormViewModel> SubForms { get; set; }
         public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
         public List<string>? AdminEmails { get; set; }
+        public bool IsNewForm { get; set; }
     }
 
     public class QC7SubFormViewModel
@@ -101,9 +109,7 @@ namespace PKFAuditManagement.ViewModels
     {
         public int QC7FormTestDescriptionID { get; set; }
         public string? Description { get; set; }
-        [Required]
         public string? SignBy { get; set; }
-        [Required]
         public DateTime SignDate { get; set; }
         public string? Comment { get; set; }
     }

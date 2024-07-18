@@ -96,4 +96,18 @@ namespace PKFAuditManagement.ViewModels
         public string EmailBody { get; set; }
         public bool IsProcessed { get; set; }
     }
+
+    public class SelectFieldsViewModel
+    {
+        public required List<string> SelectedFormIds { get; set; }
+        public required List<FieldCheckbox> Fields { get; set; }
+    }
+
+    public class FieldCheckbox
+    {
+        public string? FieldName { get; set; }
+        public string? FieldLabel { get; set; }
+        public string? Section { get; set; }
+        public bool IsSelected { get; set; }
+    }
 }

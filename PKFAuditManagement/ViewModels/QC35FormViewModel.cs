@@ -22,6 +22,7 @@ namespace PKFAuditManagement.ViewModels
 
         public IFormFile File { get; set; } // Add this property for file upload
         public string? Status { get; set; }
+        public List<string>? AdminEmails { get; set; }
 
         // List of options for the dropdown
         public List<SelectListItem> AuditFirms { get; set; } = new List<SelectListItem>

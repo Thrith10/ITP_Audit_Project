@@ -7,19 +7,43 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PKFAuditManagement.Controllers
 {
     public class SignedFSFormController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<CustomUser> _userManager;
 
-        public SignedFSFormController(ApplicationDbContext context)
+        public SignedFSFormController(ApplicationDbContext context, UserManager<CustomUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [HttpGet]
+
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
+        public async Task<IActionResult> SignedFSFormManagementAsync()
+        {
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+
+            // Retrieve signed FS data from database with unique clients
+            var signedFSForms = _context.SignedFSForm
+                .Where(e => e.UserEmail.Equals(user.Email))
+                .GroupBy(e => e.Client) 
+                .Select(g => g.First()) 
+                .ToList();
+
+            return View("~/Views/General/SignedFS/SignedFSFormManagement.cshtml", signedFSForms);
+        }
+
+        [HttpGet]
+
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
         public IActionResult ScheduleEmails()
         {
             var model = new SignedFSFormViewModel
@@ -30,6 +54,8 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpPost]
+
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
         public async Task<IActionResult> ScheduleEmails(SignedFSFormViewModel model)
         {
             if (ModelState.IsValid)
@@ -50,6 +76,7 @@ namespace PKFAuditManagement.Controllers
                 {
                     new SignedFSForm
                     {
+                        Client = model.Client,
                         AuditedReportDate = model.AuditedReportDate,
                         PartnerEmail = model.PartnerEmail,
                         UserEmail = model.UserEmail,
@@ -61,6 +88,7 @@ namespace PKFAuditManagement.Controllers
                     },
                     new SignedFSForm
                     {
+                        Client = model.Client,
                         AuditedReportDate = model.AuditedReportDate,
                         PartnerEmail = model.PartnerEmail,
                         UserEmail = model.UserEmail,
@@ -72,6 +100,7 @@ namespace PKFAuditManagement.Controllers
                     },
                     new SignedFSForm
                     {
+                        Client = model.Client,
                         AuditedReportDate = model.AuditedReportDate,
                         PartnerEmail = model.PartnerEmail,
                         UserEmail = model.UserEmail,

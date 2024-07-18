@@ -72,37 +72,3 @@ document.getElementById('engagementTable').addEventListener('click', function (e
             });
     }
 });
-
-const notyf = new Notyf({
-    position: { x: 'center', y: 'top' }
-});
-
-// Read the data-message attribute value
-var toastMessage = document.getElementById("toastMessage").getAttribute("data-message");
-
-if (toastMessage) {
-    // Display the toast message
-    notyf.success(toastMessage);
-}
-
-// Read the data-message attribute value for approval/rejection of form
-var approvalToastMessage = document.getElementById("approvalToastMessage").getAttribute("data-message");
-
-if (approvalToastMessage) {
-    // Display the toast message
-    if (toastType === "success") {
-        // Display success toast
-        notyf.success(approvalToastMessage);
-    } else if (toastType === "error") {
-        // Display error toast
-        notyf.error(approvalToastMessage);
-    }
-}
-
-// Read the data-message attribute value
-var QC6FormUpdateToastMessage = document.getElementById("QC6FormUpdateToastMessage").getAttribute("data-message");
-
-if (QC6FormUpdateToastMessage) {
-    // Display the toast message
-    notyf.success(QC6FormUpdateToastMessage);
-}

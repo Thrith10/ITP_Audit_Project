@@ -13,6 +13,9 @@ namespace PKFAuditManagement.ViewModels
 
             TNATNEAssessment = new TNATNEAssessmentViewModel();
         }
+        // Prospective Client Details
+        public List<string>? ProspectiveClients { get; set; }
+
         // User Details
         public string? UserEmail { get; set; }
 
@@ -80,9 +83,7 @@ namespace PKFAuditManagement.ViewModels
         public string? SuspiciousTransactionReportFiledRationale { get; set; }
         [Required]
         public string? Satisfaction { get; set; }
-        [Required]
         public string? ConclusionPreparedBy { get; set; }
-        [Required]
         public DateTime? ConclusionPreparedByDate { get; set; }
         public string? EPHODApprovedBy { get; set; }
         public DateTime? EPHODApprovedByDate { get; set; }
@@ -94,6 +95,16 @@ namespace PKFAuditManagement.ViewModels
         public List<FeeDetailViewModel> Services { get; set; }
         public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
         public List<string>? AdminEmails { get; set; }
+        public bool IsFirstApproved { get; set; }
+        public bool IsSecondApproved { get; set; }
+
+        // File Uploads
+
+        public IFormFile? BusinessProfile { get; set; }
+        public IFormFile? TrendSearch { get; set; }
+        public IFormFile? GoogleSearch { get; set; }
+        public IFormFile? LexisNexisSearch { get; set; }
+        public List<IFormFile>? OtherDocuments { get; set; } = new List<IFormFile>();
     }
     public class TNATNEAssessmentViewModel
     {

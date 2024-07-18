@@ -30,7 +30,7 @@ namespace PKFAuditManagement.Controllers
                 QC6FormID = qc6Form.QC6FormID,
                 FileReference = qc6Form.FileReference,
                 ProspectiveClient = qc6Form.ProspectiveClient,
-                PeriodEnded = qc6Form.PeriodEnded,
+                PeriodEnded = qc6Form.PeriodEnded.Value,
                 EngagementType = qc6Form.EngagementType,
                 PreparedBy = qc6Form.PreparedBy,
                 PreparedByDate = qc6Form.PreparedByDate,

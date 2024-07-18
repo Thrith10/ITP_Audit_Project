@@ -9,7 +9,7 @@
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">
-                    <form class="needs-validation" asp-action="SubmitQC6Form" asp-controller="QC6Form" id="qc6Form" method="post">
+                    <form class="needs-validation" asp-action="SubmitQC6Form" asp-controller="QC6Form" id="qc6Form" method="post" enctype="multipart/form-data">
                         <div class="row mb-3">
                             @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                             {
@@ -54,7 +54,8 @@
                                     <div class="row mb-3">
                                         <label asp-for="ProspectiveClient" class="col-sm-2 col-form-label">Prospective Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ProspectiveClient" required>             
+                                            <input type="text" class="form-control" asp-for="ProspectiveClient" id="autoComplete" required>
+                                            <div id="result"></div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -595,6 +596,29 @@
                                         <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" required>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label asp-for="BusinessProfile">Company’s business profile in PDF</label>
+                                    <input asp-for="BusinessProfile" type="file" class="form-control" accept="application/pdf" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="TrendSearch">TREND search in PDF</label>
+                                    <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="GoogleSearch">Google search in PDF</label>
+                                    <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="LexisNexisSearch">Lexis Nexis search in PDF</label>
+                                    <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
+                                </div>
+
+                                <div id="other-documents-container" class="form-group">
+                                    <label>Other docs in PDF (option to add more)</label>
+                                    <input asp-for="OtherDocuments" type="file" class="form-control mb-2" name="OtherDocuments" accept="application/pdf" />
+                                </div>
+                                <button type="button" id="add-more-docs" class="btn btn-secondary">Add More Documents</button>
+
                                 <div class="row mb-3">
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
@@ -619,7 +643,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" disabled>
+                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -636,7 +660,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:</label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" disabled>
+                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate">
                                     </div>
                                 </div>
                                 <h5 class="card-title"><u><i>Notes</i></u></h5>
@@ -758,6 +782,8 @@
     </div>
 </div>
 @section Scripts {
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/qc6-form-creation.js"></script>
 }

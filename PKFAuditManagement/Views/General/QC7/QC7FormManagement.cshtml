@@ -1,6 +1,36 @@
 ﻿@using PKFAuditManagement.Models
 @model List<QC7Form>
 
+<!-- Start of Alerts -->
+@{
+    var createMessage = TempData["QC7CreateMessage"] as string;
+    var updateMessage = TempData["QC7UpdateMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
+{
+    <div class="alert alert-info">
+        @createMessage @updateMessage
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notyf = new Notyf({
+                position: { x: 'center', y: 'top' }
+            });
+
+            var createMessage = '@createMessage';
+            if (createMessage) {
+                notyf.success(createMessage);
+            }
+
+            var updateMessage = '@updateMessage';
+            if (updateMessage) {
+                notyf.success(updateMessage);
+            }
+        });
+    </script>
+}
+<!-- End of Alerts -->
+
 <main id="main" class="main">
 
     <div class="pagetitle">
@@ -49,7 +79,7 @@
                                                     <a href="@Url.Action("ViewQC7Form", "QC7Form", new { id = engagement.QC7FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
                                                 </td>
                                                 <td>@engagement.Client</td>
-                                                <td>@engagement.PeriodEnded</td>
+                                                <td>@engagement.PeriodEnded.ToString("dd/MM/yyyy")</td>
                                                 <td>@engagement.EngagementType</td>
                                                 <td>@engagement.FormSubmissionDate</td>
                                                 <td>
