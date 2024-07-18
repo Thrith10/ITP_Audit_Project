@@ -474,7 +474,7 @@
 
             function filterFormFields() {
                 var selectedFormType = document.getElementById("formType").value;
-
+                console.log('Selected form type:', selectedFormType);
                 fetch('/api/Report/SelectFields')
                     .then(response => response.json())
                     .then(fields => {
@@ -491,6 +491,8 @@
                         form.appendChild(header);
 
                         filteredFields.forEach(field => {
+                            console.log('fieldsections:', field.section);
+
                             if (field.section.startsWith(selectedFormType)) {
                                 if (!formHeader && field.section === `${selectedFormType}Forms`) {
                                     const header = document.createElement('h5');
@@ -504,6 +506,13 @@
                                     header.innerText = `${selectedFormType}Form Conclusion`;
                                     form.appendChild(header);
                                     formConclusionHeader = true;
+                                }
+                                // Temp fix for SignedFS form
+                                if (!formHeader && field.section === `${selectedFormType}Form`) {
+                                    const header = document.createElement('h5');
+                                    header.innerText = `${selectedFormType}Form`;
+                                    form.appendChild(header);
+                                    formHeader = true;
                                 }
 
                                 const div = document.createElement('div');
