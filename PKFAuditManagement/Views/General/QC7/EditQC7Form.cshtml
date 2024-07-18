@@ -484,7 +484,8 @@
                                                                 <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].SignDate"/>
                                                             </td>
                                                             <td>
-                                                                    <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment">@testDescription.Comment.Replace("<br>", "\n")</textarea>
+                                                                            <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment">@testDescription.Comment</textarea>
+                                                                   @*  <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions[@testDescription.QC7FormTestDescriptionID].Comment">@testDescription.Comment.Replace("<br>", "\n")</textarea> *@
                                                             </td>
                                                         </tr>
                                                     }

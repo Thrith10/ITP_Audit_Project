@@ -95,6 +95,8 @@ namespace PKFAuditManagement.ViewModels
         public List<FeeDetailViewModel> Services { get; set; }
         public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
         public List<string>? AdminEmails { get; set; }
+        public bool IsFirstApproved { get; set; }
+        public bool IsSecondApproved { get; set; }
 
         // File Uploads
 
