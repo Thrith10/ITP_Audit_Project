@@ -40,6 +40,14 @@ namespace PKFAuditManagement.Data
 
         public DbSet<SignedFSForm> SignedFSForm { get; set; }
 
+        public DbSet<Quiz> Quiz { get; set; }
+        public DbSet<Questions> Questions { get; set; }
+        public DbSet<Option> Option { get; set; }
+        public DbSet<Participants> Participants { get; set; }
+        public DbSet<QuizResponse> QuizResponse { get; set; }
+        public DbSet<Attempt> Attempt { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +80,45 @@ namespace PKFAuditManagement.Data
                 .WithOne()
                 .HasForeignKey<QC6FormConclusion>(t => t.QC6FormID)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Quiz>()
+                .HasMany(q => q.Questions)
+                .WithOne(qn => qn.Quiz)
+                .HasForeignKey(qn => qn.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Option>()
+                .HasOne(o => o.Question)
+                .WithMany(q => q.Options)
+                .HasForeignKey(o => o.QuestionID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<QuizResponse>()
+                .HasOne(qr => qr.Attempt)
+                .WithMany(a => a.QuizResponses)
+                .HasForeignKey(qr => qr.AttemptID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<QuizResponse>()
+                .HasOne(qr => qr.Question)
+                .WithMany()
+                .HasForeignKey(qr => qr.QuestionID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Remove the configuration for SelectedOptionID since SelectedOption is now a string
+
+            // New relationships
+            modelBuilder.Entity<Attempt>()
+                .HasOne(a => a.Quiz)
+                .WithMany()
+                .HasForeignKey(a => a.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Participants>()
+                .HasOne(p => p.Quiz)
+                .WithMany()
+                .HasForeignKey(p => p.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             new DataSeeder(modelBuilder).Seed();
         }
