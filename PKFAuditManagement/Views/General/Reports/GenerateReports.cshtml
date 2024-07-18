@@ -282,17 +282,7 @@
                  
 
                             <!-- Form with checkboxes -->
-                            <form id="checkboxForm" class="form-checkboxes">
-                                <div class="mb-3">
-                                    <label><input type="checkbox" name="prospectiveClient" value="Prospective Client"> Prospective Client</label>
-                                    <label><input type="checkbox" name="periodEnded" value="Period Ended"> Period Ended</label>
-                                    <label><input type="checkbox" name="engagementType" value="Engagement Type"> Engagement Type</label>
-                                    <label><input type="checkbox" name="natureOfService" value="Nature of Service for Estimate Fee"> Nature of Service for Estimate Fee</label>
-                                    <label><input type="checkbox" name="budgetedFee" value="Budgeted Fee Recovery Rate"> Budgeted Fee Recovery Rate</label>
-                                    <label><input type="checkbox" name="complexityOfEngagement" value="Complexity of Engagement"> Complexity of Engagement</label>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Generate Report</button>
-                            </form>
+                            <form id="checkboxFieldsForm" onsubmit="generateReport(event)"></form>
 
                             <button class="btn btn-primary next-button" onclick="showCheckboxForm()">Next</button>
                         </div>
@@ -483,12 +473,128 @@
                 return;
             }
 
+            function filterFormFields() {
+                var selectedFormType = document.getElementById("formType").value;
+
+                fetch('/api/Report/SelectFields')
+                    .then(response => response.json())
+                    .then(fields => {
+                        // Filter the fields based on the selected form type
+                        const filteredFields = fields.filter(field => field.section.startsWith(selectedFormType));
+                        const form = document.getElementById('checkboxFieldsForm');
+                        form.innerHTML = ''; // Clear the form
+
+                        let formHeader = false;
+                        let formConclusionHeader = false;
+
+                        const header = document.createElement('h2');
+                        header.innerText = 'Select Fields to Include in the Report';
+                        form.appendChild(header);
+
+                        filteredFields.forEach(field => {
+                            if (field.section.startsWith(selectedFormType)) {
+                                if (!formHeader && field.section === `${selectedFormType}Forms`) {
+                                    const header = document.createElement('h5');
+                                    header.innerText = `${selectedFormType}Form`;
+                                    form.appendChild(header);
+                                    formHeader = true;
+                                }
+
+                                if (!formConclusionHeader && field.section === `${selectedFormType}FormConclusions`) {
+                                    const header = document.createElement('h5');
+                                    header.innerText = `${selectedFormType}Form Conclusion`;
+                                    form.appendChild(header);
+                                    formConclusionHeader = true;
+                                }
+
+                                const div = document.createElement('div');
+                                div.classList.add('form-group');
+
+                                const uniqueFieldName = `${field.section}_${field.fieldName}`;
+
+                                const checkbox = document.createElement('input');
+                                checkbox.type = 'checkbox';
+                                checkbox.id = uniqueFieldName;
+                                checkbox.name = 'selectedFields';
+                                checkbox.value = uniqueFieldName;
+
+                                const label = document.createElement('label');
+                                label.htmlFor = field.fieldName;
+                                label.innerText = field.fieldLabel;
+
+                                div.appendChild(checkbox);
+                                div.appendChild(label);
+
+                                form.appendChild(div);
+
+                            }
+                        })
+
+                        // Add a button to submit the selected fields
+                        const submitButton = document.createElement('button');
+                        submitButton.innerText = 'Generate Report';
+                        submitButton.classList.add('btn', 'btn-primary');
+                        submitButton.addEventListener('click', generateReport);
+                        form.appendChild(submitButton);
+                    })
+            }
+
+            function generateReport() {
+                event.preventDefault();
+                const selectedFields = Array.from(document.querySelectorAll('input[name="selectedFields"]:checked'))
+                                            .map(cb => ({
+                                                fieldName: cb.value,
+                                                fieldLabel: cb.parentElement.innerText,
+                                                section: cb.parentElement.parentElement.querySelector('h5').innerText,
+                                                isSelected: cb.checked
+                                            }));
+
+                const selectedFormIds = Array.from(document.querySelectorAll('input[name="selectedForms"]:checked'))
+                                            .map(cb => cb.value);
+
+                console.log('Selected fields:', selectedFields);
+                console.log('Selected form IDs:', selectedFormIds);
+
+                const data = {
+                    selectedFormIds: selectedFormIds,
+                    fields: selectedFields
+                };
+
+                console.log("data:", data);
+
+                fetch('/api/Report/GenerateReport', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'report.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Error generating report:', error);
+                    alert('An error occurred while generating the report.');
+                });
+            }            
+
             table.style.display = "none"; // Hide the table
-            checkboxForm.style.display = "block"; // Show the checkbox form
+            checkboxFieldsForm.style.display = "block"; // Show the checkbox form
             document.querySelector('.next-button').style.display = "none"; // Hide the Next button
             document.getElementById('formTypeContainer').style.display = "none"; // Hide the form type dropdown
             document.querySelector('.date-filter').classList.add('hidden'); // Hide the date filter
+
+            filterFormFields();
         }
+        
     </script>
 </body>
 </html>
