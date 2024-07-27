@@ -1,9 +1,8 @@
-[![Issues][issues-shield]][issues-url]
 
 <!-- PROJECT LOGO -->
 <br />
 
-Image here
+
 
 <div align="center">
   </a>
