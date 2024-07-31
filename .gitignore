@@ -401,3 +401,4 @@ FodyWeavers.xsd
 *.sln.iml
 /PKFAuditManagement/appsettings.json
 /PKFAuditManagement/appsettings.json
+/PKFAuditManagement/appsettings.Development.json

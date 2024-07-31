@@ -7,6 +7,8 @@ namespace PKFAuditManagement.ViewModels
 {
     public class SignedFSFormViewModel
     {
+        public int Id { get; set; }
+
         [Required]
         [Display(Name = "Client")]
         public string Client { get; set; }
