@@ -162,7 +162,6 @@ namespace PKFAuditManagement.ViewModels
     {
         public int QC6FormTestDescriptionID { get; set; }
         public string? Description { get; set; }
-        [Required]
         public string? SignBy { get; set; }
         [Required]
         public DateTime SignDate { get; set; }
