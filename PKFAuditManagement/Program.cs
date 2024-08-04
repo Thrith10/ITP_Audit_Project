@@ -32,7 +32,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
 });
-builder.Services.AddHostedService<EmailBackgroundService>();
+
+// Commented out background service
+/*builder.Services.AddHostedService<EmailBackgroundService>();*/
 builder.Configuration.AddEnvironmentVariables();
 var emailPassword = builder.Configuration["SMTP_PASSWORD"];
 
