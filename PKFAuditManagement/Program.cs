@@ -35,10 +35,21 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Commented out background service
 /*builder.Services.AddHostedService<EmailBackgroundService>();*/
+
+// Load environment variables
 builder.Configuration.AddEnvironmentVariables();
 var emailPassword = builder.Configuration["SMTP_PASSWORD"];
 
-builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+// Configure SmtpOptions from environment variables
+builder.Services.Configure<SmtpOptions>(options =>
+{
+    options.Host = builder.Configuration["SMTP_HOST"];
+    options.Port = int.Parse(builder.Configuration["SMTP_PORT"] ?? "587");
+    options.Username = builder.Configuration["SMTP_USERNAME"];
+    options.Password = builder.Configuration["SMTP_PASSWORD"];
+    options.EnableSsl = bool.Parse(builder.Configuration["SMTP_ENABLESSL"] ?? "true");
+    options.From = builder.Configuration["SMTP_FROM"];
+});
 
 // Service registrations
 builder.Services.AddScoped<IUserService, UserService>();
@@ -113,8 +124,8 @@ using (var scope = app.Services.CreateScope())
     // Initialise an instance of the userManager
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
 
-    string email = "admin@gmail.com";
-    string password = "P@ssw0rd";
+    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
+    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
 
     // Check if admin user has already been created
     if (await userManager.FindByEmailAsync(email) == null)
