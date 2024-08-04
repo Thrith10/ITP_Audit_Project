@@ -1,13 +1,6 @@
 ﻿@model PKFAuditManagement.ViewModels.QuizViewModel
 
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <!-- Add necessary Bootstrap CSS and other required CSS files -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Add your custom CSS here -->
     <style>
         .form-container {
             padding: 20px;
@@ -60,197 +53,190 @@
         }
     </style>
 </head>
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Edit Quiz</h1>
+    </div><!-- End Page Title -->
 
-<body>
-    <main id="main" class="main">
-        <div class="pagetitle">
-            <h1>Edit Quiz</h1>
-        </div><!-- End Page Title -->
+    <section class="section dashboard">
+        <div class="row">
+            <!-- Left side columns -->
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-xxl-12 col-md-12">
+                        <div class="card info-card customers-card">
+                            <div class="card-body">
+                                <h5 class="card-title">Edit Quiz</span></h5>
+                                <div class="form-container">
+                                    @if (TempData["SuccessMessage"] != null)
+                                    {
+                                        <div class="alert alert-success">
+                                            @TempData["SuccessMessage"]
+                                        </div>
+                                    }
 
-        <section class="section dashboard">
-            <div class="row">
-                <!-- Left side columns -->
-                <div class="col-12">
-                    <div class="row">
-                        <div class="col-xxl-12 col-md-12">
-                            <div class="card info-card customers-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Edit Quiz</span></h5>
-                                    <div class="form-container">
-                                        @if (TempData["SuccessMessage"] != null)
-                                        {
-                                            <div class="alert alert-success">
-                                                @TempData["SuccessMessage"]
-                                            </div>
+                                    <form asp-action="Edit" method="post">
+                                        <input type="hidden" asp-for="QuizID" />
+                                        <div class="form-group">
+                                            <label for="Title">Quiz Title</label>
+                                            <input type="text" class="form-control" id="Title" name="Title" value="@Model.Title" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="Description">Description</label>
+                                            <textarea class="form-control" id="Description" name="Description">@Model.Description</textarea>
+                                        </div>
+                                        <div id="quiz-container">
+                                            @for (int i = 0; i < Model.Questions.Count; i++)
+                                            {
+                                                <div class="card mb-3" data-index="@i">
+                                                    <div class="card-body">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <h5 class="card-title">Question @(i + 1):</h5>
+                                                            <button type="button" class="btn btn-danger btn-sm remove-question">
+                                                                <i class="bi bi-trash"></i> Remove Question
+                                                            </button>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" name="Questions[@i].Description" value="@Model.Questions.ElementAt(i).Description" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Options:</label>
+                                                            <div class="options-container">
+                                                                @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
+                                                                {
+                                                                    <div class="input-group mb-2 option-group">
+                                                                        <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions.ElementAt(i).Options.ElementAt(j).OptionText" data-option-index="@j" />
+                                                                        <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <button type="button" class="btn btn-secondary btn-sm add-option btn-add" data-question-index="@i">
+                                                                <i class="bi bi-plus-lg"></i> Add Option
+                                                            </button>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Select the correct answer:</label>
+                                                            <select class="form-control" name="Questions[@i].CorrectOptionText">
+                                                                @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
+                                                                {
+                                                                    var option = Model.Questions.ElementAt(i).Options.ElementAt(j);
+                                                                    <option value="@option.OptionText">@option.OptionText</option>
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="btn-container">
+                                            <button type="button" class="btn btn-secondary btn-sm add-question btn-add" id="add-question">
+                                                <i class="bi bi-plus-lg"></i> Add Question
+                                            </button>
+                                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                        </div>
+                                    </form>
+
+                                    @section Scripts {
+                                        @{
+                                            await Html.RenderPartialAsync("_ValidationScriptsPartial");
                                         }
 
-                                        <form asp-action="Edit" method="post">
-                                            <input type="hidden" asp-for="QuizID" />
-                                            <div class="form-group">
-                                                <label for="Title">Quiz Title</label>
-                                                <input type="text" class="form-control" id="Title" name="Title" value="@Model.Title" />
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="Description">Description</label>
-                                                <textarea class="form-control" id="Description" name="Description">@Model.Description</textarea>
-                                            </div>
-                                            <div id="quiz-container">
-                                                @for (int i = 0; i < Model.Questions.Count; i++)
-                                                {
-                                                    <div class="card mb-3" data-index="@i">
+                                        <script>
+                                            function updateDropdown(questionIndex) {
+                                                var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
+                                                var select = document.querySelector(`[data-index='${questionIndex}'] select[name*='CorrectOptionText']`);
+                                                select.innerHTML = ''; // Clear existing options
+
+                                                var inputs = optionsContainer.querySelectorAll('input[type="text"]');
+                                                inputs.forEach(function (input, index) {
+                                                    var option = document.createElement('option');
+                                                    option.value = input.value; // Use input value as option value
+                                                    option.text = input.value;
+                                                    select.appendChild(option);
+                                                });
+                                            }
+
+                                            document.addEventListener('input', function (e) {
+                                                if (e.target && e.target.matches('.option-group input[type="text"]')) {
+                                                    var questionCard = e.target.closest('.card');
+                                                    var questionIndex = questionCard.getAttribute('data-index');
+                                                    updateDropdown(questionIndex);
+                                                }
+                                            });
+
+                                            document.addEventListener('click', function (e) {
+                                                if (e.target.closest('.add-question')) {
+                                                    var quizContainer = document.getElementById('quiz-container');
+                                                    var newIndex = quizContainer.children.length;
+                                                    var newCard = document.createElement('div');
+                                                    newCard.className = 'card mb-3';
+                                                    newCard.setAttribute('data-index', newIndex);
+                                                    newCard.innerHTML = `
                                                         <div class="card-body">
                                                             <div class="d-flex justify-content-between align-items-center">
-                                                                <h5 class="card-title">Question @(i + 1):</h5>
+                                                                <h5 class="card-title">Question ${newIndex + 1}:</h5>
                                                                 <button type="button" class="btn btn-danger btn-sm remove-question">
                                                                     <i class="bi bi-trash"></i> Remove Question
                                                                 </button>
                                                             </div>
                                                             <div class="form-group">
-                                                                <input type="text" class="form-control" name="Questions[@i].Description" value="@Model.Questions.ElementAt(i).Description" />
+                                                                <input type="text" class="form-control" name="Questions[${newIndex}].Description" />
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Options:</label>
                                                                 <div class="options-container">
-                                                                    @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
-                                                                    {
-                                                                        <div class="input-group mb-2 option-group">
-                                                                            <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions.ElementAt(i).Options.ElementAt(j).OptionText" data-option-index="@j" />
-                                                                            <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                                <i class="bi bi-trash"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    }
+                                                                    <div class="input-group mb-2 option-group">
+                                                                        <input type="text" class="form-control" name="Questions[${newIndex}].Options[0].OptionText" />
+                                                                        <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                                <button type="button" class="btn btn-secondary btn-sm add-option btn-add" data-question-index="@i">
+                                                                <button type="button" class="btn btn-secondary btn-sm add-option btn-add" data-question-index="${newIndex}">
                                                                     <i class="bi bi-plus-lg"></i> Add Option
                                                                 </button>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Select the correct answer:</label>
-                                                                <select class="form-control" name="Questions[@i].CorrectOptionText">
-                                                                    @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
-                                                                    {
-                                                                        var option = Model.Questions.ElementAt(i).Options.ElementAt(j);
-                                                                        <option value="@option.OptionText">@option.OptionText</option>
-                                                                    }
+                                                                <select class="form-control" name="Questions[${newIndex}].CorrectOptionText">
                                                                 </select>
                                                             </div>
-                                                        </div>
-                                                    </div>
+                                                        </div>`;
+                                                    quizContainer.appendChild(newCard);
+                                                } else if (e.target.closest('.add-option')) {
+                                                    var questionIndex = e.target.getAttribute('data-question-index');
+                                                    var optionsContainer = e.target.previousElementSibling;
+                                                    var newOptionIndex = optionsContainer.children.length;
+                                                    var newOption = document.createElement('div');
+                                                    newOption.className = 'input-group mb-2 option-group';
+                                                    newOption.innerHTML = `
+                                                        <input type="text" class="form-control" name="Questions[${questionIndex}].Options[${newOptionIndex}].OptionText" />
+                                                        <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>`;
+                                                    optionsContainer.appendChild(newOption);
+                                                    updateDropdown(questionIndex);
+                                                } else if (e.target.closest('.remove-option')) {
+                                                    var optionGroup = e.target.closest('.option-group');
+                                                    var questionCard = e.target.closest('.card');
+                                                    var questionIndex = questionCard.getAttribute('data-index');
+                                                    optionGroup.parentNode.removeChild(optionGroup);
+                                                    updateDropdown(questionIndex);
+                                                } else if (e.target.closest('.remove-question')) {
+                                                    var questionCard = e.target.closest('.card');
+                                                    questionCard.parentNode.removeChild(questionCard);
                                                 }
-                                            </div>
-                                            <div class="btn-container">
-                                                <button type="button" class="btn btn-secondary btn-sm add-question btn-add" id="add-question">
-                                                    <i class="bi bi-plus-lg"></i> Add Question
-                                                </button>
-                                                <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                                            </div>
-                                        </form>
-
-                                        @section Scripts {
-                                            @{
-                                                await Html.RenderPartialAsync("_ValidationScriptsPartial");
-                                            }
-
-                                            <script>
-                                                function updateDropdown(questionIndex) {
-                                                    var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
-                                                    var select = document.querySelector(`[data-index='${questionIndex}'] select[name*='CorrectOptionText']`);
-                                                    select.innerHTML = ''; // Clear existing options
-
-                                                    var inputs = optionsContainer.querySelectorAll('input[type="text"]');
-                                                    inputs.forEach(function (input, index) {
-                                                        var option = document.createElement('option');
-                                                        option.value = input.value; // Use input value as option value
-                                                        option.text = input.value;
-                                                        select.appendChild(option);
-                                                    });
-                                                }
-
-                                                document.addEventListener('input', function (e) {
-                                                    if (e.target && e.target.matches('.option-group input[type="text"]')) {
-                                                        var questionCard = e.target.closest('.card');
-                                                        var questionIndex = questionCard.getAttribute('data-index');
-                                                        updateDropdown(questionIndex);
-                                                    }
-                                                });
-
-                                                document.addEventListener('click', function (e) {
-                                                    if (e.target.closest('.add-question')) {
-                                                        var quizContainer = document.getElementById('quiz-container');
-                                                        var newIndex = quizContainer.children.length;
-                                                        var newCard = document.createElement('div');
-                                                        newCard.className = 'card mb-3';
-                                                        newCard.setAttribute('data-index', newIndex);
-                                                        newCard.innerHTML = `
-                                                            <div class="card-body">
-                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                    <h5 class="card-title">Question ${newIndex + 1}:</h5>
-                                                                    <button type="button" class="btn btn-danger btn-sm remove-question">
-                                                                        <i class="bi bi-trash"></i> Remove Question
-                                                                    </button>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <input type="text" class="form-control" name="Questions[${newIndex}].Description" />
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label>Options:</label>
-                                                                    <div class="options-container">
-                                                                        <div class="input-group mb-2 option-group">
-                                                                            <input type="text" class="form-control" name="Questions[${newIndex}].Options[0].OptionText" />
-                                                                            <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                                <i class="bi bi-trash"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                    <button type="button" class="btn btn-secondary btn-sm add-option btn-add" data-question-index="${newIndex}">
-                                                                        <i class="bi bi-plus-lg"></i> Add Option
-                                                                    </button>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label>Select the correct answer:</label>
-                                                                    <select class="form-control" name="Questions[${newIndex}].CorrectOptionText">
-                                                                    </select>
-                                                                </div>
-                                                            </div>`;
-                                                        quizContainer.appendChild(newCard);
-                                                    } else if (e.target.closest('.add-option')) {
-                                                        var questionIndex = e.target.getAttribute('data-question-index');
-                                                        var optionsContainer = e.target.previousElementSibling;
-                                                        var newOptionIndex = optionsContainer.children.length;
-                                                        var newOption = document.createElement('div');
-                                                        newOption.className = 'input-group mb-2 option-group';
-                                                        newOption.innerHTML = `
-                                                            <input type="text" class="form-control" name="Questions[${questionIndex}].Options[${newOptionIndex}].OptionText" />
-                                                            <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                <i class="bi bi-trash"></i>
-                                                            </button>`;
-                                                        optionsContainer.appendChild(newOption);
-                                                        updateDropdown(questionIndex);
-                                                    } else if (e.target.closest('.remove-option')) {
-                                                        var optionGroup = e.target.closest('.option-group');
-                                                        var questionCard = e.target.closest('.card');
-                                                        var questionIndex = questionCard.getAttribute('data-index');
-                                                        optionGroup.parentNode.removeChild(optionGroup);
-                                                        updateDropdown(questionIndex);
-                                                    } else if (e.target.closest('.remove-question')) {
-                                                        var questionCard = e.target.closest('.card');
-                                                        questionCard.parentNode.removeChild(questionCard);
-                                                    }
-                                                });
-                                            </script>
-                                        }
-                                    </div>
+                                            });
+                                        </script>
+                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div><!-- End Left side columns -->
-            </div>
-        </section>
-    </main><!-- End #main -->
-    <!-- Add necessary Bootstrap JS and other required JS files -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
+                </div>
+            </div><!-- End Left side columns -->
+        </div>
+    </section>
+</main><!-- End #main -->
