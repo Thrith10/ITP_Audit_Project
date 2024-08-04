@@ -1,0 +1,15 @@
+services:
+  webapp:
+    build:
+      context: . # Path to the directory with the Dockerfile
+    container_name: webapp
+    env_file:
+      - PKFAuditManagement/.env
+    ports:
+      - "5000:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

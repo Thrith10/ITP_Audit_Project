@@ -33,6 +33,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 builder.Services.AddHostedService<EmailBackgroundService>();
+
+// Load environment variables
 builder.Configuration.AddEnvironmentVariables();
 var emailPassword = builder.Configuration["SMTP_PASSWORD"];
 
@@ -111,8 +113,8 @@ using (var scope = app.Services.CreateScope())
     // Initialise an instance of the userManager
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
 
-    string email = "admin@gmail.com";
-    string password = "P@ssw0rd";
+    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
+    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
 
     // Check if admin user has already been created
     if (await userManager.FindByEmailAsync(email) == null)
