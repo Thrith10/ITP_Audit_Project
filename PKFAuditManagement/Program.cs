@@ -38,7 +38,16 @@ builder.Services.AddHostedService<EmailBackgroundService>();
 builder.Configuration.AddEnvironmentVariables();
 var emailPassword = builder.Configuration["SMTP_PASSWORD"];
 
-builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+// Configure SmtpOptions from environment variables
+builder.Services.Configure<SmtpOptions>(options =>
+{
+    options.Host = builder.Configuration["SMTP_HOST"];
+    options.Port = int.Parse(builder.Configuration["SMTP_PORT"] ?? "587");
+    options.Username = builder.Configuration["SMTP_USERNAME"];
+    options.Password = builder.Configuration["SMTP_PASSWORD"];
+    options.EnableSsl = bool.Parse(builder.Configuration["SMTP_ENABLESSL"] ?? "true");
+    options.From = builder.Configuration["SMTP_FROM"];
+});
 
 // Service registrations
 builder.Services.AddScoped<IUserService, UserService>();
