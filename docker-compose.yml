@@ -1,4 +1,19 @@
 services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    env_file:
+      - PKFAuditManagement/.env
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./init-database.sql:/docker-entrypoint-initdb.d/init-database.sql
+      - ./entrypoint.sh:/usr/local/bin/entrypoint.sh
+      - sqlserver-data:/var/opt/mssql
+    entrypoint: /usr/local/bin/entrypoint.sh
+    networks:
+      - app-network
+
   webapp:
     build:
       context: . # Path to the directory with the Dockerfile
@@ -13,3 +28,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  sqlserver-data:
