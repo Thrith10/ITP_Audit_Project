@@ -164,7 +164,6 @@ namespace PKFAuditManagement.Controllers
                                       {
                                           UserID = p.UserID,
                                           UserName = u.UserName,
-                                          Email = u.Email, // Add Email field
                                           TotalScore = p.TotalScore,
                                           AttemptDate = a.AttemptDate // Fetch AttemptDate from the Attempt table
                                       }).Distinct().ToListAsync();
@@ -190,7 +189,8 @@ namespace PKFAuditManagement.Controllers
             };
 
             ViewBag.TotalQuestions = totalQuestions;
-            ViewBag.FailedParticipantsEmails = JsonSerializer.Serialize(viewModel.Participants.Where(p => p.TotalScore < 0.5 * viewModel.Questions.Count()).Select(p => p.Email).ToList());
+            ViewBag.FailedParticipantsEmails = JsonSerializer.Serialize(viewModel.Participants.Where(p => p.TotalScore < 0.5 * viewModel.Questions.Count()).Select(p => p.UserName).ToList());
+
 
             return View("~/Views/General/Quiz/QuizDetailsPage.cshtml", viewModel);
         }
@@ -307,7 +307,7 @@ namespace PKFAuditManagement.Controllers
         // POST: Quizzes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, bool deleteAssociated = false)
         {
             var quiz = await _context.Quiz
                                      .Include(q => q.Questions)
@@ -316,7 +316,48 @@ namespace PKFAuditManagement.Controllers
 
             if (quiz == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Quiz not found.";
+                return RedirectToAction(nameof(ViewAllQuiz));
+            }
+
+            if (!deleteAssociated)
+            {
+                // Check for related QuizResponse records
+                var relatedQuizResponses = await _context.QuizResponse
+                    .Where(qr => qr.Question.QuizID == id)
+                    .ToListAsync();
+
+                if (relatedQuizResponses.Any())
+                {
+                    TempData["ErrorMessage"] = "Cannot delete quiz because it is referenced by quiz responses. Do you want to delete the quiz and all associated participants and attempts?";
+                    TempData["DeleteQuizID"] = id;
+                    return RedirectToAction(nameof(ViewAllQuiz));
+                }
+            }
+            else
+            {
+                // Delete related QuizResponses
+                var relatedQuizResponses = await _context.QuizResponse
+                    .Where(qr => qr.Question.QuizID == id)
+                    .ToListAsync();
+
+                _context.QuizResponse.RemoveRange(relatedQuizResponses);
+
+                // Delete related Attempts
+                var relatedAttempts = await _context.Attempt
+                    .Where(a => a.QuizID == id)
+                    .ToListAsync();
+
+                _context.Attempt.RemoveRange(relatedAttempts);
+
+                // Delete related Participants
+                var relatedParticipants = await _context.Participants
+                    .Where(p => p.QuizID == id)
+                    .ToListAsync();
+
+                _context.Participants.RemoveRange(relatedParticipants);
+
+                await _context.SaveChangesAsync();
             }
 
             _context.Quiz.Remove(quiz);
@@ -325,6 +366,9 @@ namespace PKFAuditManagement.Controllers
             TempData["SuccessMessage"] = "Quiz deleted successfully!";
             return RedirectToAction(nameof(ViewAllQuiz));
         }
+
+
+
         // Add a method to generate QR code image as base64 string
         private string GenerateQRCode(string text)
         {
