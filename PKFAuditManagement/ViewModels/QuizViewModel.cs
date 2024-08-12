@@ -8,8 +8,6 @@ namespace PKFAuditManagement.ViewModels
     {
         public string UserID { get; set; }
         public string UserName { get; set; }
-        public string Email { get; set; } // Add Email field
-
         public DateTime AttemptDate { get; set; }  
 
         public int TotalScore { get; set; }
@@ -17,7 +15,7 @@ namespace PKFAuditManagement.ViewModels
     public class QuizViewModel
     {
         public int QuizID { get; set; }
-
+        public bool CanEdit { get; set; } 
         [Required]
         public string Title { get; set; }
 
