@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using DocumentFormat.OpenXml.InkML;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -120,5 +121,125 @@ namespace PKFAuditManagement.Controllers
             }
             return View(model);
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
+        public async Task<IActionResult> EditSignedFS(int id)
+        {
+            var job = await _context.SignedFSForm.FindAsync(id);
+            if (job == null)
+            {
+                TempData["ErrorMessage"] = "Scheduled email job not found.";
+                return RedirectToAction("ScheduleEmails");
+            }
+
+            var model = new SignedFSFormViewModel
+            {
+                Id = job.Id,
+                Client = job.Client,
+                AuditedReportDate = job.AuditedReportDate,
+                PartnerEmail = job.PartnerEmail,
+                UserEmail = job.UserEmail,
+                FinancialStatement = null // or set to a default value
+            };
+
+            return View("~/Views/General/SignedFS/EditSignedFS.cshtml", model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
+        public async Task<IActionResult> UpdateSignedFS(SignedFSFormViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var job = await _context.SignedFSForm.FindAsync(model.Id);
+                if (job == null)
+                {
+                    TempData["ErrorMessage"] = "Scheduled email job not found.";
+                    return RedirectToAction("ScheduleEmails");
+                }
+
+                // Update the job properties
+                job.Client = model.Client;
+                job.AuditedReportDate = model.AuditedReportDate;
+                job.PartnerEmail = model.PartnerEmail;
+                job.UserEmail = model.UserEmail;
+
+                // Handle file upload if a new file is provided
+/*                if (model.FinancialStatement != null)
+                {
+                    var filePath = Path.Combine("wwwroot/files", model.FinancialStatement.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.FinancialStatement.CopyToAsync(stream);
+                    }
+                    job.FilePath = filePath;
+                }*/
+
+                _context.SignedFSForm.Update(job);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Scheduled email job updated successfully!";
+                return RedirectToAction("ScheduleEmails");
+            }
+
+            ViewBag.PartnerEmailOptions = _context.SignedFSForm
+                .Select(x => x.PartnerEmail)
+                .Distinct()
+                .ToList();
+
+            return View("~/Views/General/SignedFS/EditSignedFS.cshtml", model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Non-Auditor,User,Admin")]
+        public async Task<IActionResult> DeleteSignedFS()
+        {
+            try
+            {
+                var jobs = await _context.SignedFSForm.ToListAsync();
+                if (jobs.Count == 0)
+                {
+                    return Json(new { success = false, message = "No scheduled email jobs found." });
+                }
+
+                _context.SignedFSForm.RemoveRange(jobs);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Scheduled email job deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return Json(new { success = false, message = "An error occurred while deleting scheduled email jobs." });
+            }
+        }
+
+
+        // For single deletion but to edit the logic
+        /*        [HttpPost]
+                [Authorize(Roles = "Non-Auditor,User,Admin")]
+                public async Task<IActionResult> DeleteSignedFS(int id)
+                {
+                    try
+                    {
+                        var job = await _context.SignedFSForm.FindAsync(id);
+                        if (job == null)
+                        {
+                            TempData["ErrorMessage"] = "Scheduled email job not found.";
+                            return RedirectToAction("ScheduleEmails");
+                        }
+
+                        _context.SignedFSForm.Remove(job);
+                        await _context.SaveChangesAsync();
+                        TempData["SuccessMessage"] = "Scheduled email job deleted successfully!";
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex.Message}");
+                    }
+
+                    return RedirectToAction("ScheduleEmails");
+                }*/
+
     }
 }

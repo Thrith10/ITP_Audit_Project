@@ -13,7 +13,7 @@
 <body>
     <main id="main" class="main">
         <div class="pagetitle">
-            <h1>Upload Signed Financial Statements (FS)</h1>
+            <h1>Edit Uploaded Signed Financial Statements (FS)</h1>
         </div><!-- End Page Title -->
 
         <section class="section dashboard">
@@ -24,12 +24,13 @@
                         <div class="col-xxl-12 col-md-12">
                             <div class="card info-card customers-card">
                                 <div class="card-body">
-                                    <h5 class="card-title">Upload Signed FS</h5>
+                                    <h5 class="card-title">Edit Uploaded Signed FS</h5>
                                     <div class="form-container">
-                                        <form asp-action="ScheduleEmails" method="post" enctype="multipart/form-data">
+                                        <form asp-action="UpdateSignedFS" method="post" enctype="multipart/form-data">
+                                            <input type="hidden" asp-for="Id" />
                                             <div class="form-group">
                                                 <label asp-for="Client" class="control-label">Client</label>
-                                                <input asp-for="Client" class="form-control" id="autocomplete"/>
+                                                <input asp-for="Client" class="form-control" id="autocomplete" />
                                                 <span asp-validation-for="Client" class="text-danger"></span>
                                             </div>
                                             <div class="form-group">
@@ -52,7 +53,7 @@
                                                 <input asp-for="FinancialStatement" type="file" class="form-control" />
                                                 <span asp-validation-for="FinancialStatement" class="text-danger"></span>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Upload</button>
+                                            <button type="submit" class="btn btn-primary">Update</button>
                                         </form>
 
                                         @section Scripts {

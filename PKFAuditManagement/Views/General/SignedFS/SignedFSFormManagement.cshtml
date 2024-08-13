@@ -35,6 +35,7 @@
                                         <th>Partner Email</th>
                                         <th>Audited Report Date</th>
                                         <th>File Uploaded</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -47,6 +48,14 @@
                                                 <td>@engagement.PartnerEmail</td>
                                                 <td>@engagement.AuditedReportDate</td>
                                                 <td>@engagement.FilePath</td>
+                                                <td>
+                                                    <a asp-action="EditSignedFS" asp-route-id="@engagement.Id" class="btn btn-link">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-link text-danger" onclick="confirmDelete('@engagement.Id')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         }
                                     }
@@ -70,6 +79,7 @@
 </html>
 
 @section Scripts {
-    <script src="~/js/qc6-form-management-admin.js"></script>
+    <script src="~/js/signed-fs-delete.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 }
 

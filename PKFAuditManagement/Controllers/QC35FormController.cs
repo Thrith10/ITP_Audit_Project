@@ -36,7 +36,7 @@ namespace PKFAuditManagement.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
             _s3Client = s3Client;
-            _bucketName = _configuration.GetValue<string>("AWS:BucketName");
+            _bucketName = _configuration["AWS_BUCKET_NAME"];
         }
 
         [Authorize(Roles = "User,Non-Auditor")]
@@ -418,8 +418,8 @@ namespace PKFAuditManagement.Controllers
         [HttpPost]
         public async Task<string> UploadFileAsync(IFormFile file, string bucketName, string? prefix)
         {
-            var accesskey = _configuration.GetValue<string>("AWS:AccessKey");
-            var secretkey = _configuration.GetValue<string>("AWS:SecretKey");
+            var accesskey = _configuration["AWS_ACCESS_KEY"];
+            var secretkey = _configuration["AWS_SECRET_KEY"];
             var s3client = new AmazonS3Client(accesskey, secretkey, Amazon.RegionEndpoint.APSoutheast2);
 
             // Generate a unique filename using GUID
