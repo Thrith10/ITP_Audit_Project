@@ -112,7 +112,7 @@ namespace PKFAuditManagement.Controllers
 
                         await transaction.CommitAsync();
                         TempData["SuccessMessage"] = "Account created successfully!";
-                        return RedirectToAction("CreateAccount"); // Redirect to the same page
+                        return RedirectToAction("AccountManagement"); 
                     }
                     else
                     {
@@ -198,7 +198,8 @@ namespace PKFAuditManagement.Controllers
                 Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() // Assuming single role
             };
 
-            return View("~/Views/Admin/EditAccount.cshtml", viewModel);
+            return View("~/Views/Admin/EditAccount.cshtml", viewModel);         
+
         }
 
         [HttpPost]
@@ -232,7 +233,7 @@ namespace PKFAuditManagement.Controllers
             {
                 await _userManager.AddToRoleAsync(user, viewModel.Role);
                 TempData["SuccessMessage"] = "Account updated successfully!";
-                return RedirectToAction("EditAccount", new { id = viewModel.UserId });
+                return RedirectToAction("AccountManagement", new { id = viewModel.UserId });
             }
             else
             {
