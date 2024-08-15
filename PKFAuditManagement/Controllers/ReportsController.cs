@@ -19,7 +19,7 @@ namespace PKFAuditManagement.Controllers
         public IActionResult GenerateReports()
         {
             // Step 1: Retrieve the QC6 forms from the database
-            var qc6Forms = _context.QC6Forms.ToList();
+            var qc6Forms = _context.QC6Forms.Where(e => !e.IsTemplate).ToList();
             var qc7Forms = _context.QC7Forms.ToList();
             var qc35Forms = _context.QC35Forms.ToList();
             var signedFSForms = _context.SignedFSForm.ToList();

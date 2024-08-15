@@ -93,33 +93,35 @@ function approveQC6Form(qc6FormId) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Send a POST request to the server
-            fetch("/QC6Form/ApproveQC6Form/" + qc6FormId, {
-                method: 'POST',
-            })
-                .then(response => {
-                    if (response.ok) {
-                        // Show success message
+            $.ajax({
+                url: '/QC6Form/ApproveQC6Form/' + qc6FormId,
+                type: 'POST',
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Approved!',
+                        text: 'The QC6 Form has been approved.',
+                    }).then(() => {
+                        window.location.href = '/QC6Form/QC6FormApprovalManagement';
+                    });
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 403) {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Approved!',
-                            text: 'The QC6 Form has been approved.',
-                        }).then(() => {
-                            // Redirect to main page
-                            window.location.href = '/QC6Form/QC6FormApprovalManagement';
+                            icon: 'error',
+                            title: 'Forbidden',
+                            text: 'The request was invalid. Please check that you are authorised to approve this form and try again.',
                         });
                     } else {
-                        // Handle the error response
-                        throw new Error('Failed to approve item');
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Failed to approve item. Please try again later.',
+                        });
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Failed to approve item',
-                    });
-                });
+                }
+            });
         }
     });
 }
@@ -163,37 +165,37 @@ function rejectQC6Form(qc6FormId) {
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Send a POST request to the server with the rejection reason
-                    fetch("/QC6Form/RejectQC6Form/" + qc6FormId, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
+                    $.ajax({
+                        url: '/QC6Form/RejectQC6Form/' + qc6FormId,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ QC6FormID: qc6FormId, RejectionReason: result.value }),
+                        success: function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Rejected!',
+                                text: 'The QC6 Form has been rejected.',
+                            }).then(() => {
+                                window.location.href = '/QC6Form/QC6FormApprovalManagement';
+                            });
                         },
-                        body: JSON.stringify({ QC6FormID: qc6FormId, RejectionReason: result.value })
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                // Show success message
+                        error: function (xhr) {
+                            if (xhr.status === 403) {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Rejected!',
-                                    text: 'The QC6 Form has been Rejected.',
-                                }).then(() => {
-                                    // Redirect to main page
-                                    window.location.href = '/QC6Form/QC6FormApprovalManagement';
+                                    icon: 'error',
+                                    title: 'Forbidden',
+                                    text: 'The request was invalid. Please check that you are authorised to reject this form and try again.',
                                 });
                             } else {
-                                // Handle the error response
-                                throw new Error('Failed to reject item');
+                                console.error('Error:', xhr.responseText);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Failed to reject item. Please try again later.',
+                                });
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'Failed to reject item',
-                            });
-                        });
+                        }
+                    });
                 }
             });
         }

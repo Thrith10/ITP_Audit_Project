@@ -121,10 +121,10 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any Suspicious Transaction Report filed with CAD in prior year(s)?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" asp-for="AnySuspiciousTransactionReportFiled" disabled>
+                                            <input class="form-check-input" type="checkbox" id="strCheckbox" asp-for="AnySuspiciousTransactionReportFiled" disabled>
                                         </div>
                                     </div>
-                                    <div class="row mb-3" id="suspiciousTransactionReportPriorYearRow" style="display: none;">
+                                    <div class="row mb-3" id="rationaleSTRRow" style="display: none;">
                                         <label class="col-sm-2 col-form-label">Comment for Suspicious Transaction Report filed</label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <textarea class="form-control" asp-for="SuspiciousTransactionReportFiledComment" id="suspiciousTransactionReportFiledComment" disabled></textarea>
@@ -162,8 +162,7 @@
                                             <span class="link-text">Proposed recovery rate for current year</span>
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="number" class="form-control" disabled id="proposedRecoveryRateCurrentYear" placeholder="0.00">
-                                            <input type="hidden" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden" disabled>
+                                            <input type="number" class="form-control" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden" disabled>
                                             <span class="input-group-text">%</span>
                                         </div>
                                     </div>
@@ -566,15 +565,15 @@
                                         <i><u>Note</u><br>If yes, please set out the rationale and basis for STR in a separate memo. If in doubt, please discuss with the firm’s Money Laundering Reporting Officer (MLRO) and if necessary, seek advice from legal counsel after discussing with Managing Partner and /or Quality Management Partner.</i><br>
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input" type="checkbox" id="isSuspiciousTransactionReportFiled" onchange="toggleSuspiciousTransactionReport()" asp-for="IsSuspiciousTransactionReportFiled" disabled>
+                                        <input class="form-check-input" type="checkbox" id="conStrCheckbox" onchange="toggleSuspiciousTransactionReport()" asp-for="IsSuspiciousTransactionReportFiled" disabled>
                                     </div>
                                 </div>
-                                <div class="row mb-3" id="strRationale" style="display:none;">
+                                <div class="row mb-3" id="conRationaleSTRRow" style="display:none;">
                                     <label for="inputPassword3" class="col-sm-2 col-form-label">
                                         Rationale and Basis for STR
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <textarea class="form-control" id="strRationaleComment" rows="4" asp-for="SuspiciousTransactionReportFiledRationale" disabled></textarea>
+                                        <textarea class="form-control" id="conRationaleSTRRowComment" rows="4" asp-for="SuspiciousTransactionReportFiledRationale" disabled></textarea>
                                     </div>
                                 </div>
                                 <div class="row mb-3">

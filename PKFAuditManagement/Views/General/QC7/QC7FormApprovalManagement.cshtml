@@ -1,5 +1,5 @@
-﻿@using PKFAuditManagement.Models
-@model List<QC7Form>
+﻿@using PKFAuditManagement.ViewModels
+@model QC7FormAdminManagementViewModel
 
 <!-- Start of Alerts -->
 @{
@@ -45,7 +45,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-6">
-                                <h5 class="card-title">Manage QC7 Forms</h5>
+                                <h5 class="card-title">View All QC7 Forms</h5>
                             </div>
                             <div class="col-6 mt-3 text-end">
                                 <a asp-controller="QC7Form" asp-action="QC7FormCreation" class="btn btn-primary btn-lg">Create Form</a>
@@ -72,7 +72,7 @@
                                 <tbody>
                                     @if (Model != null)
                                     {
-                                        foreach (var engagement in Model)
+                                        foreach (var engagement in Model.AllQC7Forms)
                                         {
                                             <tr>
                                                 <td>
@@ -124,10 +124,178 @@
                             </table>
                         </div>
                         <!-- End Table with stripped rows -->
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5 class="card-title">QC7 Form Approval as First Approver</h5>
+                            </div>
+                        </div>
+                        <p>As the first approver, you will be able to edit, approve or reject submitted QC7 forms.</p>
+
+                        <div class="table-responsive">
+                            <table class="table datatable table-responsive" id="firstApproverTable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            File Reference
+                                        </th>
+                                        <th>Client</th>
+                                        <th>Period Ended</th>
+                                        <th>Type of Engagement</th>
+                                        <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.FirstApproverConclusions != null && Model.FirstApproverConclusions.Any())
+                                    {
+                                        foreach (var item in Model.FirstApproverConclusions)
+                                        {
+                                            var conclusion = item.Conclusion;
+                                            var form = item.Form;
+                                            <tr>
+                                                <td>
+                                                    <a href="@Url.Action("ViewQC7Form", "QC7Form", new { id = form.QC7FormID })" style="color: #007bff; text-decoration: underline;">@form.FileReference</a>
+                                                </td>
+                                                <td>@form.Client</td>
+                                                <td>@form.PeriodEnded</td>
+                                                <td>@form.EngagementType</td>
+                                                <td>@form.FormSubmissionDate</td>
+                                                <td>
+                                                    @if (form.Status == "Pending")
+                                                    {
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    }
+                                                    else if (form.Status == "Pending 2nd Approval")
+                                                    {
+                                                        <span class="badge bg-warning">Pending 2nd Approval</span>
+                                                    }
+                                                    else if (form.Status == "Approved")
+                                                    {
+                                                        <span class="badge bg-success">Approved</span>
+                                                    }
+                                                    else if (form.Status == "Rejected")
+                                                    {
+                                                        <span class="badge bg-danger">Rejected</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </a>
+
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                            <li><a class="dropdown-item" href="@Url.Action("ViewQC7Form", new { id = form.QC7FormID })">View</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC7Form", new { id = form.QC7FormID })">Edit</a></li>
+                                                            <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC7Form", new { id = form.QC7FormID })')">Delete</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="7">No data found.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
 
                     </div>
                 </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5 class="card-title">QC7 Form Approval as Second Approver</h5>
+                            </div>
+                        </div>
+                        <p>As the second approver, you will be able to edit, approve or reject submitted QC7 forms.</p>
 
+                        <div class="table-responsive">
+                            <table class="table datatable" id="engagementTable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            File Reference
+                                        </th>
+                                        <th>Client</th>
+                                        <th>Period Ended</th>
+                                        <th>Type of Engagement</th>
+                                        <th data-type="date" data-format="DD/MM/YYYY">Form Submission Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.SecondApproverConclusions != null && Model.SecondApproverConclusions.Any())
+                                    {
+                                        foreach (var item in Model.SecondApproverConclusions)
+                                        {
+                                            var conclusion = item.Conclusion;
+                                            var form = item.Form;
+                                            <tr>
+                                                <td>
+                                                    <a href="@Url.Action("ViewQC7Form", "QC7Form", new { id = form.QC7FormID })" style="color: #007bff; text-decoration: underline;">@form.FileReference</a>
+                                                </td>
+                                                <td>@form.Client</td>
+                                                <td>@form.PeriodEnded</td>
+                                                <td>@form.EngagementType</td>
+                                                <td>@form.FormSubmissionDate</td>
+                                                <td>
+                                                    @if (form.Status == "Pending")
+                                                    {
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    }
+                                                    else if (form.Status == "Pending 2nd Approval")
+                                                    {
+                                                        <span class="badge bg-warning">Pending 2nd Approval</span>
+                                                    }
+                                                    else if (form.Status == "Approved")
+                                                    {
+                                                        <span class="badge bg-success">Approved</span>
+                                                    }
+                                                    else if (form.Status == "Rejected")
+                                                    {
+                                                        <span class="badge bg-danger">Rejected</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">form.Status</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </a>
+
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                            <li><a class="dropdown-item" href="@Url.Action("ViewQC7Form", new { id = form.QC7FormID })">View</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC7Form", new { id = form.QC7FormID })">Edit</a></li>
+                                                            <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC7Form", new { id = form.QC7FormID })')">Delete</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="7">No data found.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </section>

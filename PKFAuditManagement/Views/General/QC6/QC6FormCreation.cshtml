@@ -86,10 +86,10 @@
                                             <strong>Reviewed by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" asp-for="ReviewedBy">
+                                            <input type="text" class="form-control" asp-for="ReviewedBy" required>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
                                         </div>
                                     </div>
                                     <br>
@@ -642,8 +642,8 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:</label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -659,8 +659,8 @@
                                         </select>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-form-label">Date:</label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate">
+                                        <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
+                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" required>
                                     </div>
                                 </div>
                                 <h5 class="card-title"><u><i>Notes</i></u></h5>

@@ -58,11 +58,40 @@ namespace PKFAuditManagement.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult QC7FormApprovalManagement()
+        public async Task<IActionResult> QC7FormApprovalManagement()
         {
             // Retrieve engagement data from database
-            var engagements = _context.QC7Forms.ToList();
-            return View("~/Views/General/QC7/QC7FormApprovalManagement.cshtml", engagements);
+            var qc7forms = _context.QC7Forms.ToList();
+
+            // Retrieve user email
+            var userEmail = await _userService.GetUserEmailAsync(User);
+
+            // Retrieve QC7FormConclusions where user is the first approver
+            var qc7FormConclusionsFirstApprover = _context.QC7FormConclusions
+                                        .Where(c => c.EPHODApprovedBy == userEmail)
+                                        .Join(_context.QC7Forms,
+                                            conclusion => conclusion.QC7FormID,
+                                            form => form.QC7FormID,
+                                            (conclusion, form) => new QC7FormCombinedViewModel { Conclusion = conclusion, Form = form })
+                                        .ToList();
+
+            // Retrieve QC7FormConclusions where user is the second approver
+            var qc7FormConclusionsSecondApprover = _context.QC7FormConclusions
+                                        .Where(c => c.MPHODQMPApprovedBy == userEmail)
+                                        .Join(_context.QC7Forms,
+                                            conclusion => conclusion.QC7FormID,
+                                            form => form.QC7FormID,
+                                            (conclusion, form) => new QC7FormCombinedViewModel { Conclusion = conclusion, Form = form })
+                                        .ToList();
+
+            var viewModel = new QC7FormAdminManagementViewModel
+            {
+                FirstApproverConclusions = qc7FormConclusionsFirstApprover,
+                SecondApproverConclusions = qc7FormConclusionsSecondApprover,
+                AllQC7Forms = qc7forms
+            };
+
+            return View("~/Views/General/QC7/QC7FormApprovalManagement.cshtml", viewModel);
         }
 
         [Authorize(Roles = "User,Non-Auditor,Admin")]
@@ -756,6 +785,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.ContinuingEngagementRiskRated = conclusionData.ContinuingEngagementRiskRated;
                 viewModel.SafeguardReviewPartnerAssigned = conclusionData.SafeguardReviewPartnerAssigned;
 
+                viewModel.IsSuspiciousTransactionReportFiled = conclusionData.IsSuspiciousTransactionReportFiled;
                 if (viewModel.IsSuspiciousTransactionReportFiled == true)
                 {
                     viewModel.SuspiciousTransactionReportFiledRationale = conclusionData.SuspiciousTransactionReportFiledRationale;
@@ -1028,7 +1058,6 @@ namespace PKFAuditManagement.Controllers
                         _context.Add(qC7FormFeeDetail);
                     }
 
-                    // Save all pending changes to QC7FormTest entities at once
                     _context.SaveChanges();
                     transaction.Commit();
 
@@ -1054,7 +1083,16 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
                     transaction.Rollback();
                     // Log the error
                     viewModel.ErrorMessage = "An error occurred while processing your request. Please try again.";
-                    return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
+                    if (roles.Contains("Admin"))
+                    {
+                        // Redirect to admin-specific page
+                        return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
+                    }
+                    else
+                    {
+                        // Redirect to user-specific page
+                        return RedirectToAction("QC7FormManagement", "QC7Form");
+                    }
                 }
             }
         }
@@ -1111,34 +1149,83 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
                 return NotFound();
             }
 
+            // Get the current user's email
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var currentUserEmail = user?.Email;
+
             try
             {
                 // Check if EPHOD approval is not set
                 if (conclusion.IsFirstApproved == false)
-                {
-                    conclusion.IsFirstApproved = true;
+                {                    // Check if current user is the first approver
+                    if (currentUserEmail != conclusion.EPHODApprovedBy)
+                    {
+                        return Forbid();
+                    }
+                    else
+                    {
+                        conclusion.IsFirstApproved = true;
 
-                    // Update the engagement status to "Pending 2nd Approval"
-                    engagement.Status = "Pending 2nd Approval";
+                        // Update the engagement status to "Pending 2nd Approval"
+                        engagement.Status = "Pending 2nd Approval";
 
-                    await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC7 Form Creation",
-$"A new QC7 Form has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
 
+                        // Send email to creator to notify on approval
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
+                            $"Your new QC7 Form has been approved by: {conclusion.EPHODApprovedBy}. The QC7 Form is awaiting the second approval.");
+
+                        // Send email to 2nd approver on action to take
+                        await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC7 Form Creation",
+                            $"A new QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
+
+                        return Ok(new { success = true, message = "The QC7 Form has been approved." });
+                    }
                 }
                 // If EPHOD approval is already set, check if MPHODQMP approval is not set
                 else if (conclusion.IsSecondApproved == false)
                 {
-                    conclusion.IsSecondApproved = true;
+                    // Check if current user is the second approver
+                    if (currentUserEmail != conclusion.MPHODQMPApprovedBy)
+                    {
+                        return Forbid();
+                    }
+                    else
+                    {
+                        conclusion.IsSecondApproved = true;
 
-                    // Update the engagement status to "Pending 2nd Approval"
-                    engagement.Status = "Approved";
+                        // Update the engagement status to "Approved"
+                        engagement.Status = "Approved";
 
-                    // Clear Rejection Reason
-                    engagement.RejectionReason = null;
+                        // Clear Rejection Reason
+                        engagement.RejectionReason = null;
 
-                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
-$"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC7 Form.");
+                        // Send email to creator to notify on creation
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
+                            $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC7 Form.");
 
+                        // List of approvers
+                        var recipients = new List<string>
+                        {
+                        conclusion.EPHODApprovedBy,
+                        conclusion.MPHODQMPApprovedBy
+                        };
+
+                        // Subject and body of the email
+                        var subject = "QC7 Form Update";
+                        var body = $"The QC7 Form {engagement.FileReference} has been successfully approved and is currently active.";
+
+                        // Send the email to all approvers on the creation of the QC7 form
+                        foreach (var recipient in recipients)
+                        {
+                            await _emailSender.SendEmailAsync(recipient, subject, body);
+                        }
+
+                        return Ok(new { success = true, message = "The QC7 Form has been approved." });
+                    }
                 }
 
                 _context.SaveChanges();
@@ -1178,17 +1265,69 @@ $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPH
                     return NotFound();
                 }
 
-                // Update the engagement status to "Rejected"
-                engagement.Status = "Rejected";
-                engagement.RejectionReason = rejectionReason; // Set the rejection reason
+                // Get the current user's email
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+                var currentUserEmail = user?.Email;
 
-                // Reset the status to false to repeat approval process
-                conclusion.IsFirstApproved = false;
-                conclusion.IsSecondApproved = false;
+                // Check if EPHOD approved is not set
+                if (conclusion.IsFirstApproved == false)
+                {
+                    // Check if current user is the first approver
+                    if (currentUserEmail != conclusion.EPHODApprovedBy)
+                    {
+                        return Forbid();
+                    }
+                    else
+                    {
+                        // Update the engagement status to "Rejected"
+                        engagement.Status = "Rejected";
+                        engagement.RejectionReason = rejectionReason; // Set the rejection reason
 
-                _context.SaveChanges();
+                        // Reset the status to false to repeat approval process
+                        conclusion.IsFirstApproved = false;
+                        conclusion.IsSecondApproved = false;
 
-                return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
+                        _context.SaveChanges();
+
+                        // Send email to creator to notify on rejection
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
+                            $"Your new QC7 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+
+                        return Ok(new { success = true, message = "The QC7 Form has been rejected." });
+                    }
+                }
+                else if (conclusion.IsSecondApproved == false)
+                {
+                    // Check if current user is the second approver
+                    if (currentUserEmail != conclusion.MPHODQMPApprovedBy)
+                    {
+                        return Forbid();
+                    }
+                    else
+                    {
+                        // Update the engagement status to "Rejected"
+                        engagement.Status = "Rejected";
+                        engagement.RejectionReason = rejectionReason; // Set the rejection reason
+
+                        // Reset the status to false to repeat approval process
+                        conclusion.IsFirstApproved = false;
+                        conclusion.IsSecondApproved = false;
+
+                        _context.SaveChanges();
+
+                        // Send email to creator to notify on rejection
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
+                            $"Your new QC7 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+
+                        return Ok(new { success = true, message = "The QC7 Form has been rejected." });
+                    }
+                }
+
+                return BadRequest();
             }
         }
 

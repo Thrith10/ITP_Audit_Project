@@ -727,55 +727,82 @@ namespace PKFAuditManagement.Controllers
                 return NotFound();
             }
 
+            // Get the current user's email
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var currentUserEmail = user?.Email;
+
             try
             {
                 // Check if EPHOD approved is not set
                 if (conclusion.IsFirstApproved == false)
                 {
-                    conclusion.IsFirstApproved = true;
+                    // Check if current user is the first approver
+                    if (currentUserEmail != conclusion.EPHODApprovedBy)
+                    {
+                        return Forbid();
+                    } else
+                    {
+                        conclusion.IsFirstApproved = true;
 
-                    // Update the engagement status to "Pending 2nd Approval"
-                    engagement.Status = "Pending 2nd Approval";
+                        // Update the engagement status to "Pending 2nd Approval"
+                        engagement.Status = "Pending 2nd Approval";
 
 
-                    // Send email to creator to notify on approval
-                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
-                        $"Your new QC6 Form has been approved by: {conclusion.EPHODApprovedBy}. The QC6 Form is awaiting the second approval.");
+                        // Send email to creator to notify on approval
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
+                            $"Your new QC6 Form has been approved by: {conclusion.EPHODApprovedBy}. The QC6 Form is awaiting the second approval.");
 
-                    // Send email to 2nd approver on action to take
-                    await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC6 Form Creation",
-                        $"A new QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+                        // Send email to 2nd approver on action to take
+                        await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC6 Form Creation",
+                            $"A new QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+
+                        return Ok(new { success = true, message = "The QC6 Form has been approved." });
+                    }
                 }
                 // If EPHOD approval is already set, check if MPHODQMP approval date is not set
                 else if (conclusion.IsSecondApproved == false)
                 {
-                    conclusion.IsSecondApproved = true;
-
-                    // Update the engagement status to "Approved"
-                    engagement.Status = "Approved";
-
-                    // Clear Rejection Reason
-                    engagement.RejectionReason = null;
-
-                    // Send email to creator to notify on creation
-                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
-                        $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC6 Form.");
-
-                    // List of approvers
-                    var recipients = new List<string>
+                    // Check if current user is the second approver
+                    if (currentUserEmail != conclusion.MPHODQMPApprovedBy)
                     {
+                        return Forbid();
+                    }
+                    else
+                    {
+                        conclusion.IsSecondApproved = true;
+
+                        // Update the engagement status to "Approved"
+                        engagement.Status = "Approved";
+
+                        // Clear Rejection Reason
+                        engagement.RejectionReason = null;
+
+                        // Send email to creator to notify on creation
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
+                            $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC6 Form.");
+
+                        // List of approvers
+                        var recipients = new List<string>
+                        {
                         conclusion.EPHODApprovedBy,
                         conclusion.MPHODQMPApprovedBy
-                    };
+                        };
 
-                    // Subject and body of the email
-                    var subject = "QC6 Form Update";
-                    var body = $"The QC6 Form {engagement.FileReference} has been successfully approved and is currently active.";
+                        // Subject and body of the email
+                        var subject = "QC6 Form Update";
+                        var body = $"The QC6 Form {engagement.FileReference} has been successfully approved and is currently active.";
 
-                    // Send the email to all approvers on the creation of the QC6 form
-                    foreach (var recipient in recipients)
-                    {
-                        await _emailSender.SendEmailAsync(recipient, subject, body);
+                        // Send the email to all approvers on the creation of the QC6 form
+                        foreach (var recipient in recipients)
+                        {
+                            await _emailSender.SendEmailAsync(recipient, subject, body);
+                        }
+
+                        return Ok(new { success = true, message = "The QC6 Form has been approved." });
                     }
                 }
 
@@ -816,15 +843,65 @@ namespace PKFAuditManagement.Controllers
                     return NotFound();
                 }
 
-                // Update the engagement status to "Rejected"
-                engagement.Status = "Rejected";
-                engagement.RejectionReason = rejectionReason; // Set the rejection reason
+                // Get the current user's email
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+                var currentUserEmail = user?.Email;
 
-                // Reset the status to false to repeat approval process
-                conclusion.IsFirstApproved = false;
-                conclusion.IsSecondApproved = false;
+                // Check if EPHOD approved is not set
+                if (conclusion.IsFirstApproved == false)
+                {
+                    // Check if current user is the first approver
+                    if (currentUserEmail != conclusion.EPHODApprovedBy)
+                    {
+                        return Forbid();
+                    }
+                    else
+                    {
+                        // Update the engagement status to "Rejected"
+                        engagement.Status = "Rejected";
+                        engagement.RejectionReason = rejectionReason; // Set the rejection reason
 
-                _context.SaveChanges();
+                        // Reset the status to false to repeat approval process
+                        conclusion.IsFirstApproved = false;
+                        conclusion.IsSecondApproved = false;
+
+                        _context.SaveChanges();
+
+                        // Send email to creator to notify on rejection
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
+                            $"Your new QC6 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+
+                        return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+                    }
+                } else if (conclusion.IsSecondApproved == false)
+                {
+                    // Check if current user is the second approver
+                    if (currentUserEmail != conclusion.MPHODQMPApprovedBy)
+                    {
+                        return Forbid();
+                    } else
+                    {
+                        // Update the engagement status to "Rejected"
+                        engagement.Status = "Rejected";
+                        engagement.RejectionReason = rejectionReason; // Set the rejection reason
+
+                        // Reset the status to false to repeat approval process
+                        conclusion.IsFirstApproved = false;
+                        conclusion.IsSecondApproved = false;
+
+                        _context.SaveChanges();
+
+                        // Send email to creator to notify on rejection
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
+                            $"Your new QC6 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+
+                        return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+                    }
+                }
 
                 return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
             }
@@ -961,7 +1038,6 @@ namespace PKFAuditManagement.Controllers
 
                     // Add tnaTNESectionB data to the database
                     _context.Add(tnaTNESectionB);
-                    _context.SaveChanges();
 
                     var tnaTNESectionD = new TNATNESectionD
                     {
@@ -975,7 +1051,6 @@ namespace PKFAuditManagement.Controllers
 
                     // Add tnaTNESectionD data to the database
                     _context.Add(tnaTNESectionD);
-                    _context.SaveChanges();
 
                     var qc6formConclusion = new QC6FormConclusion
                     {
@@ -1000,7 +1075,6 @@ namespace PKFAuditManagement.Controllers
 
                     // Add qc6formConclusion data to the database
                     _context.Add(qc6formConclusion);
-                    _context.SaveChanges();
 
                     // Process the submitted data
                     foreach (var subForm in viewModel.SubForms)
@@ -1034,9 +1108,6 @@ namespace PKFAuditManagement.Controllers
                         }
                     }
 
-                    // Save all pending changes to QC6FormTest entities at once
-                    _context.SaveChanges();
-
                     // Process the submitted data
                     foreach (var service in viewModel.Services)
                     {
@@ -1052,9 +1123,6 @@ namespace PKFAuditManagement.Controllers
                         // Add qC6FormFeeDetail to the context and save changes
                         _context.Add(qC6FormFeeDetail);
                     }
-
-                    // Save all pending changes to QC6FormFeeDetail entities at once
-                    _context.SaveChanges();
 
                     var uploadsRootFolder = Path.Combine(_environment.WebRootPath, "uploads");
 
@@ -1091,6 +1159,7 @@ namespace PKFAuditManagement.Controllers
                         }
                     }
 
+                    _context.SaveChanges();
                     transaction.Commit();
 
                     await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Creation",
@@ -1144,11 +1213,17 @@ namespace PKFAuditManagement.Controllers
                 // Identify TNATNESectionD for TNATNEAssessment
                 var tnaTNESectionD = _context.TNATNESectionDs.SingleOrDefault(t => t.TNATNEAssessmentID == tnaTNEAssessment.TNATNEAssessmentID);
 
-                // Delete TNATNESectionB
-                _context.TNATNESectionBs.Remove(tnaTNESectionB);
+                if (tnaTNESectionB != null)
+                {
+                    // Delete TNATNESectionB
+                    _context.TNATNESectionBs.Remove(tnaTNESectionB);
+                }
 
-                // Delete TNATNESectionD
-                _context.TNATNESectionDs.Remove(tnaTNESectionD);
+                if (tnaTNESectionD != null)
+                {
+                    // Delete TNATNESectionD
+                    _context.TNATNESectionDs.Remove(tnaTNESectionD);
+                }
 
                 // Delete TNATNEAssessment
                 _context.TNATNEAssessments.Remove(tnaTNEAssessment);

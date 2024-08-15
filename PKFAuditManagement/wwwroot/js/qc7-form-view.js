@@ -1,9 +1,9 @@
 ﻿
 $(document).ready(function () {
     toggleRiskLevel();
-    toggleSectionBResult();
     toggleSignificantRisk();
     toggleSTR();
+    toggleConSTR();
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -36,8 +36,8 @@ function toggleRiskLevel() {
 
 // Function to display comment for significant risk field based on checkbox value
 function toggleSignificantRisk() {
-    var significantRiskCheckbox = $('#significantRiskCheckbox');
-    var significantRiskRow = $('#significantRiskRow');
+    var significantRiskCheckbox = $('#risksAssociatedCheckbox');
+    var significantRiskRow = $('#risksAssociatedRow');
 
     if (significantRiskCheckbox.is(':checked')) {
         significantRiskRow.show();
@@ -50,6 +50,18 @@ function toggleSignificantRisk() {
 function toggleSTR() {
     var strCheckbox = $('#strCheckbox');
     var rationaleSTRRow = $('#rationaleSTRRow');
+
+    if (strCheckbox.is(':checked')) {
+        rationaleSTRRow.show();
+    } else {
+        rationaleSTRRow.hide();
+    }
+}
+
+// Function to display comment for suspicious transaction report field in conclusion based on checkbox value
+function toggleConSTR() {
+    var strCheckbox = $('#conStrCheckbox');
+    var rationaleSTRRow = $('#conRationaleSTRRow');
 
     if (strCheckbox.is(':checked')) {
         rationaleSTRRow.show();
@@ -73,33 +85,35 @@ function approveQC7Form(qc7FormId) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Send a POST request to the server
-            fetch("/QC7Form/ApproveQC7Form/" + qc7FormId, {
-                method: 'POST',
-            })
-                .then(response => {
-                    if (response.ok) {
-                        // Show success message
+            $.ajax({
+                url: '/QC7Form/ApproveQC7Form/' + qc7FormId,
+                type: 'POST',
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Approved!',
+                        text: 'The QC7 Form has been approved.',
+                    }).then(() => {
+                        window.location.href = '/QC7Form/QC7FormApprovalManagement';
+                    });
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 403) {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Approved!',
-                            text: 'The QC7 Form has been approved.',
-                        }).then(() => {
-                            // Redirect to main page
-                            window.location.href = '/QC7Form/QC7FormApprovalManagement';
+                            icon: 'error',
+                            title: 'Forbidden',
+                            text: 'The request was invalid. Please check that you are authorised to approve this form and try again.',
                         });
                     } else {
-                        // Handle the error response
-                        throw new Error('Failed to approve item');
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Failed to approve item. Please try again later.',
+                        });
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Failed to approve item',
-                    });
-                });
+                }
+            });
         }
     });
 }
@@ -143,37 +157,37 @@ function rejectQC7Form(qc7FormId) {
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Send a POST request to the server with the rejection reason
-                    fetch("/QC7Form/RejectQC7Form/" + qc7FormId, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
+                    $.ajax({
+                        url: '/QC7Form/RejectQC7Form/' + qc7FormId,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ QC7FormID: qc7FormId, RejectionReason: result.value }),
+                        success: function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Rejected!',
+                                text: 'The QC7 Form has been rejected.',
+                            }).then(() => {
+                                window.location.href = '/QC7Form/QC7FormApprovalManagement';
+                            });
                         },
-                        body: JSON.stringify({ QC7FormID: qc7FormId, RejectionReason: result.value })
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                // Show success message
+                        error: function (xhr) {
+                            if (xhr.status === 403) {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Rejected!',
-                                    text: 'The QC7 Form has been Rejected.',
-                                }).then(() => {
-                                    // Redirect to main page
-                                    window.location.href = '/QC7Form/QC7FormApprovalManagement';
+                                    icon: 'error',
+                                    title: 'Forbidden',
+                                    text: 'The request was invalid. Please check that you are authorised to reject this form and try again.',
                                 });
                             } else {
-                                // Handle the error response
-                                throw new Error('Failed to reject item');
+                                console.error('Error:', xhr.responseText);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Failed to reject item. Please try again later.',
+                                });
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'Failed to reject item',
-                            });
-                        });
+                        }
+                    });
                 }
             });
         }

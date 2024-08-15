@@ -78,11 +78,11 @@
                                             <strong>Reviewed by:<span class="text-danger"> *</span></strong>
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="ReviewedBy">
+                                            <input type="text" class="form-control" placeholder="Signature" asp-for="ReviewedBy" required>
                                             <span asp-validation-for="ReviewedBy" class="text-danger"></span>
                                         </div>
                                         <div class="col">
-                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
                                             <span asp-validation-for="ReviewedByDate" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -244,7 +244,7 @@
                                                 <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
                                                 <div class="col-sm-10 d-flex align-items-center">
                                                     <input type="number" class="form-control" id="grandTotal" disabled>
-                                                    <input type="hidden" class="form-control" id="grandTotalHidden" asp-for="GrandTotal">
+                                                    <input type="hidden" class="form-control" id="grandTotalHidden" asp-for="GrandTotal" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -679,7 +679,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                        <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -696,7 +696,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate">
+                                        <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -713,7 +713,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
-                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate">
+                                        <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" required>
                                     </div>
                                 </div>
                                 <h5 class="card-title"><u><i>Note</i></u></h5>
