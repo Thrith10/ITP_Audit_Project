@@ -1173,6 +1173,7 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
                         // Update the engagement status to "Pending 2nd Approval"
                         engagement.Status = "Pending 2nd Approval";
 
+                        _context.SaveChanges();
 
                         // Send email to creator to notify on approval
                         await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
@@ -1202,6 +1203,8 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
 
                         // Clear Rejection Reason
                         engagement.RejectionReason = null;
+
+                        _context.SaveChanges();
 
                         // Send email to creator to notify on creation
                         await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
@@ -1253,7 +1256,7 @@ $"A new QC7 Form has been created with File Reference: {fileReference} and you'v
                 JObject jsonBody = JObject.Parse(requestBody);
                 int qc7FormId = (int)jsonBody["QC7FormID"];
                 string rejectionReason = (string)jsonBody["RejectionReason"];
-
+                    
                 // Retrieve engagement data from the database
                 var engagement = _context.QC7Forms.FirstOrDefault(e => e.QC7FormID == qc7FormId);
 

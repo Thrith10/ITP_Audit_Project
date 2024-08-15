@@ -751,6 +751,7 @@ namespace PKFAuditManagement.Controllers
                         // Update the engagement status to "Pending 2nd Approval"
                         engagement.Status = "Pending 2nd Approval";
 
+                        _context.SaveChanges();
 
                         // Send email to creator to notify on approval
                         await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
@@ -780,6 +781,8 @@ namespace PKFAuditManagement.Controllers
 
                         // Clear Rejection Reason
                         engagement.RejectionReason = null;
+
+                        _context.SaveChanges();
 
                         // Send email to creator to notify on creation
                         await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
