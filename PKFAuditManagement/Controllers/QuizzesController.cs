@@ -185,12 +185,12 @@ namespace PKFAuditManagement.Controllers
                     }).ToList()
                 }).ToList(),
                 Participants = participants,
-                QRImageURL = GenerateQRCode($"Quiz ID: {quiz.QuizID}") // Generate QR code for QuizID
+                QRImageURL = GenerateQRCode($"Quiz ID: {quiz.QuizID}"), // Generate QR code for QuizID
+                CanEdit = !participants.Any() // Flag to indicate if the quiz can be edited
             };
 
             ViewBag.TotalQuestions = totalQuestions;
             ViewBag.FailedParticipantsEmails = JsonSerializer.Serialize(viewModel.Participants.Where(p => p.TotalScore < 0.5 * viewModel.Questions.Count()).Select(p => p.UserName).ToList());
-
 
             return View("~/Views/General/Quiz/QuizDetailsPage.cshtml", viewModel);
         }
@@ -248,54 +248,35 @@ namespace PKFAuditManagement.Controllers
                     return NotFound();
                 }
 
+                // Update quiz details
                 quiz.Title = quizViewModel.Title;
                 quiz.Description = quizViewModel.Description;
 
-                _context.Update(quiz);
-                await _context.SaveChangesAsync();
-
-                foreach (var questionViewModel in quizViewModel.Questions)
+                // Remove existing questions and options
+                var existingQuestions = quiz.Questions.ToList();
+                foreach (var question in existingQuestions)
                 {
-                    var question = quiz.Questions.FirstOrDefault(q => q.QuestionID == questionViewModel.QuestionID);
-                    if (question != null)
-                    {
-                        question.Description = questionViewModel.Description;
-                        question.CorrectOptionText = questionViewModel.CorrectOptionText;
-
-                        foreach (var optionViewModel in questionViewModel.Options)
-                        {
-                            var option = question.Options.FirstOrDefault(o => o.OptionID == optionViewModel.OptionID);
-                            if (option != null)
-                            {
-                                option.OptionText = optionViewModel.OptionText;
-                            }
-                            else
-                            {
-                                question.Options.Add(new Option
-                                {
-                                    QuestionID = question.QuestionID,
-                                    OptionText = optionViewModel.OptionText
-                                });
-                            }
-                        }
-
-                        _context.Update(question);
-                    }
-                    else
-                    {
-                        quiz.Questions.Add(new Questions
-                        {
-                            QuizID = quiz.QuizID,
-                            Description = questionViewModel.Description,
-                            CorrectOptionText = questionViewModel.CorrectOptionText,
-                            Options = questionViewModel.Options.Select(o => new Option
-                            {
-                                OptionText = o.OptionText
-                            }).ToList()
-                        });
-                    }
+                    _context.Option.RemoveRange(question.Options);
+                    _context.Questions.Remove(question);
                 }
 
+                // Add new questions and options
+                foreach (var questionViewModel in quizViewModel.Questions)
+                {
+                    var newQuestion = new Questions
+                    {
+                        QuizID = quiz.QuizID,
+                        Description = questionViewModel.Description,
+                        CorrectOptionText = questionViewModel.CorrectOptionText,
+                        Options = questionViewModel.Options.Select(o => new Option
+                        {
+                            OptionText = o.OptionText
+                        }).ToList()
+                    };
+                    quiz.Questions.Add(newQuestion);
+                }
+
+                _context.Update(quiz);
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Quiz updated successfully!";
@@ -304,6 +285,7 @@ namespace PKFAuditManagement.Controllers
 
             return View("~/Views/General/Quiz/EditQuiz.cshtml", quizViewModel);
         }
+
         // POST: Quizzes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -329,7 +311,7 @@ namespace PKFAuditManagement.Controllers
 
                 if (relatedQuizResponses.Any())
                 {
-                    TempData["ErrorMessage"] = "Cannot delete quiz because it is referenced by quiz responses. Do you want to delete the quiz and all associated participants and attempts?";
+                    TempData["ErrorMessage"] = "Failed to delete quiz because it is referenced by quiz responses. Do you want to delete the quiz and all associated participants and attempts?";
                     TempData["DeleteQuizID"] = id;
                     return RedirectToAction(nameof(ViewAllQuiz));
                 }

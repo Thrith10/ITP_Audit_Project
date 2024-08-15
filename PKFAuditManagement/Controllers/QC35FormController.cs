@@ -262,11 +262,16 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQC35Form(QC35FormViewModel viewModel, IFormFile file)
         {
             var user = await _userManager.GetUserAsync(User);
             var roles = await _userManager.GetRolesAsync(user);
+
+            if (viewModel.File == null)
+            {
+                // Ensure that the File property is treated as valid
+                ModelState.Remove("File");
+            }
 
             if (!ModelState.IsValid)
             {

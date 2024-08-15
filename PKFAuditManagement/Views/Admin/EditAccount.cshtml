@@ -52,23 +52,29 @@
 </main><!-- End #main -->
 
 @section Scripts {
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var successMessage = '@TempData["SuccessMessage"]';
             var errorMessage = '@TempData["ErrorMessage"]';
 
+            /*
             if (successMessage) {
                 Swal.fire({
-                    icon: 'success',
+                    icon: "success",
                     title: 'Success',
                     text: successMessage,
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+                    iconColor: '#30a702'
+
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = '@Url.Action("AccountManagement", "Admin")';
                     }
                 });
             }
+            
+
 
             if (errorMessage) {
                 Swal.fire({
@@ -78,6 +84,7 @@
                     confirmButtonText: 'OK'
                 });
             }
+            */
         });
     </script>
 }
