@@ -252,12 +252,6 @@ namespace PKFAuditManagement.Controllers
                     // Get the current user's ID
                     var userId = user?.Id;
 
-                    // Re-validate form inputs for QC6 Form
-                    if (viewModel.IsPublicInterestEntity == true)
-                    {
-                        viewModel.PublicInterestEntityType = null;
-                    }
-
                     // Retrieve the existing QC6 form from the database
                     var qc6form = await _context.QC6Forms.FindAsync(int.Parse(viewModel.QC6FormID));
 
@@ -285,7 +279,16 @@ namespace PKFAuditManagement.Controllers
                     qc6form.PredecessorAuditor = viewModel.PredecessorAuditor;
                     qc6form.ReasonsForDiscontinuance = viewModel.ReasonsForDiscontinuance;
                     qc6form.PublicInterestEntity = viewModel.IsPublicInterestEntity;
-                    qc6form.PublicInterestEntityType = viewModel.PublicInterestEntityType;
+
+                    // Check if Public Interest Entity is selected
+                    if (viewModel.IsPublicInterestEntity == true)
+                    {
+                        qc6form.PublicInterestEntityType = viewModel.PublicInterestEntityType;
+                    } else
+                    {
+                        qc6form.PublicInterestEntityType = null;
+                    }
+
                     qc6form.IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable;
                     qc6form.IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable;
 
@@ -339,17 +342,33 @@ namespace PKFAuditManagement.Controllers
                     if (qc6formConclusion != null)
                     {
                         qc6formConclusion.AnySignificantRisk = viewModel.AnySignificantRisk;
-                        qc6formConclusion.SignificantRiskComment = viewModel.SignificantRiskComment;
+
+                        // Check if Significant Risk Checkbox is selected 
+                        if (viewModel.AnySignificantRisk == true)
+                        {
+                            qc6formConclusion.SignificantRiskComment = viewModel.SignificantRiskComment;
+                        } else
+                        {
+                            qc6formConclusion.SignificantRiskComment = null;
+                        }
+
                         qc6formConclusion.NewEngagementRiskRating = viewModel.NewEngagementRiskRating;
                         qc6formConclusion.NewEngagementRiskRatingReason = viewModel.NewEngagementRiskRatingReason;
                         qc6formConclusion.EngagementSubjectedTo = viewModel.EngagementSubjectedTo;
                         qc6formConclusion.SafeguardReviewerAssigned = viewModel.SafeguardReviewerAssigned;
                         qc6formConclusion.IsNewEngagementAcceptance = viewModel.IsNewEngagementAcceptance;
                         qc6formConclusion.IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled;
-                        qc6formConclusion.SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale;
+
+                        // Check if Suspicious Transaction Report Filed Checkbox is selected 
+                        if (viewModel.IsSuspiciousTransactionReportFiled == true) 
+                        {
+                            qc6formConclusion.SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale;
+                        } else
+                        {
+                            qc6formConclusion.SuspiciousTransactionReportFiledRationale = null;
+                        }
+
                         qc6formConclusion.Satisfaction = viewModel.Satisfaction;
-/*                        qc6formConclusion.PreparedBy = viewModel.ConclusionPreparedBy;
-                        qc6formConclusion.PreparedByDate = viewModel.ConclusionPreparedByDate.Value;*/
                         qc6formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
                         qc6formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
                         qc6formConclusion.EPHODApprovedByDate = viewModel.EPHODApprovedByDate;

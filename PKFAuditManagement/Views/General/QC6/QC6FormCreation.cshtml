@@ -231,7 +231,7 @@
                                                                 <label>Fee:</label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
-                                                                    <input asp-for="Services[i].Fee" class="form-control" required/>
+                                                                    <input asp-for="Services[i].Fee" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required />
                                                                 </div>
                                                             </div>
                                                             <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
@@ -253,7 +253,7 @@
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" required>
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" oninput="calculateTotalAndConcentration()" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -267,7 +267,6 @@
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
-                                            <button type="button" class="btn btn-primary mb-3" onclick="calculateTotalAndConcentration()">Calculate</button>
                                         </div>
                                     </div>
                                     <br>
@@ -596,44 +595,54 @@
                                         <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" required>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label asp-for="BusinessProfile">Company’s business profile in PDF</label>
-                                    <input asp-for="BusinessProfile" type="file" class="form-control" accept="application/pdf" />
+                                <div class="card border border-secondary p-3 mb-6">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title"> Optional Additional Documents (In PDF format) </h5>
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BusinessProfile">Company’s business profile in PDF</label>
+                                            <input asp-for="BusinessProfile" type="file" class="form-control" accept="application/pdf" />
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label asp-for="TrendSearch">TREND search in PDF</label>
+                                            <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label asp-for="GoogleSearch">Google search in PDF</label>
+                                            <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label asp-for="LexisNexisSearch">Lexis Nexis search in PDF</label>
+                                            <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
+                                        </div>
+                                        <div id="other-documents-container" class="form-group mb-3">
+                                            <label>Other Documents (option to add more)</label>
+                                            <input asp-for="OtherDocuments" type="file" class="form-control mb-2" name="OtherDocuments" accept="application/pdf" />
+                                        </div>
+                                        <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label asp-for="TrendSearch">TREND search in PDF</label>
-                                    <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="GoogleSearch">Google search in PDF</label>
-                                    <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="LexisNexisSearch">Lexis Nexis search in PDF</label>
-                                    <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
-                                </div>
-
-                                <div id="other-documents-container" class="form-group">
-                                    <label>Other docs in PDF (option to add more)</label>
-                                    <input asp-for="OtherDocuments" type="file" class="form-control mb-2" name="OtherDocuments" accept="application/pdf" />
-                                </div>
-                                <button type="button" id="add-more-docs" class="btn btn-secondary">Add More Documents</button>
-
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
+                                    <div class="col-sm-3">
+                                        <strong>Prepared by:<span class="text-danger"> *</span></strong>
+                                    </div>
+                                    <div class="col">
                                         <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="ConclusionPreparedBy" value="@Model.UserEmail" required>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="ConclusionPreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
-                                            <span class="link-text">To be approved by:</span>
+                                    <div class="col-sm-3">
+                                        <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
+                                            <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>
+                                    </div>
+                                    <div class="col">
                                         <select asp-for="EPHODApprovedBy" class="form-control">
                                             @foreach (var email in Model.AdminEmails)
                                             {
@@ -641,16 +650,17 @@
                                             }
                                         </select>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
-                                            <span class="link-text">To be approved by:</span>
+                                    <div class="col-sm-3">
+                                        <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
+                                            <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>
+                                    </div>
+                                    <div class="col">
                                         <select asp-for="MPHODQMPApprovedBy" class="form-control">
                                             @foreach (var email in Model.AdminEmails)
                                             {
@@ -658,8 +668,7 @@
                                             }
                                         </select>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" required>
                                     </div>
                                 </div>

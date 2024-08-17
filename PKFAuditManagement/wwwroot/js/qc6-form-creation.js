@@ -9,6 +9,11 @@ $(document).on("blur", "#auditFee, #EstimatedFee, #BudgetedTimeCost, input[name^
     }
 });
 
+// Function to round down to two decimal places
+function convertToMoney(val) {
+    return (Math.floor(val * 100).toFixed(0) / 100).toFixed(2);
+}
+
 var tags = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"];
 $("#autocomplete").autocomplete({
     source: function (request, response) {
@@ -27,11 +32,6 @@ document.getElementById("add-more-docs").addEventListener("click", function () {
     input.classList.add("form-control", "mb-2");
     container.appendChild(input);
 });
-
-// Function to round down to two decimal places
-function convertToMoney(val) {
-    return (Math.floor(val * 100).toFixed(0) / 100).toFixed(2);
-}
 
 // Function to add a new service field
 function addService() {
@@ -57,7 +57,7 @@ function addService() {
                 <label>Fee:</label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control" required>
+                    <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
                 </div>
             </div>
             <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex}" style="display: none;">
@@ -148,21 +148,25 @@ function toggleSubForm(subFormIndex) {
 
 // Function to calculate the total fee and fee concentration
 function calculateTotalAndConcentration() {
-    // Get all fee input elements
-    const fees = document.querySelectorAll('input[name^="Services["][name$="].Fee"]');
+    // Get all fee input elements with class 'fee-input'
+    const fees = document.querySelectorAll('.fee-input');
     let totalFee = 0;
+
     // Calculate the total fee by summing up all fee values
-    for (let fee of fees) {
+    fees.forEach(fee => {
         totalFee += parseFloat(fee.value) || 0;
-    }
+    });
+
     // Set the total fee in the corresponding input field
     document.getElementById('grandTotal').value = totalFee.toFixed(2);
     document.getElementById('grandTotalHidden').value = totalFee.toFixed(2);
 
     // Get the audit fee value
     const auditFee = parseFloat(document.getElementById('auditFee').value) || 0;
-    // Calculate the fee concentration
-    const feeConcentration = totalFee / auditFee * 100;
+
+    // Calculate the fee concentration if audit fee is greater than 0
+    let feeConcentration = auditFee > 0 ? (totalFee / auditFee) * 100 : 0;
+
     // Set the fee concentration in the corresponding input field
     document.getElementById('feeConcentration').value = feeConcentration.toFixed(2);
     document.getElementById('feeConcentrationHidden').value = feeConcentration.toFixed(2);
@@ -189,6 +193,17 @@ document.getElementById('engagementType').addEventListener('change', function ()
         q3No.disabled = false;
         q4Yes.disabled = false;
         q4No.disabled = false;
+
+        // Reset selections to No
+        q1Yes.checked = false;
+        q1No.checked = true;
+        q2Yes.checked = false;
+        q2No.checked = true;
+        q3Yes.checked = false;
+        q3No.checked = true;
+        q4Yes.checked = false;
+        q4No.checked = true;
+
     } else if (this.value === 'Non-Audit') {
 
         // Clear selections for Q2 to Q4
