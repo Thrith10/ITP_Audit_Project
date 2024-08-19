@@ -73,20 +73,21 @@
                                         <label class="col-sm-2 col-form-label">Prior year’s fee<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="PriorYearFee" placeholder="0.00" id="comp1" required>
+                                            <input type="number" class="form-control" asp-for="PriorYearFee" placeholder="0.00" step="0.01" id="comp1" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Time Costs<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="TimeCosts" placeholder="0.00" id="timeCosts" required>
+                                            <input type="number" class="form-control" asp-for="TimeCosts" placeholder="0.00" step="0.01" id="timeCosts" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Prior year’s recovery rate (Net fee / time costs)<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="number" class="form-control" asp-for="PriorYearRecoveryRate" placeholder=" 0.00" id="PriorYearRecoveryRate" disabled>
+                                            <input type="number" class="form-control" placeholder=" 0.00" id="PriorYearRecoveryRate" disabled>
+                                            <input type="hidden" asp-for="PriorYearRecoveryRate" id="PriorYearRecoveryRateHidden">
                                             <span class="input-group-text">%</span>
                                         </div>
                                     </div>
@@ -112,7 +113,7 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any Suspicious Transaction Report filed with CAD in prior year(s)?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" asp-for="AnySuspiciousTransactionReportFiled">
+                                            <input class="form-check-input" type="checkbox" id="anySuspiciousTransactionReportFiled" onchange="toggleConSTR()" asp-for="AnySuspiciousTransactionReportFiled">
                                         </div>
                                     </div>
                                     <div class="row mb-3" id="suspiciousTransactionReportPriorYearRow" style="display: none;">
@@ -137,20 +138,20 @@
                                         <label class="col-sm-2 col-form-label">Proposed fee for current year<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" placeholder="0.00">
+                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" id="proposedFeeCurrentYear" step="0.01" placeholder="0.00">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" id="budgetedTimeCost">
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" step="0.01" id="budgetedTimeCost">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.
                                             And to disclose reasons for continuance if the recovery rate is below 30%.">
-                                            <span class="link-text">Proposed recovery rate for current year</span>
+                                            <span class="link-text">Proposed recovery rate for current year (Proposed fee for current year / Budgeted Time Cost)</span>
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <input type="number" class="form-control" disabled id="proposedRecoveryRateCurrentYear" placeholder="0.00">
@@ -180,6 +181,7 @@
                                         <div class="card-body">
                                             <h5 class="card-title"> Non-audit fees charged for this client (tax, accounting, secretarial, XBRL etc) </h5>
                                             <div class="row mb-3 service input-field" id="services">
+                                                <div id="removedServicesContainer"></div>
                                                 @for (int i = 0; i < Model.Services.Count; i++)
                                                 {
                                                     <div class="card border border-secondary p-3 mb-3">
@@ -187,6 +189,7 @@
                                                             <div class="col-sm-12">
                                                                 <h6 class="card-title">Service @(i + 1)</h6>
                                                             </div>
+                                                            <input type="hidden" asp-for="Services[i].QC6FormFeeDetailID" />
                                                             <div class="col-sm-6">
                                                                 <label>Nature of Service:</label>
                                                                 <select class="form-control" asp-for="Services[i].NatureOfService" onchange="showOtherServiceInput(this)">
@@ -198,33 +201,48 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-sm-6">
-                                                                <label>Fee:</label>
+                                                                <label>Fee:<span class="text-danger"> *</span></label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
-                                                                    <input asp-for="Services[i].Fee" class="form-control" />
+                                                                    <input asp-for="Services[i].Fee" class="form-control fee-input" oninput="calculateTotalAndConcentration()" />
                                                                 </div>
                                                             </div>
                                                             @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
                                                             {
-                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i">
-                                                                    <label>Name of Non-Audit Service</label>
+                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: block;">
+                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
+                                                                    <input type="text" class="form-control" asp-for="Services[i].OtherService" required>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
+                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
                                                                     <input type="text" class="form-control" asp-for="Services[i].OtherService">
+                                                                </div>
+                                                            }
+                                                            @if (i != 0)
+                                                            {
+                                                                <div class="col-sm-12 mt-3">
+                                                                    <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
                                                                 </div>
                                                             }
                                                         </div>
                                                     </div>
                                                 }
                                             </div>
+                                            <button type="button" class="btn btn-primary mb-3" id="addService">Add New Service</button>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="grandTotal" asp-for="GrandTotal" required>
+                                                    <input type="number" class="form-control" id="grandTotal" disabled>
+                                                    <input type="hidden" class="form-control" id="grandTotalHidden" asp-for="GrandTotal">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" required>
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" oninput="calculateTotalAndConcentration()" required>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -233,7 +251,8 @@
                                                     <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration" required>
+                                                    <input type="number" class="form-control" id="feeConcentration" disabled>
+                                                    <input type="hidden" id="feeConcentrationHidden" asp-for="FeeConcentration">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
@@ -512,7 +531,7 @@
                                         <br>
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input" type="checkbox" id="risksAssociatedCheckbox" onchange="toggleRisksAssociated()" asp-for="AnyRiskAssociated">
+                                        <input class="form-check-input" type="checkbox" id="risksAssociatedCheckbox" onchange="toggleSignificantRisk()" asp-for="AnyRiskAssociated">
                                     </div>
                                 </div>
                                 <div id="risksAssociatedRow" style="display:none;">
@@ -558,7 +577,7 @@
                                         <i><u>Note</u><br>If yes, please set out the rationale and basis for STR in a separate memo. If in doubt, please discuss with the firm’s Money Laundering Reporting Officer (MLRO) and if necessary, seek advice from legal counsel after discussing with Managing Partner and /or Quality Management Partner.</i><br>
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input" type="checkbox" id="isSuspiciousTransactionReportFiled" onchange="toggleSuspiciousTransactionReport()" asp-for="IsSuspiciousTransactionReportFiled">
+                                        <input class="form-check-input" type="checkbox" id="isSuspiciousTransactionReportFiled" onchange="toggleSTR()" asp-for="IsSuspiciousTransactionReportFiled">
                                     </div>
                                 </div>
                                 <div class="row mb-3" id="strRationale" style="display:none;">
@@ -579,20 +598,23 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
+                                    <div class="col-sm-2">
+                                        <label for="inputPassword3">Prepared by:<span class="text-danger"> *</span></label>
+                                    </div>
+                                    <div class="col">
                                         <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="EMPreparedBy" disabled>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC7 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
+                                    <div class="col-sm-2">
+                                        <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC7 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">Approval by:<span class="text-danger"> *</span></span>
                                         </label>
+                                    </div>
+                                    <div class="col">
                                         <select asp-for="EPHODApprovedBy" class="form-control" value="TEST">
                                             @foreach (var email in Model.AdminEmails)
                                             {
@@ -600,16 +622,17 @@
                                             }
                                         </select>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC7 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
+                                    <div class="col-sm-2">
+                                        <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC7 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">Final Approval by:<span class="text-danger"> *</span></span>
                                         </label>
+                                    </div>
+                                    <div class="col">
                                         <select asp-for="MPHODQMPApprovedBy" class="form-control">
                                             @foreach (var email in Model.AdminEmails)
                                             {
@@ -617,8 +640,7 @@
                                             }
                                         </select>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate">
                                     </div>
                                 </div>

@@ -54,14 +54,14 @@ function addService() {
                 </select>
             </div>
             <div class="col-sm-6">
-                <label>Fee:</label>
+                <label>Fee:<span class="text-danger"> *</span></label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
                 </div>
             </div>
             <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex}" style="display: none;">
-                <label>Name of Non-Audit Service</label>
+                <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
                 <input type="text" name="Services[${lastServiceIndex}].OtherService" class="form-control">
             </div>
             <div class="col-sm-12 mt-3">
@@ -75,16 +75,17 @@ function addService() {
 
 // Function to display additional text field based on service field selection
 function showOtherServiceInput(selectElement) {
-    console.log(selectElement);
     const selectedValue = selectElement.value;
     const index = selectElement.name.split('[')[1].split(']')[0];
     const otherServiceInput = document.getElementById(`otherServiceInput-${index}`);
-    console.log(otherServiceInput);
+    const inputField = otherServiceInput.querySelector('input');
     if (otherServiceInput) {
         if (selectedValue === 'Other Non-Audit Services') {
             otherServiceInput.style.display = 'block';
+            inputField.setAttribute('required', 'required'); // Add required attribute
         } else {
             otherServiceInput.style.display = 'none';
+            inputField.removeAttribute('required'); // Remove required attribute
         }
     }
 }
@@ -124,6 +125,8 @@ function removeService(button) {
             input.id = `otherServiceInput-${i}`;
         }
     }
+
+    calculateTotalAndConcentration();
 }
 
 // Function for disabling all textareas and input on "Not Applicable" selection

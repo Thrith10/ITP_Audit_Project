@@ -91,14 +91,14 @@
                                         <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" step="0.01" placeholder="0.00" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" step="0.01" placeholder="0.00" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -183,6 +183,8 @@
                                                 </div>
                                             </div>
                                             <div class="row mb-3 service input-field" id="services">
+                                                <!-- Hidden inputs for removed services will be added here -->
+                                                <div id="removedServicesContainer"></div>
                                                 @for (int i = 0; i < Model.Services.Count; i++)
                                                 {
                                                     <div class="card border border-secondary p-3 mb-3">
@@ -190,6 +192,7 @@
                                                             <div class="col-sm-12">
                                                                 <h6 class="card-title">Service @(i + 1)</h6>
                                                             </div>
+                                                            <input type="hidden" asp-for="Services[i].QC6FormFeeDetailID" />
                                                             <div class="col-sm-6">
                                                                 <label>Nature of Service:</label>
                                                                 <select class="form-control" asp-for="Services[i].NatureOfService" onchange="showOtherServiceInput(this)">
@@ -201,7 +204,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-sm-6">
-                                                                <label>Fee:</label>
+                                                                <label>Fee:<span class="text-danger"> *</span></label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
                                                                     <input asp-for="Services[i].Fee" class="form-control fee-input" oninput="calculateTotalAndConcentration()" />
@@ -209,15 +212,29 @@
                                                             </div>
                                                             @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
                                                             {
-                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i">
-                                                                    <label>Name of Non-Audit Service</label>
+                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: block;">
+                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
+                                                                    <input type="text" class="form-control" asp-for="Services[i].OtherService" required>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
+                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
                                                                     <input type="text" class="form-control" asp-for="Services[i].OtherService">
+                                                                </div>
+                                                            }
+                                                            @if (i != 0)
+                                                            {
+                                                                <div class="col-sm-12 mt-3">
+                                                                    <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
                                                                 </div>
                                                             }
                                                         </div>
                                                     </div>
                                                 }
                                             </div>
+                                            <button type="button" class="btn btn-primary mb-3" id="addService">Add New Service</button>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
                                                 <div class="col-sm-10 d-flex align-items-center">
@@ -468,37 +485,37 @@
                                                 <tbody>
                                                 @foreach (var objective in subForm.Objectives)
                                                 {
-                                                            <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives.Index" value="@objective.QC6FormObjectiveID" />
+                                                    <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives.Index" value="@objective.QC6FormObjectiveID" />
 
-                                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                                <td colspan="4"><b>@objective.Objective</b></td>
-                                                            </tr>
+                                                    <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                        <td colspan="4"><b>@objective.Objective</b></td>
+                                                    </tr>
                                                     @foreach (var testDescription in objective.TestDescriptions)
                                                     {
-                                                                    <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC6FormTestDescriptionID" />
-                                                                    <tr class="text-zinc-700 dark:text-zinc-400">
-                                                                        <td>
-                                                                            <div>
-                                                                                <p>@Html.Raw(@testDescription.Description)</p>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                            <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignBy" value="@testDescription.SignBy"/>
-                                                                        </td>
-                                                                        <td>
-                                                                            <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignDate"/>
-                                                                        </td>
-                                                                        <td>
-                                                                             <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment">@testDescription.Comment</textarea>
-                                                                        </td>
-                                                                    </tr>
+                                                        <input type="hidden" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC6FormTestDescriptionID" />
+                                                        <tr class="text-zinc-700 dark:text-zinc-400">
+                                                            <td>
+                                                                <div>
+                                                                    <p>@Html.Raw(@testDescription.Description)</p>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" placeholder="Signed By" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignBy" value="@testDescription.SignBy"/>
+                                                            </td>
+                                                            <td>
+                                                                <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].SignDate"/>
+                                                            </td>
+                                                            <td>
+                                                                    <textarea class="form-control" rows="3" placeholder="Ref/Comment" name="SubForms[@subForm.QC6SubFormID].Objectives[@objective.QC6FormObjectiveID].TestDescriptions[@testDescription.QC6FormTestDescriptionID].Comment">@testDescription.Comment</textarea>
+                                                            </td>
+                                                        </tr>
                                                     }
                                                 }
                                                 @if (subFormIndex == 0)
                                                 {
-                                                            <tr class="font-weight-bold" style="background-color: #f8f9fa;">
-                                                                <td colspan="4"><b>Note:</b> For PEPs that are linked to Peoples’ Action Party in Singapore and PEPs where their wealth is known publicly, there is no need to establish their source of funds for their operations.  </td>
-                                                            </tr>
+                                                    <tr class="font-weight-bold" style="background-color: #f8f9fa;">
+                                                        <td colspan="4"><b>Note:</b> For PEPs that are linked to Peoples’ Action Party in Singapore and PEPs where their wealth is known publicly, there is no need to establish their source of funds for their operations.  </td>
+                                                    </tr>
                                                 }
                                                 </tbody>
                                             </table>
@@ -587,7 +604,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                     </div>
                                     <div class="col">
@@ -598,7 +615,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>
@@ -616,7 +633,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>

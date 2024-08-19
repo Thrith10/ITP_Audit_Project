@@ -37,7 +37,7 @@ $("#autocomplete").autocomplete({
 document.getElementById('addService').addEventListener('click', addService);
 
 // Ensure input values are formatted to two decimal places on blur
-$(document).on("blur", "input[name^='Services'][name$='.Fee']", function () {
+$(document).on("blur", "#proposedFeeCurrentYear, #comp1, #timeCosts, #priorYearRate, #PriorYearRecoveryRateHidden, #ProposedFee, #budgetedTimeCost, #proposedRecoveryRateCurrentYear, #proposedRecoveryRateCurrentYearHidden, #auditFee, input[name^='Services'][name$='.Fee']", function () {
     var value = parseFloat($(this).val());
     if (!isNaN(value)) {
         $(this).val(convertToMoney(value));
@@ -70,14 +70,14 @@ function addService() {
                 </select>
             </div>
             <div class="col-sm-6">
-                <label>Fee:</label>
+                <label>Fee:<span class="text-danger"> *</span></label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control" required>
+                    <input type="number" name="Services[${lastServiceIndex}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
                 </div>
             </div>
             <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex}" style="display: none;">
-                <label>Name of Non-Audit Service</label>
+                <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
                 <input type="text" name="Services[${lastServiceIndex}].OtherService" class="form-control">
             </div>
             <div class="col-sm-12 mt-3">
@@ -91,16 +91,17 @@ function addService() {
 
 // Function to display additional text field based on service field selection
 function showOtherServiceInput(selectElement) {
-    console.log(selectElement);
     const selectedValue = selectElement.value;
     const index = selectElement.name.split('[')[1].split(']')[0];
     const otherServiceInput = document.getElementById(`otherServiceInput-${index}`);
-    console.log(otherServiceInput);
+    const inputField = otherServiceInput.querySelector('input');
     if (otherServiceInput) {
         if (selectedValue === 'Other Non-Audit Services') {
             otherServiceInput.style.display = 'block';
+            inputField.setAttribute('required', 'required'); // Add required attribute
         } else {
             otherServiceInput.style.display = 'none';
+            inputField.removeAttribute('required'); // Remove required attribute
         }
     }
 }
@@ -140,6 +141,8 @@ function removeService(button) {
             input.id = `otherServiceInput-${i}`;
         }
     }
+
+    calculateTotalAndConcentration();
 }
 
 // Function to calculate the total fee and fee concentration
@@ -186,6 +189,14 @@ function toggleSubForm(subFormIndex) {
 }
 
 $(document).ready(function () {
+    toggleRiskLevel();
+    toggleSectionBResult();
+    toggleRisksAssociated();
+    toggleSuspiciousTransactionReport();
+    toggleSuspiciousTransactionReportPriorYear();
+    calculateTotalAndConcentration();
+
+
     // Function to update the Prior year’s recovery rate
     function updatePriorYearRecoveryRate() {
         var comp1 = parseFloat($("#comp1").val());
@@ -193,20 +204,22 @@ $(document).ready(function () {
 
         if (!isNaN(comp1) && !isNaN(timeCosts) && timeCosts !== 0) {
             var priorYearRecoveryRate = (comp1 / timeCosts) * 100;
-            $("#PriorYearRecoveryRate").val(priorYearRecoveryRate);
+            priorYearRecoveryRate = priorYearRecoveryRate.toFixed(2);
+            $("#priorYearRate").val(priorYearRecoveryRate);
             $("#PriorYearRecoveryRateHidden").val(priorYearRecoveryRate);
         } else {
-            $("#PriorYearRecoveryRate").val("");
+            $("#priorYearRate").val("");
         }
     }
 
     // Function to update the Proposed Recovery Rate
     function updateProposedRecoveryRate() {
-        var comp1 = parseFloat($("#comp1").val());
+        var comp1 = parseFloat($("#proposedFeeCurrentYear").val());
         var budgetedTimeCost = parseFloat($("#budgetedTimeCost").val());
 
         if (!isNaN(comp1) && !isNaN(budgetedTimeCost) && budgetedTimeCost !== 0) {
             var proposedRecoveryRateCurrentYear = (comp1 / budgetedTimeCost) * 100;
+            proposedRecoveryRateCurrentYear = proposedRecoveryRateCurrentYear.toFixed(2);
             $("#proposedRecoveryRateCurrentYear").val(proposedRecoveryRateCurrentYear);
             $("#proposedRecoveryRateCurrentYearHidden").val(proposedRecoveryRateCurrentYear);
         } else {
@@ -245,7 +258,7 @@ $(document).ready(function () {
     updatePriorYearRecoveryRate();
 
     // Update the Prior year’s recovery rate when comp1 (prior year's fee) or time costs changes
-    $("#comp1, #budgetedTimeCost").on("input", function () {
+    $("#proposedFeeCurrentYear, #budgetedTimeCost").on("input", function () {
         updateProposedRecoveryRate();
     });
 
@@ -346,6 +359,17 @@ document.getElementById('engagementType').addEventListener('change', function ()
         q3No.disabled = false;
         q4Yes.disabled = false;
         q4No.disabled = false;
+
+        // Reset selections to No
+        q1Yes.checked = false;
+        q1No.checked = true;
+        q2Yes.checked = false;
+        q2No.checked = true;
+        q3Yes.checked = false;
+        q3No.checked = true;
+        q4Yes.checked = false;
+        q4No.checked = true;
+
     } else if (this.value === 'Non-Audit') {
 
         // Clear selections for Q2 to Q4
@@ -369,6 +393,27 @@ document.getElementById('engagementType').addEventListener('change', function ()
         q4No.disabled = true;
     }
 });
+
+// Function to removing all values for Q1-Q4 for Section B of TNA Assessment
+function toggleSectionBResult() {
+    var engagementType = $('#engagementType').val();
+
+    if (engagementType === "Non-Audit") {
+        $('#q1Yes').prop('checked', false);
+        $('#q1No').prop('checked', false);
+        $('#q2Yes').prop('checked', false);
+        $('#q2No').prop('checked', false);
+        $('#q3Yes').prop('checked', false);
+        $('#q3No').prop('checked', false);
+        $('#q4Yes').prop('checked', false);
+        $('#q4No').prop('checked', false);
+
+        $('input[name="TNATNEAssessment.SectionB.Q1"]').prop('disabled', true);
+        $('input[name="TNATNEAssessment.SectionB.Q2"]').prop('disabled', true);
+        $('input[name="TNATNEAssessment.SectionB.Q3"]').prop('disabled', true);
+        $('input[name="TNATNEAssessment.SectionB.Q4"]').prop('disabled', true);
+    }
+}
 
 // Display NAS modal
 document.getElementById('retrieveFeeDetailsButton').addEventListener('click', function (e) {

@@ -4,6 +4,14 @@
     toggleSignificantRisk();
     toggleSTR();
 
+    // Find all service select elements
+    const serviceSelects = document.querySelectorAll('select[asp-for$="NatureOfService"]');
+
+    // Loop through each select element and apply the logic
+    serviceSelects.forEach(selectElement => {
+        showOtherServiceInput(selectElement);
+    });
+
     // Get the value from the hidden field
     const grandTotalHiddenValue = document.getElementById('grandTotalHidden').value;
 
@@ -61,6 +69,130 @@
     // Initial update of Budgeted fee recovery rate
     updateBudgetedFeeRecoveryRate();
 });
+
+// Add event listener to the "Add Service" button
+document.getElementById('addService').addEventListener('click', addService);
+
+// Function to add a new service field
+function addService() {
+    const servicesContainer = document.getElementById('services');
+    const lastServiceIndex = servicesContainer.children.length;
+
+    const serviceCard = document.createElement('div');
+    serviceCard.className = 'card border border-secondary p-3 mb-3';
+    serviceCard.innerHTML = `
+        <div class="row mb-3 service input-field card-body">
+            <h6 class="card-title">Service ${lastServiceIndex}</h6>
+            <input type="hidden" asp-for="Services[${lastServiceIndex - 1}].QC6FormFeeDetailID" />
+            <div class="col-sm-6">
+                <label>Nature of Service:</label>
+                <select class="form-control" asp-for="Services[${lastServiceIndex - 1}].NatureOfService" name="Services[${lastServiceIndex - 1}].NatureOfService" onchange="showOtherServiceInput(this)">
+                    <option value="Tax Services">Tax Services</option>
+                    <option value="Accounting">Accounting</option>
+                    <option value="Payroll">Payroll</option>
+                    <option value="Secretarial Services">Secretarial Services</option>
+                    <option value="Other Non-Audit Services">Other Non-Audit Services</option>
+                </select>
+            </div>
+            <div class="col-sm-6">
+                <label>Fee:<span class="text-danger"> *</span></label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" name="Services[${lastServiceIndex - 1}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
+                </div>
+            </div>
+            <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex - 1}" style="display: none;">
+                <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
+                <input type="text" name="Services[${lastServiceIndex - 1}].OtherService" class="form-control">
+            </div>
+            <div class="col-sm-12 mt-3">
+                <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
+            </div>
+        </div>
+    `;
+
+    servicesContainer.appendChild(serviceCard);
+}
+
+// Function for removing service
+function removeService(button) {
+    // Find the parent card element
+    const card = button.closest('.card');
+
+    // Get the service ID input value before removing the card
+    const serviceIdInput = card.querySelector('input[name$="QC6FormFeeDetailID"]');
+
+    if (serviceIdInput) {
+        // Create a hidden input for the removed service ID
+        const removedServicesContainer = document.getElementById('removedServicesContainer');
+        const removedServiceInput = document.createElement('input');
+        removedServiceInput.type = 'hidden';
+        removedServiceInput.name = 'RemovedServices[]';
+        removedServiceInput.value = serviceIdInput.value; // Pass the service ID here
+
+        // Append the hidden input to the container
+        removedServicesContainer.appendChild(removedServiceInput);
+    }
+
+    // Remove the card element
+    card.remove();
+
+    // Update indexes of remaining services
+    const servicesContainer = document.getElementById('services');
+    const serviceCards = servicesContainer.getElementsByClassName('card');
+    for (let i = 0; i < serviceCards.length; i++) {
+        const card = serviceCards[i];
+        const titleElement = card.querySelector('.card-title');
+        titleElement.textContent = `Service ${i + 1}`;
+
+        const inputs = serviceCards[i].getElementsByTagName('input');
+        for (let j = 0; j < inputs.length; j++) {
+            const name = inputs[j].getAttribute('name');
+            const newName = name.replace(/\[\d+\]/g, `[${i}]`);
+            inputs[j].setAttribute('name', newName);
+        }
+
+        const selects = serviceCards[i].getElementsByTagName('select');
+        for (let j = 0; j < selects.length; j++) {
+            const name = selects[j].getAttribute('name');
+            const newName = name.replace(/\[\d+\]/g, `[${i}]`);
+            selects[j].setAttribute('name', newName);
+        }
+
+        const otherServiceInputs = serviceCards[i].querySelectorAll('[id^="otherServiceInput-"]');
+        for (let j = 0; j < otherServiceInputs.length; j++) {
+            const input = otherServiceInputs[j];
+            input.id = `otherServiceInput-${i}`;
+        }
+    }
+
+    // Recalculate the total fee after removal
+    calculateTotalAndConcentration();
+}
+
+// Function to display additional text field based on service field selection
+function showOtherServiceInput(selectElement) {
+    const selectedValue = selectElement.value;
+
+    // Extract the index from the element's name (e.g., "Services[0].NatureOfService")
+    const index = selectElement.name.split('[')[1].split(']')[0];
+
+    // Find the "Other Service" input field associated with this select element
+    const otherServiceInput = document.getElementById(`otherServiceInput-${index}`);
+
+    const inputField = otherServiceInput.querySelector('input');
+
+    if (otherServiceInput) {
+        // Show or hide the "Other Service" input field based on the selected value
+        if (selectedValue === 'Other Non-Audit Services') {
+            otherServiceInput.style.display = 'block';
+            inputField.setAttribute('required', 'required'); // Add required attribute
+        } else {
+            otherServiceInput.style.display = 'none';
+            inputField.removeAttribute('required'); // Remove required attribute
+        }
+    }
+}
 
 // Ensure input values are formatted to two decimal places on blur
 $(document).on("blur", "#auditFee, #EstimatedFee, #BudgetedTimeCost, input[name^='Services'][name$='.Fee']", function () {

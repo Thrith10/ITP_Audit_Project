@@ -15,6 +15,7 @@ using PKFAuditManagement.ViewModels;
 using System.Data;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Primitives;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -192,6 +193,7 @@ namespace PKFAuditManagement.Controllers
                 {
                     viewModel.Services.Add(new FeeDetailViewModel
                     {
+                        QC6FormFeeDetailID = feeDetail.QC6FormFeeDetailID,
                         NatureOfService = feeDetail.NatureOfService,
                         OtherService = feeDetail.OtherService,
                         Fee = feeDetail.Fee
@@ -378,6 +380,11 @@ namespace PKFAuditManagement.Controllers
                     // Update QC6FormTest entities
                     foreach (var subForm in viewModel.SubForms)
                     {
+                        // Check if the subform is applicable
+                        bool isApplicable = (subForm.QC6SubFormID == 1) ||
+                                            (subForm.QC6SubFormID == 2 && !viewModel.SubForm1NotApplicable) ||
+                                            (subForm.QC6SubFormID == 3 && !viewModel.SubForm2NotApplicable);
+
                         foreach (var objective in subForm.Objectives)
                         {
                             foreach (var testDescription in objective.TestDescriptions)
@@ -385,14 +392,26 @@ namespace PKFAuditManagement.Controllers
                                 var qc6formTest = await _context.QC6FormTests
                                     .FirstOrDefaultAsync(t => t.QC6FormID == qc6form.QC6FormID && t.QC6FormTestDescriptionID == testDescription.QC6FormTestDescriptionID);
 
-                                // Populate the TestDescriptions with posted data
-                                testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignBy"];
-                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+                                if (isApplicable)
                                 {
-                                    // Use the parsed date
-                                    testDescription.SignDate = date;
+                                    // Populate the TestDescriptions with posted data
+                                    testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignBy"];
+
+                                    if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+                                    {
+                                        // Use the parsed date
+                                        testDescription.SignDate = date;
+                                    }
+
+                                    testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Comment"];
                                 }
-                                testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Comment"];
+                                else
+                                {
+                                    // SubForm is not applicable, set fields to null or minimum values
+                                    testDescription.SignBy = null;
+                                    testDescription.SignDate = DateTime.MinValue; // or use nullable DateTime and set to null if appropriate
+                                    testDescription.Comment = null;
+                                }
 
                                 if (qc6formTest != null)
                                 {
@@ -420,40 +439,64 @@ namespace PKFAuditManagement.Controllers
                     foreach (var service in viewModel.Services)
                     {
                         var qc6formFeeDetail = await _context.QC6FormFeeDetails
-                            .FirstOrDefaultAsync(f => f.QC6FormID == qc6form.QC6FormID && f.NatureOfService == service.NatureOfService);
+                            .FirstOrDefaultAsync(f => f.QC6FormFeeDetailID == service.QC6FormFeeDetailID);
 
                         if (qc6formFeeDetail != null)
                         {
                             qc6formFeeDetail.NatureOfService = service.NatureOfService;
+
+                            // Check if selection is Other Non-Audit Services
+                            if (service.NatureOfService == "Other Non-Audit Services")
+                            {
+                                qc6formFeeDetail.OtherService = service.OtherService;
+                            } else
+                            {
+                                qc6formFeeDetail.OtherService = null;
+                            }
+
                             qc6formFeeDetail.Fee = service.Fee.Value;
                         }
                         else
                         {
+                            // Check if selection is Other Non-Audit Services
+                            if (service.NatureOfService != "Other Non-Audit Services")
+                            {
+                                service.OtherService = null;
+                            }
+
                             qc6formFeeDetail = new QC6FormFeeDetail
                             {
                                 QC6FormID = qc6form.QC6FormID,
                                 NatureOfService = service.NatureOfService,
+                                OtherService = service.OtherService,
                                 Fee = service.Fee.Value
                             };
                             _context.Add(qc6formFeeDetail);
                         }
                     }
-/*
-                    // Process the submitted data
-                    foreach (var service in viewModel.Services)
-                    {
-                        // Save QC6FormFeeDetail
-                        var qC6FormFeeDetail = new QC6FormFeeDetail
-                        {
-                            QC6FormID = qc6formId,
-                            NatureOfService = service.NatureOfService,
-                            Fee = service.Fee.Value,
-                            OtherService = service.OtherService,
-                        };
 
-                        // Add qC6FormFeeDetail to the context and save changes
-                        _context.Add(qC6FormFeeDetail);
-                    }*/
+                    // Retrieve and process removed services
+                    var removedServices = Request.Form["RemovedServices[]"];
+                    var removedServiceIds = removedServices
+                        .Select(id => int.TryParse(id, out var parsedId) ? parsedId : (int?)null)
+                        .Where(id => id.HasValue)
+                        .Select(id => id.Value)
+                        .ToList();
+
+                    if (removedServiceIds.Any())
+                    {
+                        foreach (var id in removedServiceIds)
+                        {
+                            var serviceToRemove = await _context.QC6FormFeeDetails
+                                .FirstOrDefaultAsync(f => f.QC6FormFeeDetailID == id);
+
+                            if (serviceToRemove != null)
+                            {
+                                _context.QC6FormFeeDetails.Remove(serviceToRemove);
+                            }
+                        }
+                        await _context.SaveChangesAsync();
+                    }
 
                     // Save all changes
                     await _context.SaveChangesAsync();

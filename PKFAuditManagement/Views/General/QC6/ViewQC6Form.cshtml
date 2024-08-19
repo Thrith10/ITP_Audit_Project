@@ -203,7 +203,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-sm-6">
-                                                                <label>Fee:</label>
+                                                                <label>Fee:<span class="text-danger"> *</span></label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
                                                                     <input asp-for="Services[i].Fee" class="form-control" disabled/>
@@ -212,7 +212,7 @@
                                                             @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
                                                             {
                                                                 <div class="col-sm-12 mt-3" id="otherServiceInput-@i">
-                                                                    <label>Name of Non-Audit Service</label>
+                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
                                                                     <input type="text" class="form-control" asp-for="Services[i].OtherService" disabled>
                                                                 </div>
                                                             }
@@ -584,7 +584,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                     </div>
                                     <div class="col">
@@ -595,7 +595,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>
@@ -608,7 +608,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>

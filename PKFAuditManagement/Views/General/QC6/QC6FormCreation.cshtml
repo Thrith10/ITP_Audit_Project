@@ -118,14 +118,14 @@
                                         <label class="col-sm-2 col-form-label">Estimate of fee for this new prospective client<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="EstimatedFee" id="EstimatedFee" step="0.01" placeholder="0.00" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" placeholder="0.00" required>
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" id="BudgetedTimeCost" step="0.01" placeholder="0.00" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -228,14 +228,14 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-sm-6">
-                                                                <label>Fee:</label>
+                                                                <label>Fee:<span class="text-danger"> *</span></label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
                                                                     <input asp-for="Services[i].Fee" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required />
                                                                 </div>
                                                             </div>
                                                             <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
-                                                                <label>Name of Non-Audit Service</label>
+                                                                <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
                                                                 <input type="text" name="Services[@i].OtherService" class="form-control">
                                                             </div>
                                                         </div>
@@ -626,7 +626,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                     </div>
                                     <div class="col">
@@ -637,7 +637,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC6 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>
@@ -655,7 +655,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-2">
                                         <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC6 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">To be approved by:<span class="text-danger"> *</span></span>
                                         </label>

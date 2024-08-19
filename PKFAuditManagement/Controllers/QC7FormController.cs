@@ -243,6 +243,7 @@ namespace PKFAuditManagement.Controllers
                 {
                     viewModel.Services.Add(new FeeDetailViewModel
                     {
+                        QC6FormFeeDetailID = feeDetail.QC7FormFeeDetailID,
                         NatureOfService = feeDetail.NatureOfService,
                         OtherService = feeDetail.OtherService,
                         Fee = feeDetail.Fee
@@ -304,12 +305,6 @@ namespace PKFAuditManagement.Controllers
                     // Get the current user's ID
                     var userId = user?.Id;
 
-                    // Re-validate form inputs for QC7 Form
-                    if (viewModel.IsPublicInterestEntity == true)
-                    {
-                        viewModel.PublicInterestEntityType = null;
-                    }
-
                     // Retrieve the existing QC7 form from the database
                     var qc7form = await _context.QC7Forms.FindAsync(int.Parse(viewModel.QC7FormID));
 
@@ -323,12 +318,24 @@ namespace PKFAuditManagement.Controllers
                     qc7form.ReviewedByDate = viewModel.ReviewedByDate;
                     qc7form.PriorYearFee = viewModel.PriorYearFee.Value;
                     qc7form.TimeCosts = viewModel.TimeCosts.Value;
-                    qc7form.PriorYearRecoveryRate = 500m;
+                    qc7form.PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value;
                     qc7form.AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees;
                     qc7form.TypeOfClientActivities = viewModel.TypeOfClientActivities;
                     qc7form.RiskRatingPriorYear = viewModel.RiskRatingPriorYear;
                     qc7form.AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled;
-                    qc7form.SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment;
+                    qc7form.GrandTotal = viewModel.GrandTotal.Value;
+                    qc7form.AuditFee = viewModel.AuditFee.Value;
+
+
+                    // Set to null if not selected
+                    if (qc7form.AnySuspiciousTransactionReportFiled == false)
+                    {
+                        qc7form.SuspiciousTransactionReportFiledComment = null;
+                    } else
+                    {
+                        qc7form.SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment;
+                    }
+
                     qc7form.SafeguardReviewerName = viewModel.SafeguardReviewerName;
                     qc7form.AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees;
                     qc7form.FeeConcentration = viewModel.FeeConcentration.Value;
@@ -336,12 +343,25 @@ namespace PKFAuditManagement.Controllers
                     qc7form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
                     qc7form.ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value;
                     qc7form.IsPublicInterestEntity = viewModel.IsPublicInterestEntity;
-                    qc7form.PublicInterestEntityType = viewModel.PublicInterestEntityType;
+
+                    // Check if Public Interest Entity is selected
+                    if (viewModel.IsPublicInterestEntity == true)
+                    {
+                        qc7form.PublicInterestEntityType = viewModel.PublicInterestEntityType;
+                    }
+                    else
+                    {
+                        qc7form.PublicInterestEntityType = null;
+                    }
+
                     qc7form.IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable;
                     qc7form.IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable;
 
                     // Reset status to "Pending" if previously rejected
-                    qc7form.Status = "Pending";
+                    if (qc7form.Status == "Rejected")
+                    {
+                        qc7form.Status = "Pending";
+                    }
 
                     // Update TNATNEAssessment
                     var tnaTneAssessment = await _context.TNATNEAssessments.FirstOrDefaultAsync(a => a.QC7FormID == qc7form.QC7FormID);
@@ -388,25 +408,33 @@ namespace PKFAuditManagement.Controllers
                     {
                         qc7formConclusion.AnyRiskAssociated = viewModel.AnyRiskAssociated;
 
+                        // Set to null if not selected
                         if (viewModel.AnyRiskAssociated == true)
                         {
                             qc7formConclusion.RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear;
                             qc7formConclusion.IsSafeguardApplied = viewModel.IsSafeguardApplied;
                             qc7formConclusion.NatureOfSafeguard = viewModel.NatureOfSafeguard;
+                        } else
+                        {
+                            qc7formConclusion.RiskExplanationCurrentYearPriorYear = null;
+                            qc7formConclusion.IsSafeguardApplied = false;
+                            qc7formConclusion.NatureOfSafeguard = null;
                         }
 
                         qc7formConclusion.ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated;
                         qc7formConclusion.SafeguardReviewPartnerAssigned = viewModel.SafeguardReviewPartnerAssigned;
                         qc7formConclusion.IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled;
 
+                        // Set to null if not selected
                         if (viewModel.IsSuspiciousTransactionReportFiled == true)
                         {
-                            viewModel.SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale;
+                            qc7formConclusion.SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale;
+                        } else
+                        {
+                            qc7formConclusion.SuspiciousTransactionReportFiledRationale = null;
                         }
 
                         qc7formConclusion.EngagementRetainedRejected = viewModel.EngagementRetainedRejected;
-/*                        qc7formConclusion.EMPreparedBy = viewModel.EMPreparedBy;
-                        qc7formConclusion.EMPreparedByDate = viewModel.EMPreparedByDate;*/
                         qc7formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
                         qc7formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
                         qc7formConclusion.EPHODApprovedByDate = viewModel.EPHODApprovedByDate;
@@ -416,6 +444,11 @@ namespace PKFAuditManagement.Controllers
                     // Update QC7FormTest entities
                     foreach (var subForm in viewModel.SubForms)
                     {
+                        // Check if the subform is applicable
+                        bool isApplicable = (subForm.QC7SubFormID == 1) ||
+                                            (subForm.QC7SubFormID == 2 && !viewModel.SubForm1NotApplicable) ||
+                                            (subForm.QC7SubFormID == 3 && !viewModel.SubForm2NotApplicable);
+
                         foreach (var objective in subForm.Objectives)
                         {
                             foreach (var testDescription in objective.TestDescriptions)
@@ -423,14 +456,26 @@ namespace PKFAuditManagement.Controllers
                                 var qc7formTest = await _context.QC7FormTests
                                     .FirstOrDefaultAsync(t => t.QC7FormID == qc7form.QC7FormID && t.QC7FormTestDescriptionID == testDescription.QC7FormTestDescriptionID);
 
-                                // Populate the TestDescriptions with posted data
-                                testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignBy"];
-                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+                                if (isApplicable)
                                 {
-                                    // Use the parsed date
-                                    testDescription.SignDate = date;
+                                    // Populate the TestDescriptions with posted data
+                                    testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignBy"];
+                                    if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+                                    {
+                                        // Use the parsed date
+                                        testDescription.SignDate = date;
+                                    }
+                                    testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].Comment"];
+
                                 }
-                                testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].Comment"];
+                                else
+                                {
+                                    // SubForm is not applicable, set fields to null or minimum values
+                                    testDescription.SignBy = null;
+                                    testDescription.SignDate = DateTime.MinValue; // or use nullable DateTime and set to null if appropriate
+                                    testDescription.Comment = null;
+                                }
+
 
                                 if (qc7formTest != null)
                                 {
@@ -452,6 +497,70 @@ namespace PKFAuditManagement.Controllers
                                 }
                             }
                         }
+                    }
+
+                    // Update QC7FormFeeDetail entities
+                    foreach (var service in viewModel.Services)
+                    {
+                        var qc7formFeeDetail = await _context.QC7FormFeeDetails
+                            .FirstOrDefaultAsync(f => f.QC7FormFeeDetailID == service.QC6FormFeeDetailID);
+
+                        if (qc7formFeeDetail != null)
+                        {
+                            qc7formFeeDetail.NatureOfService = service.NatureOfService;
+
+                            // Check if selection is Other Non-Audit Services
+                            if (service.NatureOfService == "Other Non-Audit Services")
+                            {
+                                qc7formFeeDetail.OtherService = service.OtherService;
+                            }
+                            else
+                            {
+                                qc7formFeeDetail.OtherService = null;
+                            }
+
+                            qc7formFeeDetail.Fee = service.Fee.Value;
+                        }
+                        else
+                        {
+                            // Check if selection is Other Non-Audit Services
+                            if (service.NatureOfService != "Other Non-Audit Services")
+                            {
+                                service.OtherService = null;
+                            }
+
+                            qc7formFeeDetail = new QC7FormFeeDetail
+                            {
+                                QC7FormID = qc7form.QC7FormID,
+                                NatureOfService = service.NatureOfService,
+                                OtherService = service.OtherService,
+                                Fee = service.Fee.Value
+                            };
+                            _context.Add(qc7formFeeDetail);
+                        }
+                    }
+
+                    // Retrieve and process removed services
+                    var removedServices = Request.Form["RemovedServices[]"];
+                    var removedServiceIds = removedServices
+                        .Select(id => int.TryParse(id, out var parsedId) ? parsedId : (int?)null)
+                        .Where(id => id.HasValue)
+                        .Select(id => id.Value)
+                        .ToList();
+
+                    if (removedServiceIds.Any())
+                    {
+                        foreach (var id in removedServiceIds)
+                        {
+                            var serviceToRemove = await _context.QC7FormFeeDetails
+                                .FirstOrDefaultAsync(f => f.QC7FormFeeDetailID == id);
+
+                            if (serviceToRemove != null)
+                            {
+                                _context.QC7FormFeeDetails.Remove(serviceToRemove);
+                            }
+                        }
+                        await _context.SaveChangesAsync();
                     }
 
                     // Save all changes
@@ -614,6 +723,10 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PublicInterestEntityType = qc7formData.PublicInterestEntityType;
                 viewModel.SubForm1NotApplicable = qc7formData.IsSubForm2NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
                 viewModel.SubForm2NotApplicable = qc7formData.IsSubForm3NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                viewModel.PreparedBy = qc7formData.PreparedBy;
+                viewModel.PreparedByDate = qc7formData.PreparedByDate;
+                viewModel.ReviewedBy = qc7formData.ReviewedBy;
+                viewModel.ReviewedByDate = qc7formData.ReviewedByDate;
 
                 // Append ConclusionData for QC7FormConclusion
                 viewModel.AnyRiskAssociated = conclusionData.AnyRiskAssociated;
@@ -627,6 +740,7 @@ namespace PKFAuditManagement.Controllers
 
                 viewModel.ContinuingEngagementRiskRated = conclusionData.ContinuingEngagementRiskRated;
                 viewModel.SafeguardReviewPartnerAssigned = conclusionData.SafeguardReviewPartnerAssigned;
+                viewModel.IsSuspiciousTransactionReportFiled = conclusionData.IsSuspiciousTransactionReportFiled;
 
                 if (viewModel.IsSuspiciousTransactionReportFiled == true)
                 {
@@ -634,12 +748,12 @@ namespace PKFAuditManagement.Controllers
                 }
 
                 viewModel.EngagementRetainedRejected = conclusionData.EngagementRetainedRejected;
-/*                viewModel.EMPreparedBy = conclusionData.EMPreparedBy;
+                viewModel.EMPreparedBy = conclusionData.EMPreparedBy;
                 viewModel.EMPreparedByDate = conclusionData.EMPreparedByDate;
                 viewModel.EPHODApprovedBy = conclusionData.EPHODApprovedBy;
                 viewModel.MPHODQMPApprovedBy = conclusionData.MPHODQMPApprovedBy;
                 viewModel.EPHODApprovedByDate = conclusionData.EPHODApprovedByDate;
-                viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;*/
+                viewModel.MPHODQMPApprovedByDate = conclusionData.MPHODQMPApprovedByDate;
 
                 // Append TNATNEAssessment data for TNATNEAssessmentViewModel
                 viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;

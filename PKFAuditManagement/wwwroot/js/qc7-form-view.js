@@ -2,6 +2,7 @@
 $(document).ready(function () {
     toggleRiskLevel();
     toggleSignificantRisk();
+    toggleSectionBResult();
     toggleSTR();
     toggleConSTR();
 });
@@ -70,6 +71,26 @@ function toggleConSTR() {
     }
 }
 
+// Function to removing all values for Q1-Q4 for Section B of TNA Assessment
+function toggleSectionBResult() {
+    var engagementType = $('#engagementType').val();
+
+    if (engagementType === "Non-Audit") {
+        $('#q1Yes').prop('checked', false);
+        $('#q1No').prop('checked', false);
+        $('#q2Yes').prop('checked', false);
+        $('#q2No').prop('checked', false);
+        $('#q3Yes').prop('checked', false);
+        $('#q3No').prop('checked', false);
+        $('#q4Yes').prop('checked', false);
+        $('#q4No').prop('checked', false);
+
+        $('input[name="TNATNEAssessment.SectionB.Q1"]').prop('disabled', true);
+        $('input[name="TNATNEAssessment.SectionB.Q2"]').prop('disabled', true);
+        $('input[name="TNATNEAssessment.SectionB.Q3"]').prop('disabled', true);
+        $('input[name="TNATNEAssessment.SectionB.Q4"]').prop('disabled', true);
+    }
+}
 
 // This function approves the QC7 form selected from the Admin Dashboard QC7 Form Management page
 function approveQC7Form(qc7FormId) {

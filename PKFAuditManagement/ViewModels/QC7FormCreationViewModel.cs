@@ -9,6 +9,8 @@ namespace PKFAuditManagement.ViewModels
         {
             // Initialize the Services list with a default service
             Services = new List<FeeDetailViewModel>();
+            Services.Add(new FeeDetailViewModel { NatureOfService = "", Fee = 0 });
+
             TNATNEAssessment = new TNATNEAssessmentViewModel();
         }
         // User Details

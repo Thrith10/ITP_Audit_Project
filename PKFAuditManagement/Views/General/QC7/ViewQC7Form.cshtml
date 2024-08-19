@@ -159,7 +159,7 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.
                                             And to disclose reasons for continuance if the recovery rate is below 30%.">
-                                            <span class="link-text">Proposed recovery rate for current year</span>
+                                            <span class="link-text">Proposed recovery rate for current year (Proposed fee for current year / Budgeted Time Cost)</span>
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <input type="number" class="form-control" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden" disabled>
@@ -206,7 +206,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-sm-6">
-                                                                <label>Fee:</label>
+                                                                <label>Fee:<span class="text-danger"> *</span></label>
                                                                 <div class="input-group">
                                                                     <span class="input-group-text">$</span>
                                                                     <input asp-for="Services[i].Fee" class="form-control" disabled />
@@ -215,7 +215,7 @@
                                                             @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
                                                             {
                                                                 <div class="col-sm-12 mt-3" id="otherServiceInput-@i">
-                                                                    <label>Name of Non-Audit Service</label>
+                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
                                                                     <input type="text" class="form-control" asp-for="Services[i].OtherService" disabled>
                                                                 </div>
                                                             }
@@ -586,36 +586,39 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Prepared by:<span class="text-danger"> *</span></label>
+                                    <div class="col-sm-2">
+                                        <label for="inputPassword3">Prepared by:<span class="text-danger"> *</span></label>
+                                    </div>
+                                    <div class="col">
                                         <input type="text" class="form-control" id="inputText" placeholder="Engagement Manager" asp-for="EMPreparedBy" disabled>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="EMPreparedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC7 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
+                                    <div class="col-sm-2">
+                                        <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="On creation of the QC7 form, a notifying email will be sent to this user (Engagement Partner/ Head of Division), and this user will be the first approver of the form creation.">
                                             <span class="link-text">Approval by:<span class="text-danger"> *</span></span>
                                         </label>
+                                    </div>
+                                    <div class="col">
                                         <input type="text" class="form-control" id="inputText" asp-for="EPHODApprovedBy" disabled>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="EPHODApprovedByDate" disabled>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="col-sm-6 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC7 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
+                                    <div class="col-sm-2">
+                                        <label data-bs-toggle="tooltip" data-bs-placement="bottom" title="After the first approver has approved the created QC7 form, a subsequent email will be sent to this user (Managing Partner / Head of Division / Quality Management Partner), and this user will be the second approver of the form creation.">
                                             <span class="link-text">Final Approval by:<span class="text-danger"> *</span></span>
                                         </label>
+                                    </div>
+                                    <div class="col">
                                         <input type="text" class="form-control" id="inputText" asp-for="MPHODQMPApprovedBy" disabled>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="inputPassword3" class="col-form-label">Date:<span class="text-danger"> *</span></label>
+                                    <div class="col">
                                         <input type="date" class="form-control" id="inputText" asp-for="MPHODQMPApprovedByDate" disabled>
                                     </div>
                                 </div>
