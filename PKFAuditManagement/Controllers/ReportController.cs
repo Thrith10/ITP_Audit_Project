@@ -11,6 +11,8 @@ using System.Data;
 using System.Linq.Dynamic.Core;
 using Microsoft.Data.SqlClient;
 using Dapper;
+using System.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -20,11 +22,13 @@ namespace PKFAuditManagement.Controllers
     public class ReportController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
-
-        public ReportController(ApplicationDbContext context)
+        private readonly IConfiguration _configuration;
+        private readonly string _connectionString;
+        public ReportController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+            _connectionString = _configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         }
 
         [HttpGet("SelectFields")]
@@ -266,7 +270,7 @@ namespace PKFAuditManagement.Controllers
 
             Console.WriteLine("Query: " + selectClause);
 
-            using (var connection = new SqlConnection(_context.Database.GetDbConnection().ConnectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 //connection.Open();
                 var result = await connection.QueryAsync<dynamic>(query);
