@@ -23,15 +23,6 @@ $("#autocomplete").autocomplete({
         }));
     }
 });
-document.getElementById("add-more-docs").addEventListener("click", function () {
-    var container = document.getElementById("other-documents-container");
-    var input = document.createElement("input");
-    input.type = "file";
-    input.name = "OtherDocuments";
-    input.accept = "application/pdf";
-    input.classList.add("form-control", "mb-2");
-    container.appendChild(input);
-});
 
 // Function to add a new service field
 function addService() {
@@ -276,6 +267,43 @@ $(document).ready(function () {
 
     // Initial update of Budgeted fee recovery rate
     updateBudgetedFeeRecoveryRate();
+
+    $('#add-more-docs').on('click', function () {
+        $('#other-documents-container').append(`
+            <div class="document-row card border mb-2">
+                <div class="card-body">
+                    <input type="text" class="form-control mt-3 mb-3" placeholder="Document Name" required/>
+                    <input type="file" class="form-control mb-3" name="OtherDocuments[]" accept="application/pdf" required/>
+                    <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                    <button type="button" class="btn btn-danger btn-sm remove-doc">Remove</button>
+                </div>
+            </div>
+        `);
+    });
+
+    // Remove a document row
+    $(document).on('click', '.remove-doc', function () {
+        $(this).closest('.document-row').remove();
+    });
+
+    // Open PDF in a new tab
+    $(document).on('click', '.preview-doc', function () {
+        var fileInput = $(this).siblings('input[type="file"]')[0];
+        if (fileInput.files.length > 0) {
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var blob = new Blob([e.target.result], { type: 'application/pdf' });
+                var url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            };
+
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('No file selected.');
+        }
+    });
 });
 
 // Toggling checkbox for risk level displays the comment box

@@ -599,7 +599,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm-12">
-                                                <h5 class="card-title"> Optional Additional Documents (In PDF format) </h5>
+                                                <h5 class="card-title">Optional Additional Documents (In PDF format)</h5>
                                             </div>
                                         </div>
                                         <div class="form-group mb-3">
@@ -618,9 +618,15 @@
                                             <label asp-for="LexisNexisSearch">Lexis Nexis search in PDF</label>
                                             <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
                                         </div>
-                                        <div id="other-documents-container" class="form-group mb-3">
-                                            <label>Other Documents (option to add more)</label>
-                                            <input asp-for="OtherDocuments" type="file" class="form-control mb-2" name="OtherDocuments" accept="application/pdf" />
+                                        <div id="other-documents-container">
+                                            <label>Other Documents</label>
+                                            <div class="document-row card border mb-2">
+                                                <div class="card-body">
+                                                    <input type="text" class="form-control mt-3 mb-3" placeholder="Document Name"/>
+                                                    <input type="file" class="form-control mb-3" name="OtherDocuments[]" accept="application/pdf"/>
+                                                    <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                                </div>
+                                            </div>
                                         </div>
                                         <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button>
                                     </div>

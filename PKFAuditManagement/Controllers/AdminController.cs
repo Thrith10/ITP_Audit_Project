@@ -9,7 +9,6 @@ using PKFAuditManagement.ViewModels;
 using System.Security.Claims;
 using System.Text;
 
-
 namespace PKFAuditManagement.Controllers
 {
     public class AdminController : Controller
@@ -118,7 +117,7 @@ namespace PKFAuditManagement.Controllers
                     {
                         transaction.Rollback();
                         ViewBag.Errors = result.Errors;
-                        TempData["ErrorMessage"] = "Failed to create the account. Please try again.";
+                        TempData["ErrorMessage"] = result.Errors.Select(e => e.Description).First();
                         return View("~/Views/Admin/CreateAccount.cshtml", viewModel);
                     }
                 }
@@ -239,6 +238,7 @@ namespace PKFAuditManagement.Controllers
             {
                 TempData["ErrorMessage"] = "Failed to update the account. Please try again.";
                 ViewBag.Errors = result.Errors;
+                TempData["ErrorMessage"] = result.Errors.Select(e => e.Description).First();
                 return View("~/Views/Admin/EditAccount.cshtml", viewModel);
             }
         }

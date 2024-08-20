@@ -1,6 +1,10 @@
 ﻿@using PKFAuditManagement.ViewModels
 @model UserViewModel
 
+@{
+    var errors = ViewBag.Errors as IEnumerable<Microsoft.AspNetCore.Mvc.ModelBinding.ModelError>;
+}
+
 <head>
     <!-- Other head elements -->
     <!-- SweetAlert2 CSS -->
@@ -18,7 +22,24 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Create a New Account</h5>
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">
+                                @TempData["ErrorMessage"]
+                            </div>
+                        }
 
+                        @if (errors != null && errors.Any())
+                        {
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach (var error in errors)
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
                         <form asp-action="SubmitUserForm" asp-controller="Admin" method="post" class="row g-3">
                             <div class="col-12">
                                 <label for="username" class="form-label">Username</label>

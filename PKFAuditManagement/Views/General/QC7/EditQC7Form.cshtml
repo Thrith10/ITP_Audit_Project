@@ -179,7 +179,14 @@
                                     </div>
                                     <div class="card border border-secondary p-3 mb-3">
                                         <div class="card-body">
-                                            <h5 class="card-title"> Non-audit fees charged for this client (tax, accounting, secretarial, XBRL etc) </h5>
+                                            <div class="row">
+                                                <div class="col-9">
+                                                    <h5 class="card-title"> Non-audit fees charged for this client (tax, accounting, secretarial, XBRL etc) </h5>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-primary d-flex align-items-center" id="retrieveFeeDetailsButton">View NAS Details</button>
+                                                </div>
+                                            </div>
                                             <div class="row mb-3 service input-field" id="services">
                                                 <div id="removedServicesContainer"></div>
                                                 @for (int i = 0; i < Model.Services.Count; i++)
@@ -726,6 +733,37 @@
     </main><!-- End #main -->
 </div>
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Modal -->
+<div class="modal" id="feeDetailsModal" tabindex="-1" role="dialog" aria-labelledby="feeDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feeDetailsModalLabel">Fee Details</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body table-responsive">
+                <table class="table table-bordered" id="feeDetailsTable">
+                    <thead>
+                        <tr>
+                            <th>File Reference</th>
+                            <th>Fee</th>
+                            <th>Audit Services</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
