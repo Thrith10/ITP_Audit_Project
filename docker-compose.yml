@@ -14,10 +14,10 @@ services:
   #   networks:
   #     - app-network
 
-  webapp:
+  auditapp:
     build:
       context: . # Path to the directory with the Dockerfile
-    container_name: webapp
+    container_name: auditapp
     env_file:
       - PKFAuditManagement/.env
     ports:
