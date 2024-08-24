@@ -583,6 +583,102 @@
                                         <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" disabled>
                                     </div>
                                 </div>
+                                <div class="card border border-secondary p-3 mb-6">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title">Optional Additional Documents (In PDF format)</h5>
+                                            </div>
+                                        </div>
+
+                                        <!-- Business Profile -->
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BusinessProfile">Company’s business profile in PDF</label>
+                                            <div class="d-flex align-items-center">
+                                                @if (Model.BusinessProfileUrl != null)
+                                                {
+                                                    <a href="@Model.BusinessProfileUrl" target="_blank" class="me-2">Business Profile PDF</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="fw-bold">No file uploaded</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Trend Search -->
+                                        <div class="form-group mb-3">
+                                            <label asp-for="TrendSearch">TREND search in PDF</label>
+                                            <div class="d-flex align-items-center">
+                                                @if (Model.TrendSearchUrl != null)
+                                                {
+                                                    <a href="@Model.TrendSearchUrl" target="_blank" class="me-2">TREND Search PDF</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="fw-bold">No file uploaded</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Google Search -->
+                                        <div class="form-group mb-3">
+                                            <label asp-for="GoogleSearch">Google search in PDF</label>
+                                            <div class="d-flex align-items-center">
+                                                @if (Model.GoogleSearchUrl != null)
+                                                {
+                                                    <a href="@Model.GoogleSearchUrl"  class="me-2">Google Search PDF</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="fw-bold">No file uploaded</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Lexis Nexis Search -->
+                                        <div class="form-group mb-3">
+                                            <label asp-for="LexisNexisSearch">Lexis Nexis search in PDF</label>
+                                            <div class="d-flex align-items-center">
+                                                @if (Model.LexisNexisSearchUrl != null)
+                                                {
+                                                    <a href="@Model.LexisNexisSearchUrl" target="_blank" class="me-2">Lexis Nexis Search PDF</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="fw-bold">No file uploaded</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Other Documents -->
+                                        <div id="other-documents-container">
+                                            <label>Other Documents</label>
+                                            @if (Model.OtherDocumentUrls != null && Model.OtherDocumentUrls.Any())
+                                            {
+                                                foreach (var doc in Model.OtherDocumentUrls)
+                                                {
+                                                    <div class="form-group mb-3">
+                                                        <div class="d-flex align-items-center">
+                                                            @if (!string.IsNullOrEmpty(doc.File))
+                                                            {
+                                                                <a href="@doc.File" target="_blank" class="me-2">@doc.DocumentName</a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>No file uploaded</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <br /><span class="fw-bold">No file uploaded</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-2">
                                         <strong>Prepared by:<span class="text-danger"> *</span></strong>

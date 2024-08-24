@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using PKFAuditManagement.Services;
 using Amazon.S3;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,13 @@ builder.Services.Configure<SmtpOptions>(options =>
 
 // Service registrations
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IS3Service, S3Service>();
+// Register OpenAIService with the API key
+builder.Services.AddScoped<IOpenAIService>(provider =>
+{
+    var apiKey = builder.Configuration["OPENAI_API_KEY"];
+    return new OpenAIService(apiKey);
+});
 
 builder.Services.AddTransient<IEmailSender, EmailSender>(sp =>
 {
@@ -136,8 +144,11 @@ using (var scope = app.Services.CreateScope())
     // Initialise an instance of the userManager
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
 
-    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
-    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
+    //var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
+    //var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
+
+    string email = "admin@gmail.com";
+    string password = "P@ssw0rd";
 
     // Check if admin user has already been created
     if (await userManager.FindByEmailAsync(email) == null)

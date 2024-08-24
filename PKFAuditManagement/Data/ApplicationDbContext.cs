@@ -11,7 +11,7 @@ namespace PKFAuditManagement.Data
             : base(options)
         {
         }
-
+       
         // DbSets for QC6 Form
         public DbSet<QC6Form> QC6Forms { get; set; }
         public DbSet<QC6FormConclusion> QC6FormConclusions { get; set; }
@@ -23,6 +23,7 @@ namespace PKFAuditManagement.Data
         public DbSet<TNATNEAssessment> TNATNEAssessments { get; set; }
         public DbSet<TNATNESectionB> TNATNESectionBs { get; set; }
         public DbSet<TNATNESectionD> TNATNESectionDs { get; set; }
+        public DbSet<QCDocument> QCDocuments { get; set; }
 
         // DbSets for QC7 Form
         public DbSet<QC7Form> QC7Forms { get; set; }

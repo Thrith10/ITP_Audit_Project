@@ -16,6 +16,7 @@ using System.Data;
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Primitives;
+using Amazon.S3;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -27,7 +28,8 @@ namespace PKFAuditManagement.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment _environment;
-        public QC6FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender, IWebHostEnvironment environment)
+        private readonly IS3Service _s3Service;
+        public QC6FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender, IWebHostEnvironment environment, IS3Service s3Service)
         {
             _userService = userService;
             _context = context;
@@ -35,6 +37,7 @@ namespace PKFAuditManagement.Controllers
             _roleManager = roleManager;
             _emailSender = emailSender;
             _environment = environment;
+            _s3Service = s3Service;
         }
 
         [Authorize(Roles = "Non-Auditor,User")]
@@ -664,7 +667,6 @@ namespace PKFAuditManagement.Controllers
                 }
 
                 // Append TNATNEAssessment data for TNATNEAssessmentViewModel
-
                 viewModel.TNATNEAssessment.SectionCEvaluation = tnaTneAssessmentData.SectionCEvaluation;
                 viewModel.TNATNEAssessment.SectionB.IsAudit = tnaTNESectionBData.IsAudit;
                 viewModel.TNATNEAssessment.SectionB.Q1 = tnaTNESectionBData.Q1;
@@ -691,6 +693,58 @@ namespace PKFAuditManagement.Controllers
                         Fee = feeDetail.Fee
                     });
                 }
+
+                // Retrieve documents for QC Form from database
+                var documentData = _context.QCDocuments.Where(x => x.QC6FormID.Equals(id)).ToList();
+
+                // Retrieve and set the URL for BusinessProfile
+                var businessProfileDocument = documentData.FirstOrDefault(x => x.DocumentType == "BusinessProfile");
+                if (businessProfileDocument != null)
+                {
+                    viewModel.BusinessProfileUrl = _s3Service.GeneratePreSignedUrl(businessProfileDocument.S3Key);
+                }
+
+                // Retrieve and set the URL for TrendSearch
+                var trendSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "TrendSearch");
+                if (trendSearchDocument != null)
+                {
+                    viewModel.TrendSearchUrl = _s3Service.GeneratePreSignedUrl(trendSearchDocument.S3Key);
+                }
+
+                // Retrieve and set the URL for GoogleSearch
+                var googleSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "GoogleSearch");
+                if (googleSearchDocument != null)
+                {
+                    viewModel.GoogleSearchUrl = _s3Service.GeneratePreSignedUrl(googleSearchDocument.S3Key);
+                }
+
+                // Retrieve and set the URL for LexisNexisSearch
+                var lexisNexisSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "LexisNexisSearch");
+                if (lexisNexisSearchDocument != null)
+                {
+                    viewModel.LexisNexisSearchUrl = _s3Service.GeneratePreSignedUrl(lexisNexisSearchDocument.S3Key);
+                }
+
+                // Retrieve and set the URLs for OtherDocuments
+                var otherDocuments = documentData.Where(x => x.DocumentType == "OtherDocuments").ToList();
+                if (otherDocuments.Any())
+                {
+                    viewModel.OtherDocumentUrls = new List<DocumentView>();
+
+                    foreach (var doc in otherDocuments)
+                    {
+                        // Retrieve document name from s3key
+                        var documentName = ExtractDocumentName(doc.S3Key);
+                        var docUrl = _s3Service.GeneratePreSignedUrl(doc.S3Key);
+                        viewModel.OtherDocumentUrls.Add(new DocumentView
+                        {
+                            DocumentName = documentName,
+                            File = docUrl,
+                        });
+                    }
+                }
+
+
                 return View("~/Views/General/QC6/ViewQC6Form.cshtml", viewModel);
             }
             catch
@@ -712,7 +766,7 @@ namespace PKFAuditManagement.Controllers
         public IActionResult GetProspectiveClients(string term)
         {
             var prospectiveClients = _context.QC6Forms
-                .Where(q => q.ProspectiveClient.Contains(term)) // Adjust based on your data model and filtering logic
+                .Where(q => q.ProspectiveClient.Contains(term)) 
                 .Select(q => q.ProspectiveClient)
                 .ToList();
 
@@ -1189,38 +1243,118 @@ namespace PKFAuditManagement.Controllers
                         _context.Add(qC6FormFeeDetail);
                     }
 
-                    var uploadsRootFolder = Path.Combine(_environment.WebRootPath, "uploads");
+                    // Root folder name in S3
+                    var uploadsRootFolder = "QC6FormDocuments";
 
+                    // Check if null, else upload the file to S3
                     if (viewModel.BusinessProfile != null)
                     {
-                        var filePath = Path.Combine(uploadsRootFolder, "BusinessProfile", viewModel.BusinessProfile.FileName);
-                        await SaveFileAsync(viewModel.BusinessProfile, filePath);
+                        // Generate a unique filename
+                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                        // Define path and upload to S3
+                        var s3Key = Path.Combine(uploadsRootFolder, "BusinessProfile", uniqueFileName).Replace("\\", "/"); ;
+                        await _s3Service.UploadFileAsync(s3Key, viewModel.BusinessProfile.OpenReadStream());
+
+                        // Add to the db context
+                        _context.Add(new QCDocument
+                        {
+                            QC6FormID = qc6formId,
+                            FileName = uniqueFileName,
+                            S3Key = s3Key,
+                            DocumentType = "BusinessProfile"
+                        });
                     }
 
+                    // Check if null, else upload the file to S3
                     if (viewModel.TrendSearch != null)
                     {
-                        var filePath = Path.Combine(uploadsRootFolder, "TrendSearch", viewModel.TrendSearch.FileName);
-                        await SaveFileAsync(viewModel.TrendSearch, filePath);
+                        // Generate a unique filename
+                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                        // Define path and upload to S3
+                        var s3Key = Path.Combine(uploadsRootFolder, "TrendSearch", uniqueFileName).Replace("\\", "/"); ;
+                        await _s3Service.UploadFileAsync(s3Key, viewModel.TrendSearch.OpenReadStream());
+
+                        // Add to the db context
+                        _context.Add(new QCDocument
+                        {
+                            QC6FormID = qc6formId,
+                            FileName = uniqueFileName,
+                            S3Key = s3Key,
+                            DocumentType = "TrendSearch"
+                        });
                     }
 
+                    // Check if null, else upload the file to S3
                     if (viewModel.GoogleSearch != null)
                     {
-                        var filePath = Path.Combine(uploadsRootFolder, "GoogleSearch", viewModel.GoogleSearch.FileName);
-                        await SaveFileAsync(viewModel.GoogleSearch, filePath);
+                        // Generate a unique filename
+                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                        // Define path and upload to S3
+                        var s3Key = Path.Combine(uploadsRootFolder, "GoogleSearch", uniqueFileName).Replace("\\", "/"); ;
+                        await _s3Service.UploadFileAsync(s3Key, viewModel.GoogleSearch.OpenReadStream());
+
+                        // Add to the db context
+                        _context.Add(new QCDocument
+                        {
+                            QC6FormID = qc6formId,
+                            FileName = uniqueFileName,
+                            S3Key = s3Key,
+                            DocumentType = "GoogleSearch"
+                        });
                     }
 
+                    // Check if null, else upload the file to S3
                     if (viewModel.LexisNexisSearch != null)
                     {
-                        var filePath = Path.Combine(uploadsRootFolder, "LexisNexisSearch", viewModel.LexisNexisSearch.FileName);
-                        await SaveFileAsync(viewModel.LexisNexisSearch, filePath);
+                        // Generate a unique filename
+                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                        // Define path and upload to S3
+                        var s3Key = Path.Combine(uploadsRootFolder, "LexisNexisSearch", uniqueFileName).Replace("\\", "/"); ;
+                        await _s3Service.UploadFileAsync(s3Key, viewModel.LexisNexisSearch.OpenReadStream());
+
+                        // Add to the db context
+                        _context.Add(new QCDocument
+                        {
+                            QC6FormID = qc6formId,
+                            FileName = uniqueFileName,
+                            S3Key = s3Key,
+                            DocumentType = "LexisNexisSearch"
+                        });
                     }
 
+                    // Check if null, else upload the files to S3
                     if (viewModel.OtherDocuments != null && viewModel.OtherDocuments.Count > 0)
                     {
-                        foreach (var file in viewModel.OtherDocuments)
+                        foreach (var document in viewModel.OtherDocuments)
                         {
-                            var filePath = Path.Combine(uploadsRootFolder, "OtherDocuments", file.FileName);
-                            await SaveFileAsync(file, filePath);
+                            if (document.File != null && !string.IsNullOrWhiteSpace(document.DocumentName))
+                            {
+                                // Generate a unique filename
+                                var uniqueFileName =  Guid.NewGuid().ToString() + ".pdf";
+
+                                // Generate the S3 key with the desired path
+                                var s3Key = Path.Combine(
+                                    uploadsRootFolder,
+                                    "OtherDocuments",
+                                    document.DocumentName + "/" + uniqueFileName
+                                ).Replace("\\", "/"); ;
+
+                                // Upload the file to S3
+                                await _s3Service.UploadFileAsync(s3Key, document.File.OpenReadStream());
+
+                                // Add to the db context
+                                _context.Add(new QCDocument
+                                {
+                                    QC6FormID = qc6formId,
+                                    FileName = uniqueFileName,
+                                    S3Key = s3Key,
+                                    DocumentType = "OtherDocuments"
+                                });
+                            }
                         }
                     }
 
@@ -1427,16 +1561,6 @@ namespace PKFAuditManagement.Controllers
                 viewModel.SuspiciousTransactionReportFiledRationale = conclusionData.SuspiciousTransactionReportFiledRationale;
                 viewModel.Satisfaction = conclusionData.Satisfaction;
 
-/*                // Append FeeDetail data for Services
-                foreach (var feeDetail in feeDetailData)
-                {
-                    viewModel.Services.Add(new FeeDetailViewModel
-                    {
-                        NatureOfService = feeDetail.NatureOfService,
-                        OtherService = feeDetail.OtherService,
-                        Fee = feeDetail.Fee
-                    });
-                }*/
                 return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
             }
             catch
@@ -1520,5 +1644,24 @@ namespace PKFAuditManagement.Controllers
             // Return the combined data as JSON
             return Json(feeDetails);
         }
+
+        public string ExtractDocumentName(string s3Key)
+        {
+            // Example s3Key: QC6FormUploads/OtherDocuments/DocumentName/c73a5d21-c0bc-4c6b-aaf5-0b20b58b16fd.pdf
+
+            // Split by '/' to get the parts
+            var parts = s3Key.Split('/');
+
+            // Check if the array length is sufficient and get the document name
+            if (parts.Length >= 4)
+            {
+                // The document name is the part before the last part (which is the filename)
+                return parts[parts.Length - 2];
+            }
+
+            // Return an empty string or handle the case where the format is unexpected
+            return string.Empty;
+        }
+
     }
 }

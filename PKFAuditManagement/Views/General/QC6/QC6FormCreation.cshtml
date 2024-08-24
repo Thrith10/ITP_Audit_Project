@@ -604,26 +604,38 @@
                                         </div>
                                         <div class="form-group mb-3">
                                             <label asp-for="BusinessProfile">Company’s business profile in PDF</label>
-                                            <input asp-for="BusinessProfile" type="file" class="form-control" accept="application/pdf" />
+                                            <div class="d-flex align-items-center">
+                                                <input asp-for="BusinessProfile" type="file" class="form-control me-2" accept="application/pdf" />
+                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                            </div>
                                         </div>
                                         <div class="form-group mb-3">
                                             <label asp-for="TrendSearch">TREND search in PDF</label>
-                                            <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
+                                            <div class="d-flex align-items-center">
+                                                <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
+                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                            </div>
                                         </div>
                                         <div class="form-group mb-3">
                                             <label asp-for="GoogleSearch">Google search in PDF</label>
-                                            <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
+                                            <div class="d-flex align-items-center">
+                                                <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
+                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                            </div>
                                         </div>
                                         <div class="form-group mb-3">
                                             <label asp-for="LexisNexisSearch">Lexis Nexis search in PDF</label>
-                                            <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
+                                            <div class="d-flex align-items-center">
+                                                <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
+                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                            </div>
                                         </div>
                                         <div id="other-documents-container">
                                             <label>Other Documents</label>
                                             <div class="document-row card border mb-2">
                                                 <div class="card-body">
-                                                    <input type="text" class="form-control mt-3 mb-3" placeholder="Document Name"/>
-                                                    <input type="file" class="form-control mb-3" name="OtherDocuments[]" accept="application/pdf"/>
+                                                    <input type="text" class="form-control mt-3 mb-3" name="OtherDocuments[0].DocumentName" placeholder="Document Name" required />
+                                                    <input type="file" class="form-control mb-3" name="OtherDocuments[0].File" accept="application/pdf" required />
                                                     <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
                                                 </div>
                                             </div>

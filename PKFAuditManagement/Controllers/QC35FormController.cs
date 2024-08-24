@@ -420,7 +420,7 @@ namespace PKFAuditManagement.Controllers
         {
             var accesskey = _configuration["AWS_ACCESS_KEY"];
             var secretkey = _configuration["AWS_SECRET_KEY"];
-            var s3client = new AmazonS3Client(accesskey, secretkey, Amazon.RegionEndpoint.APSoutheast2);
+            var s3client = new AmazonS3Client(accesskey, secretkey, Amazon.RegionEndpoint.APSoutheast1);
 
             // Generate a unique filename using GUID
             var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
