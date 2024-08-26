@@ -28,7 +28,19 @@
                                     <div class="row mb-3">
                                         <label asp-for="Client" class="col-sm-2 col-form-label">Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="Client" value="@Model.Client" required>
+                                            <select asp-for="Client" class="form-control">
+                                                @if (Model.ClientNames != null && Model.ClientNames.Any())
+                                                {
+                                                    @foreach (var client in Model.ClientNames)
+                                                    {
+                                                        <option value="@client">@client</option>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <option disabled>No clients available</option>
+                                                }
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="row mb-3">

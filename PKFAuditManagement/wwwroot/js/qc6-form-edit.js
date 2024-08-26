@@ -68,8 +68,78 @@
 
     // Initial update of Budgeted fee recovery rate
     updateBudgetedFeeRecoveryRate();
+
+    var documentIndex = 1;
+    $('#add-more-docs').on('click', function () {
+        $('#other-documents-container').append(`
+            <div class="document-row card border mb-2" data-index="${documentIndex}">
+                <div class="card-body">
+                    <input type="text" class="form-control mt-3 mb-3" name="OtherDocuments[${documentIndex}].DocumentName" placeholder="Document Name" required/>
+                    <input type="file" class="form-control mb-3" name="OtherDocuments[${documentIndex}].File" accept="application/pdf" required/>
+                    <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                    <button type="button" class="btn btn-danger btn-sm remove-doc">Remove</button>
+                </div>
+            </div>
+        `);
+        documentIndex++;
+    });
+
+    // Remove a document row
+    $(document).on('click', '.remove-doc', function () {
+        // Remove the clicked document row
+        $(this).closest('.document-row').remove();
+
+        // Reindex the remaining document rows
+        $('#other-documents-container .document-row').each(function (index) {
+            $(this).attr('data-index', index); // Update the data-index attribute
+
+            // Update the names of the input fields to match the new index
+            $(this).find('input[name^="OtherDocuments"]').each(function () {
+                var name = $(this).attr('name');
+                var newName = name.replace(/\[.*?\]/, '[' + index + ']');
+                $(this).attr('name', newName);
+            });
+        });
+
+        // Decrease the global documentIndex variable 
+        documentIndex--;
+    });
+
+    // Open PDF in a new tab
+    $(document).on('click', '.preview-doc', function () {
+        var fileInput = $(this).siblings('input[type="file"]')[0];
+        if (fileInput.files.length > 0) {
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var blob = new Blob([e.target.result], { type: 'application/pdf' });
+                var url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            };
+
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('No file selected.');
+        }
+    });
 });
 
+$("#autocomplete").autocomplete({
+    source: function (request, response) {
+        $.ajax({
+            url: '/QC6Form/GetAllClients',
+            type: 'GET',
+            success: function (data) {
+                var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
+                response($.grep(data, function (item) {
+                    return matcher.test(item);
+                }));
+            }
+        });
+    }
+
+});
 // Add event listener to the "Add Service" button
 document.getElementById('addService').addEventListener('click', addService);
 

@@ -97,11 +97,20 @@ namespace PKFAuditManagement.Controllers
             // Retrieve all emails for users in the "Admin" role
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
 
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
             var viewModel = new QC35FormViewModel
             {
                 QC35FormID = qc35Form.QC35FormID,
                 CreatedBy = qc35Form.CreatedBy,
                 ClientName = qc35Form.ClientName,
+                ClientNames = clientNames,
                 ReportingYearEnd = (DateTime)qc35Form.ReportingYearEnd,
                 PartnerName = qc35Form.PartnerName,
                 ManagerName = qc35Form.ManagerName,
@@ -156,6 +165,14 @@ namespace PKFAuditManagement.Controllers
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
 
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
             // Retrieve all emails for users in the "Admin" role
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
 
@@ -163,16 +180,17 @@ namespace PKFAuditManagement.Controllers
             {
                 CreatedBy = userEmail,
                 AuditFirms = new List<SelectListItem>
-        {
-            new SelectListItem { Value = "PKF-CAP LLP", Text = "PKF-CAP LLP" },
-            new SelectListItem { Value = "PKF-HT Khoo PAC", Text = "PKF-HT Khoo PAC" }
-        },
+                {
+                    new SelectListItem { Value = "PKF-CAP LLP", Text = "PKF-CAP LLP" },
+                    new SelectListItem { Value = "PKF-HT Khoo PAC", Text = "PKF-HT Khoo PAC" }
+                },
                 ChecklistItems = new List<QC35ChecklistItemViewModel>
-        {
-            new QC35ChecklistItemViewModel { Description = "All working papers in each file is reviewed and completed (Manager to initial or sign all working papers)" },
-            new QC35ChecklistItemViewModel { Description = "Date of Audit Report" },
-            new QC35ChecklistItemViewModel { Description = "Date of approval and confirmation that CaseWare Audit files has been locked down within 60 days from the date of the Audit Report (if applicable). Refer to the screenshot of CaseWare below." }
-        }
+                {
+                    new QC35ChecklistItemViewModel { Description = "All working papers in each file is reviewed and completed (Manager to initial or sign all working papers)" },
+                    new QC35ChecklistItemViewModel { Description = "Date of Audit Report" },
+                    new QC35ChecklistItemViewModel { Description = "Date of approval and confirmation that CaseWare Audit files has been locked down within 60 days from the date of the Audit Report (if applicable). Refer to the screenshot of CaseWare below." }
+                },
+                ClientNames = clientNames
             };
 
             // Append emails to viewModel

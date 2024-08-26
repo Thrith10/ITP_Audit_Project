@@ -1,20 +1,8 @@
-$("#autocomplete").autocomplete({
-    source: function (request, response) {
-        $.ajax({
-            url: '/Tags/GetQC7Tags',
-            type: 'GET',
-            success: function (data) {
-                var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
-                response($.grep(data, function (item) {
-                    return matcher.test(item);
-                }));
-            }
-        });
-    },
-    select: function (event, ui) {
-        // Perform an action when an item is selected
-        var selectedValue = ui.item.value;
+// Handle the change event for the select element
+$("#clientSelect").on('change', function () {
+    var selectedValue = $(this).val();
 
+    if (selectedValue) {
         // Make another AJAX call using the selected value
         $.ajax({
             url: '/QC7Form/RetrievePastQC7Data',
@@ -33,6 +21,17 @@ $("#autocomplete").autocomplete({
         });
     }
 });
+
+// Handle the submission event validations
+document.getElementById('qc7form').addEventListener('submit', function (event) {
+    var selectElement = document.getElementById('clientSelect');
+    if (selectElement.value === "") {
+        selectElement.focus(); // Focus on the select element
+        event.preventDefault(); // Prevent form submission
+    } 
+});
+
+
 // Add event listener to the "Add Service" button
 document.getElementById('addService').addEventListener('click', addService);
 

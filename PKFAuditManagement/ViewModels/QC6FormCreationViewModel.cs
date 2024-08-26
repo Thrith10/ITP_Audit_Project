@@ -104,7 +104,7 @@ namespace PKFAuditManagement.ViewModels
         public IFormFile? TrendSearch { get; set; }
         public IFormFile? GoogleSearch { get; set; }
         public IFormFile? LexisNexisSearch { get; set; }
-        public List<DocumentUpload> OtherDocuments { get; set; } = new List<DocumentUpload>();
+        public List<DocumentUpload>? OtherDocuments { get; set; } = new List<DocumentUpload>();
 
         // URLs or Streams to display the files in the view
         public string? BusinessProfileUrl { get; set; }
@@ -116,14 +116,15 @@ namespace PKFAuditManagement.ViewModels
     }
     public class DocumentView
     {
-        public string DocumentName { get; set; }
-        public string File { get; set; } 
+        public string? DocumentName { get; set; }
+        public string? DocumentType { get; set; }
+        public string? File { get; set; } 
     }
 
     public class DocumentUpload
     {
-        public string DocumentName { get; set; }
-        public IFormFile File { get; set; }
+        public string? DocumentName { get; set; }
+        public IFormFile? File { get; set; }
     }
 
     public class TNATNEAssessmentViewModel

@@ -28,7 +28,7 @@
                                     <div class="row mb-3">
                                         <label asp-for="ProspectiveClient" class="col-sm-2 col-form-label">Prospective Client:<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ProspectiveClient" value="@Model.ProspectiveClient" required>
+                                            <input type="text" class="form-control" asp-for="ProspectiveClient" id="autocomplete" value="@Model.ProspectiveClient" required>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -603,6 +603,154 @@
                                         <input type="text" class="form-control" id="inputText" asp-for="Satisfaction" required>
                                     </div>
                                 </div>
+                                <div class="card border border-secondary p-3 mb-6">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title">Optional Additional Documents (In PDF format)</h5>
+                                            </div>
+                                        </div>
+
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Current Attachment</th>
+                                                    <th>View Attachment</th>
+                                                    <th>Upload New Attachment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- BusinessProfile Row -->
+                                                <tr>
+                                                    <td>
+                                                        @if (Model.BusinessProfileUrl != null)
+                                                        {
+                                                            <span>Business Profile PDF</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file uploaded</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (Model.BusinessProfileUrl != null)
+                                                        {
+                                                            <a href="@Model.BusinessProfileUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file available</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <input asp-for="BusinessProfile" type="file" class="form-control" accept="application/pdf" />
+                                                    </td>
+                                                </tr>
+
+                                                <!-- TrendSearch Row -->
+                                                <tr>
+                                                    <td>
+                                                        @if (Model.TrendSearchUrl != null)
+                                                        {
+                                                            <span>TREND Search PDF</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file uploaded</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (Model.TrendSearchUrl != null)
+                                                        {
+                                                            <a href="@Model.TrendSearchUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file available</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
+                                                    </td>
+                                                </tr>
+
+                                                <!-- GoogleSearch Row -->
+                                                <tr>
+                                                    <td>
+                                                        @if (Model.GoogleSearchUrl != null)
+                                                        {
+                                                            <span>Google Search PDF</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file uploaded</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (Model.GoogleSearchUrl != null)
+                                                        {
+                                                            <a href="@Model.GoogleSearchUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file available</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
+                                                    </td>
+                                                </tr>
+
+                                                <!-- LexisNexisSearch Row -->
+                                                <tr>
+                                                    <td>
+                                                        @if (Model.LexisNexisSearchUrl != null)
+                                                        {
+                                                            <span>Lexis Nexis Search PDF</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file uploaded</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (Model.LexisNexisSearchUrl != null)
+                                                        {
+                                                            <a href="@Model.LexisNexisSearchUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>No file available</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- Other Documents -->
+                                        <div id="other-documents-container">
+                                            <label>Other Documents</label>
+                                            @for (int i = 0; i < Model.OtherDocumentUrls.Count; i++)
+                                            {
+                                                var doc = Model.OtherDocumentUrls[i];
+                                                <div class="document-row card border mb-2">
+                                                    <div class="card-body">
+                                                        <input type="text" class="form-control mt-3 mb-3" name="OtherDocuments[@i].DocumentName" value="@doc.DocumentName" placeholder="Document Name" required />
+                                                        @if (doc.File != null)
+                                                        {
+                                                            <a href="@doc.File" target="_blank" class="me-2">Current @doc.DocumentName PDF</a>
+                                                        }
+                                                        <input type="file" class="form-control mb-3" name="OtherDocuments[@i].File" accept="application/pdf" />
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button>
+                                    </div>
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-2">
                                         <strong>Prepared by:<span class="text-danger"> *</span></strong>
@@ -770,6 +918,8 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/qc6-form-edit.js"></script>
 }

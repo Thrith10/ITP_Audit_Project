@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Interface;
+using PKFAuditManagement.Migrations;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.Services;
 using PKFAuditManagement.Util;
@@ -51,8 +52,16 @@ namespace PKFAuditManagement.Controllers
             // Retrieve all emails for users in the "Admin" role
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
 
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
             // Retrieve QC7Form data
-            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, AdminEmails = adminEmails.OrderBy(email => email).ToList(), IsNewForm = true });
+            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, ClientNames = clientNames, AdminEmails = adminEmails.OrderBy(email => email).ToList(), IsNewForm = true });
 
             return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
         }
@@ -138,6 +147,17 @@ namespace PKFAuditManagement.Controllers
 
                 // Retrieve QC7 Form Test data
                 var testData = _context.QC7FormTests.Where(e => e.QC7FormID.Equals(id)).ToList();
+
+                // Retrieve client names for display
+                var clientNames = await _context.QC6Forms
+                                                 .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                                 .Select(c => c.ProspectiveClient) // Select the column with client names
+                                                 .Distinct() // Ensure unique client names
+                                                 .OrderBy(name => name) // Order client names from A to Z
+                                                 .ToListAsync(); // Fetch the ordered list of unique client names
+
+                // Append clientNames to viewModel
+                viewModel.ClientNames = clientNames;
 
                 // Loop through each SubForm in the viewModel
                 foreach (var subForm in viewModel.SubForms)
@@ -637,15 +657,52 @@ namespace PKFAuditManagement.Controllers
             // Append emails to viewModel
             viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
 
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
+            // Append client names to viewModel
+            viewModel.ClientNames = clientNames;
+
+            // Set selection so that it doesn't get refreshed
+            viewModel.SelectedClient = selectedClient;
+
             // Retrieve QC7Form data from the database
             try
             {
-                // Get the selected QC7 Form that matches the clientName
-                var qc7formData = _context.QC7Forms.FirstOrDefault(q => q.Client == selectedClient);
+                // Get the most recent QC7 Form that matches the clientName based on ApprovalDate from QC7FormsConclusion
+                var qc7formData = (from form in _context.QC7Forms
+                                   join conclusion in _context.QC7FormConclusions
+                                   on form.QC7FormID equals conclusion.QC7FormID
+                                   where form.Client == selectedClient
+                                   orderby conclusion.MPHODQMPApprovedByDate descending
+                                   select form)
+                                         .FirstOrDefault();
 
                 if (qc7formData == null)
                 {
-                    viewModel.ErrorMessage = "No client found!";
+                    viewModel.ErrorMessage = "No past QC7 data found for the selected client!";
+
+                    // Loop through each SubForm in the viewModel
+                    foreach (var subForm in viewModel.SubForms)
+                    {
+                        // Loop through each Objective in the SubForm
+                        foreach (var objective in subForm.Objectives)
+                        {
+                            // Loop through each TestDescription in the Objective
+                            foreach (var testDescription in objective.TestDescriptions)
+                            {
+                                // Populate the TestDescription with QC7FormTest data
+                                testDescription.SignBy = viewModel.UserEmail;
+                                testDescription.SignDate = DateTime.Now;
+                            }
+                        }
+                    }
+
                     return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
                 }
 

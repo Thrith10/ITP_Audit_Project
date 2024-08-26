@@ -28,6 +28,7 @@ namespace PKFAuditManagement.ViewModels
         [Display(Name = "Financial Statement (PDF)")]
         public IFormFile FinancialStatement { get; set; }
 
+        public List<string>? ClientNames { get; set; }
         public List<string> PartnerEmailOptions { get; set; } = new List<string>
         {
             "russelpoon25@gmail.com",

@@ -45,12 +45,22 @@ namespace PKFAuditManagement.Controllers
         [HttpGet]
 
         [Authorize(Roles = "Non-Auditor,User,Admin")]
-        public IActionResult ScheduleEmails()
+        public async Task<IActionResult> ScheduleEmailsAsync()
         {
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
             var model = new SignedFSFormViewModel
             {
-                UserEmail = User.Identity.Name // Assuming the user email is set in the identity
+                UserEmail = User.Identity.Name,
+                ClientNames = clientNames
             };
+
             return View("~/Views/General/SignedFS/SignedFSForm.cshtml", model);
         }
 
@@ -133,10 +143,20 @@ namespace PKFAuditManagement.Controllers
                 return RedirectToAction("ScheduleEmails");
             }
 
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
+
             var model = new SignedFSFormViewModel
             {
                 Id = job.Id,
                 Client = job.Client,
+                ClientNames = clientNames,
                 AuditedReportDate = job.AuditedReportDate,
                 PartnerEmail = job.PartnerEmail,
                 UserEmail = job.UserEmail,

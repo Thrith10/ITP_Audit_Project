@@ -19,6 +19,7 @@ namespace PKFAuditManagement.ViewModels
         public string ManagerName { get; set; }
         public string PartnerName { get; set; }
         public string? ImageFileName { get; set; }
+        public List<string>? ClientNames { get; set; }
 
         public IFormFile? File { get; set; } // Add this property for file upload
         public string? Status { get; set; }

@@ -1,3 +1,18 @@
+$("#autocomplete").autocomplete({
+    source: function (request, response) {
+        $.ajax({
+            url: '/QC6Form/GetAllClients',
+            type: 'GET',
+            success: function (data) {
+                var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
+                response($.grep(data, function (item) {
+                    return matcher.test(item);
+                }));
+            }
+        });
+    }
+});
+
 // Add event listener to the "Add Service" button
 document.getElementById('addService').addEventListener('click', addService);
 
@@ -13,16 +28,6 @@ $(document).on("blur", "#auditFee, #EstimatedFee, #BudgetedTimeCost, input[name^
 function convertToMoney(val) {
     return (Math.floor(val * 100).toFixed(0) / 100).toFixed(2);
 }
-
-var tags = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"];
-$("#autocomplete").autocomplete({
-    source: function (request, response) {
-        var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
-        response($.grep(tags, function (item) {
-            return matcher.test(item);
-        }));
-    }
-});
 
 // Function to add a new service field
 function addService() {

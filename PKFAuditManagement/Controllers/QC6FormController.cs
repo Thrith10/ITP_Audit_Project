@@ -202,6 +202,23 @@ namespace PKFAuditManagement.Controllers
                         Fee = feeDetail.Fee
                     });
                 }
+
+                // Load existing documents
+                var documentData = _context.QCDocuments.Where(x => x.QC6FormID == id).ToList();
+
+                viewModel.BusinessProfileUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "BusinessProfile")?.S3Key);
+                viewModel.TrendSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "TrendSearch")?.S3Key);
+                viewModel.GoogleSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "GoogleSearch")?.S3Key);
+                viewModel.LexisNexisSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "LexisNexisSearch")?.S3Key);
+
+                viewModel.OtherDocumentUrls = documentData.Where(x => x.DocumentType == "OtherDocuments")
+                    .Select(x => new DocumentView
+                    {
+                        DocumentName = ExtractDocumentName(x.S3Key),
+                        File = _s3Service.GeneratePreSignedUrl(x.S3Key),
+                        DocumentType = x.DocumentType
+                    }).ToList();
+
                 return View("~/Views/General/QC6/EditQC6Form.cshtml", viewModel);
             }
             catch
@@ -1661,6 +1678,17 @@ namespace PKFAuditManagement.Controllers
 
             // Return an empty string or handle the case where the format is unexpected
             return string.Empty;
+        }
+
+        public async Task<IActionResult> GetAllClients()
+        {
+            var clientNames = await _context.QC6Forms
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .ToListAsync(); // Fetch all unique client names
+
+            // Return the list of client names
+            return Ok(clientNames);
         }
 
     }

@@ -15,6 +15,8 @@ namespace PKFAuditManagement.ViewModels
         }
         // User Details
         public string? UserEmail { get; set; }
+        // Client Names
+        public List<string>? ClientNames { get; set; }
 
         // Start of QC7Form data
         public string? QC7FormID { get; set; }
@@ -91,6 +93,7 @@ namespace PKFAuditManagement.ViewModels
         public TNATNEAssessmentViewModel TNATNEAssessment { get; set; }
         public List<string>? AdminEmails { get; set; }
         public bool IsNewForm { get; set; }
+        public string? SelectedClient { get; set; }
     }
 
     public class QC7SubFormViewModel

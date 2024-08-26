@@ -28,22 +28,34 @@
                                     <div class="form-container">
                                         <form asp-action="UpdateSignedFS" method="post" enctype="multipart/form-data">
                                             <input type="hidden" asp-for="Id" />
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label asp-for="Client" class="control-label">Client</label>
-                                                <input asp-for="Client" class="form-control" id="autocomplete" />
+                                                <select asp-for="Client" class="form-control">
+                                                    @if (Model.ClientNames != null && Model.ClientNames.Any())
+                                                    {
+                                                        @foreach (var client in Model.ClientNames)
+                                                        {
+                                                            <option value="@client">@client</option>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <option disabled>No clients available</option>
+                                                    }
+                                                </select>
                                                 <span asp-validation-for="Client" class="text-danger"></span>
                                             </div>
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label asp-for="AuditedReportDate" class="control-label">Audited Report Date</label>
                                                 <input asp-for="AuditedReportDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" type="date" />
                                                 <span asp-validation-for="AuditedReportDate" class="text-danger"></span>
                                             </div>
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label asp-for="PartnerEmail" class="control-label">Partner Email</label>
                                                 <select asp-for="PartnerEmail" class="form-control" asp-items="@(new SelectList(Model.PartnerEmailOptions))"></select>
                                                 <span asp-validation-for="PartnerEmail" class="text-danger"></span>
                                             </div>
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label asp-for="UserEmail" class="control-label">Your Email</label>
                                                 <input asp-for="UserEmail" class="form-control" readonly />
                                                 <span asp-validation-for="UserEmail" class="text-danger"></span>
@@ -58,8 +70,6 @@
 
                                         @section Scripts {
                                             @{
-                                                <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
-                                                <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
                                                 <script src="~/js/signed-fs-creation.js"></script>
                                                 await Html.RenderPartialAsync("_ValidationScriptsPartial");
                                             }
