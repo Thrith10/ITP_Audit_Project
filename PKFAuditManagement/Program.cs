@@ -144,11 +144,8 @@ using (var scope = app.Services.CreateScope())
     // Initialise an instance of the userManager
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
 
-    //var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
-    //var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
-
-    string email = "admin@gmail.com";
-    string password = "P@ssw0rd";
+    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
+    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
 
     // Check if admin user has already been created
     if (await userManager.FindByEmailAsync(email) == null)
