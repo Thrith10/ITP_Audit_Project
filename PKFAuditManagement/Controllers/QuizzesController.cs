@@ -142,7 +142,7 @@ namespace PKFAuditManagement.Controllers
         }
         // Additional actions for Edit, Delete, Details, etc., can be added here
         // Your existing Details method with QR code generation added
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
             var quiz = await _context.Quiz
                                      .Include(q => q.Questions)
@@ -198,7 +198,7 @@ namespace PKFAuditManagement.Controllers
 
         // GET: Quizzes/Edit
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             var quiz = await _context.Quiz
                 .Include(q => q.Questions)
@@ -289,7 +289,7 @@ namespace PKFAuditManagement.Controllers
         // POST: Quizzes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id, bool deleteAssociated = false)
+        public async Task<IActionResult> DeleteConfirmed(Guid id, bool deleteAssociated = false)
         {
             var quiz = await _context.Quiz
                                      .Include(q => q.Questions)

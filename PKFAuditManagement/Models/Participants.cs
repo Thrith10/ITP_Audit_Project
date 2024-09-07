@@ -12,7 +12,7 @@ namespace PKFAuditManagement.Models
         public string UserID { get; set; } // Foreign Key to ApplicationUser
 
         [Required]
-        public int QuizID { get; set; } // Foreign Key
+        public Guid QuizID { get; set; } // Foreign Key
 
         public int TotalScore { get; set; } // Total score for the quiz
 

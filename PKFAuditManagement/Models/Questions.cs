@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PKFAuditManagement.Models
@@ -9,7 +11,7 @@ namespace PKFAuditManagement.Models
         public int QuestionID { get; set; }
 
         [Required]
-        public int QuizID { get; set; }
+        public Guid QuizID { get; set; }  // Changed from int to Guid
 
         [Required]
         [StringLength(255)]
