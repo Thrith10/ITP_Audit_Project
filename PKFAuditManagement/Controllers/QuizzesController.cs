@@ -52,7 +52,9 @@ namespace PKFAuditManagement.Controllers
                 var quiz = new Quiz
                 {
                     Title = quizViewModel.Title,
-                    Description = quizViewModel.Description
+                    Description = quizViewModel.Description,
+                    QuizStart = quizViewModel.QuizStart,
+
                 };
 
                 // Add the quiz first to generate the QuizID
@@ -134,7 +136,9 @@ namespace PKFAuditManagement.Controllers
                 {
                     QuizID = q.QuizID,
                     Title = q.Title,
-                    Description = q.Description
+                    Description = q.Description,
+                    QuizStart = q.QuizStart // Include QuizStart in the view model
+
                 }).ToList()
             };
 
@@ -156,23 +160,15 @@ namespace PKFAuditManagement.Controllers
 
             var totalQuestions = quiz.Questions.Count;
 
-            var participants = await (from p in _context.Participants
-                                      join u in _context.Users on p.UserID equals u.Id
-                                      join a in _context.Attempt on new { p.UserID, p.QuizID } equals new { a.UserID, a.QuizID }
-                                      where p.QuizID == id
-                                      select new ParticipantViewModel
-                                      {
-                                          UserID = p.UserID,
-                                          UserName = u.UserName,
-                                          TotalScore = p.TotalScore,
-                                          AttemptDate = a.AttemptDate // Fetch AttemptDate from the Attempt table
-                                      }).Distinct().ToListAsync();
+
 
             var viewModel = new QuizViewModel
             {
                 QuizID = quiz.QuizID,
                 Title = quiz.Title,
                 Description = quiz.Description,
+                QuizStart = quiz.QuizStart, // Include QuizStart in the view model
+
                 Questions = quiz.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionID = q.QuestionID,
@@ -184,14 +180,13 @@ namespace PKFAuditManagement.Controllers
                         OptionText = o.OptionText
                     }).ToList()
                 }).ToList(),
-                Participants = participants,
+      
                 QRImageURL = GenerateQRCode($"Quiz ID: {quiz.QuizID}"), // Generate QR code for QuizID
-                CanEdit = !participants.Any() // Flag to indicate if the quiz can be edited
+
             };
 
             ViewBag.TotalQuestions = totalQuestions;
-            ViewBag.FailedParticipantsEmails = JsonSerializer.Serialize(viewModel.Participants.Where(p => p.TotalScore < 0.5 * viewModel.Questions.Count()).Select(p => p.UserName).ToList());
-
+         
             return View("~/Views/General/Quiz/QuizDetailsPage.cshtml", viewModel);
         }
 
@@ -215,6 +210,7 @@ namespace PKFAuditManagement.Controllers
                 QuizID = quiz.QuizID,
                 Title = quiz.Title,
                 Description = quiz.Description,
+                QuizStart = quiz.QuizStart,
                 Questions = quiz.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionID = q.QuestionID,
@@ -251,6 +247,8 @@ namespace PKFAuditManagement.Controllers
                 // Update quiz details
                 quiz.Title = quizViewModel.Title;
                 quiz.Description = quizViewModel.Description;
+                quiz.QuizStart = quizViewModel.QuizStart;
+
 
                 // Remove existing questions and options
                 var existingQuestions = quiz.Questions.ToList();

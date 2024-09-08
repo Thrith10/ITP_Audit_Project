@@ -1,6 +1,12 @@
 ﻿@model PKFAuditManagement.ViewModels.QuizViewModel
 <head>
     <style>
+        .validation-error {
+            color: #dc3545; /* Red color for error messages */
+            font-size: 0.875em; /* Smaller font size */
+            margin-top: 0.25em; /* Space above the error message */
+            display: none; /* Hide by default */
+        }
         .form-container {
             padding: 20px;
         }
@@ -77,25 +83,40 @@
                                     <form asp-action="Create" method="post">
                                         <div class="form-group">
                                             <label for="Title">Quiz Title</label>
-                                            <input type="text" class="form-control" id="Title" name="Title" value="@Model.Title" />
+                                            <input type="text" class="form-control" id="Title" name="Title" value="@Model.Title" required />
                                         </div>
                                         <div class="form-group">
                                             <label for="Description">Description</label>
-                                            <textarea class="form-control" id="Description" name="Description">@Model.Description</textarea>
+                                            <textarea class="form-control" id="Description" name="Description" required>@Model.Description</textarea>
                                         </div>
+
+                                        <!-- New Quiz Start Field -->
+                                        <div class="form-group">
+                                            <label for="QuizStart">Quiz Start</label>
+                                            <!-- Set default value to current date and time -->
+                                            <input type="datetime-local" class="form-control" id="QuizStart" name="QuizStart"
+                                                   placeholder="dd/MM/yyyy" required />
+                                        </div>
+
                                         <div id="quiz-container">
+                                            <!-- Updated Loop for Questions -->
                                             @for (int i = 0; i < Model.Questions.Count; i++)
                                             {
                                                 <div class="card mb-3" data-index="@i">
                                                     <div class="card-body">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <h5 class="card-title">Question @(i + 1):</h5>
-                                                            <button type="button" class="btn btn-danger btn-sm remove-question">
-                                                                <i class="bi bi-trash"></i> Remove Question
-                                                            </button>
+
+                                                            <!-- Conditionally Render Remove Question Button -->
+                                                            @if (i > 0)
+                                                            {
+                                                                <button type="button" class="btn btn-danger btn-sm remove-question">
+                                                                    <i class="bi bi-trash"></i> Remove Question
+                                                                </button>
+                                                            }
                                                         </div>
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control" name="Questions[@i].Description" value="@Model.Questions.ElementAt(i).Description" />
+                                                            <input type="text" class="form-control" name="Questions[@i].Description" value="@Model.Questions.ElementAt(i).Description" required />
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Options:</label>
@@ -103,7 +124,7 @@
                                                                 @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
                                                                 {
                                                                     <div class="input-group mb-2 option-group">
-                                                                        <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions.ElementAt(i).Options.ElementAt(j).OptionText" data-option-index="@j" />
+                                                                        <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions.ElementAt(i).Options.ElementAt(j).OptionText" data-option-index="@j" required />
                                                                         <button type="button" class="btn btn-danger btn-sm remove-option">
                                                                             <i class="bi bi-trash"></i>
                                                                         </button>
@@ -116,7 +137,7 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Select the correct answer:</label>
-                                                            <select class="form-control" name="Questions[@i].CorrectOptionText">
+                                                            <select class="form-control" name="Questions[@i].CorrectOptionText" required>
                                                                 @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
                                                                 {
                                                                     var option = Model.Questions.ElementAt(i).Options.ElementAt(j);
@@ -127,28 +148,57 @@
                                                     </div>
                                                 </div>
                                             }
+
                                         </div>
                                         <div class="btn-container">
                                             <button type="button" class="btn btn-secondary btn-sm add-question btn-add" id="add-question">
                                                 <i class="bi bi-plus-lg"></i> Add Question
                                             </button>
-                                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                            <button type="submit" id="submit-button" class="btn btn-primary btn-sm">Save</button>
                                         </div>
                                     </form>
-
                                     @section Scripts {
                                         @{
                                             await Html.RenderPartialAsync("_ValidationScriptsPartial");
                                         }
-
                                         <script>
+                                            document.addEventListener('DOMContentLoaded', function () {
+                                                var quizStartInput = document.getElementById('QuizStart');
+                                                if (quizStartInput) {
+                                                    var now = new Date();
+
+                                                    // Convert to Singapore time (UTC+8)
+                                                    var singaporeOffset = 8 * 60; // offset in minutes
+                                                    var localOffset = now.getTimezoneOffset(); // offset in minutes
+                                                    var singaporeTime = new Date(now.getTime() + (singaporeOffset + localOffset) * 60000);
+
+                                                    // Format the date and time to yyyy-MM-ddTHH:mm format for the input value
+                                                    var year = singaporeTime.getFullYear();
+                                                    var month = String(singaporeTime.getMonth() + 1).padStart(2, '0');
+                                                    var day = String(singaporeTime.getDate()).padStart(2, '0');
+                                                    var hours = String(singaporeTime.getHours()).padStart(2, '0');
+                                                    var minutes = String(singaporeTime.getMinutes()).padStart(2, '0');
+                                                    var formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+                                                    // Set the min attribute to the formatted date-time for validation
+                                                    quizStartInput.min = formattedDate;
+                                                    quizStartInput.placeholder = formattedDate;
+                                                    quizStartInput.value = formattedDate;
+
+                                                    // Open the DateTime picker on focus or click anywhere in the input field
+                                                    quizStartInput.addEventListener('click', function () {
+                                                        quizStartInput.showPicker(); // Opens the date-time picker
+                                                    });
+                                                }
+                                            });
+
                                             function updateDropdown(questionIndex) {
                                                 var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
                                                 var select = document.querySelector(`[data-index='${questionIndex}'] select[name*='CorrectOptionText']`);
                                                 select.innerHTML = ''; // Clear existing options
 
                                                 var inputs = optionsContainer.querySelectorAll('input[type="text"]');
-                                                inputs.forEach(function (input, index) {
+                                                inputs.forEach(function (input) {
                                                     var option = document.createElement('option');
                                                     option.value = input.value; // Use input value as option value
                                                     option.text = input.value;
@@ -156,75 +206,170 @@
                                                 });
                                             }
 
+                                            function getOptions(questionIndex) {
+                                                var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
+                                                return Array.from(optionsContainer.querySelectorAll('input[type="text"]')).map(input => input.value.trim());
+                                            }
+
+                                            function isOptionUnique(options, newValue) {
+                                                return options.filter(option => option === newValue).length === 1;
+                                            }
+
+                                            function showInvalidOptionsPopup() {
+                                                alert('Some options are invalid. Please correct duplicate options before submitting.');
+                                            }
+
                                             document.addEventListener('input', function (e) {
                                                 if (e.target && e.target.matches('.option-group input[type="text"]')) {
                                                     var questionCard = e.target.closest('.card');
                                                     var questionIndex = questionCard.getAttribute('data-index');
+                                                    var allOptions = getOptions(questionIndex);
+                                                    var newValue = e.target.value.trim();
+
+                                                    // Update dropdown for correct answer
                                                     updateDropdown(questionIndex);
+
+                                                    // Remove existing validation classes
+                                                    var optionInputs = document.querySelectorAll(`[data-index='${questionIndex}'] .option-group input[type="text"]`);
+                                                    optionInputs.forEach(function (input) {
+                                                        input.classList.remove('is-invalid');
+                                                    });
+
+                                                    // Apply invalid class only to duplicate options
+                                                    allOptions.forEach(function (option) {
+                                                        if (!isOptionUnique(allOptions, option)) {
+                                                            var invalidInputs = Array.from(optionInputs).filter(input => input.value.trim() === option);
+                                                            invalidInputs.forEach(input => input.classList.add('is-invalid'));
+                                                        }
+                                                    });
                                                 }
                                             });
 
                                             document.addEventListener('click', function (e) {
-                                                if (e.target.closest('.add-question')) {
+                                                if (e.target && e.target.matches('.add-question')) {
                                                     var quizContainer = document.getElementById('quiz-container');
                                                     var newIndex = quizContainer.children.length;
                                                     var newCard = document.createElement('div');
                                                     newCard.className = 'card mb-3';
                                                     newCard.setAttribute('data-index', newIndex);
                                                     newCard.innerHTML = `
-                                                                    <div class="card-body">
-                                                                        <div class="d-flex justify-content-between align-items-center">
-                                                                            <h5 class="card-title">Question ${newIndex + 1}:</h5>
-                                                                            <button type="button" class="btn btn-danger btn-sm remove-question">
-                                                                                <i class="bi bi-trash"></i> Remove Question
-                                                                            </button>
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <input type="text" class="form-control" name="Questions[${newIndex}].Description" />
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label>Options:</label>
-                                                                            <div class="options-container">
-                                                                                <div class="input-group mb-2 option-group">
-                                                                                    <input type="text" class="form-control" name="Questions[${newIndex}].Options[0].OptionText" />
-                                                                                    <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                                        <i class="bi bi-trash"></i>
-                                                                                    </button>
-                                                                                </div>
+                                                                <div class="card-body">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <h5 class="card-title">Question ${newIndex + 1}:</h5>
+                                                                        <button type="button" class="btn btn-danger btn-sm remove-question">
+                                                                            <i class="bi bi-trash"></i> Remove Question
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <input type="text" class="form-control" name="Questions[${newIndex}].Description" required />
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label>Options:</label>
+                                                                        <div class="options-container">
+                                                                            <div class="input-group mb-2 option-group">
+                                                                                <input type="text" class="form-control" name="Questions[${newIndex}].Options[0].OptionText" data-option-index="0" required />
+                                                                                <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                                    <i class="bi bi-trash"></i>
+                                                                                </button>
                                                                             </div>
-                                                                            <button type="button" class="btn btn-secondary btn-sm add-option btn-add" data-question-index="${newIndex}">
-                                                                                <i class="bi bi-plus-lg"></i> Add Option
-                                                                            </button>
                                                                         </div>
-                                                                        <div class="form-group">
-                                                                            <label>Select the correct answer:</label>
-                                                                            <select class="form-control" name="Questions[${newIndex}].CorrectOptionText">
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>`;
+                                                                        <button type="button" class="btn btn-secondary btn-sm add-option" data-question-index="${newIndex}">
+                                                                            <i class="bi bi-plus-lg"></i> Add Option
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label>Select the correct answer:</label>
+                                                                        <select class="form-control" name="Questions[${newIndex}].CorrectOptionText" required>
+                                                                            <option value="">Select an option</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            `;
                                                     quizContainer.appendChild(newCard);
-                                                } else if (e.target.closest('.add-option')) {
+                                                } else if (e.target && e.target.matches('.add-option')) {
                                                     var questionIndex = e.target.getAttribute('data-question-index');
-                                                    var optionsContainer = e.target.previousElementSibling;
-                                                    var newOptionIndex = optionsContainer.children.length;
-                                                    var newOption = document.createElement('div');
-                                                    newOption.className = 'input-group mb-2 option-group';
-                                                    newOption.innerHTML = `
-                                                                    <input type="text" class="form-control" name="Questions[${questionIndex}].Options[${newOptionIndex}].OptionText" />
-                                                                    <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>`;
-                                                    optionsContainer.appendChild(newOption);
+                                                    var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
+                                                    var newIndex = optionsContainer.children.length;
+                                                    var newOptionGroup = document.createElement('div');
+                                                    newOptionGroup.className = 'input-group mb-2 option-group';
+                                                    newOptionGroup.innerHTML = `
+                                                                <input type="text" class="form-control" name="Questions[${questionIndex}].Options[${newIndex}].OptionText" data-option-index="${newIndex}" required />
+                                                                <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            `;
+                                                    optionsContainer.appendChild(newOptionGroup);
                                                     updateDropdown(questionIndex);
-                                                } else if (e.target.closest('.remove-option')) {
-                                                    var optionGroup = e.target.closest('.option-group');
-                                                    var questionCard = e.target.closest('.card');
-                                                    var questionIndex = questionCard.getAttribute('data-index');
-                                                    optionGroup.parentNode.removeChild(optionGroup);
+
+                                                    // Hide the add option button if the number of options reaches 5
+                                                    if (newIndex >= 4) { // next index would be 5
+                                                        e.target.style.display = 'none';
+                                                    }
+                                                } else if (e.target && e.target.matches('.remove-question')) {
+                                                    var cardToRemove = e.target.closest('.card');
+                                                    cardToRemove.remove();
+                                                    updateIndexes();
+                                                } else if (e.target && e.target.matches('.remove-option')) {
+                                                    var optionGroupToRemove = e.target.closest('.option-group');
+                                                    var questionIndex = e.target.closest('.card').getAttribute('data-index');
+                                                    optionGroupToRemove.remove();
                                                     updateDropdown(questionIndex);
-                                                } else if (e.target.closest('.remove-question')) {
-                                                    var questionCard = e.target.closest('.card');
-                                                    questionCard.parentNode.removeChild(questionCard);
+
+                                                    // Re-enable the add option button if options are fewer than 5
+                                                    var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
+                                                    var addOptionButton = document.querySelector(`[data-index='${questionIndex}'] .add-option`);
+                                                    if (optionsContainer.children.length < 5) {
+                                                        addOptionButton.style.display = 'block';
+                                                    }
+                                                }
+                                            });
+
+                                            function updateIndexes() {
+                                                var cards = document.querySelectorAll('#quiz-container .card');
+                                                cards.forEach(function (card, index) {
+                                                    card.setAttribute('data-index', index);
+                                                    card.querySelector('.card-title').textContent = `Question ${index + 1}:`;
+                                                    var inputs = card.querySelectorAll('input, select');
+                                                    inputs.forEach(function (input) {
+                                                        var name = input.getAttribute('name');
+                                                        if (name) {
+                                                            var newName = name.replace(/Questions\[\d+\]/, `Questions[${index}]`);
+                                                            input.setAttribute('name', newName);
+                                                        }
+                                                    });
+                                                });
+                                            }
+
+                                            // Function to validate all questions before submission
+                                            function validateQuiz() {
+                                                var isValid = true;
+                                                var cards = document.querySelectorAll('#quiz-container .card');
+                                                cards.forEach(function (card) {
+                                                    var questionIndex = card.getAttribute('data-index');
+                                                    var allOptions = getOptions(questionIndex);
+                                                    var optionInputs = card.querySelectorAll('.option-group input[type="text"]');
+
+                                                    // Check for invalid options
+                                                    allOptions.forEach(function (option) {
+                                                        if (!isOptionUnique(allOptions, option)) {
+                                                            var invalidInputs = Array.from(optionInputs).filter(input => input.value.trim() === option);
+                                                            invalidInputs.forEach(input => input.classList.add('is-invalid'));
+                                                            isValid = false;
+                                                        }
+                                                    });
+                                                });
+
+                                                if (!isValid) {
+                                                    showInvalidOptionsPopup();
+                                                }
+
+                                                return isValid;
+                                            }
+
+                                            // Example submission handling
+                                            document.querySelector('#submit-button').addEventListener('click', function (e) {
+                                                if (!validateQuiz()) {
+                                                    e.preventDefault(); // Prevent form submission if there are invalid options
                                                 }
                                             });
                                         </script>
@@ -233,8 +378,9 @@
                             </div>
                         </div>
                     </div>
+                    <!-- End Customers Card -->
                 </div>
             </div><!-- End Left side columns -->
         </div>
     </section>
-</main><!-- End #main -->
+</main>
