@@ -18,6 +18,8 @@ namespace PKFAuditManagement.Models
 
         [Required]
         public DateTime AttemptDate { get; set; }
+        [Required]
+        public int Score { get; set; }
 
         // Navigation properties
         [ForeignKey("QuizID")]
