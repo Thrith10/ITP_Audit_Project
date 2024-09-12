@@ -363,7 +363,7 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult GenerateQR(int quizId)
+        public IActionResult GenerateQR(string quizId)
         {
             var qrCodeImage = GenerateQRCode($"{quizId}");
             return Json(new { qrCodeImage });
