@@ -6,15 +6,23 @@ namespace PKFAuditManagement.Models
     public class Participants
     {
         [Key]
-        public int ParticipantID { get; set; } // Primary Key
+        public int ParticipantID { get; set; }
 
         [Required]
-        public string UserID { get; set; } // Foreign Key to ApplicationUser
+        public string UserID { get; set; }
 
         [Required]
-        public Guid QuizID { get; set; } // Foreign Key
+        public Guid QuizID { get; set; }
 
-        public int TotalScore { get; set; } // Total score for the quiz
+        public bool IsRequired { get; set; } = true;
+
+        public bool ClockedAttendance { get; set; } = false;
+        public bool QuizDone { get; set; } = false;
+        public bool FeedbackDone { get; set; } = false;
+        public bool OverallCompletion { get; set; } = false;
+
+        public DateTime? OverallCompletionDate { get; set; } = null;
+
 
         // Navigation properties
         [ForeignKey("QuizID")]

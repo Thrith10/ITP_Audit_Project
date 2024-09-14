@@ -19,5 +19,6 @@ namespace PKFAuditManagement.Models
         // Navigation properties
         public ICollection<Questions> Questions { get; set; } = new List<Questions>();
         public ICollection<Participants>? Participants { get; set; }
+        public DateTime QuizStart { get; set; }
     }
 }

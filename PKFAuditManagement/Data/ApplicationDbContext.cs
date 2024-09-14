@@ -119,11 +119,6 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(a => a.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Participants>()
-                .HasOne(p => p.Quiz)
-                .WithMany()
-                .HasForeignKey(p => p.QuizID)
-                .OnDelete(DeleteBehavior.Cascade);
 
             new DataSeeder(modelBuilder).Seed();
         }

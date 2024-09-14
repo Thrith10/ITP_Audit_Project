@@ -11,6 +11,10 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
+using System.Net.Mail;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -52,7 +56,8 @@ namespace PKFAuditManagement.Controllers
                 var quiz = new Quiz
                 {
                     Title = quizViewModel.Title,
-                    Description = quizViewModel.Description
+                    Description = quizViewModel.Description,
+                    QuizStart = quizViewModel.QuizStart
                 };
 
                 // Add the quiz first to generate the QuizID
@@ -81,8 +86,38 @@ namespace PKFAuditManagement.Controllers
                         };
 
                         _context.Option.Add(option);
-                        await _context.SaveChangesAsync(); // Save each option to get OptionID
                     }
+                    await _context.SaveChangesAsync(); // Save each option to get OptionID
+                }
+
+                // Handle selected participants by querying their UserID based on their email
+                if (!string.IsNullOrEmpty(quizViewModel.SelectedParticipants))
+                {
+                    // Split the email string by the delimiter `;`
+                    var emailList = quizViewModel.SelectedParticipants.Split(';');
+
+                    foreach (var email in emailList)
+                    {
+                        var trimmedEmail = email.Trim(); // Ensure to remove any extra spaces around the email
+
+                        // Query the database to find the UserID based on the email
+                        var user = await _context.Users
+                            .Where(u => u.Email == trimmedEmail)
+                            .FirstOrDefaultAsync();
+
+                        if (user != null)
+                        {
+                            var participant = new Participants
+                            {
+                                UserID = user.Id, // Assuming Id is the primary key of the User entity
+                                QuizID = quiz.QuizID,
+                                IsRequired = true
+                            };
+                            _context.Participants.Add(participant);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
                 }
 
                 TempData["SuccessMessage"] = "Quiz created successfully!";
@@ -91,6 +126,10 @@ namespace PKFAuditManagement.Controllers
 
             return View("~/Views/General/Quiz/CreateQuiz.cshtml", quizViewModel);
         }
+
+
+
+
 
         // GET: Quizzes
         [HttpGet]
@@ -134,7 +173,9 @@ namespace PKFAuditManagement.Controllers
                 {
                     QuizID = q.QuizID,
                     Title = q.Title,
-                    Description = q.Description
+                    Description = q.Description,
+                    QuizStart = q.QuizStart // Include QuizStart in the view model
+
                 }).ToList()
             };
 
@@ -156,23 +197,15 @@ namespace PKFAuditManagement.Controllers
 
             var totalQuestions = quiz.Questions.Count;
 
-            var participants = await (from p in _context.Participants
-                                      join u in _context.Users on p.UserID equals u.Id
-                                      join a in _context.Attempt on new { p.UserID, p.QuizID } equals new { a.UserID, a.QuizID }
-                                      where p.QuizID == id
-                                      select new ParticipantViewModel
-                                      {
-                                          UserID = p.UserID,
-                                          UserName = u.UserName,
-                                          TotalScore = p.TotalScore,
-                                          AttemptDate = a.AttemptDate // Fetch AttemptDate from the Attempt table
-                                      }).Distinct().ToListAsync();
+
 
             var viewModel = new QuizViewModel
             {
                 QuizID = quiz.QuizID,
                 Title = quiz.Title,
                 Description = quiz.Description,
+                QuizStart = quiz.QuizStart, // Include QuizStart in the view model
+
                 Questions = quiz.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionID = q.QuestionID,
@@ -184,14 +217,13 @@ namespace PKFAuditManagement.Controllers
                         OptionText = o.OptionText
                     }).ToList()
                 }).ToList(),
-                Participants = participants,
+      
                 QRImageURL = GenerateQRCode($"Quiz ID: {quiz.QuizID}"), // Generate QR code for QuizID
-                CanEdit = !participants.Any() // Flag to indicate if the quiz can be edited
+
             };
 
             ViewBag.TotalQuestions = totalQuestions;
-            ViewBag.FailedParticipantsEmails = JsonSerializer.Serialize(viewModel.Participants.Where(p => p.TotalScore < 0.5 * viewModel.Questions.Count()).Select(p => p.UserName).ToList());
-
+         
             return View("~/Views/General/Quiz/QuizDetailsPage.cshtml", viewModel);
         }
 
@@ -215,6 +247,7 @@ namespace PKFAuditManagement.Controllers
                 QuizID = quiz.QuizID,
                 Title = quiz.Title,
                 Description = quiz.Description,
+                QuizStart = quiz.QuizStart,
                 Questions = quiz.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionID = q.QuestionID,
@@ -251,6 +284,8 @@ namespace PKFAuditManagement.Controllers
                 // Update quiz details
                 quiz.Title = quizViewModel.Title;
                 quiz.Description = quizViewModel.Description;
+                quiz.QuizStart = quizViewModel.QuizStart;
+
 
                 // Remove existing questions and options
                 var existingQuestions = quiz.Questions.ToList();
@@ -365,11 +400,74 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult GenerateQR(int quizId)
+        public IActionResult GenerateQR(string quizId)
         {
             var qrCodeImage = GenerateQRCode($"{quizId}");
             return Json(new { qrCodeImage });
         }
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _context.Users
+                .Select(u => new UserViewModel
+                {
+                    Email = u.Email,  // Ensure email is properly fetched
+                    UserId = u.Id,
+                    UserName = u.UserName
+                })
+                .ToListAsync();
+
+            return Json(users);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EmailValidation([FromBody] List<string> emails)
+        {
+            // Check if the list is null or empty
+            if (emails == null || !emails.Any())
+            {
+                return BadRequest("No emails provided.");
+            }
+
+            // Validate each email format
+            var validEmails = new List<string>();
+
+            foreach (var email in emails)
+            {
+                if (IsValidEmailFormat(email))
+                {
+                    validEmails.Add(email);
+                }
+            }
+
+            // Query database to validate emails and ensure they exist
+            var existingEmails = await _context.Users
+                .Where(u => validEmails.Contains(u.Email))
+                .Select(u => u.Email)
+                .ToListAsync();
+
+            // Return the valid emails as a semicolon-delimited string
+            var result = string.Join(";", existingEmails);
+            return Ok(result);
+        }
+
+        private bool IsValidEmailFormat(string email)
+        {
+            // Check if the email format is valid
+            try
+            {
+                var addr = new MailAddress(email);
+                return addr.Address == email; // Ensure the email address is well-formed
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+
+
 
     }
 
