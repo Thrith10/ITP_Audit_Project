@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.ViewModels;
 using System.Collections.Generic;
