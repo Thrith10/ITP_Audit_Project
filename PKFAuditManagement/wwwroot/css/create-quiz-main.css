@@ -1,0 +1,35 @@
+﻿/* Tab styles */
+.nav-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+    .nav-tabs button {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        border-radius: 4px;
+        flex: 1;
+        text-align: center;
+    }
+
+        .nav-tabs button.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .nav-tabs button:hover {
+            background-color: #e2e6ea;
+        }
+
+.tab-content {
+    display: none;
+}
+
+    .tab-content.active {
+        display: block;
+    }
+

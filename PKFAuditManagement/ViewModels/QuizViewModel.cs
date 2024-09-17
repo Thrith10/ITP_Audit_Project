@@ -37,6 +37,8 @@ namespace PKFAuditManagement.ViewModels
         public string? SelectedParticipants { get; set; }
         public string? QRImageURL { get; set; }
 
+
+
     }
 
     public class QuestionViewModel

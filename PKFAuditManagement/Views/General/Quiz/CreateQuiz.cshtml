@@ -1,41 +1,16 @@
 @model PKFAuditManagement.ViewModels.QuizViewModel
 
 <head>
+    <link rel="stylesheet" href="~/css/create-quiz-main.css">
+    <link rel="stylesheet" href="~/css/manual-quiz-creation.css">
+    <script src="~/js/create-quiz-main.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="~/js/manual-quiz-creation.js" defer></script>
+    <script src="~/js/excel-quiz-creation.js" defer></script>
     <style>
-        /* Tab styles */
-        .nav-tabs {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
+        label {
+            font-weight: bold;
         }
-
-            .nav-tabs button {
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
-                padding: 10px 20px;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-                border-radius: 4px;
-                flex: 1;
-                text-align: center;
-            }
-
-                .nav-tabs button.active {
-                    background-color: #007bff;
-                    color: white;
-                }
-
-                .nav-tabs button:hover {
-                    background-color: #e2e6ea;
-                }
-
-        .tab-content {
-            display: none;
-        }
-
-            .tab-content.active {
-                display: block;
-            }
     </style>
 </head>
 
@@ -68,38 +43,4 @@
             </div>
         </div>
     </section>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Tab switching logic
-            var manualTab = document.getElementById('manual-tab');
-            var excelTab = document.getElementById('excel-tab');
-            var manualContent = document.getElementById('manual-content');
-            var excelContent = document.getElementById('excel-content');
-
-            // Ensure sidebar is closed on page load
-            var sidebar = document.querySelector('.sidebar'); // Adjust this selector to your sidebar
-            var toggleSidebarBtn = document.querySelector('.toggle-sidebar-btn'); // The hamburger menu button
-            toggleSidebarBtn.click();
-     
-
-            // Switch to Manual Quiz Creation tab
-            manualTab.addEventListener('click', function () {
-                manualTab.classList.add('active');
-                excelTab.classList.remove('active');
-                manualContent.classList.add('active');
-                excelContent.classList.remove('active');
-            });
-
-            // Switch to Excel Quiz Creation tab
-            excelTab.addEventListener('click', function () {
-                excelTab.classList.add('active');
-                manualTab.classList.remove('active');
-                excelContent.classList.add('active');
-                manualContent.classList.remove('active');
-            });
-        });
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="~/js/manual-quiz-creation.js"></script>
 </main>
