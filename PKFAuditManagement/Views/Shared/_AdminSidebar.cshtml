@@ -58,6 +58,12 @@
         </a>
     </li>
     <li class="nav-item">
+        <a class="nav-link @(currentController == "DisplayStatus" && currentAction == "DisplayStatus" ? "active" : "collapsed")" asp-controller="DisplayStatus" asp-action="DisplayStatus">
+            <i class="bi bi-list-check"></i>
+            <span>Display Status</span>
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link @(currentController == "Quizzes" && currentAction == "ViewAllQuiz" ? "active" : "collapsed")" asp-controller="Quizzes" asp-action="ViewAllQuiz">
             <i class="bi bi-person"></i>
             <span>View Quizzes</span>
