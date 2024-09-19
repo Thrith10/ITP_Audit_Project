@@ -143,31 +143,28 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Data Seeder for mapping user to roles
-/*
-using (var scope = app.Services.CreateScope())
-{
-    // Initialise an instance of the userManager
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
+//using (var scope = app.Services.CreateScope())
+//{
+//    // Initialise an instance of the userManager
+//    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
 
-    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
-    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
+//    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
+//    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
 
-    // Check if admin user has already been created
-    if (await userManager.FindByEmailAsync(email) == null)
-    {
-        // Set details of the admin user
-        var user = new CustomUser();
-        user.UserName = email;
-        user.Email = email;
+//    // Check if admin user has already been created
+//    if (await userManager.FindByEmailAsync(email) == null)
+//    {
+//        // Set details of the admin user
+//        var user = new CustomUser();
+//        user.UserName = email;
+//        user.Email = email;
 
-        // Create a new admin account asynchronously
-        await userManager.CreateAsync(user, password);
+//        // Create a new admin account asynchronously
+//        await userManager.CreateAsync(user, password);
 
-        await userManager.AddToRoleAsync(user, "Admin");
-    }
+//        await userManager.AddToRoleAsync(user, "Admin");
+//    }
 
-}
-*/
 
 // Data Seeder for mapping user to roles
 using (var scope = app.Services.CreateScope())

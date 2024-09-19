@@ -8,14 +8,12 @@ namespace PKFAuditManagement.ViewModels
     {
         public string FormType { get; set; } // "QC6" or "QC7"
 
-        // QC6 properties
+        // QC6 properties from QC6Form
         public int QC6FormID { get; set; }
         public string? FileReference { get; set; }
         public string? ProspectiveClient { get; set; }
         public DateTime PeriodEnded { get; set; }
         public string? EngagementType { get; set; }
-        public string? PreparedBy { get; set; }
-        public DateTime PreparedByDate { get; set; }
         public string? ReviewedBy { get; set; }
         public DateTime ReviewedByDate { get; set; }
         public string? Status { get; set; }
@@ -39,13 +37,19 @@ namespace PKFAuditManagement.ViewModels
         public bool IsPublicInterestEntity { get; set; }
         public string? PublicInterestEntityType { get; set; }
 
-        // QC7 properties
+        // QC6 properties from QC6FormConclusion
+        public string? PreparedBy { get; set; }  // Now from QC6FormConclusion
+        public DateTime PreparedByDate { get; set; }  // Now from QC6FormConclusion
+        public DateTime? MPHODQMPApprovedByDate { get; set; }  // New field from QC6FormConclusion
+
+        // Updated QC7 properties
         public int QC7FormID { get; set; }
         public string Client { get; set; }
         public DateTime PeriodEndedQC7 { get; set; }
         public string EngagementTypeQC7 { get; set; }
-        public string PreparedByQC7 { get; set; }
-        public DateTime PreparedByDateQC7 { get; set; }
+        public string PreparedByQC7 { get; set; }  // PreparedBy from QC7FormConclusion
+        public DateTime PreparedByDateQC7 { get; set; }  // PreparedByDate from QC7FormConclusion
+        public DateTime? MPHODQMPApprovedByDateQC7 { get; set; }  // New field from QC7FormConclusion
         public string ReviewedByQC7 { get; set; }
         public DateTime ReviewedByDateQC7 { get; set; }
         public string StatusQC7 { get; set; }
@@ -67,9 +71,10 @@ namespace PKFAuditManagement.ViewModels
         public string PublicInterestEntityTypeQC7 { get; set; }
         public bool IsSubForm2NotApplicable { get; set; }
         public bool IsSubForm3NotApplicable { get; set; }
+    
 
-        // QC35
-        public int QC35FormID { get; set; }
+    // QC35 properties
+    public int QC35FormID { get; set; }
         public string CreatedBy { get; set; }
         public string? AuditFirmName { get; set; }
         public string? ClientName { get; set; }
@@ -84,8 +89,7 @@ namespace PKFAuditManagement.ViewModels
         public string? AdminStaffInitial { get; set; }
         public DateTime? AdminDate { get; set; }
 
-        //Signed FS
-        // Add SignedFSForm fields
+        // Signed FS properties
         public int? SignedFSFormID { get; set; }
         public DateTime? AuditedReportDate { get; set; }
         public string PartnerEmail { get; set; }
