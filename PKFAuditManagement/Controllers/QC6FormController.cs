@@ -555,7 +555,18 @@ namespace PKFAuditManagement.Controllers
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception ex2)
+                    {
+                        // This catch block will handle any errors that may have occurred 
+                        // on the server that would cause the rollback to fail, such as 
+                        // a closed connection.
+                        Console.WriteLine("Rollback Exception Type: {0}", ex2.GetType());
+                        Console.WriteLine("Message: {0}", ex2.Message);
+                    }
                     // Log the error
                     viewModel.ErrorMessage = "Error updating the form, please try again!";
                     return View("~/Views/General/QC6/EditQC6Form.cshtml", viewModel);
@@ -1397,7 +1408,18 @@ namespace PKFAuditManagement.Controllers
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception ex2)
+                    {
+                        // This catch block will handle any errors that may have occurred 
+                        // on the server that would cause the rollback to fail, such as 
+                        // a closed connection.
+                        Console.WriteLine("Rollback Exception Type: {0}", ex2.GetType());
+                        Console.WriteLine("Message: {0}", ex2.Message);
+                    }
                     // Log the error
                     ViewBag.ErrorMessage = "An error occurred while processing your request. Please try again.";
                     return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);

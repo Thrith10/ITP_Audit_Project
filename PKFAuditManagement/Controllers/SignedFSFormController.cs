@@ -10,18 +10,21 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using DocumentFormat.OpenXml.InkML;
+using PKFAuditManagement.Services;
 
 namespace PKFAuditManagement.Controllers
 {
     public class SignedFSFormController : Controller
     {
+        private readonly IUserService _userService;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
 
-        public SignedFSFormController(ApplicationDbContext context, UserManager<CustomUser> userManager)
+        public SignedFSFormController(ApplicationDbContext context, UserManager<CustomUser> userManager, IUserService userService)
         {
             _context = context;
             _userManager = userManager;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -32,12 +35,8 @@ namespace PKFAuditManagement.Controllers
             // Get the current user's ID
             var user = await _userManager.GetUserAsync(User);
 
-            // Retrieve signed FS data from database with unique clients
-            var signedFSForms = _context.SignedFSForm
-                .Where(e => e.UserEmail.Equals(user.Email))
-                .GroupBy(e => e.Client) 
-                .Select(g => g.First()) 
-                .ToList();
+            // Retrieve signed FS data from database
+            var signedFSForms = _context.SignedFSForm.ToList();
 
             return View("~/Views/General/SignedFS/SignedFSFormManagement.cshtml", signedFSForms);
         }
@@ -55,10 +54,14 @@ namespace PKFAuditManagement.Controllers
                                              .OrderBy(name => name) // Order client names from A to Z
                                              .ToListAsync(); // Fetch the ordered list of unique client names
 
+            // Retrieve all emails for users in the "Admin" role
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
             var model = new SignedFSFormViewModel
             {
                 UserEmail = User.Identity.Name,
-                ClientNames = clientNames
+                ClientNames = clientNames,
+                PartnerEmailOptions = adminEmails.OrderBy(email => email).ToList()
             };
 
             return View("~/Views/General/SignedFS/SignedFSForm.cshtml", model);
@@ -82,52 +85,21 @@ namespace PKFAuditManagement.Controllers
                     }
                 }
 
-                // Create the scheduled job entries
-                var jobs = new List<SignedFSForm>
+                // Create the Signed FS entry
+                var signedFs = new SignedFSForm
                 {
-                    new SignedFSForm
-                    {
-                        Client = model.Client,
-                        AuditedReportDate = model.AuditedReportDate,
-                        PartnerEmail = model.PartnerEmail,
-                        UserEmail = model.UserEmail,
-                        FilePath = filePath,
-                        ScheduleDate = DateTime.Now.AddMinutes(1), // ScheduleDate for demo
-                        EmailType = "First Reminder",
-                        EmailBody = "This is the first reminder. Please take necessary actions.",
-                        IsProcessed = false
-                    },
-                    new SignedFSForm
-                    {
-                        Client = model.Client,
-                        AuditedReportDate = model.AuditedReportDate,
-                        PartnerEmail = model.PartnerEmail,
-                        UserEmail = model.UserEmail,
-                        FilePath = filePath,
-                        ScheduleDate = DateTime.Now.AddMinutes(2), // ScheduleDate for demo
-                        EmailType = "Second Reminder",
-                        EmailBody = "This is the second reminder. Please take necessary actions.",
-                        IsProcessed = false
-                    },
-                    new SignedFSForm
-                    {
-                        Client = model.Client,
-                        AuditedReportDate = model.AuditedReportDate,
-                        PartnerEmail = model.PartnerEmail,
-                        UserEmail = model.UserEmail,
-                        FilePath = filePath,
-                        ScheduleDate = DateTime.Now.AddMinutes(3), // ScheduleDate for demo
-                        EmailType = "Final Reminder",
-                        EmailBody = "This is the final reminder. Please take necessary actions.",
-                        IsProcessed = false
-                    }
+                    Client = model.Client,
+                    AuditedReportDate = model.AuditedReportDate,
+                    FinancialYearEnd = model.FinancialYearEnd,
+                    PartnerEmail = model.PartnerEmail,
+                    UserEmail = model.UserEmail,
+                    FilePath = filePath
                 };
 
-                _context.SignedFSForm.AddRange(jobs);
+                _context.SignedFSForm.Add(signedFs);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Form submitted successfully!";
 
-                return RedirectToAction("ScheduleEmails");
+                return RedirectToAction("SignedFSFormManagement");
             }
             return View(model);
         }
@@ -139,9 +111,12 @@ namespace PKFAuditManagement.Controllers
             var job = await _context.SignedFSForm.FindAsync(id);
             if (job == null)
             {
-                TempData["ErrorMessage"] = "Scheduled email job not found.";
-                return RedirectToAction("ScheduleEmails");
+                TempData["ErrorMessage"] = "Signed Financial Statement not found.";
+                return RedirectToAction("SignedFSFormManagement");
             }
+
+            // Retrieve admin emails
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
 
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
@@ -158,8 +133,10 @@ namespace PKFAuditManagement.Controllers
                 Client = job.Client,
                 ClientNames = clientNames,
                 AuditedReportDate = job.AuditedReportDate,
+                FinancialYearEnd = job.FinancialYearEnd,
                 PartnerEmail = job.PartnerEmail,
                 UserEmail = job.UserEmail,
+                PartnerEmailOptions = adminEmails.OrderBy(email => email).ToList(),
                 FinancialStatement = null // or set to a default value
             };
 
@@ -175,91 +152,77 @@ namespace PKFAuditManagement.Controllers
                 var job = await _context.SignedFSForm.FindAsync(model.Id);
                 if (job == null)
                 {
-                    TempData["ErrorMessage"] = "Scheduled email job not found.";
+                    TempData["ErrorMessage"] = "Signed Financial Statement not found.";
                     return RedirectToAction("ScheduleEmails");
                 }
 
                 // Update the job properties
                 job.Client = model.Client;
                 job.AuditedReportDate = model.AuditedReportDate;
+                job.FinancialYearEnd = model.FinancialYearEnd;
                 job.PartnerEmail = model.PartnerEmail;
                 job.UserEmail = model.UserEmail;
 
-                // Handle file upload if a new file is provided
-/*                if (model.FinancialStatement != null)
-                {
-                    var filePath = Path.Combine("wwwroot/files", model.FinancialStatement.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.FinancialStatement.CopyToAsync(stream);
-                    }
-                    job.FilePath = filePath;
-                }*/
+                //// Handle file upload if a new file is provided
+                //if (model.FinancialStatement != null)
+                //{
+                //    var filePath = Path.Combine("wwwroot/files", model.FinancialStatement.FileName);
+                //    using (var stream = new FileStream(filePath, FileMode.Create))
+                //    {
+                //        await model.FinancialStatement.CopyToAsync(stream);
+                //    }
+                //    job.FilePath = filePath;
+                //}
 
                 _context.SignedFSForm.Update(job);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Scheduled email job updated successfully!";
-                return RedirectToAction("ScheduleEmails");
+                return RedirectToAction("SignedFSFormManagement");
             }
 
-            ViewBag.PartnerEmailOptions = _context.SignedFSForm
-                .Select(x => x.PartnerEmail)
-                .Distinct()
-                .ToList();
+            // Retrieve admin emails
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
+            // Set to viewbag and model
+            ViewBag.PartnerEmailOptions = adminEmails.OrderBy(email => email).ToList();
+            model.PartnerEmailOptions = adminEmails.OrderBy(email => email).ToList();
+
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
+
+            // Append client names to model
+            model.ClientNames = clientNames;
 
             return View("~/Views/General/SignedFS/EditSignedFS.cshtml", model);
         }
 
         [HttpPost]
         [Authorize(Roles = "Non-Auditor,User,Admin")]
-        public async Task<IActionResult> DeleteSignedFS()
+        public async Task<IActionResult> DeleteSignedFS(int id)
         {
             try
             {
-                var jobs = await _context.SignedFSForm.ToListAsync();
-                if (jobs.Count == 0)
+                var fs = await _context.SignedFSForm.FindAsync(id);
+                if (fs == null)
                 {
-                    return Json(new { success = false, message = "No scheduled email jobs found." });
+                    return Json(new { success = false, message = "No signed financial statement found." });
                 }
 
-                _context.SignedFSForm.RemoveRange(jobs);
+                _context.SignedFSForm.RemoveRange(fs);
                 await _context.SaveChangesAsync();
-                return Json(new { success = true, message = "Scheduled email job deleted successfully!" });
+                return Json(new { success = true, message = "Signed Financial Statement deleted successfully!" });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                return Json(new { success = false, message = "An error occurred while deleting scheduled email jobs." });
+                return Json(new { success = false, message = "An error occurred while deleting the signed financial statement." });
             }
         }
-
-
-        // For single deletion but to edit the logic
-        /*        [HttpPost]
-                [Authorize(Roles = "Non-Auditor,User,Admin")]
-                public async Task<IActionResult> DeleteSignedFS(int id)
-                {
-                    try
-                    {
-                        var job = await _context.SignedFSForm.FindAsync(id);
-                        if (job == null)
-                        {
-                            TempData["ErrorMessage"] = "Scheduled email job not found.";
-                            return RedirectToAction("ScheduleEmails");
-                        }
-
-                        _context.SignedFSForm.Remove(job);
-                        await _context.SaveChangesAsync();
-                        TempData["SuccessMessage"] = "Scheduled email job deleted successfully!";
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error: {ex.Message}");
-                    }
-
-                    return RedirectToAction("ScheduleEmails");
-                }*/
-
     }
 }

@@ -47,8 +47,13 @@
                                             </div>
                                             <div class="form-group mb-3">
                                                 <label asp-for="AuditedReportDate" class="control-label">Audited Report Date</label>
-                                                <input asp-for="AuditedReportDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" type="date" />
+                                                <input asp-for="AuditedReportDate" class="form-control" type="date" />
                                                 <span asp-validation-for="AuditedReportDate" class="text-danger"></span>
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label asp-for="FinancialYearEnd" class="control-label">Financial Year End</label>
+                                                <input asp-for="FinancialYearEnd" class="form-control" type="date" />
+                                                <span asp-validation-for="FinancialYearEnd" class="text-danger"></span>
                                             </div>
                                             <div class="form-group mb-3">
                                                 <label asp-for="PartnerEmail" class="control-label">Partner Email</label>

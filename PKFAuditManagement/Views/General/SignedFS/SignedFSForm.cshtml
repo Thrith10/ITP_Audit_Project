@@ -50,6 +50,11 @@
                                                 <span asp-validation-for="AuditedReportDate" class="text-danger"></span>
                                             </div>
                                             <div class="form-group mb-3">
+                                                <label asp-for="FinancialYearEnd" class="control-label">Financial Year End</label>
+                                                <input asp-for="FinancialYearEnd" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" type="date" />
+                                                <span asp-validation-for="FinancialYearEnd" class="text-danger"></span>
+                                            </div>
+                                            <div class="form-group mb-3">
                                                 <label asp-for="PartnerEmail" class="control-label">Partner Email</label>
                                                 <select asp-for="PartnerEmail" class="form-control" asp-items="@(new SelectList(Model.PartnerEmailOptions))"></select>
                                                 <span asp-validation-for="PartnerEmail" class="text-danger"></span>
@@ -61,7 +66,10 @@
                                             </div>
                                             <div class="form-group">
                                                 <label asp-for="FinancialStatement" class="control-label">Financial Statement (PDF)</label>
-                                                <input asp-for="FinancialStatement" type="file" class="form-control" />
+                                                <div class="d-flex align-items-center">
+                                                    <input asp-for="FinancialStatement" type="file" class="form-control me-2" accept="application/pdf" />
+                                                    <button type="button" class="btn btn-primary btn-sm preview-doc" style="margin-top: 0;">Preview</button>
+                                                </div>
                                                 <span asp-validation-for="FinancialStatement" class="text-danger"></span>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Upload</button>
@@ -72,15 +80,6 @@
                                                 <script src="~/js/signed-fs-creation.js"></script>
                                                 await Html.RenderPartialAsync("_ValidationScriptsPartial");
                                             }
-
-                                            <script>
-                                                $(document).ready(function () {
-                                                    var successMessage = '@TempData["SuccessMessage"]';
-                                                    if (successMessage) {
-                                                        alert(successMessage);
-                                                    }
-                                                });
-                                            </script>
                                         }
                                     </div>
                                 </div>

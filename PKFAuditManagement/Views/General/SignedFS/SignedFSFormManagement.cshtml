@@ -34,6 +34,7 @@
                                         </th>
                                         <th>Partner Email</th>
                                         <th>Audited Report Date</th>
+                                        <th>Financial Year End</th>
                                         <th>File Uploaded</th>
                                         <th>Actions</th>
                                     </tr>
@@ -47,7 +48,8 @@
                                                 <td>@engagement.Client</td>
                                                 <td>@engagement.PartnerEmail</td>
                                                 <td>@engagement.AuditedReportDate</td>
-                                                <td>@engagement.FilePath</td>
+                                                <td>@engagement.FinancialYearEnd</td>
+                                                <td><a href="@Url.Content(engagement.FilePath)" target="_blank">@engagement.FilePath</a></td>
                                                 <td>
                                                     <a asp-action="EditSignedFS" asp-route-id="@engagement.Id" class="btn btn-link">
                                                         <i class="fas fa-edit"></i>
@@ -61,7 +63,7 @@
                                     }
                                     else
                                     {
-                                        <tr><td colspan="4">No data found.</td></tr>
+                                        <tr><td colspan="6">No data found.</td></tr>
                                     }
                                 </tbody>
                             </table>

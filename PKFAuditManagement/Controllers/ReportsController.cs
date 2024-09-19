@@ -113,11 +113,7 @@ namespace PKFAuditManagement.Controllers
                 AuditedReportDate = form.AuditedReportDate,
                 PartnerEmail = form.PartnerEmail,
                 UserEmail = form.UserEmail,
-                FilePath = form.FilePath,
-                ScheduleDate = form.ScheduleDate,
-                EmailType = form.EmailType,
-                EmailBody = form.EmailBody,
-                IsProcessed = form.IsProcessed
+                FilePath = form.FilePath
             }).ToList();
 
             // Concatenate all report data

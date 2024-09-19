@@ -19,6 +19,9 @@ namespace PKFAuditManagement.ViewModels
         [Required]
         [Display(Name = "Partner Email")]
         public string PartnerEmail { get; set; }
+        [Required]
+        [Display(Name = "Financial Year End")]
+        public DateTime FinancialYearEnd { get; set; }
 
         [EmailAddress]
         [Display(Name = "Your Email")]
@@ -29,11 +32,6 @@ namespace PKFAuditManagement.ViewModels
         public IFormFile FinancialStatement { get; set; }
 
         public List<string>? ClientNames { get; set; }
-        public List<string> PartnerEmailOptions { get; set; } = new List<string>
-        {
-            "russelpoon25@gmail.com",
-            "bookhaven50@gmail.com",
-            "khoojunwei6671@gmail.com"
-        };
+        public List<string>? PartnerEmailOptions { get; set; }
     }
 }
