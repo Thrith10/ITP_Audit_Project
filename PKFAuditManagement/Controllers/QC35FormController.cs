@@ -166,12 +166,24 @@ namespace PKFAuditManagement.Controllers
             var userEmail = await _userService.GetUserEmailAsync(User);
 
             // Retrieve client names for display
+            /*
             var clientNames = await _context.QC6Forms
                                              .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
                                              .Select(c => c.ProspectiveClient) // Select the column with client names
                                              .Distinct() // Ensure unique client names
                                              .OrderBy(name => name) // Order client names from A to Z
                                              .ToListAsync(); // Fetch the ordered list of unique client names
+            */
+
+            // Create sample data for ClientNames
+            var clientNames = new List<string>
+            {
+                "Client A Ltd",
+                "Client B Pvt Ltd",
+                "Client C Inc",
+                "Client D Group",
+                "Client E International"
+            };
 
             // Retrieve all emails for users in the "Admin" role
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");

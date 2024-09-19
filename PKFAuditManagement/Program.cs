@@ -11,8 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 using PKFAuditManagement.Services;
 using Amazon.S3;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Load the .env file
+Env.Load();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -41,15 +45,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Configuration.AddEnvironmentVariables();
 var emailPassword = builder.Configuration["SMTP_PASSWORD"];
 
-// Configure SmtpOptions from environment variables
+// Configure SMTP options from environment variables
 builder.Services.Configure<SmtpOptions>(options =>
 {
-    options.Host = builder.Configuration["SMTP_HOST"];
-    options.Port = int.Parse(builder.Configuration["SMTP_PORT"] ?? "587");
-    options.Username = builder.Configuration["SMTP_USERNAME"];
-    options.Password = builder.Configuration["SMTP_PASSWORD"];
-    options.EnableSsl = bool.Parse(builder.Configuration["SMTP_ENABLESSL"] ?? "true");
-    options.From = builder.Configuration["SMTP_FROM"];
+    options.Host = Environment.GetEnvironmentVariable("SMTP_HOST");
+    options.Port = int.Parse(Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587");
+    options.Username = Environment.GetEnvironmentVariable("SMTP_USERNAME");
+    options.Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
+    options.EnableSsl = bool.Parse(Environment.GetEnvironmentVariable("SMTP_ENABLESSL") ?? "true");
+    options.From = Environment.GetEnvironmentVariable("SMTP_FROM");
 });
 
 // Service registrations
@@ -139,6 +143,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Data Seeder for mapping user to roles
+/*
 using (var scope = app.Services.CreateScope())
 {
     // Initialise an instance of the userManager
@@ -161,6 +166,68 @@ using (var scope = app.Services.CreateScope())
         await userManager.AddToRoleAsync(user, "Admin");
     }
 
+}
+*/
+
+// Data Seeder for mapping user to roles
+using (var scope = app.Services.CreateScope())
+{
+    // Initialise an instance of the userManager and roleManager
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    // Admin user details from configuration
+    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
+    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
+
+    // Validate that email and password are not null or empty
+    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+    {
+        throw new ArgumentNullException("Admin email or password is not configured properly.");
+    }
+
+    // Check if the Admin role exists, and create it if it doesn't
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        var roleResult = await roleManager.CreateAsync(new IdentityRole("Admin"));
+        if (!roleResult.Succeeded)
+        {
+            throw new Exception($"Failed to create Admin role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+        }
+    }
+
+    // Check if the admin user has already been created
+    var existingUser = await userManager.FindByEmailAsync(email);
+    if (existingUser == null)
+    {
+        // Set details of the admin user
+        var user = new CustomUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true  // You can change this if you require email confirmation
+        };
+
+        // Create a new admin account asynchronously
+        var result = await userManager.CreateAsync(user, password);
+        if (result.Succeeded)
+        {
+            // Assign the Admin role to the new user
+            var roleAssignResult = await userManager.AddToRoleAsync(user, "Admin");
+            if (!roleAssignResult.Succeeded)
+            {
+                throw new Exception($"Failed to assign Admin role: {string.Join(", ", roleAssignResult.Errors.Select(e => e.Description))}");
+            }
+        }
+        else
+        {
+            throw new Exception($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("Admin user already exists.");
+    }
 }
 
 
