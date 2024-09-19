@@ -1,11 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace PKFAuditManagement.Models
 {
     public class Quiz
     {
         [Key]
-        public int QuizID { get; set; }
+        public Guid QuizID { get; set; }  // Changed from int to Guid
 
         [Required]
         [StringLength(255)]
@@ -17,6 +19,6 @@ namespace PKFAuditManagement.Models
         // Navigation properties
         public ICollection<Questions> Questions { get; set; } = new List<Questions>();
         public ICollection<Participants>? Participants { get; set; }
-  
+        public DateTime QuizStart { get; set; }
     }
 }

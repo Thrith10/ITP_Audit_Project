@@ -16,7 +16,10 @@ namespace PKFAuditManagement.Models
         public string? ManagerName { get; set; }
         public string? ImageFileName { get; set; } 
         public string? Status { get; set; }
-
+        public string? FirstApprover { get; set; }
+        public string? SecondApprover { get; set; }
+        public bool? IsFirstApproved { get; set; }
+        public bool? IsSecondApproved { get; set; }
         public ICollection<QC35ChecklistItem> ChecklistItems { get; set; }
     }
 

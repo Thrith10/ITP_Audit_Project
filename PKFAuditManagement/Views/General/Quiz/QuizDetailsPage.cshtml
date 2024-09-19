@@ -71,44 +71,6 @@
                 width: 100%;
                 max-width: 600px;
             }
-
-        .filter-tabs {
-            margin-bottom: 1rem;
-        }
-
-            .filter-tabs .nav-link {
-                cursor: pointer;
-            }
-
-        .card-participant {
-            margin-bottom: 1rem;
-            padding: 1rem;
-        }
-
-            .card-participant .card-body {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-                .card-participant .card-body .participant-info {
-                    flex-grow: 1;
-                }
-
-                .card-participant .card-body .participant-score {
-                    margin-left: 1rem;
-                    text-align: right;
-                }
-
-        #border_tab {
-            border: 1px solid transparent;
-        }
-
-        .email-button-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 1rem;
-        }
     </style>
 </head>
 
@@ -133,9 +95,6 @@
                             <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">View Quiz Details</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="participants-tab" data-bs-toggle="tab" data-bs-target="#participants" type="button" role="tab" aria-controls="participants" aria-selected="false">View Participants</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
                             <button class="nav-link" id="qr-code-tab" data-bs-toggle="tab" data-bs-target="#qr-code" type="button" role="tab" aria-controls="qr-code" aria-selected="false">Generate QR Code</button>
                         </li>
                     </ul>
@@ -144,7 +103,7 @@
                         <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
                             <h5 class="card-title d-flex justify-content-between align-items-center">
                                 Quiz: @Model.Title
-                                @if (Model.CanEdit)
+                                @if (Model.CanEdit) 
                                 {
                                     <a asp-action="Edit" asp-route-id="@Model.QuizID" class="btn btn-primary btn-sm btn-edit">Edit Quiz</a>
                                 }
@@ -155,7 +114,7 @@
                             {
                                 <div class="card mb-3">
                                     <div class="card-body">
-                                        <h5 class="card-title">Question @(question.index+1) : @question.q.Description</h5>
+                                        <h5 class="card-title">Question @(question.index + 1) : @question.q.Description</h5>
                                         <ul class="list-group list-group-flush">
                                             @foreach (var option in question.q.Options)
                                             {
@@ -172,95 +131,6 @@
                             <p>QR Code for Quiz ID: @Model.QuizID</p>
                             <div class="qrcode-container">
                                 <div id="qrcode"></div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
-                            <h5 class="card-title">Participants</h5>
-                            <ul class="nav nav-pills filter-tabs" id="participantFilterTabs" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" data-bs-toggle="pill" href="#all-participants" role="tab" aria-controls="all-participants" aria-selected="true">All</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-bs-toggle="pill" href="#passed-participants" role="tab" aria-controls="passed-participants" aria-selected="false">Passed</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-bs-toggle="pill" href="#failed-participants" role="tab" aria-controls="failed-participants" aria-selected="false">Failed</a>
-                                </li>
-                            </ul>
-
-                            <div class="tab-content" id="border_tab">
-                                <div class="tab-pane fade show active" id="all-participants" role="tabpanel">
-                                    @if (!Model.Participants.Any())
-                                    {
-                                        <p>No participants available for this quiz.</p>
-                                    }
-                                    else
-                                    {
-                                        @foreach (var participant in Model.Participants)
-                                        {
-                                            <div class="card card-participant" data-score="@participant.TotalScore">
-                                                <div class="card-body">
-                                                    <div class="participant-info">
-                                                        <p>Participant: @participant.UserName</p>
-                                                        <p>Attempted on: @participant.AttemptDate.ToString("yyyy-MM-dd HH:mm")</p>
-                                                    </div>
-                                                    <div class="participant-score">
-                                                        <p class="text-end"><strong>Score: @participant.TotalScore / @ViewBag.TotalQuestions</strong></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                </div>
-                                <div class="tab-pane fade" id="passed-participants" role="tabpanel">
-                                    @if (!Model.Participants.Any(p => p.TotalScore >= @ViewBag.TotalQuestions * 0.5))
-                                    {
-                                        <p>No participants passed the quiz.</p>
-                                    }
-                                    else
-                                    {
-                                        @foreach (var participant in Model.Participants.Where(p => p.TotalScore >= @ViewBag.TotalQuestions * 0.5))
-                                        {
-                                            <div class="card card-participant" data-score="@participant.TotalScore">
-                                                <div class="card-body">
-                                                    <div class="participant-info">
-                                                        <p>Participant: @participant.UserName</p>
-                                                        <p>Attempted on: @participant.AttemptDate.ToString("yyyy-MM-dd HH:mm")</p>
-                                                    </div>
-                                                    <div class="participant-score">
-                                                        <p class="text-end"><strong>Score: @participant.TotalScore / @ViewBag.TotalQuestions</strong></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                </div>
-                                <div class="tab-pane fade" id="failed-participants" role="tabpanel">
-                                    <div class="email-button-container">
-                                        <button id="emailFailedParticipants" class="btn btn-primary">Email Failed Participants</button>
-                                    </div>
-                                    @if (!Model.Participants.Any(p => p.TotalScore < @ViewBag.TotalQuestions * 0.5))
-                                    {
-                                        <p>No participants failed the quiz.</p>
-                                    }
-                                    else
-                                    {
-                                        @foreach (var participant in Model.Participants.Where(p => p.TotalScore < @ViewBag.TotalQuestions * 0.5))
-                                        {
-                                            <div class="card card-participant" data-score="@participant.TotalScore">
-                                                <div class="card-body">
-                                                    <div class="participant-info">
-                                                        <p>Participant: @participant.UserName</p>
-                                                        <p>Attempted on: @participant.AttemptDate.ToString("yyyy-MM-dd HH:mm")</p>
-                                                    </div>
-                                                    <div class="participant-score">
-                                                        <p class="text-end"><strong>Score: @participant.TotalScore / @ViewBag.TotalQuestions</strong></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -284,17 +154,6 @@
                     }
                 })
                 .catch(error => console.error('Error generating QR code:', error));
-
-            var emailButton = document.getElementById("emailFailedParticipants");
-            if (emailButton) {
-                emailButton.addEventListener("click", function () {
-                    var failedEmails = @Html.Raw(ViewBag.FailedParticipantsEmails);
-                    var subject = "Quiz Review";
-                    var body = "Please review your quiz performance.";
-                    var mailtoLink = "mailto:" + failedEmails.join(",") + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-                    window.location.href = mailtoLink;
-                });
-            }
         });
     </script>
 </body>

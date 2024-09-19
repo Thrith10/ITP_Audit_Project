@@ -1,0 +1,116 @@
+﻿@model IEnumerable<PKFAuditManagement.ViewModels.DisplayStatusViewModel>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Status</title>
+    <link rel="stylesheet" href="~/css/site.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+</head>
+<body>
+    <main id="main" class="main">
+        <div class="pagetitle">
+            <h1>Display Status</h1>
+        </div>
+
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Client Form Statuses</h5>
+
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Client Name</th>
+                                        <th>QC6 Status</th>
+                                        <th>QC7 Status</th>
+                                        <th>QC35 Status</th>
+                                        <th>SignedFS Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.ClientName</td>
+                                            <td>
+                                                @if (item.QC6Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                                else if (item.QC6Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">Approved</span>
+                                                }
+                                                else if (item.QC6Status == "Rejected")
+                                                {
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@item.QC6Status</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.QC7Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                                else if (item.QC7Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">Approved</span>
+                                                }
+                                                else if (item.QC7Status == "Rejected")
+                                                {
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@item.QC7Status</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.QC35Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                                else if (item.QC35Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">Approved</span>
+                                                }
+                                                else if (item.QC35Status == "Rejected")
+                                                {
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@item.QC35Status</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.SignedFSStatus == "Processed")
+                                                {
+                                                    <span class="badge bg-success">Uploaded</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Not Uploaded</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

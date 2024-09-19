@@ -52,12 +52,39 @@ namespace PKFAuditManagement.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult QC35FormApprovalManagement()
+        public async Task<IActionResult> QC35FormApprovalManagement()
         {
             // Retrieve engagement data from database
-            var qc35forms = _context.QC35Forms.ToList();
-            return View("~/Views/General/QC35/QC35FormApprovalManagement.cshtml", qc35forms);
+            //var qc35forms = _context.QC35Forms.ToList();
+            //return View("~/Views/General/QC35/QC35FormApprovalManagement.cshtml", qc35forms);
+
+            // Retrieve all QC35 forms that are not templates
+            var allForms = _context.QC35Forms.ToList();
+
+            // Get the current user's email (assume _userService provides this)
+            var userEmail = await _userService.GetUserEmailAsync(User);
+
+            // Filter for first approver (assuming ManagerName is first approver)
+            var firstApproverForms = _context.QC35Forms
+                .Where(f => f.FirstApprover == userEmail && (f.IsFirstApproved == false || f.IsFirstApproved == null))
+                .ToList();
+
+            // Filter for second approver (assuming PartnerName is second approver)
+            var secondApproverForms = _context.QC35Forms
+                .Where(f => f.SecondApprover == userEmail && (f.IsSecondApproved == false || f.IsSecondApproved == null))
+                .ToList();
+
+            // Populate the view model
+            var viewModel = new QC35FormAdminManagementViewModel
+            {
+                AllQC35Forms = allForms,
+                FirstApproverForms = firstApproverForms,
+                SecondApproverForms = secondApproverForms
+            };
+
+            return View("~/Views/General/QC35/QC35FormApprovalManagement.cshtml", viewModel);
         }
+    
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -166,12 +193,24 @@ namespace PKFAuditManagement.Controllers
             var userEmail = await _userService.GetUserEmailAsync(User);
 
             // Retrieve client names for display
+            /*
             var clientNames = await _context.QC6Forms
                                              .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
                                              .Select(c => c.ProspectiveClient) // Select the column with client names
                                              .Distinct() // Ensure unique client names
                                              .OrderBy(name => name) // Order client names from A to Z
                                              .ToListAsync(); // Fetch the ordered list of unique client names
+            */
+
+            // Create sample data for ClientNames
+            var clientNames = new List<string>
+            {
+                "Client A Ltd",
+                "Client B Pvt Ltd",
+                "Client C Inc",
+                "Client D Group",
+                "Client E International"
+            };
 
             // Retrieve all emails for users in the "Admin" role
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
@@ -232,7 +271,11 @@ namespace PKFAuditManagement.Controllers
                         PartnerName = viewModel.PartnerName,
                         ManagerName = viewModel.ManagerName,
                         ImageFileName = viewModel.ImageFileName,
-                        Status = "Pending"
+                        Status = "Pending",
+                        FirstApprover = viewModel.PartnerName,
+                        SecondApprover = viewModel.ManagerName,
+                        IsFirstApproved = false,
+                        IsSecondApproved = false,
                     };
 
                     _context.QC35Forms.Add(qc35Form);

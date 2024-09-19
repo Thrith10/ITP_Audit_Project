@@ -1,4 +1,5 @@
-﻿using PKFAuditManagement.Models;
+using PKFAuditManagement.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,25 +8,36 @@ namespace PKFAuditManagement.ViewModels
     public class ParticipantViewModel
     {
         public string UserID { get; set; }
-        public string UserName { get; set; }
-        public DateTime AttemptDate { get; set; }  
 
-        public int TotalScore { get; set; }
+        // New properties reflecting the Participants model
+        public Guid QuizID { get; set; }  // To map the participant to a specific quiz
+        public DateTime OverallCompletionDate { get; set; }
+
+        public bool IsRequired { get; set; } = true;  // Default is true, similar to the Participants model
+        public bool ClockedAttendance { get; set; } = false; // Default is false
+        public bool QuizDone { get; set; } = false; // Default is false
+        public bool FeedbackDone { get; set; } = false; // Default is false
+
+        public bool OverallCompletion { get; set; } = false; // Default is false
     }
+
     public class QuizViewModel
     {
-        public int QuizID { get; set; }
-        public bool CanEdit { get; set; } 
+        public Guid QuizID { get; set; }  
+        public bool CanEdit { get; set; }
         [Required]
         public string Title { get; set; }
 
         public string Description { get; set; }
+        public DateTime QuizStart { get; set; }
+
         public DateTime? AttemptDate { get; set; }
 
-
         public List<QuestionViewModel> Questions { get; set; } = new List<QuestionViewModel>();
-        public List<ParticipantViewModel>? Participants { get; set; }
-        public string? QRImageURL { get; set; } // Add this property to hold the QR code image URL
+        public string? SelectedParticipants { get; set; }
+        public string? QRImageURL { get; set; }
+
+
 
     }
 
@@ -58,7 +70,7 @@ namespace PKFAuditManagement.ViewModels
     public class AttemptViewModel
     {
         public string UserID { get; set; }
-        public int QuizID { get; set; }
+        public Guid QuizID { get; set; }  // Changed from int to Guid
         public List<QuizResponseViewModel> Responses { get; set; }
     }
 
@@ -66,8 +78,5 @@ namespace PKFAuditManagement.ViewModels
     {
         public int QuestionID { get; set; }
         public string SelectedOption { get; set; }
-
     }
-
-
 }

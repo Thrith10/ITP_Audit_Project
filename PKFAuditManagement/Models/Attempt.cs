@@ -8,16 +8,18 @@ namespace PKFAuditManagement.Models
     public class Attempt
     {
         [Key]
-        public int AttemptID { get; set; } // Primary Key
+        public int AttemptID { get; set; }
 
         [Required]
-        public string UserID { get; set; } // Foreign Key to ApplicationUser
+        public string UserID { get; set; }
 
         [Required]
-        public int QuizID { get; set; } // Foreign Key
+        public Guid QuizID { get; set; }  // Changed from int to Guid
 
         [Required]
         public DateTime AttemptDate { get; set; }
+        [Required]
+        public int Score { get; set; }
 
         // Navigation properties
         [ForeignKey("QuizID")]

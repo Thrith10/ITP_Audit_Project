@@ -75,7 +75,7 @@
                                     <option value="QC6" selected>QC6 Forms</option>
                                     <option value="QC7">QC7 Forms</option>
                                     <option value="QC35">QC35 Forms</option>
-                                    <option value="SignedFS">Signed FS Forms</option>
+                                    <option value="SignedFS">Signed Financial Statements</option>
                                 </select>
                             </div>
 
@@ -95,31 +95,34 @@
                                 <thead>
                                     <!-- QC6 Headers -->
                                     <tr class="qc6-header">
-                                        <th>Select</th>
+                                        <!-- QC6 Select All Checkbox -->
+                                        <th><input type="checkbox" id="selectAllQc6" /> Select All</th>
                                         <th>Form ID</th>
                                         <th>File Reference</th>
-                                        <th>Prospective Client</th>
+                                        <th>Client</th>
                                         <th>Period Ended</th>
                                         <th>Engagement Type</th>
-                                        <th>Form Submission Date</th>
                                         <th>Prepared By Date</th>
+                                        <th>Form Submission Date</th> <!-- New column for MPHOD QMP Approved By Date -->
                                         <th>Status</th>
                                     </tr>
                                     <!-- QC7 Headers -->
                                     <tr class="qc7-header" style="display: none;">
-                                        <th>Select</th>
+                                        <!-- QC7 Select All Checkbox -->
+                                        <th><input type="checkbox" id="selectAllQc7" /> Select All</th>
                                         <th>Form ID</th>
-                                        <th>Prospective Client</th>
+                                        <th>Client</th>
                                         <th>Engagement Type</th>
                                         <th>Period Ended</th>
-                                        <th>Form Submission Date</th>
-                                        <th>Prepared By Date</th>
+                                        <th>Prepared By Date</th>  <!-- Updated to show data from QC7FormConclusion -->
+                                        <th>Form Submission Dat</th>  <!-- New column for MPHOD QMP Approved By Date -->
                                         <th>Status</th>
 
                                     </tr>
                                     <!-- QC35 Headers -->
                                     <tr class="qc35-header" style="display: none;">
-                                        <th>Select</th>
+                                        <!-- QC35 Select All Checkbox -->
+                                        <th><input type="checkbox" id="selectAllQc35" /> Select All</th>
                                         <th>Form ID</th>
                                         <th>Client Name</th>
                                         <th>Partner Name</th>
@@ -131,12 +134,14 @@
                                     </tr>
                                     <!-- SignedFS Headers -->
                                     <tr class="signedfs-header" style="display: none;">
-                                        <th>Select</th>
+                                        <!-- SignedFS Select All Checkbox -->
+                                        <th><input type="checkbox" id="selectAllSignedFS" /> Select All</th>
                                         <th>Form ID</th>
                                         <th>User Email</th>
                                         <th>Partner Email</th>
-                                        <th>Schedule Date</th>
-                                        <th>Email Type</th>
+                                        <th>Client</th>
+                                        <th>Year-End Date</th>
+                                        <th>Audit Report Date</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -148,14 +153,14 @@
                                             if (form.FormType == "QC6")
                                             {
                                                 <tr id="@form.QC6FormID" class="qc6-form">
-                                                    <td><input type="checkbox" name="selectedForms" value="@form.QC6FormID" /></td>
+                                                    <td><input type="checkbox" name="selectedForms" value="@form.QC6FormID" class="selectQc6" /></td>
                                                     <td>@form.QC6FormID</td>
                                                     <td>@form.FileReference</td>
                                                     <td>@form.ProspectiveClient</td>
                                                     <td>@form.PeriodEnded.ToShortDateString()</td>
                                                     <td>@form.EngagementType</td>
-                                                    <td>@form.FormSubmissionDate.ToShortDateString()</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
+                                                    <td>@form.PreparedByDate.ToShortDateString()</td> <!-- Prepared By Date from QC6FormConclusion -->
+                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td> <!-- MPHODQMPApprovedByDate from QC6FormConclusion -->
                                                     <td>
                                                         @if (form.Status == "Pending")
                                                         {
@@ -183,13 +188,14 @@
                                             else if (form.FormType == "QC7")
                                             {
                                                 <tr id="@form.QC7FormID" class="qc7-form" style="display: none;">
-                                                    <td><input type="checkbox" name="selectedForms" value="@form.QC7FormID" /></td>
+                                                    <td><input type="checkbox" name="selectedForms" value="@form.QC7FormID" class="selectQc7" /></td>
                                                     <td>@form.QC7FormID</td>
                                                     <td>@form.ProspectiveClient</td>
                                                     <td>@form.EngagementType</td>
                                                     <td>@form.PeriodEnded.ToShortDateString()</td>
-                                                    <td>@form.FormSubmissionDate.ToShortDateString()</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
+                                                    <td>@form.PreparedByDate.ToShortDateString()</td> <!-- Now from QC7FormConclusion -->
+                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td> <!-- New field from QC7FormConclusion -->
+
                                                     <td>
                                                         @if (form.Status == "Pending")
                                                         {
@@ -217,7 +223,7 @@
                                             else if (form.FormType == "QC35")
                                             {
                                                 <tr id="@form.QC35FormID" class="qc35-form" style="display: none;">
-                                                    <td><input type="checkbox" name="selectedForms" value="@form.QC35FormID" /></td>
+                                                    <td><input type="checkbox" name="selectedForms" value="@form.QC35FormID" class="selectQc35" /></td>
                                                     <td>@form.QC35FormID</td>
                                                     <td>@form.ClientName</td>
                                                     <td>@form.PartnerName</td>
@@ -250,20 +256,21 @@
                                             else if (form.FormType == "SignedFS")
                                             {
                                                 <tr id="@form.SignedFSFormID" class="signedfs-form" style="display: none;">
-                                                    <td><input type="checkbox" name="selectedForms" value="@form.SignedFSFormID" /></td>
+                                                    <td><input type="checkbox" name="selectedForms" value="@form.SignedFSFormID" class="selectSignedFS" /></td>
                                                     <td>@form.SignedFSFormID</td>
                                                     <td>@form.UserEmail</td>
                                                     <td>@form.PartnerEmail</td>
+                                                    <td>@form.Client</td>
                                                     <td>@form.ScheduleDate?.ToShortDateString()</td>
-                                                    <td>@form.EmailType</td>
+                                                    <td>@form.AuditedReportDate?.ToShortDateString()</td>
                                                     <td>
                                                         @if (form.IsProcessed)
                                                         {
-                                                            <span class="badge bg-success">Email Sent</span>
+                                                            <span class="badge bg-success">Uploaded</span>
                                                         }
                                                         else
                                                         {
-                                                            <span class="badge bg-warning">Yet to send</span>
+                                                            <span class="badge bg-warning">Not Uploaded</span>
                                                         }
                                                     </td>
                                                 </tr>
@@ -305,6 +312,29 @@
             // Initialize by applying filters to show only the selected form type
             filterForms();
         });
+
+        $(document).ready(function () {
+            // Select or Deselect All QC6 Checkboxes
+            $('#selectAllQc6').on('change', function () {
+                $('.selectQc6').prop('checked', this.checked); // Check or uncheck all QC6 checkboxes
+            });
+
+            // Select or Deselect All QC7 Checkboxes
+            $('#selectAllQc7').on('change', function () {
+                $('.selectQc7').prop('checked', this.checked); // Check or uncheck all QC7 checkboxes
+            });
+
+            // Select or Deselect All QC35 Checkboxes
+            $('#selectAllQc35').on('change', function () {
+                $('.selectQc35').prop('checked', this.checked); // Check or uncheck all QC35 checkboxes
+            });
+
+            // Select or Deselect All SignedFS Checkboxes
+            $('#selectAllSignedFS').on('change', function () {
+                $('.selectSignedFS').prop('checked', this.checked); // Check or uncheck all SignedFS checkboxes
+            });
+        });
+
 
         function filterForms() {
             var formType = document.getElementById("formType").value;
@@ -408,6 +438,14 @@
         }
 
         function filterByDate() {
+
+            // Show a confirmation prompt before filtering
+            var userConfirmed = confirm("Filters by Prepared By Date");
+
+            if (!userConfirmed) {
+                return; // Exit if the user cancels the prompt
+            }
+
             var startDate = new Date(document.getElementById("startDate").value);
             var endDate = new Date(document.getElementById("endDate").value);
             var formType = document.getElementById("formType").value;

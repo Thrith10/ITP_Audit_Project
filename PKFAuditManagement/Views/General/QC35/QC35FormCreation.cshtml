@@ -8,7 +8,7 @@
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">
-                    <form asp-action="SubmitQC35Form" asp-controller="QC35Form" method="post" enctype="multipart/form-data">
+                    <form id="mainForm" asp-action="SubmitQC35Form" asp-controller="QC35Form" method="post" enctype="multipart/form-data">
                         @if (ViewBag.Errors != null)
                         {
                             <ul>
@@ -21,6 +21,13 @@
                         else if (ViewBag.ErrorMessage != null)
                         {
                             <span class="alert alert-danger">@ViewBag.ErrorMessage</span>
+                        }
+                        @if (Model.AdminEmails != null && Model.AdminEmails.Any())
+                        {
+                            @for (int i = 0; i < Model.AdminEmails.Count; i++)
+                            {
+                                <input type="hidden" name="AdminEmails[@i]" value="@Model.AdminEmails[i]" />
+                            }
                         }
                         <div class="card">
                             <div class="card-body">
@@ -57,24 +64,38 @@
                                 <div class="form-group">
                                     <label asp-for="ClientName">Approved by (Manager):<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <select asp-for="ManagerName" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        @if (Model.AdminEmails != null && Model.AdminEmails.Any())
+                                        {
+                                            <select asp-for="ManagerName" class="form-control">
+                                                @foreach (var email in Model.AdminEmails)
+                                                {
+                                                    <option value="@email">@email</option>
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">No admin emails available</span>
+                                        }
                                         <span asp-validation-for="ManagerName" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ClientName">Approved by (Partner):<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <select asp-for="PartnerName" class="form-control">
-                                            @foreach (var email in Model.AdminEmails)
-                                            {
-                                                <option value="@email">@email</option>
-                                            }
-                                        </select>
+                                        @if (Model.AdminEmails != null && Model.AdminEmails.Any())
+                                        {
+                                            <select asp-for="PartnerName" class="form-control">
+                                                @foreach (var email in Model.AdminEmails)
+                                                {
+                                                    <option value="@email">@email</option>
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">No admin emails available</span>
+                                        }
                                         <span asp-validation-for="PartnerName" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -197,9 +218,15 @@
                                         </div>
                                     </label>
                                 </div>
+
                                 <div class="text-center">
+                                    <button id="cancel-upload" type="button" class="btn btn-danger mt-3" style="display:none;">Cancel Upload</button>
+                                    <button id="crop-image-button" type="button" class="btn btn-success mt-3" style="display:none;">Crop Image</button>
                                     <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC35 Form</button>
                                 </div>
+
+                                <canvas id="canvas" style="display:none;"></canvas>
+
                             </div>
                         </div>
                     </form>
@@ -211,32 +238,146 @@
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 @section Scripts {
-    <script>
 
+    <script>
+        let cropper;
         const dropArea = document.getElementById("drop-area");
         const inputFile = document.getElementById("input-file");
         const imageView = document.getElementById("img-view");
+        const cropButton = document.getElementById("crop-button");
+        const cancelButton = document.getElementById("cancel-upload");
+        const cropImageButton = document.getElementById("crop-image-button");
+        const form = document.querySelector("mainForm");
 
-        inputFile.addEventListener("change", uploadImage);
+        // Get the image path using Razor syntax and inject it into the JavaScript as a constant
+        const uploadIconPath = '@Url.Content("~/img/upload-icon.png")';
 
-        function uploadImage() {
-            let imgLink = URL.createObjectURL(inputFile.files[0]);
-            imageView.style.backgroundImage = `url(${imgLink})`;
-            imageView.style.height = "700px"; // Set the height to 500px after uploading the image
-            imageView.innerHTML = ""; // Clear previous content
+        cropImageButton.addEventListener("click", function () {
+            if (cropper) {
+                cropper.getCroppedCanvas().toBlob((blob) => {
+                    // Create a new File object
+                    const croppedImage = new File([blob], "cropped-image.jpg", { type: "image/jpeg" });
+
+                    // Create a new FileList containing the cropped image
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(croppedImage);
+
+                    // Update the file input with the new FileList
+                    inputFile.files = dataTransfer.files;
+
+                    // Optionally, update the image preview by adding <img> instead of backgroundImage
+                    const croppedImageUrl = URL.createObjectURL(croppedImage);
+                    imageView.innerHTML = ""; // Clear previous content
+
+                    // Create an img element and append it to the imageView
+                    const imgElement = document.createElement("img");
+                    imgElement.src = croppedImageUrl;
+                    imgElement.style.maxWidth = "100%";
+                    imgElement.style.borderRadius = "20px";
+                    imageView.appendChild(imgElement);
+
+                    console.log("Image cropped and input updated");
+                }, 'image/jpeg');
+            } else {
+                console.log("Cropper not initialized");
+            }
+        });
+
+        // Add event listener for file selection
+        inputFile.addEventListener("change", handleFileSelect);
+        // Add event listener for cancel upload
+        cancelButton.addEventListener("click", cancelUpload);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const imgLink = URL.createObjectURL(file);
+                imageView.style.backgroundImage = `url(${imgLink})`;
+                imageView.style.height = "500px";
+                imageView.innerHTML = ""; // Clear the previous content
+
+                const imgElement = document.createElement("img");
+                imgElement.src = imgLink;
+                imgElement.id = "uploaded-image";
+                imgElement.style.maxWidth = "100%";
+                imageView.appendChild(imgElement);
+
+                imgElement.onload = function () {
+                    try {
+                        // Initialize Cropper.js
+                        cropper = new Cropper(imgElement, {
+                            aspectRatio: NaN, // or set to desired aspect ratio
+                            viewMode: 1
+                        });
+                    } catch (error) {
+                        console.error("Error initializing Cropper:", error);
+                    }
+                };
+                cancelButton.style.display = "inline-block";  // Show cancel button
+                cropImageButton.style.display = "inline-block";  // Show crop button
+                disableUpload();  // Disable upload functionality
+            }
         }
 
+        // Function to disable both click and drag-and-drop functionality
+        function disableUpload() {
+            inputFile.disabled = true; // Disable click-to-upload
+            dropArea.removeEventListener("drop", handleDrop); // Remove drop event listener
+            dropArea.classList.add('upload-disabled'); // Add a class for styling
+        }
+
+        // Function to enable both click and drag-and-drop functionality (for cancel)
+        function enableUpload() {
+            dropArea.style.pointerEvents = "auto"; // Re-enable drag-and-drop
+            inputFile.disabled = false; // Re-enable click-to-upload
+        }
+
+        // Drag and drop functionality
         dropArea.addEventListener("dragover", function (e) {
+            if (dropArea.style.pointerEvents === "none") {
+                return; // Prevent drag if pointer-events is set to none
+            }
             e.preventDefault();
         });
 
         dropArea.addEventListener("drop", function (e) {
+            if (dropArea.style.pointerEvents === "none") {
+                return; // Prevent drop if pointer-events is set to none
+            }
             e.preventDefault();
             inputFile.files = e.dataTransfer.files;
-            uploadImage();
+            handleFileSelect({ target: { files: e.dataTransfer.files } });
         });
 
+        // Function to cancel the upload and reset the image view
+        function cancelUpload() {
+            // Reset the image view content to show the upload icon and text
+            imageView.style.backgroundImage = "";
+            imageView.style.height = "auto";
+            imageView.innerHTML = `
+                                <img src="${uploadIconPath}" alt="Upload Icon">
+                                <p>Drag and drop or click here<br>to upload image</p>
+                                <span>Upload any images from desktop</span>
+                            `;
+
+            // Reset the file input
+            inputFile.value = null;
+
+            // Re-enable the input and drop functionality
+            enableUpload();
+
+            // Hide the cancel button
+            cancelButton.style.display = "none";
+
+            // Destroy the Cropper instance if it exists
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
+
             const dateInput = document.getElementById("reportingYearEnd");
             console.log("Date input: " + dateInput.value);
             // Function to set placeholder if the value is the default date
@@ -259,7 +400,49 @@
             dateInput.addEventListener("blur", function () {
                 setPlaceholder();
             });
+
+            const form = document.getElementById("mainForm");  // Select form by ID
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                console.log("Form is submitted!");  // Debug log
+
+                const formData = new FormData(this);
+
+                // Append the cropped image file to the formData
+                if (inputFile.files.length > 0) {
+                    formData.append("file", inputFile.files[0]);
+                }
+
+                // Send form data via Fetch API
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        // Check if the response is JSON or something else
+                        const contentType = response.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                            return response.json();  // Parse JSON if it's a JSON response
+                        } else {
+                            return response.text();  // Handle non-JSON (e.g., HTML response)
+                        }
+                    })
+                    .then(data => {
+                        if (typeof data === "object") {
+                            // JSON response, handle success
+                            console.log('Success:', data);
+                        } else {
+                            // HTML response, most likely an error or redirect
+                            console.log('HTML Response:', data);
+                            document.body.innerHTML = data;  // Optionally display the HTML response
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            });
         });
+
 
     </script>
 }

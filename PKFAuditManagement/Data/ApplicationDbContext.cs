@@ -82,6 +82,11 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey<QC6FormConclusion>(t => t.QC6FormID)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Configure QuizID as GUID
+            modelBuilder.Entity<Quiz>()
+                .Property(q => q.QuizID)
+                .HasDefaultValueSql("NEWID()");
+
             modelBuilder.Entity<Quiz>()
                 .HasMany(q => q.Questions)
                 .WithOne(qn => qn.Quiz)
@@ -106,8 +111,7 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(qr => qr.QuestionID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Remove the configuration for SelectedOptionID since SelectedOption is now a string
-
+      
             // New relationships
             modelBuilder.Entity<Attempt>()
                 .HasOne(a => a.Quiz)
@@ -115,11 +119,6 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(a => a.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Participants>()
-                .HasOne(p => p.Quiz)
-                .WithMany()
-                .HasForeignKey(p => p.QuizID)
-                .OnDelete(DeleteBehavior.Cascade);
 
             new DataSeeder(modelBuilder).Seed();
         }
