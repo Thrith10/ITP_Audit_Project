@@ -13,5 +13,6 @@ namespace PKFAuditManagement.Models
         public string PartnerEmail { get; set; }
         public string UserEmail { get; set; }
         public string FilePath { get; set; }
+        public bool IsProcessed { get; internal set; }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +11,11 @@ using PKFAuditManagement.Services;
 using PKFAuditManagement.Util;
 using PKFAuditManagement.ViewModels;
 using System.Data;
-using System.Globalization;
+using PKFAuditManagement.Interface;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -25,10 +28,11 @@ namespace PKFAuditManagement.Controllers
         private readonly IAmazonS3 _s3Client;
         private readonly IConfiguration _configuration;
         private readonly string _bucketName;
+        private readonly Interface.IEmailSender _emailSender;
 
         public QC35FormController(IUserService userService, ApplicationDbContext context, 
             UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, 
-            IConfiguration configuration, IAmazonS3 s3Client)
+            IConfiguration configuration, IAmazonS3 s3Client, Interface.IEmailSender emailSender)
         {
             _userService = userService;
             _context = context;
@@ -37,6 +41,7 @@ namespace PKFAuditManagement.Controllers
             _configuration = configuration;
             _s3Client = s3Client;
             _bucketName = _configuration["AWS_BUCKET_NAME"];
+            _emailSender = emailSender;
         }
 
         [Authorize(Roles = "User,Non-Auditor")]
@@ -89,7 +94,7 @@ namespace PKFAuditManagement.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("/QC35Form/ApproveQC35Form/{id}")]
-        public IActionResult ApproveQC35Form(int id)
+        public async Task<IActionResult> ApproveQC35Form(int id)
         {
             // Retrieve engagement data from the database
             var engagement = _context.QC35Forms.FirstOrDefault(e => e.QC35FormID == id);
@@ -99,12 +104,151 @@ namespace PKFAuditManagement.Controllers
                 return NotFound();
             }
 
-            // Update the engagement status to "Approved"
-            engagement.Status = "Approved";
-            _context.SaveChanges();
+            // Get the current user's email
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var currentUserEmail = user?.Email;
+
+            if(currentUserEmail == engagement.FirstApprover)
+            {
+                engagement.IsFirstApproved = true;
+                engagement.Status = "Pending 2nd Approval";
+
+                _context.SaveChanges();
+
+                // Send email to creator to notify on approval
+                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Creation",
+                    $"Your new QC35 Form has been approved by: {engagement.FirstApprover}. The QC35 Form is awaiting the second approval.");
+
+                // Send email to 2nd approver on action to take
+                await _emailSender.SendEmailAsync(engagement.SecondApprover, "QC35 Form Creation",
+                    $"A new QC35 Form {engagement.FileReference} has been approved by: {engagement.FirstApprover} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
+
+                return Ok(new { success = true, message = "The QC35 Form has been approved." });
+
+            }else if (currentUserEmail == engagement.SecondApprover)
+            {
+                
+                if(engagement.IsFirstApproved == false)
+                {
+                    return Forbid();
+                }
+                
+                engagement.IsSecondApproved = true;
+
+                if(engagement.IsFirstApproved == true && engagement.IsSecondApproved == true)
+                {
+                    engagement.Status = "Approved";
+                }
+
+                _context.SaveChanges();
+
+                // Send email to creator to notify on creation
+                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Creation",
+                    $"Your QC35 Form {engagement.FileReference} has been approved by: {engagement.FirstApprover}. Please login to the Audit Management System to view the QC35 Form.");
+
+                // List of approvers
+                var recipients = new List<string>
+                        {
+                        engagement.FirstApprover,
+                        engagement.SecondApprover
+                        };
+
+                // Subject and body of the email
+                var subject = "QC35 Form Update";
+                var body = $"The QC35 Form {engagement.FileReference} has been successfully approved and is currently active.";
+
+                // Send the email to all approvers on the creation of the QC6 form
+                foreach (var recipient in recipients)
+                {
+                    await _emailSender.SendEmailAsync(recipient, subject, body);
+                }
+
+                return Ok(new { success = true, message = "The QC35 Form has been approved." });
+
+            }
 
             return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("/QC35Form/RejectQC35Form/{id}")]
+        public async Task<IActionResult> RejectQC35Form(int id)
+        {
+            // Get the request body as a string
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+
+                // Parse the request body JSON to extract the QC35FormID and RejectionReason
+                JObject jsonBody = JObject.Parse(requestBody);
+                int qc35FormId = (int)jsonBody["QC35FormID"];
+                string rejectionReason = (string)jsonBody["RejectionReason"];
+
+                // Retrieve engagement data from the database
+                var engagement = _context.QC35Forms.FirstOrDefault(e => e.QC35FormID == qc35FormId);
+                if (engagement == null)
+                {
+                    return NotFound();
+                }
+
+                // Get the current user's email
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+                var currentUserEmail = user?.Email;
+
+                // Check if current user is the first approver
+                if (currentUserEmail == engagement.FirstApprover)
+                {
+                    // Update the engagement status to "Rejected"
+                    engagement.Status = "Rejected";
+                    engagement.RejectionReason = rejectionReason; // Set the rejection reason
+
+                    // Reset approval status to repeat the approval process
+                    engagement.IsFirstApproved = false;
+                    engagement.IsSecondApproved = false;
+
+                    _context.SaveChanges();
+
+                    // Send email to creator to notify about the rejection
+                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejected",
+                        $"Your QC35 Form has been rejected by: {engagement.FirstApprover}. Please make the necessary amendments and resubmit the form.");
+
+                    return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
+                }
+
+                // Check if current user is the second approver
+                if (currentUserEmail == engagement.SecondApprover)
+                {
+                    // Update the engagement status to "Rejected"
+                    engagement.Status = "Rejected";
+                    engagement.RejectionReason = rejectionReason; // Set the rejection reason
+
+                    // Reset approval status to repeat the approval process
+                    engagement.IsFirstApproved = false;
+                    engagement.IsSecondApproved = false;
+
+                    _context.SaveChanges();
+
+                    // Send email to creator to notify about the rejection
+                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejected",
+                        $"Your QC35 Form has been rejected by: {engagement.SecondApprover}. Please make the necessary amendments and resubmit the form.");
+
+                    return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
+                }
+
+                // If neither the first nor the second approver, forbid the operation
+                return Forbid();
+            }
+        }
+
 
         [Authorize(Roles = "User,Admin,Non-Auditor")]
         public async Task<IActionResult> ViewQC35Form(int id)
@@ -157,6 +301,57 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/QC35/ViewQC35Form.cshtml", viewModel);
         }
 
+        [Authorize(Roles = "User,Admin,Non-Auditor")]
+        public async Task<IActionResult> EditQC35Form(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var qc35Form = await _context.QC35Forms
+                .Include(f => f.ChecklistItems) // Include the related checklist items
+                .FirstOrDefaultAsync(f => f.QC35FormID == id);
+
+            if (qc35Form == null)
+            {
+                return NotFound();
+            }
+
+            // Retrieve all emails for users in the "Admin" role
+            var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+
+            // Retrieve client names for display
+            var clientNames = await _context.QC6Forms
+                                             .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
+                                             .Select(c => c.ProspectiveClient) // Select the column with client names
+                                             .Distinct() // Ensure unique client names
+                                             .OrderBy(name => name) // Order client names from A to Z
+                                             .ToListAsync(); // Fetch the ordered list of unique client names
+
+            var viewModel = new QC35FormViewModel
+            {
+                QC35FormID = qc35Form.QC35FormID,
+                CreatedBy = qc35Form.CreatedBy,
+                ClientName = qc35Form.ClientName,
+                ClientNames = clientNames,
+                ReportingYearEnd = (DateTime)qc35Form.ReportingYearEnd,
+                PartnerName = qc35Form.PartnerName,
+                ManagerName = qc35Form.ManagerName,
+                Status = qc35Form.Status,
+                ImageFileName = qc35Form.ImageFileName,
+                AdminEmails = adminEmails.ToList(),
+                ChecklistItems = qc35Form.ChecklistItems.Select(ci => new QC35ChecklistItemViewModel
+                {
+                    QC35ChecklistItemID = ci.QC35ChecklistItemID,
+                    Description = ci.Description,
+                    Response = ci.Response
+                }).ToList()
+            };
+
+            ViewBag.Roles = roles;
+
+            return View("~/Views/General/QC35/EditQC35Form.cshtml", viewModel);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetImage(string key)
         {
@@ -193,24 +388,14 @@ namespace PKFAuditManagement.Controllers
             var userEmail = await _userService.GetUserEmailAsync(User);
 
             // Retrieve client names for display
-            /*
+            
             var clientNames = await _context.QC6Forms
                                              .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
                                              .Select(c => c.ProspectiveClient) // Select the column with client names
                                              .Distinct() // Ensure unique client names
                                              .OrderBy(name => name) // Order client names from A to Z
                                              .ToListAsync(); // Fetch the ordered list of unique client names
-            */
-
-            // Create sample data for ClientNames
-            var clientNames = new List<string>
-            {
-                "Client A Ltd",
-                "Client B Pvt Ltd",
-                "Client C Inc",
-                "Client D Group",
-                "Client E International"
-            };
+           
 
             // Retrieve all emails for users in the "Admin" role
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
@@ -263,19 +448,36 @@ namespace PKFAuditManagement.Controllers
                     // Get the current user's ID
                     var userId = user?.Id;
 
+                    // Retrieve email based on userId from the AspNetUsers table
+                    var userEmail = await _context.Users
+                        .Where(u => u.Id == userId)
+                        .Select(u => u.Email)
+                        .FirstOrDefaultAsync();
+
+                    // QCForm File Reference will contain _NAS for Non-Auditor role creation
+                    string fileReference = Helper.GenerateQCFormFileReference();
+
+                    if (roles.Contains("Non-Auditor"))
+                    {
+                        // Modify the fileReference if the "Non-Auditor" role is present
+                        fileReference += "_NAS";
+                    }
+
                     var qc35Form = new QC35Form
                     {
                         CreatedBy = userId,
+                        FileReference = fileReference,
                         ClientName = viewModel.ClientName,
                         ReportingYearEnd = viewModel.ReportingYearEnd,
                         PartnerName = viewModel.PartnerName,
                         ManagerName = viewModel.ManagerName,
                         ImageFileName = viewModel.ImageFileName,
                         Status = "Pending",
-                        FirstApprover = viewModel.PartnerName,
-                        SecondApprover = viewModel.ManagerName,
+                        FirstApprover = viewModel.ManagerName,
+                        SecondApprover = viewModel.PartnerName,
                         IsFirstApproved = false,
                         IsSecondApproved = false,
+                        PreparedBy = userEmail
                     };
 
                     _context.QC35Forms.Add(qc35Form);
@@ -301,6 +503,12 @@ namespace PKFAuditManagement.Controllers
                     }
                     
                     await transaction.CommitAsync();
+
+                    await _emailSender.SendEmailAsync(viewModel.PartnerName, "QC35 Form Creation",
+                    $"A new QC35 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
+
+                    await _emailSender.SendEmailAsync(viewModel.ManagerName, "QC35 Form Creation",
+                    $"A new QC35 Form has been created with File Reference: {fileReference} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
 
                     if (roles.Contains("Admin"))
                     {
@@ -348,7 +556,7 @@ namespace PKFAuditManagement.Controllers
                 // Pass the errors to the view
                 ViewBag.Errors = errors;
 
-                return View("~/Views/General/QC35/ViewQC35Form.cshtml", viewModel);
+                return View("~/Views/General/QC35/EditQC35Form.cshtml", viewModel);
             }
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
@@ -364,10 +572,16 @@ namespace PKFAuditManagement.Controllers
                         return NotFound();
                     }
 
+                    // Store the old values for comparison
+                    var oldPartnerName = qc35Form.PartnerName;
+                    var oldManagerName = qc35Form.ManagerName;
+
                     // Check if the request is a PUT operation
                     var isPutRequest = Request.Method.Equals(HttpMethod.Put.ToString(), StringComparison.OrdinalIgnoreCase)
                    || Request.Form.ContainsKey("_method") && string.Equals(Request.Form["_method"], "PUT", StringComparison.OrdinalIgnoreCase);
 
+                    // Flag to track if Partner or Manager has been updated
+                    var isPartnerOrManagerNameUpdated = false;
 
                     // Update the QC35Form fields based on the request method
                     if (isPutRequest)
@@ -376,8 +590,19 @@ namespace PKFAuditManagement.Controllers
                         // Update the QC35Form fields
                         qc35Form.ClientName = viewModel.ClientName;
                         qc35Form.ReportingYearEnd = viewModel.ReportingYearEnd;
-                        qc35Form.PartnerName = viewModel.PartnerName;
-                        qc35Form.ManagerName = viewModel.ManagerName;
+
+                        if (qc35Form.PartnerName != viewModel.PartnerName)
+                        {
+                            qc35Form.PartnerName = viewModel.PartnerName;
+                            isPartnerOrManagerNameUpdated = true;
+                        }
+
+                        if (qc35Form.ManagerName != viewModel.ManagerName)
+                        {
+                            qc35Form.ManagerName = viewModel.ManagerName;
+                            isPartnerOrManagerNameUpdated = true;
+                        }
+                        
 
                         // Update the ChecklistItems
                         foreach (var item in viewModel.ChecklistItems)
@@ -416,10 +641,24 @@ namespace PKFAuditManagement.Controllers
                         qc35Form.ImageFileName = fileName;
                     }
 
-
                     _context.QC35Forms.Update(qc35Form);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
+
+                    if (isPartnerOrManagerNameUpdated)
+                    {
+                        if(qc35Form.PartnerName != oldPartnerName)
+                        {
+                            await _emailSender.SendEmailAsync(qc35Form.PartnerName, "QC35 Form Update",
+                            $"The QC35 Form with File Reference: {qc35Form.FileReference} has been updated and you've been designated as the first approver. Please review the changes.");
+                        }
+
+                        if (qc35Form.ManagerName != oldManagerName)
+                        {
+                            await _emailSender.SendEmailAsync(qc35Form.ManagerName, "QC35 Form Update",
+                            $"The QC35 Form with File Reference: {qc35Form.FileReference} has been updated and you've been designated as the second approver. Please review the changes.");
+                        }
+                    }
 
                     if (roles.Contains("Admin"))
                     {
@@ -443,7 +682,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpDelete]
         [Authorize(Roles = "User,Admin,Non-Auditor")]
-        public IActionResult DeleteQC35Form(int id)
+        public async Task<IActionResult> DeleteQC35FormAsync(int id)
         {
             using var transaction = _context.Database.BeginTransaction();
 
@@ -460,12 +699,24 @@ namespace PKFAuditManagement.Controllers
                 var checklistItems = _context.QC35ChecklistItems.Where(c => c.QC35FormID == id);
                 _context.QC35ChecklistItems.RemoveRange(checklistItems);
 
+                //Delete Image from S3 bucket
+                var formImage = qc35Form.ImageFileName;
+                if (!string.IsNullOrEmpty(formImage))
+                {
+                    var s3DeletionSuccess = await DeleteFileAsync(formImage);
+                    if (!s3DeletionSuccess)
+                    {
+                        // Optionally return an error message if S3 deletion fails
+                        return StatusCode(500, "Error deleting the image from S3");
+                    }
+                }
+
                 // Delete the QC35Form itself
                 _context.QC35Forms.Remove(qc35Form);
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                transaction.Commit(); // Commit the transaction if all operations are successful
+                await transaction.CommitAsync(); // Commit the transaction if all operations are successful
 
                 return NoContent(); // Respond with 204 No Content
             }
@@ -500,7 +751,7 @@ namespace PKFAuditManagement.Controllers
             return fileName;
         }
 
-        private async Task DeleteFileAsync(string fileName)
+        private async Task<bool> DeleteFileAsync(string fileName)
         {
             try
             {
@@ -511,10 +762,11 @@ namespace PKFAuditManagement.Controllers
                 };
 
                 await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+                return true;
             }
             catch (AmazonS3Exception ex)
             {
-                // Handle exception (e.g., log it)
+                return false;
             }
         }
 

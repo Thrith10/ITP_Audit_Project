@@ -1,14 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject UserManager<CustomUser> UserManager
-@inject RoleManager<IdentityRole> RoleManager
-
-@{
-    var user = await UserManager.GetUserAsync(User);
-    var roles = await UserManager.GetRolesAsync(user);
-    var role = roles.Any() ? roles[0] : null;
-}
-
-@model PKFAuditManagement.ViewModels.QC35FormViewModel
+﻿@model PKFAuditManagement.ViewModels.QC35FormViewModel
 @using Microsoft.AspNetCore.Mvc.ViewFeatures
 
 <div class="justify-content-center">
@@ -49,7 +39,7 @@
                                 <div class="form-group">
                                     <label asp-for="ClientName">Client Name:<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <select asp-for="ClientName" class="form-control" disabled>
+                                        <select asp-for="ClientName" class="form-control">
                                             @if (Model.ClientNames != null && Model.ClientNames.Any())
                                             {
                                                 @foreach (var client in Model.ClientNames)
@@ -68,14 +58,14 @@
                                 <div class="form-group">
                                     <label asp-for="ReportingYearEnd">Reporting Year End:<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <input type="date" class="form-control" asp-for="ReportingYearEnd" id="reportingYearEnd" disabled>
+                                        <input type="date" class="form-control" asp-for="ReportingYearEnd" id="reportingYearEnd">
                                         <span asp-validation-for="ReportingYearEnd" class="text-danger"></span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ClientName">Approved by (Manager):<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <select asp-for="ManagerName" class="form-control" disabled>
+                                        <select asp-for="ManagerName" class="form-control">
                                             @foreach (var email in Model.AdminEmails)
                                             {
                                                 <option value="@email">@email</option>
@@ -87,7 +77,7 @@
                                 <div class="form-group">
                                     <label asp-for="ClientName">Approved by (Partner):<span class="text-danger"> *</span></label>
                                     <div class="input-group">
-                                        <select asp-for="PartnerName" class="form-control" disabled>
+                                        <select asp-for="PartnerName" class="form-control">
                                             @foreach (var email in Model.AdminEmails)
                                             {
                                                 <option value="@email">@email</option>
@@ -245,11 +235,11 @@
                                                        Model.ChecklistItems[i].Description == "Date of approval of files for archival is within 60 days from date of Audit Report" ||
                                                        Model.ChecklistItems[i].Description == "Date of approval and confirmation that CaseWare Audit files has been locked down within 60 days from the date of the Audit Report (if applicable). Refer to the screenshot of CaseWare below.")
                                                         {
-                                                            <input type="date" class="form-control" name="ChecklistItems[@i].Response" asp-for="@Model.ChecklistItems[i].Response" required disabled />
+                                                            <input type="date" class="form-control" name="ChecklistItems[@i].Response" asp-for="@Model.ChecklistItems[i].Response" required />
                                                         }
                                                         else
                                                         {
-                                                            <input type="text" class="form-control" name="ChecklistItems[@i].Response" asp-for="@Model.ChecklistItems[i].Response" required disabled />
+                                                            <input type="text" class="form-control" name="ChecklistItems[@i].Response" asp-for="@Model.ChecklistItems[i].Response" required />
                                                         }
 
                                                     </td>
@@ -263,13 +253,13 @@
                                     <div id="drop-area">
                                         <div id="img-view">
                                             <!-- Placeholder content for drag-and-drop area -->
-                                            <img id="upload-icon" src="~/img/upload-icon.png" alt="Upload Icon" style="max-width: 100px; height: 100px;" disabled>
+                                            <img id="upload-icon" src="~/img/upload-icon.png" alt="Upload Icon" style="max-width: 100px; height: 100px;">
                                             <div id="placeholder-text">
                                                 <p>Drag and drop an image here to upload</p>
                                                 <span>Upload any images from desktop</span>
                                             </div>
                                             <!-- The image element that will show the uploaded image -->
-                                            <img id="uploaded-image" src="" alt="Uploaded Image" style="display: none;" disabled>
+                                            <img id="uploaded-image" src="" alt="Uploaded Image" style="display: none;">
                                         </div>
                                         <input type="file" name="file" accept="image/*" id="input-file" hidden>
                                     </div>
@@ -286,18 +276,13 @@
                                 }
 
                                 <div class="text-center">
+                                    <button type="button" id="editImageBtn" class="btn btn-primary mt-3">Edit Image</button>
+                                    <button id="cancel-upload" type="button" class="btn btn-danger mt-3" style="display: none;">Cancel Upload</button>
                                     @{
-                                        var backUrl = role == "Admin" ? Url.Action("QC35FormApprovalManagement", "QC35Form") : Url.Action("QC35FormManagement", "QC35Form");
+                                        var backUrl = ViewBag.Roles.Contains("Admin") ? Url.Action("QC35FormApprovalManagement", "QC35Form") : Url.Action("QC35FormManagement", "QC35Form");
                                     }
                                     <a href="@backUrl" class="mt-3 end-0 btn btn-primary">Back</a>
-                                    @if (role == "Admin")
-                                    {
-                                        if (Model.Status == "Pending" || Model.Status == "Pending 2nd Approval")
-                                        {
-                                            <button type="button" class="mt-3 end-0 btn btn-success" id="approveButton" onclick="approveQC35Form(@Model.QC35FormID)">Approve</button>
-                                            <button type="button" class="mt-3 end-0 btn btn-danger" id="rejectButton" onclick="rejectQC35Form(@Model.QC35FormID)">Reject</button>
-                                        }
-                                    }
+                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Submit</button>
                                 </div>
                             </div>
                         </div>
@@ -423,133 +408,6 @@
                 editImageBtn.style.display = "none";
             });
         });
-
-        // This function approves the QC35 form selected from the Admin Dashboard QC35 Form Management page
-        function approveQC35Form(qc35FormId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to approve this QC35 Form?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, approve it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Send a POST request to the server
-                    $.ajax({
-                        url: '/QC35Form/ApproveQC35Form/' + qc35FormId,
-                        type: 'POST',
-                        headers: {
-                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Anti-forgery token
-                        },
-                        success: function (response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Approved!',
-                                text: 'The QC35 Form has been approved.',
-                            }).then(() => {
-                                window.location.href = '/QC35Form/QC35FormApprovalManagement'; // Redirect to the management page
-                            });
-                        },
-                        error: function (xhr, status, error) {
-                            if (xhr.status === 403) {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Forbidden',
-                                    text: 'The request was invalid. Please check that you are authorized to approve this form and try again.',
-                                });
-                            } else {
-                                console.error('Error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Oops...',
-                                    text: 'Failed to approve item. Please try again later.',
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-        }
-
-        // This function rejects the QC35 form selected from the Admin Dashboard QC35 Form Management page
-        function rejectQC35Form(qc35FormId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to reject this QC35 Form?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, reject it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Prompt user for rejection reason
-                    Swal.fire({
-                        title: 'Rejection Reason',
-                        input: 'textarea',
-                        inputLabel: 'Enter your reason for rejection',
-                        inputPlaceholder: 'Enter reason here...',
-                        inputAttributes: {
-                            autocapitalize: 'off',
-                            rows: 4 // Number of visible rows
-                        },
-                        showCancelButton: true,
-                        confirmButtonText: 'Reject',
-                        cancelButtonText: 'Cancel',
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        showLoaderOnConfirm: true,
-                        preConfirm: (rejectionReason) => {
-                            if (!rejectionReason) {
-                                Swal.showValidationMessage('Rejection reason is required');
-                            }
-                            return rejectionReason;
-                        },
-                        allowOutsideClick: () => !Swal.isLoading()
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Send a POST request to the server with the rejection reason
-                            $.ajax({
-                                url: '/QC35Form/RejectQC35Form/' + qc35FormId,
-                                type: 'POST',
-                                contentType: 'application/json',
-                                data: JSON.stringify({ QC35FormID: qc35FormId, RejectionReason: result.value }),
-                                success: function (response) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Rejected!',
-                                        text: 'The QC35 Form has been rejected.',
-                                    }).then(() => {
-                                        window.location.href = '/QC35Form/QC35FormApprovalManagement';
-                                    });
-                                },
-                                error: function (xhr) {
-                                    if (xhr.status === 403) {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Forbidden',
-                                            text: 'The request was invalid. Please check that you are authorised to reject this form and try again.',
-                                        });
-                                    } else {
-                                        console.error('Error:', xhr.responseText);
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Oops...',
-                                            text: 'Failed to reject item. Please try again later.',
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
     </script>
 }
 

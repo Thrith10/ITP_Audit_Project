@@ -151,18 +151,44 @@
 
                                     #img-view {
                                         width: 100%;
+                                        height: 700px; /* Adjust based on your desired height */
                                         border-radius: 20px;
                                         background: #f7f8ff;
-                                        background-position: center;
-                                        background-size: cover;
-                                        background-repeat: no-repeat;
-                                        transition: height 0.3s ease;
+                                        display: flex;
+                                        flex-direction: column; /* Stack elements vertically */
+                                        align-items: center; /* Center elements horizontally */
+                                        justify-content: center; /* Center elements vertically */
+                                        overflow: hidden; /* Hide overflow for large images */
                                     }
 
+                                    #upload-icon {
+                                        margin-bottom: 20px; /* Add space below the icon */
+                                    }
+
+                                    #placeholder-text {
+                                        text-align: center;
+                                        font-size: 14px;
+                                    }
+
+                                    #uploaded-image {
+                                        max-width: 100%; /* Scale image width */
+                                        max-height: 100%; /* Scale image height */
+                                        display: none; /* Hide initially until an image is uploaded */
+                                    }
+
+                                    #placeholder-text p,
+                                    #placeholder-text span {
+                                        margin: 0; /* Remove default margins */
+                                        color: #777;
+                                    }
+
+
                                         #img-view img {
-                                            width: 100px;
-                                            margin-top: 25px;
+                                            max-width: 100%; /* Scale image width */
+                                            max-height: 100%; /* Scale image height */
+                                            margin: 0 auto; /* Center image */
                                         }
+
 
                                         #img-view span {
                                             display: block;
@@ -170,6 +196,21 @@
                                             color: #777;
                                             margin-top: 15px;
                                         }
+
+                                    #cancel-upload {
+                                        display: none; /* Hidden by default */
+                                    }
+
+                                    #drop-area {
+                                        transition: border-color 0.3s ease;
+                                    }
+
+                                        #drop-area.dragging {
+                                            border-color: #4A90E2; /* Custom color when dragging over the area */
+                                            background: #f1f7ff; /* Light background to indicate drop zone */
+                                        }
+
+
 
                                 </style>
 
@@ -209,18 +250,24 @@
                                     </table>
                                 </div>
                                 <div class="imageUpload">
-                                    <label for="input-file" id="drop-area">
-                                        <input type="file" name="file" accept="image/*" id="input-file" hidden>
+                                    <!-- Updated drop-area structure -->
+                                    <div id="drop-area">
                                         <div id="img-view">
-                                            <img src="~/img/upload-icon.png" alt="Upload Icon">
-                                            <p>Drag and drop or click here<br>to upload image</p>
-                                            <span>Upload any images from desktop</span>
+                                            <!-- Upload Icon and Placeholder Text -->
+                                            <img id="upload-icon" src="~/img/upload-icon.png" alt="Upload Icon" style="max-width: 100px; height: 100px;">
+                                            <div id="placeholder-text">
+                                                <p>Drag and drop an image here to upload</p>
+                                                <span>Upload any images from desktop</span>
+                                            </div>
+                                            <!-- The image element that will show the uploaded image -->
+                                            <img id="uploaded-image" src="" alt="Uploaded Image" style="display: none;">
                                         </div>
-                                    </label>
+                                        <input type="file" name="file" accept="image/*" id="input-file" hidden>
+                                    </div>
                                 </div>
 
                                 <div class="text-center">
-                                    <button id="cancel-upload" type="button" class="btn btn-danger mt-3" style="display:none;">Cancel Upload</button>
+                                    <button id="cancel-upload" type="button" class="btn btn-danger mt-3" style="display: none;">Cancel Upload</button>
                                     <button id="crop-image-button" type="button" class="btn btn-success mt-3" style="display:none;">Crop Image</button>
                                     <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC35 Form</button>
                                 </div>
@@ -240,143 +287,90 @@
 @section Scripts {
 
     <script>
-        let cropper;
-        const dropArea = document.getElementById("drop-area");
-        const inputFile = document.getElementById("input-file");
-        const imageView = document.getElementById("img-view");
-        const cropButton = document.getElementById("crop-button");
-        const cancelButton = document.getElementById("cancel-upload");
-        const cropImageButton = document.getElementById("crop-image-button");
-        const form = document.querySelector("mainForm");
-
-        // Get the image path using Razor syntax and inject it into the JavaScript as a constant
-        const uploadIconPath = '@Url.Content("~/img/upload-icon.png")';
-
-        cropImageButton.addEventListener("click", function () {
-            if (cropper) {
-                cropper.getCroppedCanvas().toBlob((blob) => {
-                    // Create a new File object
-                    const croppedImage = new File([blob], "cropped-image.jpg", { type: "image/jpeg" });
-
-                    // Create a new FileList containing the cropped image
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(croppedImage);
-
-                    // Update the file input with the new FileList
-                    inputFile.files = dataTransfer.files;
-
-                    // Optionally, update the image preview by adding <img> instead of backgroundImage
-                    const croppedImageUrl = URL.createObjectURL(croppedImage);
-                    imageView.innerHTML = ""; // Clear previous content
-
-                    // Create an img element and append it to the imageView
-                    const imgElement = document.createElement("img");
-                    imgElement.src = croppedImageUrl;
-                    imgElement.style.maxWidth = "100%";
-                    imgElement.style.borderRadius = "20px";
-                    imageView.appendChild(imgElement);
-
-                    console.log("Image cropped and input updated");
-                }, 'image/jpeg');
-            } else {
-                console.log("Cropper not initialized");
-            }
-        });
-
-        // Add event listener for file selection
-        inputFile.addEventListener("change", handleFileSelect);
-        // Add event listener for cancel upload
-        cancelButton.addEventListener("click", cancelUpload);
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const imgLink = URL.createObjectURL(file);
-                imageView.style.backgroundImage = `url(${imgLink})`;
-                imageView.style.height = "500px";
-                imageView.innerHTML = ""; // Clear the previous content
-
-                const imgElement = document.createElement("img");
-                imgElement.src = imgLink;
-                imgElement.id = "uploaded-image";
-                imgElement.style.maxWidth = "100%";
-                imageView.appendChild(imgElement);
-
-                imgElement.onload = function () {
-                    try {
-                        // Initialize Cropper.js
-                        cropper = new Cropper(imgElement, {
-                            aspectRatio: NaN, // or set to desired aspect ratio
-                            viewMode: 1
-                        });
-                    } catch (error) {
-                        console.error("Error initializing Cropper:", error);
-                    }
-                };
-                cancelButton.style.display = "inline-block";  // Show cancel button
-                cropImageButton.style.display = "inline-block";  // Show crop button
-                disableUpload();  // Disable upload functionality
-            }
-        }
-
-        // Function to disable both click and drag-and-drop functionality
-        function disableUpload() {
-            inputFile.disabled = true; // Disable click-to-upload
-            dropArea.removeEventListener("drop", handleDrop); // Remove drop event listener
-            dropArea.classList.add('upload-disabled'); // Add a class for styling
-        }
-
-        // Function to enable both click and drag-and-drop functionality (for cancel)
-        function enableUpload() {
-            dropArea.style.pointerEvents = "auto"; // Re-enable drag-and-drop
-            inputFile.disabled = false; // Re-enable click-to-upload
-        }
-
-        // Drag and drop functionality
-        dropArea.addEventListener("dragover", function (e) {
-            if (dropArea.style.pointerEvents === "none") {
-                return; // Prevent drag if pointer-events is set to none
-            }
-            e.preventDefault();
-        });
-
-        dropArea.addEventListener("drop", function (e) {
-            if (dropArea.style.pointerEvents === "none") {
-                return; // Prevent drop if pointer-events is set to none
-            }
-            e.preventDefault();
-            inputFile.files = e.dataTransfer.files;
-            handleFileSelect({ target: { files: e.dataTransfer.files } });
-        });
-
-        // Function to cancel the upload and reset the image view
-        function cancelUpload() {
-            // Reset the image view content to show the upload icon and text
-            imageView.style.backgroundImage = "";
-            imageView.style.height = "auto";
-            imageView.innerHTML = `
-                                <img src="${uploadIconPath}" alt="Upload Icon">
-                                <p>Drag and drop or click here<br>to upload image</p>
-                                <span>Upload any images from desktop</span>
-                            `;
-
-            // Reset the file input
-            inputFile.value = null;
-
-            // Re-enable the input and drop functionality
-            enableUpload();
-
-            // Hide the cancel button
-            cancelButton.style.display = "none";
-
-            // Destroy the Cropper instance if it exists
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-        }
-
         document.addEventListener("DOMContentLoaded", function () {
+            // DOM elements
+            const dropArea = document.getElementById("drop-area");
+            const inputFile = document.getElementById("input-file");
+            const imageView = document.getElementById("img-view");
+            const uploadIcon = document.getElementById("upload-icon");
+            const placeholderText = document.getElementById("placeholder-text");
+            const uploadedImage = document.getElementById("uploaded-image");
+            const cancelUploadButton = document.getElementById("cancel-upload");
+
+            // Initialize Viewer.js on the uploaded image only
+            let viewer;
+
+            function initializeViewer() {
+                if (viewer) {
+                    viewer.destroy(); // Destroy existing Viewer instance if it exists
+                }
+                viewer = new Viewer(uploadedImage, { // Initialize only on the uploaded image
+                    toolbar: true,
+                    navbar: false,
+                    title: false,
+                });
+            }
+
+            // Handle drag-and-drop image upload
+            dropArea.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                dropArea.style.borderColor = "#4A90E2"; // Change border color on hover
+            });
+
+            dropArea.addEventListener("dragleave", function (e) {
+                e.preventDefault();
+                dropArea.style.borderColor = "#bbb5ff"; // Reset border color when not dragging
+            });
+
+            dropArea.addEventListener("drop", function (e) {
+                e.preventDefault();
+                dropArea.style.borderColor = "#bbb5ff"; // Reset border color when dropping the file
+                inputFile.files = e.dataTransfer.files;
+                uploadImage();
+            });
+
+            // Handle file upload
+            function uploadImage() {
+                if (inputFile.files && inputFile.files[0]) {
+                    let imgLink = URL.createObjectURL(inputFile.files[0]);
+
+                    // Set the uploaded image src and show the image
+                    uploadedImage.src = imgLink;
+                    uploadedImage.style.display = "block";
+
+                    // Hide placeholder icon and text
+                    uploadIcon.style.display = "none";
+                    placeholderText.style.display = "none";
+
+                    // Show the Cancel Upload button
+                    cancelUploadButton.style.display = "inline-block";
+
+                    // Re-initialize Viewer.js after setting a new image source
+                    initializeViewer();
+                }
+            }
+
+            // Handle Cancel Upload button click
+            cancelUploadButton.addEventListener("click", function () {
+                // Reset the input file element
+                inputFile.value = "";
+
+                // Hide the uploaded image
+                uploadedImage.style.display = "none";
+                uploadedImage.src = ""; // Clear the image source
+
+                // Show placeholder icon and text again
+                uploadIcon.style.display = "block";
+                placeholderText.style.display = "block";
+
+                // Hide the Cancel Upload button
+                cancelUploadButton.style.display = "none";
+
+                // Destroy Viewer.js instance as there's no image to view
+                if (viewer) {
+                    viewer.destroy();
+                }
+            });
 
             const dateInput = document.getElementById("reportingYearEnd");
             console.log("Date input: " + dateInput.value);
@@ -401,48 +395,10 @@
                 setPlaceholder();
             });
 
-            const form = document.getElementById("mainForm");  // Select form by ID
-            form.addEventListener("submit", function (e) {
-                e.preventDefault();
-                console.log("Form is submitted!");  // Debug log
-
-                const formData = new FormData(this);
-
-                // Append the cropped image file to the formData
-                if (inputFile.files.length > 0) {
-                    formData.append("file", inputFile.files[0]);
-                }
-
-                // Send form data via Fetch API
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => {
-                        // Check if the response is JSON or something else
-                        const contentType = response.headers.get("content-type");
-                        if (contentType && contentType.includes("application/json")) {
-                            return response.json();  // Parse JSON if it's a JSON response
-                        } else {
-                            return response.text();  // Handle non-JSON (e.g., HTML response)
-                        }
-                    })
-                    .then(data => {
-                        if (typeof data === "object") {
-                            // JSON response, handle success
-                            console.log('Success:', data);
-                        } else {
-                            // HTML response, most likely an error or redirect
-                            console.log('HTML Response:', data);
-                            document.body.innerHTML = data;  // Optionally display the HTML response
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
-            });
         });
 
 
     </script>
 }
+
+

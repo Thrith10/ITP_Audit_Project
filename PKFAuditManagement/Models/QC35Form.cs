@@ -9,13 +9,15 @@ namespace PKFAuditManagement.Models
         [Key]
         public int QC35FormID { get; set; }
         public string CreatedBy { get; set; }
-        //public string? AuditFirmName { get; set; }
+        public string PreparedBy { get; set; }
+        public string? FileReference { get; set; }
         public string? ClientName { get; set; }
         public DateTime? ReportingYearEnd { get; set; }
         public string? PartnerName { get; set; }
         public string? ManagerName { get; set; }
         public string? ImageFileName { get; set; } 
         public string? Status { get; set; }
+        public string? RejectionReason { get; set; }
         public string? FirstApprover { get; set; }
         public string? SecondApprover { get; set; }
         public bool? IsFirstApproved { get; set; }
