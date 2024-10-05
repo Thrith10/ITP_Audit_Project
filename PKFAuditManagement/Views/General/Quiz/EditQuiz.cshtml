@@ -8,12 +8,12 @@
     <title>Edit Quiz</title>
     <link rel="stylesheet" href="~/css/edit-quiz.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" defer rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
     <script src="~/js/edit-quiz.js" defer></script>
-
 </head>
 <body>
-
-
     <main>
         <section class="section dashboard">
             <div class="row">
@@ -23,73 +23,66 @@
                             <div class="card info-card customers-card">
                                 <div class="card-body">
                                     <div class="form-container">
-                                        <!-- Success message display -->
                                         @if (TempData["SuccessMessage"] != null)
                                         {
                                             <div class="alert alert-success">
                                                 @TempData["SuccessMessage"]
                                             </div>
                                         }
-
-                                        <!-- Form to edit quiz details -->
                                         <form asp-action="Edit" method="post">
-                                            @* Hidden field for the QuizID *@
+                                            <!-- Hidden field for QuizID -->
                                             <input type="hidden" asp-for="QuizID" />
 
-                                            <!-- Quiz title input -->
                                             <div class="form-group">
-                                                <label asp-for="Title">Quiz Title</label>
-                                                <input asp-for="Title" class="form-control" required />
+                                                <label for="Title">Quiz Title</label>
+                                                <input type="text" class="form-control" id="Title" name="Title" value="@Model.Title" required />
                                             </div>
 
-                                            <!-- Quiz description input -->
                                             <div class="form-group">
-                                                <label asp-for="Description">Description</label>
-                                                <textarea asp-for="Description" class="form-control" required></textarea>
+                                                <label for="Description">Description</label>
+                                                <textarea class="form-control" id="Description" name="Description" required>@Model.Description</textarea>
                                             </div>
 
-                                            <!-- Quiz start date and time -->
                                             <div class="form-group">
-                                                <label asp-for="QuizStart">Quiz Start</label>
-                                                <input asp-for="QuizStart" class="form-control" type="datetime-local" required />
+                                                <label for="QuizStart">Quiz Start</label>
+                                                <input type="datetime-local" class="form-control" id="QuizStart" name="QuizStart"
+                                                       value="@Model.QuizStart.ToString("yyyy-MM-ddTHH:mm")" required />
                                             </div>
 
-                                            <!-- Participant selection options -->
                                             <div class="form-group">
-                                                <label>Participants (Selection is limited to registered users only)</label>
+                                                <label for="QuizEnd">Quiz End</label>
+                                                <input type="datetime-local" class="form-control" id="QuizEnd" name="QuizEnd"
+                                                       value="@Model.QuizEnd.ToString("yyyy-MM-ddTHH:mm")" required />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="Participants">Participants (Note: Selection is limited to registered users only)</label>
                                                 <br />
-
-                                                <!-- Buttons to select participants or upload via Excel -->
-                                                <button type="button" id="select-participants-btn" class="btn btn-secondary btn-sm">
-                                                    Select Participants
-                                                </button>
+                                                <button type="button" id="select-participants-btn" class="btn btn-secondary btn-sm">Select Participants</button>
                                                 <span class="separator">OR</span>
-                                                <button type="button" id="upload-participants-btn" class="btn btn-secondary btn-sm">
-                                                    Upload via Excel
-                                                </button>
-
-                                                <!-- Display selected participant count -->
+                                                <button type="button" id="upload-participants-btn" class="btn btn-secondary btn-sm">Upload via Excel</button>
                                                 <span id="participants-count" class="clickable" style="margin-left: 10px; color: blue; cursor: pointer;">
-                                                    0 participants selected
+                                                    @{
+                                                        var participantCount = 0;
+                                                        if (!string.IsNullOrEmpty(Model.SelectedParticipants))
+                                                        {
+                                                            participantCount = Model.SelectedParticipants.Split(';').Length;
+                                                        }
+                                                    }
+                                                    @participantCount participants selected
                                                 </span>
-
-                                                <!-- Hidden input for Excel upload -->
                                                 <input type="file" id="ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
                                             </div>
 
-                                            <!-- Hidden input for selected participants -->
-                                            <input type="hidden" id="SelectedParticipants" asp-for="SelectedParticipants" />
+                                            <input type="hidden" id="SelectedParticipants" name="SelectedParticipants" value="@Model.SelectedParticipants" />
 
-                                            <!-- Quiz questions loop -->
                                             <div id="quiz-container">
                                                 @for (int i = 0; i < Model.Questions.Count; i++)
                                                 {
-                                                    var question = Model.Questions[i];
                                                     <div class="card mb-3" data-index="@i">
                                                         <div class="card-body">
                                                             <div class="d-flex justify-content-between align-items-center">
                                                                 <h5 class="card-title">Question @(i + 1):</h5>
-
                                                                 @if (i > 0)
                                                                 {
                                                                     <button type="button" class="btn btn-danger btn-sm remove-question">
@@ -97,44 +90,105 @@
                                                                     </button>
                                                                 }
                                                             </div>
+
+                                                            <!-- Question Description -->
                                                             <div class="form-group">
-                                                                <input type="text" class="form-control" name="Questions[@i].Description" value="@question.Description" required />
+                                                                <input type="text" class="form-control" name="Questions[@i].Description" value="@Model.Questions.ElementAt(i).Description" required />
                                                             </div>
+
+                                                            <!-- Question Type Dropdown -->
                                                             <div class="form-group">
-                                                                <label>Options:</label>
-                                                                <div class="options-container">
-                                                                    @for (int j = 0; j < question.Options.Count; j++)
-                                                                    {
-                                                                        var option = question.Options[j];
-                                                                        <div class="input-group mb-2 option-group">
-                                                                            <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@option.OptionText" data-option-index="@j" required />
-                                                                            <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                                <i class="bi bi-trash"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                                <button type="button" class="btn btn-secondary btn-sm add-option btn-add" data-question-index="@i">
-                                                                    <i class="bi bi-plus-lg"></i> Add Option
-                                                                </button>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Select the correct answer:</label>
-                                                                <select class="form-control" name="Questions[@i].CorrectOptionText" required>
-                                                                    @for (int j = 0; j < question.Options.Count; j++)
-                                                                    {
-                                                                        var option = question.Options[j];
-                                                                        <option value="@option.OptionText">@option.OptionText</option>
-                                                                    }
+                                                                <label for="QuestionType">Question Type</label>
+                                                                <select class="form-control question-type-select" name="Questions[@i].Type" required>
+                                                                    <option value="@((int)QuestionType.TrueFalse)" selected="@(Model.Questions[i].Type == QuestionType.TrueFalse)">True/False</option>
+                                                                    <option value="@((int)QuestionType.SingleAnswerMCQ)" selected="@(Model.Questions[i].Type == QuestionType.SingleAnswerMCQ)">Single Answer MCQ</option>
+                                                                    <option value="@((int)QuestionType.MultiAnswerMCQ)" selected="@(Model.Questions[i].Type == QuestionType.MultiAnswerMCQ)">Multi-Answer MCQ</option>
                                                                 </select>
+                                                            </div>
+
+                                                            <!-- Options Container -->
+                                                            <div class="form-group options-container" id="options-container-@i">
+                                                                @switch (Model.Questions[i].Type)
+                                                                {
+                                                                    case QuestionType.TrueFalse:
+                                                                        <div>
+                                                                            <label>Select True/False</label>
+                                                                            <select class="form-control" name="Questions[@i].CorrectOptionText">
+                                                                                <option value="True" selected="@(Model.Questions[i].CorrectOptionText == "True")">True</option>
+                                                                                <option value="False" selected="@(Model.Questions[i].CorrectOptionText == "False")">False</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        break;
+
+                                                                    case QuestionType.SingleAnswerMCQ:
+                                                                        
+                                                                            <label>Options:</label>
+                                                                            @for (int j = 0; j < Model.Questions[i].Options.Count; j++)
+                                                                            {
+                                                                                <div class="input-group mb-2 option-group">
+                                                                                    <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions[i].Options[j].OptionText" required />
+                                                                                    <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                                        <i class="bi bi-trash"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            }
+                                                                            <!-- Add Option Button -->
+                                                                            @if (Model.Questions[i].Options.Count < 5)
+                                                                            {
+                                                                                <button type="button" class="btn btn-secondary btn-sm add-option" data-question-index="@i">
+                                                                                    <i class="bi bi-plus-lg"></i> Add Option
+                                                                                </button>
+                                                                            }
+                                                                            <br />
+                                                                            <label>Select the correct answer:</label>
+                                                                            <select class="form-control" name="Questions[@i].CorrectOptionText" required>
+                                                                                @foreach (var option in Model.Questions[i].Options)
+                                                                                {
+                                                                                    <option value="@option.OptionText" selected="@(Model.Questions[i].CorrectOptionText == option.OptionText)">@option.OptionText</option>
+                                                                                }
+                                                                            </select>
+                                                                      
+                                                                        break;
+
+                                                                    case QuestionType.MultiAnswerMCQ:
+                                                                 
+                                                                            <label>Options:</label>
+                                                                            @for (int j = 0; j < Model.Questions[i].Options.Count; j++)
+                                                                            {
+                                                                                <div class="input-group mb-2 option-group">
+                                                                                    <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions[i].Options[j].OptionText" required />
+                                                                                    <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                                        <i class="bi bi-trash"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            }
+                                                                            <!-- Add Option Button -->
+                                                                            @if (Model.Questions[i].Options.Count < 5)
+                                                                            {
+                                                                                <button type="button" class="btn btn-secondary btn-sm add-option" data-question-index="@i">
+                                                                                    <i class="bi bi-plus-lg"></i> Add Option
+                                                                                </button>
+                                                                            }
+                                                                            <br />
+                                                                            <label>Select the correct answer(s):</label>
+                                                                            <select class="form-control multi-select" name="Questions[@i].CorrectOptionText" multiple>
+                                                                            @{
+                                                                                var selectedCorrectAnswers = Model.Questions[i].CorrectOptionText?.Split(';') ?? new string[] { };
+                                                                            }
+                                                                                @foreach (var option in Model.Questions[i].Options)
+                                                                                {
+                                                                                    <option value="@option.OptionText" selected="@(Model.Questions[i].CorrectOptionText != null && Model.Questions[i].CorrectOptionText.Contains(option.OptionText))">@option.OptionText</option>
+                                                                                }
+                                                                            </select>
+                                                                
+                                                                        break;
+                                                                }
                                                             </div>
                                                         </div>
                                                     </div>
                                                 }
-
                                             </div>
 
-                                            <!-- Add question and submit buttons -->
                                             <div class="btn-container">
                                                 <button type="button" class="btn btn-secondary btn-sm add-question btn-add" id="add-question">
                                                     <i class="bi bi-plus-lg"></i> Add Question
@@ -143,7 +197,6 @@
                                             </div>
                                         </form>
 
-                                        <!-- Participants selection modal -->
                                         <div id="participants-modal" class="modal">
                                             <div class="modal-content">
                                                 <span class="close-modal">&times;</span>
@@ -151,9 +204,7 @@
                                                 <div class="button-container">
                                                     <button id="select-all" class="select-all-btn btn btn-primary">Select All</button>
                                                 </div>
-                                                <div class="participants-list">
-                                                    <!-- Dynamically populated list -->
-                                                </div>
+                                                <div class="participants-list"></div>
                                                 <div class="pagination">
                                                     <button class="prev-page btn btn-secondary">Prev</button>
                                                     <span class="current-page">1</span>
@@ -165,7 +216,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Selected participants modal -->
                                         <div id="selectedParticipantsModal" class="modal" style="display:none;">
                                             <div class="modal-content">
                                                 <span id="closeSelectedParticipantsModal" class="close">&times;</span>
@@ -183,7 +233,9 @@
                 </div>
             </div>
         </section>
-    </mainstyle>
+    </main>
+
+
 
 </body>
 </html>

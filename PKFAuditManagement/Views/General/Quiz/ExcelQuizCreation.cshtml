@@ -1,12 +1,18 @@
 ﻿@model PKFAuditManagement.ViewModels.QuizViewModel
 
+
 <div class="form-container">
     <h5>Excel Quiz Creation</h5>
-    <form asp-action="CreateExcelQuiz" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="ExcelFile">Upload Quiz via Excel</label>
-            <input type="file" class="form-control" id="ExcelFile" name="ExcelFile" accept=".xlsx" required />
+            <label for="ExcelQuizUpload">Upload Quiz via Excel</label>
+            <input type="file" class="form-control" id="ExcelQuizUpload" accept=".xlsx" required />
         </div>
-        <button type="submit" class="btn btn-primary">Upload and Create Quiz</button>
+        <button type="button" class="btn btn-primary" onclick="processExcel()">Upload and Extract Quiz</button>
     </form>
+</div>
+
+<!-- Placeholder for the second PartialView -->
+<div id="quiz-form-container">
+    <!-- The extracted data will populate this section -->
 </div>

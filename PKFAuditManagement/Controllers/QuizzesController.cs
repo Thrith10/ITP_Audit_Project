@@ -57,26 +57,47 @@ namespace PKFAuditManagement.Controllers
                 {
                     Title = quizViewModel.Title,
                     Description = quizViewModel.Description,
-                    QuizStart = quizViewModel.QuizStart
+                    QuizStart = quizViewModel.QuizStart,
+                    QuizEnd = quizViewModel.QuizEnd
                 };
 
-                // Add the quiz first to generate the QuizID
+                // Add the quiz to the context first to generate the QuizID
                 _context.Add(quiz);
                 await _context.SaveChangesAsync();
 
-                // Add questions and options
+                // Process each question from the view model
                 foreach (var questionViewModel in quizViewModel.Questions)
                 {
                     var question = new Questions
                     {
                         QuizID = quiz.QuizID,
                         Description = questionViewModel.Description,
-                        CorrectOptionText = questionViewModel.CorrectOptionText
+                        Type = (QuestionType)questionViewModel.Type, 
+
                     };
 
-                    _context.Questions.Add(question);
-                    await _context.SaveChangesAsync(); // Save to get QuestionID
+                    // Handle question types
+                    switch (questionViewModel.Type)
+                    {
+                        case QuestionType.TrueFalse:
+                        case QuestionType.SingleAnswerMCQ:
+                            // For True/False and SingleAnswerMCQ, use CorrectOptionText
+                            question.CorrectOptionText = questionViewModel.CorrectOptionText;
+                            break;
 
+                        case QuestionType.MultiAnswerMCQ:
+                            // For MultiAnswerMCQ, join the correct options list into a single string
+                            question.CorrectOptionText = questionViewModel.CorrectOptionTexts != null
+                                ? string.Join(';', questionViewModel.CorrectOptionTexts)
+                                : null;
+                            break;
+                    }
+
+                    // Add the question to the context and save to generate the QuestionID
+                    _context.Questions.Add(question);
+                    await _context.SaveChangesAsync();
+
+                    // Add options for each question
                     foreach (var optionViewModel in questionViewModel.Options)
                     {
                         var option = new Option
@@ -84,21 +105,20 @@ namespace PKFAuditManagement.Controllers
                             QuestionID = question.QuestionID,
                             OptionText = optionViewModel.OptionText
                         };
-
                         _context.Option.Add(option);
                     }
+
                     await _context.SaveChangesAsync(); // Save each option to get OptionID
                 }
 
                 // Handle selected participants by querying their UserID based on their email
                 if (!string.IsNullOrEmpty(quizViewModel.SelectedParticipants))
                 {
-                    // Split the email string by the delimiter `;`
                     var emailList = quizViewModel.SelectedParticipants.Split(';');
 
                     foreach (var email in emailList)
                     {
-                        var trimmedEmail = email.Trim(); // Ensure to remove any extra spaces around the email
+                        var trimmedEmail = email.Trim();
 
                         // Query the database to find the UserID based on the email
                         var user = await _context.Users
@@ -126,6 +146,7 @@ namespace PKFAuditManagement.Controllers
 
             return View("~/Views/General/Quiz/CreateQuiz.cshtml", quizViewModel);
         }
+
 
 
 
@@ -174,7 +195,8 @@ namespace PKFAuditManagement.Controllers
                     QuizID = q.QuizID,
                     Title = q.Title,
                     Description = q.Description,
-                    QuizStart = q.QuizStart // Include QuizStart in the view model
+                    QuizStart = q.QuizStart, // Include QuizStart in the view model
+                    QuizEnd = q.QuizEnd
 
                 }).ToList()
             };
@@ -238,11 +260,10 @@ namespace PKFAuditManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            // Fetch quiz details including questions, options, and participants (UserID)
             var quiz = await _context.Quiz
                 .Include(q => q.Questions)
                     .ThenInclude(q => q.Options)
-                .Include(q => q.Participants) // Fetch the participants associated with the quiz
+                .Include(q => q.Participants)
                 .FirstOrDefaultAsync(q => q.QuizID == id);
 
             if (quiz == null)
@@ -250,29 +271,26 @@ namespace PKFAuditManagement.Controllers
                 return NotFound();
             }
 
-            // Get the list of UserIDs from the Participants
             var participantUserIDs = quiz.Participants.Select(p => p.UserID).ToList();
-
-            // Fetch the corresponding email addresses using UserID
             var participantEmails = await _context.Users
-                .Where(u => participantUserIDs.Contains(u.Id)) // Filter by the participant UserIDs
-                .Select(u => u.Email) // Select the email of the participants
+                .Where(u => participantUserIDs.Contains(u.Id))
+                .Select(u => u.Email)
                 .ToListAsync();
 
-            // Join the email list into a single string with semicolon delimiter
             var selectedParticipants = string.Join(";", participantEmails);
 
-            // Build the QuizViewModel
             var model = new QuizViewModel
             {
                 QuizID = quiz.QuizID,
                 Title = quiz.Title,
                 Description = quiz.Description,
                 QuizStart = quiz.QuizStart,
+                QuizEnd = quiz.QuizEnd,
                 Questions = quiz.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionID = q.QuestionID,
                     Description = q.Description,
+                    Type = q.Type,  // Include the Question Type here
                     CorrectOptionText = q.CorrectOptionText,
                     Options = q.Options.Select(o => new OptionViewModel
                     {
@@ -280,12 +298,11 @@ namespace PKFAuditManagement.Controllers
                         OptionText = o.OptionText
                     }).ToList()
                 }).ToList(),
-                SelectedParticipants = selectedParticipants // Assign the emails as a single string with delimiter
+                SelectedParticipants = selectedParticipants
             };
 
             return View("~/Views/General/Quiz/EditQuiz.cshtml", model);
         }
-
 
         // POST: Quizzes/Edit
         [HttpPost]
@@ -294,11 +311,11 @@ namespace PKFAuditManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Fetch the quiz including its questions and options
+                // Fetch the quiz and related data (Questions, Options, and Participants)
                 var quiz = await _context.Quiz
                     .Include(q => q.Questions)
                         .ThenInclude(q => q.Options)
-                    .Include(q => q.Participants) // Include participants to update later
+                    .Include(q => q.Participants)
                     .FirstOrDefaultAsync(q => q.QuizID == quizViewModel.QuizID);
 
                 if (quiz == null)
@@ -310,68 +327,100 @@ namespace PKFAuditManagement.Controllers
                 quiz.Title = quizViewModel.Title;
                 quiz.Description = quizViewModel.Description;
                 quiz.QuizStart = quizViewModel.QuizStart;
+                quiz.QuizEnd = quizViewModel.QuizEnd;
 
-                // Remove existing questions and options
+                // Clear existing questions and options
                 var existingQuestions = quiz.Questions.ToList();
                 foreach (var question in existingQuestions)
                 {
+                    // Remove all options associated with this question
                     _context.Option.RemoveRange(question.Options);
+
+                    // Remove the question itself
                     _context.Questions.Remove(question);
                 }
 
-                // Add new questions and options
+                // Clear existing participants
+                quiz.Participants.Clear();
+
+                // Save changes to remove questions and participants
+                await _context.SaveChangesAsync();
+
+                // Add new questions and options from the view model
                 foreach (var questionViewModel in quizViewModel.Questions)
                 {
                     var newQuestion = new Questions
                     {
                         QuizID = quiz.QuizID,
                         Description = questionViewModel.Description,
-                        CorrectOptionText = questionViewModel.CorrectOptionText,
-                        Options = questionViewModel.Options.Select(o => new Option
-                        {
-                            OptionText = o.OptionText
-                        }).ToList()
+                        Type = (QuestionType)questionViewModel.Type
                     };
-                    quiz.Questions.Add(newQuestion);
+
+                    // Handle question types
+                    switch (questionViewModel.Type)
+                    {
+                        case QuestionType.TrueFalse:
+                        case QuestionType.SingleAnswerMCQ:
+                            // For True/False and SingleAnswerMCQ, set CorrectOptionText
+                            newQuestion.CorrectOptionText = questionViewModel.CorrectOptionText;
+                            break;
+                        case QuestionType.MultiAnswerMCQ:
+                            // For MultiAnswerMCQ, join correct options into a string
+                            newQuestion.CorrectOptionText = questionViewModel.CorrectOptionTexts != null
+                                ? string.Join(';', questionViewModel.CorrectOptionTexts)
+                                : null;
+                            break;
+                    }
+
+                    // Add the new question to the quiz
+                    _context.Questions.Add(newQuestion);
+                    await _context.SaveChangesAsync(); // Save question to get QuestionID
+
+                    // Add options for the new question
+                    foreach (var optionViewModel in questionViewModel.Options)
+                    {
+                        var newOption = new Option
+                        {
+                            QuestionID = newQuestion.QuestionID,
+                            OptionText = optionViewModel.OptionText
+                        };
+                        _context.Option.Add(newOption);
+                    }
+
+                    // Save options
+                    await _context.SaveChangesAsync();
                 }
 
-                // Handle participants' emails (SelectedParticipants) and update participants table
+                // Add new participants from the view model
                 if (!string.IsNullOrEmpty(quizViewModel.SelectedParticipants))
                 {
-                    // Split the string of emails into a list
                     var participantEmails = quizViewModel.SelectedParticipants.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-                    // Fetch corresponding users by email
                     var participants = await _context.Users
-                        .Where(u => participantEmails.Contains(u.Email)) // Find users whose email matches
+                        .Where(u => participantEmails.Contains(u.Email))
                         .ToListAsync();
 
-                    // Remove existing participants
-                    quiz.Participants.Clear();
-
-                    // Add new participants (from fetched users)
                     foreach (var participant in participants)
                     {
                         quiz.Participants.Add(new Participants
                         {
                             QuizID = quiz.QuizID,
-                            UserID = participant.Id // Add participant by UserID
+                            UserID = participant.Id,
+                            IsRequired = true
                         });
                     }
                 }
 
-                // Save changes to the database
+                // Save the new participants
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Quiz updated successfully.";
 
-                // Redirect to Quiz Details Page with the updated quizViewModel
-                return RedirectToAction(nameof(Details), new { id = quiz.QuizID });
+                TempData["SuccessMessage"] = "Quiz updated successfully!";
+                return RedirectToAction(nameof(Edit), new { id = quiz.QuizID });
             }
 
-            TempData["UnsuccessfulMessage"] = "Failed to update the quiz. Please review the form and try again.";
-            // Return the same view with the validation error and current model
+            // If model state is invalid, return to the view
             return View("~/Views/General/Quiz/EditQuiz.cshtml", quizViewModel);
         }
+
 
 
 
@@ -517,6 +566,48 @@ namespace PKFAuditManagement.Controllers
             {
                 return false;
             }
+        }
+        [HttpPost]
+        public async Task<IActionResult> LoadManualQuizCreationAsync([FromBody] ExcelQuizViewModel excelQuizModel)
+        {
+            var validEmailsResult = await EmailValidation(excelQuizModel.Participants);
+
+            if (validEmailsResult is BadRequestObjectResult badRequestResult)
+            {
+                return badRequestResult; // Handle the case where no valid emails were found
+            }
+
+            // Parse the valid emails string returned by EmailValidation (semicolon-delimited)
+            var validEmails = validEmailsResult is OkObjectResult okResult && okResult.Value is string validEmailsString
+                ? validEmailsString.Split(';').ToList()
+                : new List<string>();
+
+            // Map ExcelQuizViewModel to QuizViewModel
+            var quizViewModel = new QuizViewModel
+            {
+                Title = excelQuizModel.Title,
+                Description = excelQuizModel.Description,
+                QuizStart = DateTime.Parse(excelQuizModel.QuizStart),
+                Questions = excelQuizModel.Questions.Select(q => new QuestionViewModel
+                {
+                    Description = q.Description,
+                    Options = new List<OptionViewModel>
+            {
+                new OptionViewModel { OptionText = q.OptionA },
+                new OptionViewModel { OptionText = q.OptionB },
+                new OptionViewModel { OptionText = q.OptionC },
+                new OptionViewModel { OptionText = q.OptionD },
+                new OptionViewModel { OptionText = q.OptionE }
+            },
+                    CorrectOptionText = q.CorrectAnswer
+                }).ToList(),
+                SelectedParticipants = validEmails != null && validEmails.Any()
+            ? string.Join(";", validEmails)
+            : null
+            };
+
+            // Return the existing ManualQuizCreation PartialView with the mapped QuizViewModel
+            return PartialView("~/Views/General/Quiz/QuizAutoFilled.cshtml", quizViewModel);
         }
 
 

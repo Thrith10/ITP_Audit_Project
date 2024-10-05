@@ -20,5 +20,6 @@ namespace PKFAuditManagement.Models
         public ICollection<Questions> Questions { get; set; } = new List<Questions>();
         public ICollection<Participants>? Participants { get; set; }
         public DateTime QuizStart { get; set; }
+        public DateTime QuizEnd { get; set; }
     }
 }

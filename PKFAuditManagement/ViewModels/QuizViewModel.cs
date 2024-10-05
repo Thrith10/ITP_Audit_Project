@@ -30,6 +30,7 @@ namespace PKFAuditManagement.ViewModels
 
         public string Description { get; set; }
         public DateTime QuizStart { get; set; }
+        public DateTime QuizEnd { get; set; }
 
         public DateTime? AttemptDate { get; set; }
 
@@ -40,7 +41,6 @@ namespace PKFAuditManagement.ViewModels
 
 
     }
-
     public class QuestionViewModel
     {
         public int QuestionID { get; set; }
@@ -49,10 +49,17 @@ namespace PKFAuditManagement.ViewModels
         public string Description { get; set; }
 
         [Required]
-        public string CorrectOptionText { get; set; }
+        public QuestionType Type { get; set; }  // Distinguishes between the question types
+
+        // For True/False and SingleAnswerMCQ
+        public string? CorrectOptionText { get; set; }
+
+        // For Multi-Answer MCQ
+        public List<string>? CorrectOptionTexts { get; set; } = new List<string>();
 
         public List<OptionViewModel> Options { get; set; } = new List<OptionViewModel>();
     }
+
 
     public class OptionViewModel
     {
@@ -60,7 +67,11 @@ namespace PKFAuditManagement.ViewModels
 
         [Required]
         public string OptionText { get; set; }
+
+        // Indicates whether this option is correct for multi-answer MCQ
+        public bool IsCorrect { get; set; }
     }
+
 
     public class QuizListViewModel
     {
@@ -77,6 +88,38 @@ namespace PKFAuditManagement.ViewModels
     public class QuizResponseViewModel
     {
         public int QuestionID { get; set; }
+
+        // For Single Answer MCQ and True/False
         public string SelectedOption { get; set; }
+
+        // For Multi-Answer MCQ
+        public List<string> SelectedOptions { get; set; } = new List<string>();
+    }
+
+
+    public class ExcelQuizViewModel
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string QuizStart { get; set; } // DateTime in string format
+        public List<ExcelQuestionViewModel> Questions { get; set; }
+        public List<string> Participants { get; set; } // Emails from the Participants sheet
+
+        public ExcelQuizViewModel()
+        {
+            Questions = new List<ExcelQuestionViewModel>();
+            Participants = new List<string>();
+        }
+    }
+
+    public class ExcelQuestionViewModel
+    {
+        public string Description { get; set; }
+        public string OptionA { get; set; }
+        public string OptionB { get; set; }
+        public string OptionC { get; set; }
+        public string OptionD { get; set; }
+        public string OptionE { get; set; }
+        public string CorrectAnswer { get; set; }
     }
 }

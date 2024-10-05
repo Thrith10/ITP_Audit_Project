@@ -1,0 +1,178 @@
+﻿@model PKFAuditManagement.ViewModels.QuizViewModel
+<script src="~/js/quiz-auto-filled.js" defer></script>
+<section class="section dashboard quiz-create-section">
+    <div class="row quiz-create-row">
+        <!-- Left side columns -->
+        <div class="col-12 quiz-create-col">
+            <div class="row">
+                <div class="col-xxl-12 col-md-12">
+                    <div class="card info-card quiz-create-card">
+                        <div class="card-body quiz-create-card-body">
+                            <div class="form-container-quiz-create">
+                                @if (TempData["SuccessMessage"] != null)
+                                {
+                                    <div class="alert alert-success quiz-create-alert">
+                                        @TempData["SuccessMessage"]
+                                    </div>
+                                }
+                                <form asp-action="Create" method="post">
+                                    <div class="form-group quiz-create-form-group">
+                                        <label for="QuizTitle">Quiz Title</label>
+                                        <input type="text" class="form-control" id="QuizTitle" name="Title" value="@Model.Title" required />
+                                    </div>
+                                    <div class="form-group quiz-create-form-group">
+                                        <label for="QuizDescription">Description</label>
+                                        <textarea class="form-control" id="QuizDescription" name="Description" required>@Model.Description</textarea>
+                                    </div>
+
+                                    <!-- New Quiz Start Field -->
+                                    <div class="form-group quiz-create-form-group">
+                                        <label for="QuizStartDateTime">Quiz Start</label>
+                                        <!-- Set default value to current date and time, or the value from the model -->
+                                        <input type="datetime-local" class="form-control" id="QuizStartDateTime" name="QuizStart"
+                                               value="@Model.QuizStart.ToString("yyyy-MM-ddTHH:mm")" placeholder="dd/MM/yyyy" required />
+                                    </div>
+
+                                    <!-- New Participants Selection Field -->
+                                    <div class="form-group quiz-create-form-group">
+                                        <label for="QuizParticipants">Participants (Note: Selection is limited to registered users only)</label>
+                                        <br />
+                                        <!-- Select Participants Button -->
+                                        <button type="button" id="quiz-select-participants-btn" class="btn btn-secondary btn-sm">
+                                            Select Participants
+                                        </button>
+                                        <span class="separator">OR</span>
+
+                                        <!-- Upload via Excel Button -->
+                                        <button type="button" id="quiz-upload-participants-btn" class="btn btn-secondary btn-sm">
+                                            Upload via Excel
+                                        </button>
+
+                                        <!-- Display selected count -->
+                                        <span id="quiz-participants-count" class="clickable" style="margin-left: 10px; color: blue; cursor: pointer;">
+                                            0 participants selected
+                                        </span>
+
+                                        <!-- File Input for Excel Upload (Hidden initially) -->
+                                        <input type="file" id="quiz-ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
+                                    </div>
+
+                                    <input type="hidden" id="quiz-SelectedParticipants" name="SelectedParticipants" value="@Model.SelectedParticipants" />
+
+                                    <div id="quiz-questions-container">
+                                        <!-- Updated Loop for Questions -->
+                                        @for (int i = 0; i < Model.Questions.Count; i++)
+                                        {
+                                            <div class="card mb-3 quiz-question-card" data-index="@i">
+                                                <div class="card-body quiz-question-card-body">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <h5 class="card-title">Question @(i + 1):</h5>
+
+                                                        <!-- Conditionally Render Remove Question Button -->
+                                                        @if (i > 0)
+                                                        {
+                                                            <button type="button" class="btn btn-danger btn-sm quiz-remove-question">
+                                                                <i class="bi bi-trash"></i> Remove Question
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                    <div class="form-group quiz-create-form-group">
+                                                        <input type="text" class="form-control" name="Questions[@i].Description" value="@Model.Questions.ElementAt(i).Description" required />
+                                                    </div>
+                                                    <div class="form-group quiz-create-form-group">
+                                                        <label>Options:</label>
+                                                        <div class="quiz-options-container">
+                                                            @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
+                                                            {
+                                                                <div class="input-group mb-2 quiz-option-group">
+                                                                    <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions.ElementAt(i).Options.ElementAt(j).OptionText" data-option-index="@j" required />
+                                                                    <button type="button" class="btn btn-danger btn-sm quiz-remove-option">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                            <button type="button" class="btn btn-secondary btn-sm quiz-add-option btn-add" data-question-index="@i">
+                                                                <i class="bi bi-plus-lg"></i> Add Option
+                                                            </button>
+
+                                                    </div>
+
+                                                    <div class="form-group quiz-create-form-group">
+                                                        <label>Select the correct answer:</label>
+                                                        <select class="form-control" name="Questions[@i].CorrectOptionText" required>
+                                                            @for (int j = 0; j < Model.Questions.ElementAt(i).Options.Count; j++)
+                                                            {
+                                                                var option = Model.Questions.ElementAt(i).Options.ElementAt(j);
+                                                                if (Model.Questions.ElementAt(i).CorrectOptionText == option.OptionText)
+                                                                {
+                                                                    <option value="@option.OptionText" selected>@option.OptionText</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@option.OptionText">@option.OptionText</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="quiz-create-btn-container">
+                                        <button type="button" class="btn btn-secondary btn-sm quiz-add-question btn-add" id="quiz-add-question">
+                                            <i class="bi bi-plus-lg"></i> Add Question
+                                        </button>
+                                        <button type="submit" id="quiz-submit-button" class="btn btn-primary btn-sm">Save</button>
+                                    </div>
+                                </form>
+
+                                <!-- Modal for Participants Selection -->
+                                <div id="quiz-participants-modal" class="modal">
+                                    <div class="modal-content quiz-modal-content">
+                                        <span class="quiz-close-modal">&times;</span>
+                                        <h5>Select Participants</h5>
+
+                                        <!-- Button Container -->
+                                        <div class="quiz-button-container">
+                                            <button id="quiz-select-all" class="quiz-select-all-btn btn btn-primary">Select All</button>
+                                        </div>
+
+                                        <!-- Participant List -->
+                                        <div class="quiz-participants-list">
+                                            <!-- Dynamically populated list -->
+                                        </div>
+
+                                        <!-- Pagination -->
+                                        <div class="quiz-pagination">
+                                            <button class="quiz-prev-page btn btn-secondary">Prev</button>
+                                            <span class="quiz-current-page">1</span>
+                                            <button class="quiz-next-page btn btn-secondary">Next</button>
+                                        </div>
+                                        <div class="quiz-button-container">
+                                            <button type="button" id="quiz-confirm-participants-btn" class="btn btn-primary">Confirm</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal for displaying selected participants -->
+                                <div id="quiz-selectedParticipantsModal" class="modal" style="display:none;">
+                                    <div class="modal-content quiz-modal-content">
+                                        <span id="quiz-closeSelectedParticipantsModal" class="quiz-close">&times;</span>
+                                        <h4>Selected Participants</h4>
+                                        <div class="quiz-scrollable-participants-list" style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                                            <ul id="quiz-selectedParticipantsList"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+  <script src="~/js/quiz-auto-filled.js" defer></script>
