@@ -9,7 +9,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> <!-- QR Code Library -->
     <style>
-        <style >
         .form-container {
             padding: 20px;
         }
@@ -42,21 +41,21 @@
             text-align: center;
         }
 
-            .no-quiz-container .icon {
-                font-size: 3rem;
-                margin-bottom: 1rem;
-                color: #adb5bd;
-            }
+        .no-quiz-container .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #adb5bd;
+        }
 
-            .no-quiz-container h5 {
-                margin-bottom: 1rem;
-                font-size: 1.5rem;
-                color: #495057;
-            }
+        .no-quiz-container h5 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: #495057;
+        }
 
-            .no-quiz-container .btn {
-                margin-top: 1rem;
-            }
+        .no-quiz-container .btn {
+            margin-top: 1rem;
+        }
 
         .card-title {
             padding: 0px 0 0px 0;
@@ -75,13 +74,13 @@
         /* Modal QR Code Size */
         #qrCode {
             margin: 0 auto;
-            width: 600px; /* QR Code size */
-            height: 600px; /* QR Code size */
+            width: 600px;
+            height: 600px;
         }
 
         /* Custom style for Show QR Code button */
         .show-qr-btn {
-            background: linear-gradient(45deg, #00802b, #00802b); /* Green gradient */
+            background: linear-gradient(45deg, #00802b, #00802b);
             border: none;
             color: white;
             padding: 0.4rem 0.75rem;
@@ -90,9 +89,9 @@
             transition: background 0.3s ease;
         }
 
-            .show-qr-btn:hover {
-                background: linear-gradient(45deg, #388E3C, #66BB6A); /* Darker green on hover */
-            }
+        .show-qr-btn:hover {
+            background: linear-gradient(45deg, #388E3C, #66BB6A);
+        }
 
         /* Fixed column widths and word wrapping */
         table {
@@ -103,25 +102,43 @@
         th,
         td {
             word-wrap: break-word;
-            white-space: normal; /* Ensures text wraps inside the cell */
+            white-space: normal;
             vertical-align: middle;
+            cursor: pointer; /* Indicates that the column headers are clickable */
         }
 
-            /* Adjusted width for QuizStart and QuizEnd columns to just fit the datetime */
-            th.date-time,
-            td.date-time {
-                width: 10%; /* Adjust this percentage to just enough to fit the datetime */
-                white-space: nowrap; /* Prevents unnecessary wrapping */
-            }
+        th.date-time,
+        td.date-time {
+            width: 10%;
+            white-space: nowrap;
+        }
 
         th {
-            width: 30%; /* Set fixed width for other columns */
+            width: 30%;
         }
 
-            th.actions,
-            td.actions {
-                width: 25%; /* Slightly smaller for actions */
-            }
+        th.actions,
+        td.actions {
+            width: 25%;
+        }
+
+        /* Styling for tabs */
+        .nav-tabs {
+            margin-bottom: 1rem;
+        }
+
+        .tab-content {
+            margin-top: 1rem;
+        }
+
+        .nav-link.active {
+            background-color: #f8f9fa !important;
+            border-color: #dee2e6 #dee2e6 #f8f9fa !important;
+        }
+
+        .tab-content .table {
+            margin-top: 1rem;
+        }
     </style>
 
 </head>
@@ -142,7 +159,6 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="form-container">
-
                                         @if (TempData["SuccessMessage"] != null)
                                         {
                                             <div class="alert alert-success">
@@ -157,117 +173,119 @@
                                             </div>
                                         }
 
-                                        <!-- Upcoming Quizzes Section -->
-                                        <div class="table-section">
-                                            <h5 class="section-title">Upcoming Quizzes</h5>
-                                            <input type="text" id="searchUpcomingInput" class="form-control search-input" placeholder="Search upcoming quizzes...">
+                                        <!-- Tabs for Upcoming and Past Quizzes -->
+                                        <ul class="nav nav-tabs" id="quizTabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="upcoming-quizzes-tab" data-bs-toggle="tab" data-bs-target="#upcoming-quizzes" type="button" role="tab" aria-controls="upcoming-quizzes" aria-selected="true">Upcoming Quizzes</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="past-quizzes-tab" data-bs-toggle="tab" data-bs-target="#past-quizzes" type="button" role="tab" aria-controls="past-quizzes" aria-selected="false">Past Quizzes</button>
+                                            </li>
+                                        </ul>
 
-                                            @if (Model.Quizzes.Where(q => q.QuizEnd > DateTime.Now).OrderByDescending(q => q.QuizStart).Any())
-                                            {
-                                                <div class="table-container">
-                                                    <table class="table table-bordered table-striped" id="upcomingQuizTable">
-                                                        <thead class="table-dark">
-                                                            <tr>
-                                                                <th>Quiz Title</th>
-                                                                <th>Description</th>
-                                                                <th class="date-time">Quiz Start</th>
-                                                                <th class="date-time">Quiz End</th>
-                                                                <th class="actions">Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach (var quiz in Model.Quizzes.Where(q => q.QuizEnd > DateTime.Now).OrderByDescending(q => q.QuizStart))
-                                                            {
+                                        <div class="tab-content" id="quizTabContent">
+                                            <!-- Upcoming Quizzes -->
+                                            <div class="tab-pane fade show active" id="upcoming-quizzes" role="tabpanel" aria-labelledby="upcoming-quizzes-tab">
+                                                <h5 class="section-title">Upcoming Quizzes</h5>
+                                                <input type="text" id="searchUpcomingInput" class="form-control search-input" placeholder="Search upcoming quizzes...">
+                                                @if (Model.Quizzes.Where(q => q.QuizEnd > DateTime.Now).OrderByDescending(q => q.QuizStart).Any())
+                                                {
+                                                    <div class="table-container">
+                                                        <table class="table table-bordered table-striped" id="upcomingQuizTable">
+                                                            <thead class="table-dark">
                                                                 <tr>
-                                                                    <td>@quiz.Title</td>
-                                                                    <td>@quiz.Description</td>
-                                                                    <td class="date-time">@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                    <td class="date-time">@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                    <td class="actions">
-                                                                        <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">
-                                                                            View Details
-                                                                        </a>
-                                                                        <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">
-                                                                            Show QR Code
-                                                                        </button>
-                                                                        <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete this quiz?');" style="display:inline-block;">
-                                                                            <input type="hidden" name="id" value="@quiz.QuizID" />
-                                                                            @Html.AntiForgeryToken()
-                                                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                                                <i class="bi bi-trash"></i> Delete
-                                                                            </button>
-                                                                        </form>
-                                                                    </td>
+                                                                    <th>Quiz Title</th>
+                                                                    <th>Description</th>
+                                                                    <th class="date-time">Quiz Start</th>
+                                                                    <th class="date-time">Quiz End</th>
+                                                                    <th class="actions">Actions</th>
                                                                 </tr>
-                                                            }
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="no-quiz-container">
-                                                    <i class="bi bi-calendar-x icon"></i>
-                                                    <h5>No Upcoming Quizzes Available</h5>
-                                                    <a href="@Url.Action("Create", "Quizzes")" class="btn btn-primary btn-sm">Create Quiz</a>
-                                                </div>
-                                            }
-                                        </div>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach (var quiz in Model.Quizzes.Where(q => q.QuizEnd > DateTime.Now).OrderByDescending(q => q.QuizStart))
+                                                                {
+                                                                    <tr>
+                                                                        <td>@quiz.Title</td>
+                                                                        <td>@quiz.Description</td>
+                                                                        <td class="date-time">@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                        <td class="date-time">@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                        <td class="actions">
+                                                                            <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">View Details</a>
+                                                                            <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">Show QR Code</button>
+                                                                            <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete this quiz?');" style="display:inline-block;">
+                                                                                <input type="hidden" name="id" value="@quiz.QuizID" />
+                                                                                @Html.AntiForgeryToken()
+                                                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                                                    <i class="bi bi-trash"></i> Delete
+                                                                                </button>
+                                                                            </form>
+                                                                        </td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="no-quiz-container">
+                                                        <i class="bi bi-calendar-x icon"></i>
+                                                        <h5>No Upcoming Quizzes Available</h5>
+                                                        <a href="@Url.Action("Create", "Quizzes")" class="btn btn-primary btn-sm">Create Quiz</a>
+                                                    </div>
+                                                }
+                                            </div>
 
-                                        <!-- Past Quizzes Section -->
-                                        <div class="table-section">
-                                            <h5 class="section-title">Past Quizzes</h5>
-                                            <input type="text" id="searchPastInput" class="form-control search-input" placeholder="Search past quizzes...">
-
-                                            @if (Model.Quizzes.Where(q => q.QuizEnd < DateTime.Now).OrderByDescending(q => q.QuizEnd).Any())
-                                            {
-                                                <div class="table-container">
-                                                    <table class="table table-bordered table-striped" id="pastQuizTable">
-                                                        <thead class="table-dark">
-                                                            <tr>
-                                                                <th>Quiz Title</th>
-                                                                <th>Description</th>
-                                                                <th>Quiz Start</th>
-                                                                <th>Quiz End</th>
-                                                                <th>Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach (var quiz in Model.Quizzes.Where(q => q.QuizEnd < DateTime.Now).OrderByDescending(q => q.QuizEnd))
-                                                            {
+                                            <!-- Past Quizzes -->
+                                            <div class="tab-pane fade" id="past-quizzes" role="tabpanel" aria-labelledby="past-quizzes-tab">
+                                                <h5 class="section-title">Past Quizzes</h5>
+                                                <input type="text" id="searchPastInput" class="form-control search-input" placeholder="Search past quizzes...">
+                                                @if (Model.Quizzes.Where(q => q.QuizEnd < DateTime.Now).OrderByDescending(q => q.QuizEnd).Any())
+                                                {
+                                                    <div class="table-container">
+                                                        <table class="table table-bordered table-striped" id="pastQuizTable">
+                                                            <thead class="table-dark">
                                                                 <tr>
-                                                                    <td>@quiz.Title</td>
-                                                                    <td>@quiz.Description</td>
-                                                                    <td>@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                    <td>@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                    <td>
-                                                                        <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">
-                                                                            View Details
-                                                                        </a>
-                                                                        <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">
-                                                                            Show QR Code
-                                                                        </button>
-                                                                        <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete this quiz?');" style="display:inline-block;">
-                                                                            <input type="hidden" name="id" value="@quiz.QuizID" />
-                                                                            @Html.AntiForgeryToken()
-                                                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                                                <i class="bi bi-trash"></i> Delete
-                                                                            </button>
-                                                                        </form>
-                                                                    </td>
+                                                                    <th>Quiz Title</th>
+                                                                    <th>Description</th>
+                                                                    <th>Quiz Start</th>
+                                                                    <th>Quiz End</th>
+                                                                    <th>Actions</th>
                                                                 </tr>
-                                                            }
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="no-quiz-container">
-                                                    <i class="bi bi-calendar-x icon"></i>
-                                                    <h5>No Past Quizzes Available</h5>
-                                                </div>
-                                            }
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach (var quiz in Model.Quizzes.Where(q => q.QuizEnd < DateTime.Now).OrderByDescending(q => q.QuizEnd))
+                                                                {
+                                                                    <tr>
+                                                                        <td>@quiz.Title</td>
+                                                                        <td>@quiz.Description</td>
+                                                                        <td>@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                        <td>@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                        <td>
+                                                                            <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">View Details</a>
+                                                                            <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">Show QR Code</button>
+                                                                            <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete this quiz?');" style="display:inline-block;">
+                                                                                <input type="hidden" name="id" value="@quiz.QuizID" />
+                                                                                @Html.AntiForgeryToken()
+                                                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                                                    <i class="bi bi-trash"></i> Delete
+                                                                                </button>
+                                                                            </form>
+                                                                        </td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="no-quiz-container">
+                                                        <i class="bi bi-calendar-x icon"></i>
+                                                        <h5>No Past Quizzes Available</h5>
+                                                    </div>
+                                                }
+                                            </div>
                                         </div>
 
                                     </div>
@@ -326,6 +344,35 @@
                     width: 600,   // Increased size (2x)
                     height: 600   // Increased size (2x)
                 });
+            });
+
+            // Sorting logic for the tables
+            function sortTable(table, colIndex, ascending) {
+                var rows = $(table).find('tbody > tr').get();
+                rows.sort(function (a, b) {
+                    var cellA = $(a).children('td').eq(colIndex).text().toLowerCase();
+                    var cellB = $(b).children('td').eq(colIndex).text().toLowerCase();
+
+                    if ($.isNumeric(cellA) && $.isNumeric(cellB)) {
+                        return ascending ? cellA - cellB : cellB - cellA;
+                    } else {
+                        return ascending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+                    }
+                });
+                $.each(rows, function (index, row) {
+                    $(table).children('tbody').append(row);
+                });
+            }
+
+            // Add click event to headers for sorting
+            $('th').on('click', function () {
+                var table = $(this).closest('table');
+                var colIndex = $(this).index();
+                var ascending = $(this).hasClass('ascending');
+                $(table).find('th').removeClass('ascending descending');
+                $(this).toggleClass('ascending', !ascending);
+                $(this).toggleClass('descending', ascending);
+                sortTable(table, colIndex, !ascending);
             });
         });
     </script>
