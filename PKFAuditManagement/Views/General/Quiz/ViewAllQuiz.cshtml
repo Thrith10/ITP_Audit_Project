@@ -110,19 +110,17 @@
             /* Adjusted width for QuizStart and QuizEnd columns to just fit the datetime */
             th.date-time,
             td.date-time {
-                width: 5%; /* Adjust this percentage to just enough to fit the datetime */
+                width: 10%; /* Adjust this percentage to just enough to fit the datetime */
                 white-space: nowrap; /* Prevents unnecessary wrapping */
-                text-align: center;
             }
 
         th {
-            width: 20%; /* Set fixed width for other columns */
+            width: 30%; /* Set fixed width for other columns */
         }
 
             th.actions,
             td.actions {
-                width: 15%; /* Slightly smaller for actions */
-                text-align: center;
+                width: 25%; /* Slightly smaller for actions */
             }
     </style>
 
@@ -172,9 +170,9 @@
                                                             <tr>
                                                                 <th>Quiz Title</th>
                                                                 <th>Description</th>
-                                                                <th>Quiz Start</th>
-                                                                <th>Quiz End</th>
-                                                                <th>Actions</th>
+                                                                <th class="date-time">Quiz Start</th>
+                                                                <th class="date-time">Quiz End</th>
+                                                                <th class="actions">Actions</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -183,9 +181,9 @@
                                                                 <tr>
                                                                     <td>@quiz.Title</td>
                                                                     <td>@quiz.Description</td>
-                                                                    <td>@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                    <td>@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                    <td>
+                                                                    <td class="date-time">@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                    <td class="date-time">@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                    <td class="actions">
                                                                         <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">
                                                                             View Details
                                                                         </a>
