@@ -26,7 +26,6 @@ namespace PKFAuditManagement.Controllers
             var qc7Forms = _context.QC7Forms.ToList();
             var qc7FormConclusions = _context.QC7FormConclusions.ToList();  // Retrieve all QC7FormConclusions
 
-
             var qc35Forms = _context.QC35Forms.ToList();
             var signedFSForms = _context.SignedFSForm.ToList();
 
@@ -141,11 +140,34 @@ namespace PKFAuditManagement.Controllers
                 FilePath = form.FilePath
             }).ToList();
 
+            // Client Status data (from DisplayStatus)
+            var clientStatusData = qc6Forms.Select(qc6 =>
+            {
+                var qc7Form = _context.QC7Forms.FirstOrDefault(q => q.Client == qc6.ProspectiveClient);
+                var qc7FormConclusion = qc7Form != null ? _context.QC7FormConclusions.FirstOrDefault(c => c.QC7FormID == qc7Form.QC7FormID) : null;
+
+                return new ReportsViewModel
+                {
+                    FormType = "ClientStatus",
+                    CSClientName = qc6.ProspectiveClient ?? "Unknown",
+                    ClientStatusFinancialYearEnd = qc6.PeriodEnded,  // Client Status Financial Year End
+                    QC6FirstApprover = _context.QC6FormConclusions.FirstOrDefault(c => c.QC6FormID == qc6.QC6FormID)?.PreparedBy ?? "Not Assigned",
+                    QC6SecondApprover = _context.QC6FormConclusions.FirstOrDefault(c => c.QC6FormID == qc6.QC6FormID)?.MPHODQMPApprovedBy ?? "Not Assigned",
+                    QC7FirstApprover = qc7FormConclusion?.EMPreparedBy ?? "Not Assigned",
+                    QC7SecondApprover = qc7FormConclusion?.MPHODQMPApprovedBy ?? "Not Assigned",
+                    QC6Status = qc6.Status ?? "Null",
+                    QC7Status = qc7Form?.Status ?? "Null",
+                    QC35Status = _context.QC35Forms.FirstOrDefault(q => q.ClientName == qc6.ProspectiveClient)?.Status ?? "Null",
+                    SignedFSStatus = _context.SignedFSForm.FirstOrDefault(q => q.UserEmail == qc6.ProspectiveClient)?.IsProcessed == true ? "Processed" : "Not Uploaded"
+                };
+            }).ToList();
+
             // Concatenate all report data
             var reportData = reportDataQC6
                 .Concat(reportDataQC7)
                 .Concat(reportDataQC35)
                 .Concat(reportDataSignedFS)
+                .Concat(clientStatusData)  // Add Client Status data
                 .ToList();
 
             // Step 3: Pass the report data to the view

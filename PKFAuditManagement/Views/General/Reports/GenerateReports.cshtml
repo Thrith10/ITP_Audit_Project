@@ -64,7 +64,6 @@
                                 </div>
                                 <div class="col-6 mt-3 text-end">
                                     <!-- Placeholder for a button or link if needed -->
-                                    <!-- Remove the Create Report button -->
                                 </div>
                             </div>
 
@@ -76,6 +75,7 @@
                                     <option value="QC7">QC7 Forms</option>
                                     <option value="QC35">QC35 Forms</option>
                                     <option value="SignedFS">Signed Financial Statements</option>
+                                    <option value="ClientStatus">Client Status</option> <!-- New option -->
                                 </select>
                             </div>
 
@@ -90,12 +90,10 @@
                             </div>
 
                             <!-- Table to display report data -->
-                            <!-- Table to display report data -->
                             <table class="table datatable" id="reportTable">
                                 <thead>
                                     <!-- QC6 Headers -->
                                     <tr class="qc6-header">
-                                        <!-- QC6 Select All Checkbox -->
                                         <th><input type="checkbox" id="selectAllQc6" /> Select All</th>
                                         <th>Form ID</th>
                                         <th>File Reference</th>
@@ -108,20 +106,17 @@
                                     </tr>
                                     <!-- QC7 Headers -->
                                     <tr class="qc7-header" style="display: none;">
-                                        <!-- QC7 Select All Checkbox -->
                                         <th><input type="checkbox" id="selectAllQc7" /> Select All</th>
                                         <th>Form ID</th>
                                         <th>Client</th>
                                         <th>Engagement Type</th>
                                         <th>Period Ended</th>
-                                        <th>Prepared By Date</th>  <!-- Updated to show data from QC7FormConclusion -->
-                                        <th>Form Submission Dat</th>  <!-- New column for MPHOD QMP Approved By Date -->
+                                        <th>Prepared By Date</th>
+                                        <th>Form Submission Date</th>
                                         <th>Status</th>
-
                                     </tr>
                                     <!-- QC35 Headers -->
                                     <tr class="qc35-header" style="display: none;">
-                                        <!-- QC35 Select All Checkbox -->
                                         <th><input type="checkbox" id="selectAllQc35" /> Select All</th>
                                         <th>Form ID</th>
                                         <th>Client Name</th>
@@ -129,12 +124,9 @@
                                         <th>Reporting Year End</th>
                                         <th>Manager Name</th>
                                         <th>Status</th>
-
-
                                     </tr>
                                     <!-- SignedFS Headers -->
                                     <tr class="signedfs-header" style="display: none;">
-                                        <!-- SignedFS Select All Checkbox -->
                                         <th><input type="checkbox" id="selectAllSignedFS" /> Select All</th>
                                         <th>Form ID</th>
                                         <th>User Email</th>
@@ -143,6 +135,20 @@
                                         <th>Year-End Date</th>
                                         <th>Audit Report Date</th>
                                         <th>Status</th>
+                                    </tr>
+                                    <!-- ClientStatus Headers -->
+                                    <tr class="clientstatus-header" style="display: none;">
+                                        <th><input type="checkbox" id="selectAllClientStatus" /> Select All</th>
+                                        <th>CSClientName</th>
+                                        <th>Client Status Financial Year End</th>
+                                        <th>QC6 First Approver</th>
+                                        <th>QC6 Second Approver</th>
+                                        <th>QC7 First Approver</th>
+                                        <th>QC7 Second Approver</th>
+                                        <th>QC6 Status</th>
+                                        <th>QC7 Status</th>
+                                        <th>QC35 Status</th>
+                                        <th>SignedFS Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -159,30 +165,9 @@
                                                     <td>@form.ProspectiveClient</td>
                                                     <td>@form.PeriodEnded.ToShortDateString()</td>
                                                     <td>@form.EngagementType</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td> <!-- Prepared By Date from QC6FormConclusion -->
-                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td> <!-- MPHODQMPApprovedByDate from QC6FormConclusion -->
-                                                    <td>
-                                                        @if (form.Status == "Pending")
-                                                        {
-                                                            <span class="badge bg-warning">Pending</span>
-                                                        }
-                                                        else if (form.Status == "Pending 2nd Approval")
-                                                        {
-                                                            <span class="badge bg-warning">Pending 2nd Approval</span>
-                                                        }
-                                                        else if (form.Status == "Approved")
-                                                        {
-                                                            <span class="badge bg-success">Approved</span>
-                                                        }
-                                                        else if (form.Status == "Rejected")
-                                                        {
-                                                            <span class="badge bg-danger">Rejected</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="badge bg-secondary">@form.Status</span>
-                                                        }
-                                                    </td>
+                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
+                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td>
+                                                    <td>@form.Status</td>
                                                 </tr>
                                             }
                                             else if (form.FormType == "QC7")
@@ -193,31 +178,9 @@
                                                     <td>@form.ProspectiveClient</td>
                                                     <td>@form.EngagementType</td>
                                                     <td>@form.PeriodEnded.ToShortDateString()</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td> <!-- Now from QC7FormConclusion -->
-                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td> <!-- New field from QC7FormConclusion -->
-
-                                                    <td>
-                                                        @if (form.Status == "Pending")
-                                                        {
-                                                            <span class="badge bg-warning">Pending</span>
-                                                        }
-                                                        else if (form.Status == "Pending 2nd Approval")
-                                                        {
-                                                            <span class="badge bg-warning">Pending 2nd Approval</span>
-                                                        }
-                                                        else if (form.Status == "Approved")
-                                                        {
-                                                            <span class="badge bg-success">Approved</span>
-                                                        }
-                                                        else if (form.Status == "Rejected")
-                                                        {
-                                                            <span class="badge bg-danger">Rejected</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="badge bg-secondary">@form.Status</span>
-                                                        }
-                                                    </td>
+                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
+                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td>
+                                                    <td>@form.Status</td>
                                                 </tr>
                                             }
                                             else if (form.FormType == "QC35")
@@ -229,28 +192,7 @@
                                                     <td>@form.PartnerName</td>
                                                     <td>@form.ReportingYearEnd?.ToShortDateString()</td>
                                                     <td>@form.ManagerName</td>
-                                                    <td>
-                                                        @if (form.Status == "Pending")
-                                                        {
-                                                            <span class="badge bg-warning">Pending</span>
-                                                        }
-                                                        else if (form.Status == "Pending 2nd Approval")
-                                                        {
-                                                            <span class="badge bg-warning">Pending 2nd Approval</span>
-                                                        }
-                                                        else if (form.Status == "Approved")
-                                                        {
-                                                            <span class="badge bg-success">Approved</span>
-                                                        }
-                                                        else if (form.Status == "Rejected")
-                                                        {
-                                                            <span class="badge bg-danger">Rejected</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="badge bg-secondary">@form.Status</span>
-                                                        }
-                                                    </td>
+                                                    <td>@form.Status</td>
                                                 </tr>
                                             }
                                             else if (form.FormType == "SignedFS")
@@ -263,16 +205,23 @@
                                                     <td>@form.Client</td>
                                                     <td>@form.ScheduleDate?.ToShortDateString()</td>
                                                     <td>@form.AuditedReportDate?.ToShortDateString()</td>
-                                                    <td>
-                                                        @if (form.IsProcessed)
-                                                        {
-                                                            <span class="badge bg-success">Uploaded</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="badge bg-warning">Not Uploaded</span>
-                                                        }
-                                                    </td>
+                                                    <td>@form.IsProcessed</td>
+                                                </tr>
+                                            }
+                                            else if (form.FormType == "ClientStatus")
+                                            {
+                                                <tr id="@form.CSClientName" class="clientstatus-form" style="display: none;">
+                                                    <td><input type="checkbox" name="selectedForms" value="@form.CSClientName" class="selectClientStatus" /></td>
+                                                    <td>@form.CSClientName</td>
+                                                    <td>@form.ClientStatusFinancialYearEnd?.ToShortDateString()</td>
+                                                    <td>@form.QC6FirstApprover</td>
+                                                    <td>@form.QC6SecondApprover</td>
+                                                    <td>@form.QC7FirstApprover</td>
+                                                    <td>@form.QC7SecondApprover</td>
+                                                    <td>@form.QC6Status</td>
+                                                    <td>@form.QC7Status</td>
+                                                    <td>@form.QC35Status</td>
+                                                    <td>@form.SignedFSStatus</td>
                                                 </tr>
                                             }
                                         }
@@ -285,7 +234,6 @@
                                     }
                                 </tbody>
                             </table>
-                 
 
                             <!-- Form with checkboxes -->
                             <form id="checkboxFieldsForm" onsubmit="generateReport(event)"></form>
@@ -333,8 +281,12 @@
             $('#selectAllSignedFS').on('change', function () {
                 $('.selectSignedFS').prop('checked', this.checked); // Check or uncheck all SignedFS checkboxes
             });
-        });
 
+            // Select or Deselect All Client Status Checkboxes
+            $('#selectAllClientStatus').on('change', function () {
+                $('.selectClientStatus').prop('checked', this.checked); // Check or uncheck all Client Status checkboxes
+            });
+        });
 
         function filterForms() {
             var formType = document.getElementById("formType").value;
@@ -343,12 +295,14 @@
             var qc7Forms = document.querySelectorAll(".qc7-form");
             var qc35Forms = document.querySelectorAll(".qc35-form");
             var signedFSForms = document.querySelectorAll(".signedfs-form");
+            var clientStatusForms = document.querySelectorAll(".clientstatus-form");
 
             var headers = {
                 qc6: document.querySelectorAll(".qc6-header"),
                 qc7: document.querySelectorAll(".qc7-header"),
                 qc35: document.querySelectorAll(".qc35-header"),
-                signedfs: document.querySelectorAll(".signedfs-header")
+                signedfs: document.querySelectorAll(".signedfs-header"),
+                clientstatus: document.querySelectorAll(".clientstatus-header") // ClientStatus header
             };
 
             // Hide all headers initially
@@ -371,6 +325,9 @@
                 signedFSForms.forEach(function (form) {
                     form.style.display = "none";
                 });
+                clientStatusForms.forEach(function (form) {
+                    form.style.display = "none";
+                });
                 document.querySelector('.date-filter').classList.remove('hidden');
             } else if (formType === "QC7") {
                 qc6Forms.forEach(function (form) {
@@ -384,6 +341,9 @@
                     form.style.display = "none";
                 });
                 signedFSForms.forEach(function (form) {
+                    form.style.display = "none";
+                });
+                clientStatusForms.forEach(function (form) {
                     form.style.display = "none";
                 });
                 document.querySelector('.date-filter').classList.remove('hidden');
@@ -401,6 +361,9 @@
                 signedFSForms.forEach(function (form) {
                     form.style.display = "none";
                 });
+                clientStatusForms.forEach(function (form) {
+                    form.style.display = "none";
+                });
                 document.querySelector('.date-filter').classList.add('hidden');
             } else if (formType === "SignedFS") {
                 qc6Forms.forEach(function (form) {
@@ -416,10 +379,30 @@
                 qc7Forms.forEach(function (form) {
                     form.style.display = "none";
                 });
+                clientStatusForms.forEach(function (form) {
+                    form.style.display = "none";
+                });
                 document.querySelector('.date-filter').classList.add('hidden');
+            } else if (formType === "ClientStatus") {
+                qc6Forms.forEach(function (form) {
+                    form.style.display = "none";
+                });
+                headers.clientstatus.forEach(h => h.style.display = "");
+                qc35Forms.forEach(function (form) {
+                    form.style.display = "none";
+                });
+                signedFSForms.forEach(function (form) {
+                    form.style.display = "none";
+                });
+                qc7Forms.forEach(function (form) {
+                    form.style.display = "none";
+                });
+                clientStatusForms.forEach(function (form) {
+                    form.style.display = "";
+                });
+                document.querySelector('.date-filter').classList.add('hidden'); // Hide date filter for Client Status
             }
         }
-
 
         function parseDate(dateStr) {
             if (!dateStr) return null;
@@ -438,26 +421,14 @@
         }
 
         function filterByDate() {
-
-            // Show a confirmation prompt before filtering
-            var userConfirmed = confirm("Filters by Prepared By Date");
-
-            if (!userConfirmed) {
-                return; // Exit if the user cancels the prompt
-            }
-
             var startDate = new Date(document.getElementById("startDate").value);
             var endDate = new Date(document.getElementById("endDate").value);
-            var formType = document.getElementById("formType").value;
             var rows = document.querySelectorAll("#reportTable tbody tr");
 
             rows.forEach(function (row) {
                 var preparedByDateStr = row.cells[6].textContent.trim();
                 var preparedByDate = parseDate(preparedByDateStr);
-                var isFormTypeMatch = (formType === "QC6" && row.classList.contains("qc6-form")) ||
-                    (formType === "QC7" && row.classList.contains("qc7-form")) ||
-                    (formType === "QC35" && row.classList.contains("qc35-form")) ||
-                    (formType === "SignedFS" && row.classList.contains("signed-fs-form"));
+                var isFormTypeMatch = row.classList.contains("qc6-form") || row.classList.contains("qc7-form");
 
                 var dateRangeValid = false;
                 if (startDate && endDate) {
@@ -481,20 +452,9 @@
         }
 
         function clearFilters() {
-            // Clear date inputs
             document.getElementById("startDate").value = '';
             document.getElementById("endDate").value = '';
-
-            // Show all rows in the table
-            var rows = document.querySelectorAll("#reportTable tbody tr");
-            rows.forEach(function (row) {
-                row.style.display = "";
-            });
-
-            // Reapply form type filter
             filterForms();
-
-            // Redraw the DataTable to reflect changes
             $('#reportTable').DataTable().draw();
         }
 

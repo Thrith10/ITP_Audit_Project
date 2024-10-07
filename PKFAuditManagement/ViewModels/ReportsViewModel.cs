@@ -71,10 +71,9 @@ namespace PKFAuditManagement.ViewModels
         public string PublicInterestEntityTypeQC7 { get; set; }
         public bool IsSubForm2NotApplicable { get; set; }
         public bool IsSubForm3NotApplicable { get; set; }
-    
 
-    // QC35 properties
-    public int QC35FormID { get; set; }
+        // QC35 properties
+        public int QC35FormID { get; set; }
         public string CreatedBy { get; set; }
         public string? AuditFirmName { get; set; }
         public string? ClientName { get; set; }
@@ -99,6 +98,18 @@ namespace PKFAuditManagement.ViewModels
         public string EmailType { get; set; }
         public string EmailBody { get; set; }
         public bool IsProcessed { get; set; }
+
+        // Client Status properties
+        public string CSClientName { get; set; } // Renamed Client Name to CSClientName
+        public DateTime? ClientStatusFinancialYearEnd { get; set; }
+        public string QC6FirstApprover { get; set; }
+        public string QC6SecondApprover { get; set; }
+        public string QC7FirstApprover { get; set; }
+        public string QC7SecondApprover { get; set; }
+        public string QC6Status { get; set; }
+        public string QC7Status { get; set; }
+        public string QC35Status { get; set; }
+        public string SignedFSStatus { get; set; }
     }
 
     public class SelectFieldsViewModel

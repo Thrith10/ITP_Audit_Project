@@ -26,82 +26,74 @@
                                 <thead>
                                     <tr>
                                         <th>Client Name</th>
-                                        <th>QC6 Status</th>
-                                        <th>QC7 Status</th>
-                                        <th>QC35 Status</th>
-                                        <th>SignedFS Status</th>
+                                        <th>Financial Year End</th> <!-- New column -->
+                                        <th>QC6 First Approver</th> <!-- New column -->
+                                        <th>QC6 Second Approver</th> <!-- New column -->
+                                        <th>QC7 First Approver</th> <!-- New column -->
+                                        <th>QC7 Second Approver</th> <!-- New column -->
+                                        <th>SignedFS Status</th> <!-- New column -->
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var item in Model)
                                     {
-                                        <tr>
-                                            <td>@item.ClientName</td>
-                                            <td>
-                                                @if (item.QC6Status == "Pending")
+                                            <tr>
+                                                <td>@item.ClientName</td>
+                                                <td>@item.FinancialYearEnd?.ToShortDateString()</td> <!-- Added Financial Year End -->
+
+                                                <td>
+                                                @if (!string.IsNullOrEmpty(item.QC6FirstApprover))
                                                 {
-                                                    <span class="badge bg-warning">Pending</span>
-                                                }
-                                                else if (item.QC6Status == "Approved")
-                                                {
-                                                    <span class="badge bg-success">Approved</span>
-                                                }
-                                                else if (item.QC6Status == "Rejected")
-                                                {
-                                                    <span class="badge bg-danger">Rejected</span>
+                                                    @item.QC6FirstApprover
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-secondary">@item.QC6Status</span>
+                                                            <span class="badge bg-secondary">N/A</span>
                                                 }
-                                            </td>
-                                            <td>
-                                                @if (item.QC7Status == "Pending")
+                                                </td>
+                                                <td>
+                                                @if (!string.IsNullOrEmpty(item.QC6SecondApprover))
                                                 {
-                                                    <span class="badge bg-warning">Pending</span>
-                                                }
-                                                else if (item.QC7Status == "Approved")
-                                                {
-                                                    <span class="badge bg-success">Approved</span>
-                                                }
-                                                else if (item.QC7Status == "Rejected")
-                                                {
-                                                    <span class="badge bg-danger">Rejected</span>
+                                                    @item.QC6SecondApprover
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-secondary">@item.QC7Status</span>
+                                                            <span class="badge bg-secondary">N/A</span>
                                                 }
-                                            </td>
-                                            <td>
-                                                @if (item.QC35Status == "Pending")
+                                                </td>
+
+                                                <td>
+                                                @if (!string.IsNullOrEmpty(item.QC7FirstApprover))
                                                 {
-                                                    <span class="badge bg-warning">Pending</span>
-                                                }
-                                                else if (item.QC35Status == "Approved")
-                                                {
-                                                    <span class="badge bg-success">Approved</span>
-                                                }
-                                                else if (item.QC35Status == "Rejected")
-                                                {
-                                                    <span class="badge bg-danger">Rejected</span>
+                                                    @item.QC7FirstApprover
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-secondary">@item.QC35Status</span>
+                                                            <span class="badge bg-secondary">N/A</span>
                                                 }
-                                            </td>
-                                            <td>
+                                                </td>
+                                                <td>
+                                                @if (!string.IsNullOrEmpty(item.QC7SecondApprover))
+                                                {
+                                                    @item.QC7SecondApprover
+                                                }
+                                                else
+                                                {
+                                                            <span class="badge bg-secondary">N/A</span>
+                                                }
+                                                </td>
+
+                                                <td>
                                                 @if (item.SignedFSStatus == "Processed")
                                                 {
-                                                    <span class="badge bg-success">Uploaded</span>
+                                                            <span class="badge bg-success">Uploaded</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-secondary">Not Uploaded</span>
+                                                            <span class="badge bg-secondary">Not Uploaded</span>
                                                 }
-                                            </td>
-                                        </tr>
+                                                </td>
+                                            </tr>
                                     }
                                 </tbody>
                             </table>
