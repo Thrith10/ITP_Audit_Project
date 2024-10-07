@@ -21,5 +21,7 @@ namespace PKFAuditManagement.Models
         public ICollection<Participants>? Participants { get; set; }
         public DateTime QuizStart { get; set; }
         public DateTime QuizEnd { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }

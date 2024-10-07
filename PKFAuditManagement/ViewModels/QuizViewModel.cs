@@ -32,6 +32,9 @@ namespace PKFAuditManagement.ViewModels
         public DateTime QuizStart { get; set; }
         public DateTime QuizEnd { get; set; }
 
+        public string? CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+
         public DateTime? AttemptDate { get; set; }
 
         public List<QuestionViewModel> Questions { get; set; } = new List<QuestionViewModel>();

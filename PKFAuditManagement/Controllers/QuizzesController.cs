@@ -15,16 +15,19 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Identity;
 
 namespace PKFAuditManagement.Controllers
 {
     public class QuizzesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<CustomUser> _userManager;
 
-        public QuizzesController(ApplicationDbContext context)
+        public QuizzesController(ApplicationDbContext context, UserManager<CustomUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Quizzes/Create
@@ -52,13 +55,18 @@ namespace PKFAuditManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var userId = currentUser?.Id;
                 // Create a new Quiz entity
                 var quiz = new Quiz
                 {
                     Title = quizViewModel.Title,
                     Description = quizViewModel.Description,
                     QuizStart = quizViewModel.QuizStart,
-                    QuizEnd = quizViewModel.QuizEnd
+                    QuizEnd = quizViewModel.QuizEnd,
+                    CreatedBy = userId,
+                    CreatedDate = DateTime.Now,
+
                 };
 
                 // Add the quiz to the context first to generate the QuizID
@@ -185,7 +193,19 @@ namespace PKFAuditManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> ViewAllQuiz()
         {
+            // Get the current user
+            var currentUser = await _userManager.GetUserAsync(User);
+            var userId = currentUser?.Id;
+
+            // Check if the user is authenticated
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            // Query the quizzes where CreatedBy matches the current user's ID
             var quizzes = await _context.Quiz
+                                        .Where(q => q.CreatedBy == userId)
                                         .ToListAsync();
 
             var quizListViewModel = new QuizListViewModel
@@ -195,14 +215,14 @@ namespace PKFAuditManagement.Controllers
                     QuizID = q.QuizID,
                     Title = q.Title,
                     Description = q.Description,
-                    QuizStart = q.QuizStart, // Include QuizStart in the view model
+                    QuizStart = q.QuizStart,
                     QuizEnd = q.QuizEnd
-
                 }).ToList()
             };
 
             return View("~/Views/General/Quiz/ViewAllQuiz.cshtml", quizListViewModel);
         }
+
 
         public async Task<IActionResult> Details(Guid id)
         {
