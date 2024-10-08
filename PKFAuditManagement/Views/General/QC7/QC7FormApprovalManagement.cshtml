@@ -1,36 +1,6 @@
 ﻿@using PKFAuditManagement.ViewModels
 @model QC7FormAdminManagementViewModel
 
-<!-- Start of Alerts -->
-@{
-    var createMessage = TempData["QC7CreateMessage"] as string;
-    var updateMessage = TempData["QC7UpdateMessage"] as string;
-}
-@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
-{
-    <div class="alert alert-info">
-        @createMessage @updateMessage
-    </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const notyf = new Notyf({
-                position: { x: 'center', y: 'top' }
-            });
-
-            var createMessage = '@createMessage';
-            if (createMessage) {
-                notyf.success(createMessage);
-            }
-
-            var updateMessage = '@updateMessage';
-            if (updateMessage) {
-                notyf.success(updateMessage);
-            }
-        });
-    </script>
-}
-<!-- End of Alerts -->
-
 <main id="main" class="main">
 
     <div class="pagetitle">
@@ -300,6 +270,36 @@
         </div>
     </section>
 </main>
+
+<!-- Start of Alerts -->
+@{
+    var createMessage = TempData["QC7CreateMessage"] as string;
+    var updateMessage = TempData["QC7UpdateMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
+{
+        <div class="alert alert-info">
+        @createMessage @updateMessage
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const notyf = new Notyf({
+                    position: { x: 'center', y: 'top' }
+                });
+
+                var createMessage = '@createMessage';
+                if (createMessage) {
+                    notyf.success(createMessage);
+                }
+
+                var updateMessage = '@updateMessage';
+                if (updateMessage) {
+                    notyf.success(updateMessage);
+                }
+            });
+        </script>
+}
+<!-- End of Alerts -->
 
 @section Scripts {
     <script src="~/js/qc7-form-management-admin.js"></script>

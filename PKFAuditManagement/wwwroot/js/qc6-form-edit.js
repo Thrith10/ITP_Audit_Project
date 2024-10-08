@@ -107,8 +107,10 @@
 
     // Open PDF in a new tab
     $(document).on('click', '.preview-doc', function () {
-        var fileInput = $(this).siblings('input[type="file"]')[0];
-        if (fileInput.files.length > 0) {
+        // Find the closest <tr> and then look for the file input within it
+        var fileInput = $(this).closest('tr').find('input[type="file"]')[0];
+
+        if (fileInput && fileInput.files.length > 0) {  // Check if fileInput is defined
             var file = fileInput.files[0];
             var reader = new FileReader();
 

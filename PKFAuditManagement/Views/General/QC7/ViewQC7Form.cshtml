@@ -585,6 +585,32 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="card border border-secondary p-3 mb-6">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <h5 class="card-title">Optional Additional Documents (In PDF format)</h5>
+                                            </div>
+                                        </div>
+
+                                        <!-- Other Documents -->
+                                        <div class="form-group mb-3">
+                                            <label asp-for="OtherDocuments">Consolidated Documents in PDF</label>
+                                            <div class="d-flex align-items-center">
+                                                @if (Model.OtherDocumentsFileName != null)
+                                                {
+                                                    var fileUrl = Url.Content("~/uploads/QC7Form-OtherDocuments/" + Model.OtherDocumentsFileName);
+                                                    <a href="@fileUrl" target="_blank">View Document</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="fw-bold">No file uploaded</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-2">
                                         <label for="inputPassword3">Prepared by:<span class="text-danger"> *</span></label>

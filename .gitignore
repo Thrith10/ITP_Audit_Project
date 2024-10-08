@@ -403,3 +403,4 @@ FodyWeavers.xsd
 /PKFAuditManagement/appsettings.json
 /PKFAuditManagement/appsettings.Development.json
 *.env
+/PKFAuditManagement/wwwroot/uploads

@@ -17,6 +17,7 @@ using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Primitives;
 using Amazon.S3;
+using OpenAI;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -203,21 +204,27 @@ namespace PKFAuditManagement.Controllers
                     });
                 }
 
-                // Load existing documents
-                var documentData = _context.QCDocuments.Where(x => x.QC6FormID == id).ToList();
+                // Load existing document
+                var documentData = _context.QCDocuments.Where(x => x.QC6FormID == id).FirstOrDefault();
 
-                viewModel.BusinessProfileUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "BusinessProfile")?.S3Key);
-                viewModel.TrendSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "TrendSearch")?.S3Key);
-                viewModel.GoogleSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "GoogleSearch")?.S3Key);
-                viewModel.LexisNexisSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "LexisNexisSearch")?.S3Key);
+                // Retrieve and set the file path for other documents
+                if (documentData != null)
+                {
+                    viewModel.OtherDocumentsFileName = documentData.FileName;
+                }
 
-                viewModel.OtherDocumentUrls = documentData.Where(x => x.DocumentType == "OtherDocuments")
-                    .Select(x => new DocumentView
-                    {
-                        DocumentName = ExtractDocumentName(x.S3Key),
-                        File = _s3Service.GeneratePreSignedUrl(x.S3Key),
-                        DocumentType = x.DocumentType
-                    }).ToList();
+                //viewModel.BusinessProfileUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "BusinessProfile")?.S3Key);
+                //viewModel.TrendSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "TrendSearch")?.S3Key);
+                //viewModel.GoogleSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "GoogleSearch")?.S3Key);
+                //viewModel.LexisNexisSearchUrl = _s3Service.GeneratePreSignedUrl(documentData.FirstOrDefault(x => x.DocumentType == "LexisNexisSearch")?.S3Key);
+
+                //viewModel.OtherDocumentUrls = documentData.Where(x => x.DocumentType == "OtherDocuments")
+                //    .Select(x => new DocumentView
+                //    {
+                //        DocumentName = ExtractDocumentName(x.S3Key),
+                //        File = _s3Service.GeneratePreSignedUrl(x.S3Key),
+                //        DocumentType = x.DocumentType
+                //    }).ToList();
 
                 return View("~/Views/General/QC6/EditQC6Form.cshtml", viewModel);
             }
@@ -520,6 +527,62 @@ namespace PKFAuditManagement.Controllers
 
                     // Save all changes
                     await _context.SaveChangesAsync();
+
+                    if (viewModel.OtherDocuments != null)
+                    {
+                        // Attempt to parse QC6FormID from the view model
+                        if (int.TryParse(viewModel.QC6FormID, out int parsedQc6FormId))
+                        {
+                            // Find the existing document
+                            var existingDocument = await _context.QCDocuments
+                                .FirstOrDefaultAsync(x => x.QC6FormID == parsedQc6FormId);
+
+                            // Generate a unique file name for the new document
+                            var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                            // Check if the document exists
+                            if (existingDocument != null)
+                            {
+                                // Construct the file path
+                                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC6Form-OtherDocuments", existingDocument.FileName);
+
+                                // Remove the old file from wwwroot
+                                if (System.IO.File.Exists(oldFilePath))
+                                {
+                                    System.IO.File.Delete(oldFilePath);
+                                }
+
+                                // Update the old document
+                                existingDocument.FileName = uniqueFileName;
+
+                                // Save all changes
+                                await _context.SaveChangesAsync();
+                            }
+                            else
+                            {
+                                // Add to the db context
+                                _context.Add(new QCDocument
+                                {
+                                    QC6FormID = parsedQc6FormId,
+                                    FileName = uniqueFileName,
+                                    DocumentType = "OtherDocuments"
+                                });
+
+                                // Save all changes
+                                await _context.SaveChangesAsync();
+                            }
+
+                            // Define the path for the new document
+                            var newFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC6Form-OtherDocuments", uniqueFileName);
+
+                            // Save the new document to the wwwroot folder
+                            using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+                            {
+                                viewModel.OtherDocuments.CopyTo(fileStream);
+                            }
+                        }
+                    }
+
                     transaction.Commit();
 
                     // Set the success message for the toast notification
@@ -723,54 +786,53 @@ namespace PKFAuditManagement.Controllers
                 }
 
                 // Retrieve documents for QC Form from database
-                var documentData = _context.QCDocuments.Where(x => x.QC6FormID.Equals(id)).ToList();
+                var documentData = _context.QCDocuments.Where(x => x.QC6FormID.Equals(id)).FirstOrDefault();
 
-                // Retrieve and set the URL for BusinessProfile
-                var businessProfileDocument = documentData.FirstOrDefault(x => x.DocumentType == "BusinessProfile");
-                if (businessProfileDocument != null)
+                // Retrieve and set the file path for other documents
+                if (documentData != null)
                 {
-                    viewModel.BusinessProfileUrl = _s3Service.GeneratePreSignedUrl(businessProfileDocument.S3Key);
+                    viewModel.OtherDocumentsFileName = documentData.FileName;
                 }
 
-                // Retrieve and set the URL for TrendSearch
-                var trendSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "TrendSearch");
-                if (trendSearchDocument != null)
-                {
-                    viewModel.TrendSearchUrl = _s3Service.GeneratePreSignedUrl(trendSearchDocument.S3Key);
-                }
+                //// Retrieve and set the URL for TrendSearch
+                //var trendSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "TrendSearch");
+                //if (trendSearchDocument != null)
+                //{
+                //    viewModel.TrendSearchUrl = _s3Service.GeneratePreSignedUrl(trendSearchDocument.S3Key);
+                //}
 
-                // Retrieve and set the URL for GoogleSearch
-                var googleSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "GoogleSearch");
-                if (googleSearchDocument != null)
-                {
-                    viewModel.GoogleSearchUrl = _s3Service.GeneratePreSignedUrl(googleSearchDocument.S3Key);
-                }
+                //// Retrieve and set the URL for GoogleSearch
+                //var googleSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "GoogleSearch");
+                //if (googleSearchDocument != null)
+                //{
+                //    viewModel.GoogleSearchUrl = _s3Service.GeneratePreSignedUrl(googleSearchDocument.S3Key);
+                //}
 
-                // Retrieve and set the URL for LexisNexisSearch
-                var lexisNexisSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "LexisNexisSearch");
-                if (lexisNexisSearchDocument != null)
-                {
-                    viewModel.LexisNexisSearchUrl = _s3Service.GeneratePreSignedUrl(lexisNexisSearchDocument.S3Key);
-                }
+                //// Retrieve and set the URL for LexisNexisSearch
+                //var lexisNexisSearchDocument = documentData.FirstOrDefault(x => x.DocumentType == "LexisNexisSearch");
+                //if (lexisNexisSearchDocument != null)
+                //{
+                //    viewModel.LexisNexisSearchUrl = _s3Service.GeneratePreSignedUrl(lexisNexisSearchDocument.S3Key);
+                //}
 
-                // Retrieve and set the URLs for OtherDocuments
-                var otherDocuments = documentData.Where(x => x.DocumentType == "OtherDocuments").ToList();
-                if (otherDocuments.Any())
-                {
-                    viewModel.OtherDocumentUrls = new List<DocumentView>();
+                //// Retrieve and set the URLs for OtherDocuments
+                //var otherDocuments = documentData.Where(x => x.DocumentType == "OtherDocuments").ToList();
+                //if (otherDocuments.Any())
+                //{
+                //    viewModel.OtherDocumentUrls = new List<DocumentView>();
 
-                    foreach (var doc in otherDocuments)
-                    {
-                        // Retrieve document name from s3key
-                        var documentName = ExtractDocumentName(doc.S3Key);
-                        var docUrl = _s3Service.GeneratePreSignedUrl(doc.S3Key);
-                        viewModel.OtherDocumentUrls.Add(new DocumentView
-                        {
-                            DocumentName = documentName,
-                            File = docUrl,
-                        });
-                    }
-                }
+                //    foreach (var doc in otherDocuments)
+                //    {
+                //        // Retrieve document name from s3key
+                //        var documentName = ExtractDocumentName(doc.S3Key);
+                //        var docUrl = _s3Service.GeneratePreSignedUrl(doc.S3Key);
+                //        viewModel.OtherDocumentUrls.Add(new DocumentView
+                //        {
+                //            DocumentName = documentName,
+                //            File = docUrl,
+                //        });
+                //    }
+                //}
 
 
                 return View("~/Views/General/QC6/ViewQC6Form.cshtml", viewModel);
@@ -1085,345 +1147,283 @@ namespace PKFAuditManagement.Controllers
                 return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
             }
 
-            // Begin a transaction to ensure atomicity
-            using (var transaction = _context.Database.BeginTransaction())
+            try
             {
-                try
+                // Get the current user's ID
+                var userId = user?.Id;
+
+                // Re-validate form inputs for QC6 Form
+                if (viewModel.IsPublicInterestEntity == true)
                 {
-                    // Get the current user's ID
-                    var userId = user?.Id;
+                    viewModel.PublicInterestEntityType = null;
+                }
 
-                    // Re-validate form inputs for QC6 Form
-                    if (viewModel.IsPublicInterestEntity == true)
+                // QCForm File Reference will contain _NAS for Non-Auditor role creation
+                string fileReference = Helper.GenerateQCFormFileReference();
+
+                if (roles.Contains("Non-Auditor"))
+                {
+                    // Modify the fileReference if the "Non-Auditor" role is present
+                    fileReference += "_NAS";
+                }
+
+                // Save viewModel data to QC6Form
+                var qc6form = new QC6Form
+                {
+                    FileReference = fileReference,
+                    CreatedBy = userId,
+                    ProspectiveClient = viewModel.ProspectiveClient,
+                    PeriodEnded = viewModel.PeriodEnded.Value,
+                    EngagementType = viewModel.EngagementType,
+                    PreparedBy = viewModel.PreparedBy,
+                    PreparedByDate = viewModel.PreparedByDate,
+                    ReviewedBy = viewModel.ReviewedBy,
+                    ReviewedByDate = viewModel.ReviewedByDate,
+                    Status = "Pending",
+                    FormSubmissionDate = DateTime.Now,
+                    PKFEntityProposingService = viewModel.PKFEntityProposingService,
+                    SourceOfReferral = viewModel.SourceOfReferral,
+                    NatureOfServiceForEstimateFee = viewModel.NatureOfServiceForEstimateFee,
+                    EstimatedFee = viewModel.EstimatedFee.Value,
+                    BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
+                    BudgetedFeeRecoveryRate = viewModel.BudgetedFeeRecoveryRate.Value,
+                    OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees,
+                    GrandTotal = viewModel.GrandTotal.Value,
+                    AuditFee = viewModel.AuditFee.Value,
+                    FeeConcentration = viewModel.FeeConcentration.Value,
+                    ConflictsCheckDone = viewModel.ConflictsCheckDone,
+                    TypeOfActivities = viewModel.TypeOfActivities,
+                    ComplexityOfEngagement = viewModel.ComplexityOfEngagement,
+                    PredecessorAuditor = viewModel.PredecessorAuditor,
+                    ReasonsForDiscontinuance = viewModel.ReasonsForDiscontinuance,
+                    PublicInterestEntity = viewModel.IsPublicInterestEntity,
+                    PublicInterestEntityType = viewModel.PublicInterestEntityType,
+                    IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable, // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                    IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                };
+
+                // Add qc6form data to intermediary datastore
+                _context.Add(qc6form);
+                _context.SaveChanges();
+
+                // Retrieve the QC6FormID from the saved entity
+                int qc6formId = qc6form.QC6FormID;
+
+                var tnaTneAssessment = new TNATNEAssessment
+                {
+                    QC6FormID = qc6formId,
+                    SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation,
+                };
+
+                // Add tnaTneAssessment data to the database
+                _context.Add(tnaTneAssessment);
+                _context.SaveChanges();
+
+                // Retrieve the tnaTneAssessmentID from the saved entity
+                int tnaTneAssessmentID = tnaTneAssessment.TNATNEAssessmentID;
+
+                var tnaTNESectionB = new TNATNESectionB
+                {
+                    TNATNEAssessmentID = tnaTneAssessmentID,
+                    IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit
+                };
+
+                // Save Q1 - Q4 if IsAudit == true, else only Save Q5
+                if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
+                {
+                    tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
+                    tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
+                    tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
+                    tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
+                    tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                }
+                else
+                {
+                    tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                }
+
+                // Add tnaTNESectionB data to the database
+                _context.Add(tnaTNESectionB);
+                _context.SaveChanges();
+
+                var tnaTNESectionD = new TNATNESectionD
+                {
+                    TNATNEAssessmentID = tnaTneAssessmentID,
+                    Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment,
+                    Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment,
+                    Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment,
+                    Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment,
+                    Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment,
+                };
+
+                // Add tnaTNESectionD data to the database
+                _context.Add(tnaTNESectionD);
+                _context.SaveChanges();
+
+                var qc6formConclusion = new QC6FormConclusion
+                {
+                    QC6FormID = qc6formId,
+                    AnySignificantRisk = viewModel.AnySignificantRisk,
+                    SignificantRiskComment = viewModel.SignificantRiskComment,
+                    NewEngagementRiskRating = viewModel.NewEngagementRiskRating,
+                    NewEngagementRiskRatingReason = viewModel.NewEngagementRiskRatingReason,
+                    EngagementSubjectedTo = viewModel.EngagementSubjectedTo,
+                    SafeguardReviewerAssigned = viewModel.SafeguardReviewerAssigned,
+                    IsNewEngagementAcceptance = viewModel.IsNewEngagementAcceptance,
+                    IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled,
+                    SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale,
+                    Satisfaction = viewModel.Satisfaction,
+                    PreparedBy = viewModel.ConclusionPreparedBy,
+                    PreparedByDate = viewModel.ConclusionPreparedByDate.Value,
+                    EPHODApprovedBy = viewModel.EPHODApprovedBy,
+                    EPHODApprovedByDate = viewModel.EPHODApprovedByDate,
+                    MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy,
+                    MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate
+                };
+
+                // Add qc6formConclusion data to the database
+                _context.Add(qc6formConclusion);
+                _context.SaveChanges();
+
+                // Process the submitted data
+                foreach (var subForm in viewModel.SubForms)
+                {
+                    foreach (var objective in subForm.Objectives)
                     {
-                        viewModel.PublicInterestEntityType = null;
-                    }
-
-                    // QCForm File Reference will contain _NAS for Non-Auditor role creation
-                    string fileReference = Helper.GenerateQCFormFileReference();
-
-                    if (roles.Contains("Non-Auditor"))
-                    {
-                        // Modify the fileReference if the "Non-Auditor" role is present
-                        fileReference += "_NAS";
-                    }
-
-                    // Save viewModel data to QC6Form
-                    var qc6form = new QC6Form
-                    {
-                        FileReference = fileReference,
-                        CreatedBy = userId,
-                        ProspectiveClient = viewModel.ProspectiveClient,
-                        PeriodEnded = viewModel.PeriodEnded.Value,
-                        EngagementType = viewModel.EngagementType,
-                        PreparedBy = viewModel.PreparedBy,
-                        PreparedByDate = viewModel.PreparedByDate,
-                        ReviewedBy = viewModel.ReviewedBy,
-                        ReviewedByDate = viewModel.ReviewedByDate,
-                        Status = "Pending",
-                        FormSubmissionDate = DateTime.Now,
-                        PKFEntityProposingService = viewModel.PKFEntityProposingService,
-                        SourceOfReferral = viewModel.SourceOfReferral,
-                        NatureOfServiceForEstimateFee = viewModel.NatureOfServiceForEstimateFee,
-                        EstimatedFee = viewModel.EstimatedFee.Value,
-                        BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
-                        BudgetedFeeRecoveryRate = viewModel.BudgetedFeeRecoveryRate.Value,
-                        OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees,
-                        GrandTotal = viewModel.GrandTotal.Value,
-                        AuditFee = viewModel.AuditFee.Value,
-                        FeeConcentration = viewModel.FeeConcentration.Value,
-                        ConflictsCheckDone = viewModel.ConflictsCheckDone,
-                        TypeOfActivities = viewModel.TypeOfActivities,
-                        ComplexityOfEngagement = viewModel.ComplexityOfEngagement,
-                        PredecessorAuditor = viewModel.PredecessorAuditor,
-                        ReasonsForDiscontinuance = viewModel.ReasonsForDiscontinuance,
-                        PublicInterestEntity = viewModel.IsPublicInterestEntity,
-                        PublicInterestEntityType = viewModel.PublicInterestEntityType,
-                        IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable, // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
-                        IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
-                    };
-
-                    // Add qc6form data to intermediary datastore
-                    _context.Add(qc6form);
-                    _context.SaveChanges();
-
-                    // Retrieve the QC6FormID from the saved entity
-                    int qc6formId = qc6form.QC6FormID;
-
-                    var tnaTneAssessment = new TNATNEAssessment
-                    {
-                        QC6FormID = qc6formId,
-                        SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation,
-                    };
-
-                    // Add tnaTneAssessment data to the database
-                    _context.Add(tnaTneAssessment);
-                    _context.SaveChanges();
-
-                    // Retrieve the tnaTneAssessmentID from the saved entity
-                    int tnaTneAssessmentID = tnaTneAssessment.TNATNEAssessmentID;
-
-                    var tnaTNESectionB = new TNATNESectionB
-                    {
-                        TNATNEAssessmentID = tnaTneAssessmentID,
-                        IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit
-                    };
-
-                    // Save Q1 - Q4 if IsAudit == true, else only Save Q5
-                    if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
-                    {
-                        tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
-                        tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
-                        tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
-                        tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
-                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
-                    }
-                    else
-                    {
-                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
-                    }
-
-                    // Add tnaTNESectionB data to the database
-                    _context.Add(tnaTNESectionB);
-
-                    var tnaTNESectionD = new TNATNESectionD
-                    {
-                        TNATNEAssessmentID = tnaTneAssessmentID,
-                        Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment,
-                        Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment,
-                        Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment,
-                        Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment,
-                        Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment,
-                    };
-
-                    // Add tnaTNESectionD data to the database
-                    _context.Add(tnaTNESectionD);
-
-                    var qc6formConclusion = new QC6FormConclusion
-                    {
-                        QC6FormID = qc6formId,
-                        AnySignificantRisk = viewModel.AnySignificantRisk,
-                        SignificantRiskComment = viewModel.SignificantRiskComment,
-                        NewEngagementRiskRating = viewModel.NewEngagementRiskRating,
-                        NewEngagementRiskRatingReason = viewModel.NewEngagementRiskRatingReason,
-                        EngagementSubjectedTo = viewModel.EngagementSubjectedTo,
-                        SafeguardReviewerAssigned = viewModel.SafeguardReviewerAssigned,
-                        IsNewEngagementAcceptance = viewModel.IsNewEngagementAcceptance,
-                        IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled,
-                        SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale,
-                        Satisfaction = viewModel.Satisfaction,
-                        PreparedBy = viewModel.ConclusionPreparedBy,
-                        PreparedByDate = viewModel.ConclusionPreparedByDate.Value,
-                        EPHODApprovedBy = viewModel.EPHODApprovedBy,
-                        EPHODApprovedByDate = viewModel.EPHODApprovedByDate,
-                        MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy,
-                        MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate
-                    };
-
-                    // Add qc6formConclusion data to the database
-                    _context.Add(qc6formConclusion);
-
-                    // Process the submitted data
-                    foreach (var subForm in viewModel.SubForms)
-                    {
-                        foreach (var objective in subForm.Objectives)
+                        foreach (var testDescription in objective.TestDescriptions)
                         {
-                            foreach (var testDescription in objective.TestDescriptions)
+                            // Populate the TestDescriptions with posted data
+                            testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignBy"];
+                            if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
                             {
-                                // Populate the TestDescriptions with posted data
-                                testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignBy"];
-                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
-                                {
-                                    // Use the parsed date
-                                    testDescription.SignDate = date;
-                                }
-                                testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Comment"];
-
-                                // Save QC6FormTest
-                                var qc6formTest = new QC6FormTest
-                                {
-                                    QC6FormID = qc6formId,
-                                    QC6FormTestDescriptionID = testDescription.QC6FormTestDescriptionID,
-                                    SignOffDate = testDescription.SignDate,
-                                    SignOffBy = testDescription.SignBy,
-                                    Comments = testDescription.Comment
-                                };
-
-                                // Add qc6formTest to the context and save changes
-                                _context.Add(qc6formTest);
+                                // Use the parsed date
+                                testDescription.SignDate = date;
                             }
+                            testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC6SubFormID}].Objectives[{objective.QC6FormObjectiveID}].TestDescriptions[{testDescription.QC6FormTestDescriptionID}].Comment"];
+
+                            // Save QC6FormTest
+                            var qc6formTest = new QC6FormTest
+                            {
+                                QC6FormID = qc6formId,
+                                QC6FormTestDescriptionID = testDescription.QC6FormTestDescriptionID,
+                                SignOffDate = testDescription.SignDate,
+                                SignOffBy = testDescription.SignBy,
+                                Comments = testDescription.Comment
+                            };
+
+                            // Add qc6formTest to the context and save changes
+                            _context.Add(qc6formTest);
+                            _context.SaveChanges();
                         }
                     }
+                }
 
-                    // Process the submitted data
-                    foreach (var service in viewModel.Services)
+                // Process the submitted data
+                foreach (var service in viewModel.Services)
+                {
+                    // Save QC6FormFeeDetail
+                    var qC6FormFeeDetail = new QC6FormFeeDetail
                     {
-                        // Save QC6FormFeeDetail
-                        var qC6FormFeeDetail = new QC6FormFeeDetail
-                        {
-                            QC6FormID = qc6formId,
-                            NatureOfService = service.NatureOfService,
-                            Fee = service.Fee.Value,
-                            OtherService = service.OtherService,
-                        };
+                        QC6FormID = qc6formId,
+                        NatureOfService = service.NatureOfService,
+                        Fee = service.Fee.Value,
+                        OtherService = service.OtherService,
+                    };
 
-                        // Add qC6FormFeeDetail to the context and save changes
-                        _context.Add(qC6FormFeeDetail);
+                    // Add qC6FormFeeDetail to the context and save changes
+                    _context.Add(qC6FormFeeDetail);
+                    _context.SaveChanges();
+                }
+
+                // Root folder name in S3
+                var uploadsRootFolder = "QC6FormDocuments";
+
+                // Check if null
+                if (viewModel.OtherDocuments != null)
+                {
+                    // Generate a unique filename
+                    var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                    // Get the path to wwwroot
+                    var uploadsFolder = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "QC6Form-OtherDocuments");
+
+                    // Ensure the uploads folder exists
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    // Get file path
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    // Save the file to wwwroot/uploads/OtherDocuments
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await viewModel.OtherDocuments.CopyToAsync(stream);
                     }
 
-                    // Root folder name in S3
-                    var uploadsRootFolder = "QC6FormDocuments";
-
-                    // Check if null, else upload the file to S3
-                    if (viewModel.BusinessProfile != null)
+                    // Add to the db context
+                    _context.Add(new QCDocument
                     {
-                        // Generate a unique filename
-                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
-
-                        // Define path and upload to S3
-                        var s3Key = Path.Combine(uploadsRootFolder, "BusinessProfile", uniqueFileName).Replace("\\", "/"); ;
-                        await _s3Service.UploadFileAsync(s3Key, viewModel.BusinessProfile.OpenReadStream());
-
-                        // Add to the db context
-                        _context.Add(new QCDocument
-                        {
-                            QC6FormID = qc6formId,
-                            FileName = uniqueFileName,
-                            S3Key = s3Key,
-                            DocumentType = "BusinessProfile"
-                        });
-                    }
-
-                    // Check if null, else upload the file to S3
-                    if (viewModel.TrendSearch != null)
-                    {
-                        // Generate a unique filename
-                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
-
-                        // Define path and upload to S3
-                        var s3Key = Path.Combine(uploadsRootFolder, "TrendSearch", uniqueFileName).Replace("\\", "/"); ;
-                        await _s3Service.UploadFileAsync(s3Key, viewModel.TrendSearch.OpenReadStream());
-
-                        // Add to the db context
-                        _context.Add(new QCDocument
-                        {
-                            QC6FormID = qc6formId,
-                            FileName = uniqueFileName,
-                            S3Key = s3Key,
-                            DocumentType = "TrendSearch"
-                        });
-                    }
-
-                    // Check if null, else upload the file to S3
-                    if (viewModel.GoogleSearch != null)
-                    {
-                        // Generate a unique filename
-                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
-
-                        // Define path and upload to S3
-                        var s3Key = Path.Combine(uploadsRootFolder, "GoogleSearch", uniqueFileName).Replace("\\", "/"); ;
-                        await _s3Service.UploadFileAsync(s3Key, viewModel.GoogleSearch.OpenReadStream());
-
-                        // Add to the db context
-                        _context.Add(new QCDocument
-                        {
-                            QC6FormID = qc6formId,
-                            FileName = uniqueFileName,
-                            S3Key = s3Key,
-                            DocumentType = "GoogleSearch"
-                        });
-                    }
-
-                    // Check if null, else upload the file to S3
-                    if (viewModel.LexisNexisSearch != null)
-                    {
-                        // Generate a unique filename
-                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
-
-                        // Define path and upload to S3
-                        var s3Key = Path.Combine(uploadsRootFolder, "LexisNexisSearch", uniqueFileName).Replace("\\", "/"); ;
-                        await _s3Service.UploadFileAsync(s3Key, viewModel.LexisNexisSearch.OpenReadStream());
-
-                        // Add to the db context
-                        _context.Add(new QCDocument
-                        {
-                            QC6FormID = qc6formId,
-                            FileName = uniqueFileName,
-                            S3Key = s3Key,
-                            DocumentType = "LexisNexisSearch"
-                        });
-                    }
-
-                    // Check if null, else upload the files to S3
-                    if (viewModel.OtherDocuments != null && viewModel.OtherDocuments.Count > 0)
-                    {
-                        foreach (var document in viewModel.OtherDocuments)
-                        {
-                            if (document.File != null && !string.IsNullOrWhiteSpace(document.DocumentName))
-                            {
-                                // Generate a unique filename
-                                var uniqueFileName =  Guid.NewGuid().ToString() + ".pdf";
-
-                                // Generate the S3 key with the desired path
-                                var s3Key = Path.Combine(
-                                    uploadsRootFolder,
-                                    "OtherDocuments",
-                                    document.DocumentName + "/" + uniqueFileName
-                                ).Replace("\\", "/"); ;
-
-                                // Upload the file to S3
-                                await _s3Service.UploadFileAsync(s3Key, document.File.OpenReadStream());
-
-                                // Add to the db context
-                                _context.Add(new QCDocument
-                                {
-                                    QC6FormID = qc6formId,
-                                    FileName = uniqueFileName,
-                                    S3Key = s3Key,
-                                    DocumentType = "OtherDocuments"
-                                });
-                            }
-                        }
-                    }
+                        QC6FormID = qc6formId,
+                        FileName = uniqueFileName,
+                        DocumentType = "OtherDocuments"
+                    });
 
                     _context.SaveChanges();
-                    transaction.Commit();
-
-                    await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Creation",
-                    $"A new QC6 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
-
-                    // Set the success message for the toast notification
-                    TempData["QC6CreateMessage"] = "QC6 Form created successfully.";
-
-                    if (roles.Contains("Admin"))
-                    {
-                        // Redirect to admin-specific page
-                        return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
-                    }
-                    else
-                    {
-                        // Redirect to user-specific page
-                        return RedirectToAction("QC6FormManagement", "QC6Form");
-                    }
                 }
-                catch (Exception ex)
+
+                //// Check if null, else upload the files to S3
+                //if (viewModel.OtherDocuments != null && viewModel.OtherDocuments.Count > 0)
+                //{
+                //    foreach (var document in viewModel.OtherDocuments)
+                //    {
+                //        if (document.File != null && !string.IsNullOrWhiteSpace(document.DocumentName))
+                //        {
+                //            // Generate a unique filename
+                //            var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                //            // Generate the S3 key with the desired path
+                //            var s3Key = Path.Combine(
+                //                uploadsRootFolder,
+                //                "OtherDocuments",
+                //                document.DocumentName + "/" + uniqueFileName
+                //            ).Replace("\\", "/"); ;
+
+                //            // Upload the file to S3
+                //            await _s3Service.UploadFileAsync(s3Key, document.File.OpenReadStream());
+
+                //            // Add to the db context
+                //            _context.Add(new QCDocument
+                //            {
+                //                QC6FormID = qc6formId,
+                //                FileName = uniqueFileName,
+                //                S3Key = s3Key,
+                //                DocumentType = "OtherDocuments"
+                //            });
+                //        }
+                //    }
+                //}
+
+                await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Creation",
+                $"A new QC6 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+
+                // Set the success message for the toast notification
+                TempData["QC6CreateMessage"] = "QC6 Form created successfully.";
+
+                if (roles.Contains("Admin"))
                 {
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch (Exception ex2)
-                    {
-                        // This catch block will handle any errors that may have occurred 
-                        // on the server that would cause the rollback to fail, such as 
-                        // a closed connection.
-                        Console.WriteLine("Rollback Exception Type: {0}", ex2.GetType());
-                        Console.WriteLine("Message: {0}", ex2.Message);
-                    }
-                    // Log the error
-                    ViewBag.ErrorMessage = "An error occurred while processing your request. Please try again.";
-                    return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
                 }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC6FormManagement", "QC6Form");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                ViewBag.ErrorMessage = "An error occurred while processing your request. Please try again.";
+                return View("~/Views/General/QC6/QC6FormCreation.cshtml", viewModel);
             }
         }
 

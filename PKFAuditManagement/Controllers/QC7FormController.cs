@@ -21,14 +21,16 @@ namespace PKFAuditManagement.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _environment;
         private readonly IEmailSender _emailSender;
-        public QC7FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender)
+        public QC7FormController(IUserService userService, ApplicationDbContext context, UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender, IWebHostEnvironment environment)
         {
             _userService = userService;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _emailSender = emailSender;
+            _environment = environment; 
         }
 
         [Authorize(Roles = "User,Non-Auditor")]
@@ -270,9 +272,18 @@ namespace PKFAuditManagement.Controllers
                     });
                 }
 
+                // Load existing documents
+                var documentData = _context.QCDocuments.Where(x => x.QC7FormID == id).FirstOrDefault();
+
+                // Retrieve and set the file path for other documents
+                if (documentData != null)
+                {
+                    viewModel.OtherDocumentsFileName = documentData.FileName;
+                }
+
                 return View("~/Views/General/QC7/EditQC7Form.cshtml", viewModel);
             }
-            catch
+            catch (Exception ex)
             {
                 if (roles.Contains("Admin"))
                 {
@@ -317,322 +328,374 @@ namespace PKFAuditManagement.Controllers
                 return View("~/Views/General/QC7/EditQC7Form.cshtml", viewModel);
             }
 
-            // Begin a transaction to ensure atomicity
-            using (var transaction = _context.Database.BeginTransaction())
+            try
             {
-                try
+                // Get the current user's ID
+                var userId = user?.Id;
+
+                // Retrieve the existing QC7 form from the database
+                var qc7form = await _context.QC7Forms.FindAsync(int.Parse(viewModel.QC7FormID));
+
+                // Update the existing QC7Form with new values
+                qc7form.Client = viewModel.Client;
+                qc7form.PeriodEnded = viewModel.PeriodEnded.Value;
+                qc7form.EngagementType = viewModel.EngagementType;
+                qc7form.PreparedBy = viewModel.PreparedBy;
+                qc7form.PreparedByDate = viewModel.PreparedByDate;
+                qc7form.ReviewedBy = viewModel.ReviewedBy;
+                qc7form.ReviewedByDate = viewModel.ReviewedByDate;
+                qc7form.PriorYearFee = viewModel.PriorYearFee.Value;
+                qc7form.TimeCosts = viewModel.TimeCosts.Value;
+                qc7form.PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value;
+                qc7form.AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees;
+                qc7form.TypeOfClientActivities = viewModel.TypeOfClientActivities;
+                qc7form.RiskRatingPriorYear = viewModel.RiskRatingPriorYear;
+                qc7form.AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled;
+                qc7form.GrandTotal = viewModel.GrandTotal.Value;
+                qc7form.AuditFee = viewModel.AuditFee.Value;
+
+
+                // Set to null if not selected
+                if (qc7form.AnySuspiciousTransactionReportFiled == false)
                 {
-                    // Get the current user's ID
-                    var userId = user?.Id;
+                    qc7form.SuspiciousTransactionReportFiledComment = null;
+                }
+                else
+                {
+                    qc7form.SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment;
+                }
 
-                    // Retrieve the existing QC7 form from the database
-                    var qc7form = await _context.QC7Forms.FindAsync(int.Parse(viewModel.QC7FormID));
+                qc7form.SafeguardReviewerName = viewModel.SafeguardReviewerName;
+                qc7form.AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees;
+                qc7form.FeeConcentration = viewModel.FeeConcentration.Value;
+                qc7form.ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value;
+                qc7form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
+                qc7form.ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value;
+                qc7form.IsPublicInterestEntity = viewModel.IsPublicInterestEntity;
 
-                    // Update the existing QC7Form with new values
-                    qc7form.Client = viewModel.Client;
-                    qc7form.PeriodEnded = viewModel.PeriodEnded.Value;
-                    qc7form.EngagementType = viewModel.EngagementType;
-                    qc7form.PreparedBy = viewModel.PreparedBy;
-                    qc7form.PreparedByDate = viewModel.PreparedByDate;
-                    qc7form.ReviewedBy = viewModel.ReviewedBy;
-                    qc7form.ReviewedByDate = viewModel.ReviewedByDate;
-                    qc7form.PriorYearFee = viewModel.PriorYearFee.Value;
-                    qc7form.TimeCosts = viewModel.TimeCosts.Value;
-                    qc7form.PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value;
-                    qc7form.AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees;
-                    qc7form.TypeOfClientActivities = viewModel.TypeOfClientActivities;
-                    qc7form.RiskRatingPriorYear = viewModel.RiskRatingPriorYear;
-                    qc7form.AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled;
-                    qc7form.GrandTotal = viewModel.GrandTotal.Value;
-                    qc7form.AuditFee = viewModel.AuditFee.Value;
+                // Check if Public Interest Entity is selected
+                if (viewModel.IsPublicInterestEntity == true)
+                {
+                    qc7form.PublicInterestEntityType = viewModel.PublicInterestEntityType;
+                }
+                else
+                {
+                    qc7form.PublicInterestEntityType = null;
+                }
 
+                qc7form.IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable;
+                qc7form.IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable;
 
-                    // Set to null if not selected
-                    if (qc7form.AnySuspiciousTransactionReportFiled == false)
+                // Reset status to "Pending" if previously rejected
+                if (qc7form.Status == "Rejected")
+                {
+                    qc7form.Status = "Pending";
+                }
+
+                // Update TNATNEAssessment
+                var tnaTneAssessment = await _context.TNATNEAssessments.FirstOrDefaultAsync(a => a.QC7FormID == qc7form.QC7FormID);
+                if (tnaTneAssessment != null)
+                {
+                    tnaTneAssessment.SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation;
+
+                }
+
+                // Update TNATNESectionB with foreign key linking the two tables (TNATNESectionB and TNATNEAssessment)
+                var tnaTNESectionB = await _context.TNATNESectionBs.FirstOrDefaultAsync(b => b.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
+                if (tnaTNESectionB != null)
+                {
+                    tnaTNESectionB.IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit;
+
+                    if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
                     {
-                        qc7form.SuspiciousTransactionReportFiledComment = null;
-                    } else
-                    {
-                        qc7form.SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment;
-                    }
-
-                    qc7form.SafeguardReviewerName = viewModel.SafeguardReviewerName;
-                    qc7form.AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees;
-                    qc7form.FeeConcentration = viewModel.FeeConcentration.Value;
-                    qc7form.ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value;
-                    qc7form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
-                    qc7form.ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value;
-                    qc7form.IsPublicInterestEntity = viewModel.IsPublicInterestEntity;
-
-                    // Check if Public Interest Entity is selected
-                    if (viewModel.IsPublicInterestEntity == true)
-                    {
-                        qc7form.PublicInterestEntityType = viewModel.PublicInterestEntityType;
+                        tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
+                        tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
+                        tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
+                        tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
+                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
                     }
                     else
                     {
-                        qc7form.PublicInterestEntityType = null;
+                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                    }
+                }
+
+                // Update TNATNESectionD with foreign key linking the two tables (TNATNESectionD and TNATNEAssessment)
+                var tnaTNESectionD = await _context.TNATNESectionDs.FirstOrDefaultAsync(d => d.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
+                if (tnaTNESectionD != null)
+                {
+                    tnaTNESectionD.Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment;
+                    tnaTNESectionD.Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment;
+                    tnaTNESectionD.Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment;
+                    tnaTNESectionD.Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment;
+                    tnaTNESectionD.Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment;
+                }
+
+                // Update QC7FormConclusion
+                var qc7formConclusion = await _context.QC7FormConclusions.FirstOrDefaultAsync(c => c.QC7FormID == qc7form.QC7FormID);
+                if (qc7formConclusion != null)
+                {
+                    qc7formConclusion.AnyRiskAssociated = viewModel.AnyRiskAssociated;
+
+                    // Set to null if not selected
+                    if (viewModel.AnyRiskAssociated == true)
+                    {
+                        qc7formConclusion.RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear;
+                        qc7formConclusion.IsSafeguardApplied = viewModel.IsSafeguardApplied;
+                        qc7formConclusion.NatureOfSafeguard = viewModel.NatureOfSafeguard;
+                    }
+                    else
+                    {
+                        qc7formConclusion.RiskExplanationCurrentYearPriorYear = null;
+                        qc7formConclusion.IsSafeguardApplied = false;
+                        qc7formConclusion.NatureOfSafeguard = null;
                     }
 
-                    qc7form.IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable;
-                    qc7form.IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable;
+                    qc7formConclusion.ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated;
+                    qc7formConclusion.SafeguardReviewPartnerAssigned = viewModel.SafeguardReviewPartnerAssigned;
+                    qc7formConclusion.IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled;
 
-                    // Reset status to "Pending" if previously rejected
-                    if (qc7form.Status == "Rejected")
+                    // Set to null if not selected
+                    if (viewModel.IsSuspiciousTransactionReportFiled == true)
                     {
-                        qc7form.Status = "Pending";
+                        qc7formConclusion.SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale;
+                    }
+                    else
+                    {
+                        qc7formConclusion.SuspiciousTransactionReportFiledRationale = null;
                     }
 
-                    // Update TNATNEAssessment
-                    var tnaTneAssessment = await _context.TNATNEAssessments.FirstOrDefaultAsync(a => a.QC7FormID == qc7form.QC7FormID);
-                    if (tnaTneAssessment != null)
+                    qc7formConclusion.EngagementRetainedRejected = viewModel.EngagementRetainedRejected;
+                    qc7formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
+                    qc7formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
+                    qc7formConclusion.EPHODApprovedByDate = viewModel.EPHODApprovedByDate;
+                    qc7formConclusion.MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate;
+                }
+
+                // Update QC7FormTest entities
+                foreach (var subForm in viewModel.SubForms)
+                {
+                    // Check if the subform is applicable
+                    bool isApplicable = (subForm.QC7SubFormID == 1) ||
+                                        (subForm.QC7SubFormID == 2 && !viewModel.SubForm1NotApplicable) ||
+                                        (subForm.QC7SubFormID == 3 && !viewModel.SubForm2NotApplicable);
+
+                    foreach (var objective in subForm.Objectives)
                     {
-                        tnaTneAssessment.SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation;
-
-                    }
-
-                    // Update TNATNESectionB with foreign key linking the two tables (TNATNESectionB and TNATNEAssessment)
-                    var tnaTNESectionB = await _context.TNATNESectionBs.FirstOrDefaultAsync(b => b.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
-                    if (tnaTNESectionB != null)
-                    {
-                        tnaTNESectionB.IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit;
-
-                        if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
+                        foreach (var testDescription in objective.TestDescriptions)
                         {
-                            tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
-                            tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
-                            tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
-                            tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
-                            tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
-                        }
-                        else
-                        {
-                            tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
-                        }
-                    }
+                            var qc7formTest = await _context.QC7FormTests
+                                .FirstOrDefaultAsync(t => t.QC7FormID == qc7form.QC7FormID && t.QC7FormTestDescriptionID == testDescription.QC7FormTestDescriptionID);
 
-                    // Update TNATNESectionD with foreign key linking the two tables (TNATNESectionD and TNATNEAssessment)
-                    var tnaTNESectionD = await _context.TNATNESectionDs.FirstOrDefaultAsync(d => d.TNATNEAssessmentID == tnaTneAssessment.TNATNEAssessmentID);
-                    if (tnaTNESectionD != null)
-                    {
-                        tnaTNESectionD.Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment;
-                        tnaTNESectionD.Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment;
-                        tnaTNESectionD.Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment;
-                        tnaTNESectionD.Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment;
-                        tnaTNESectionD.Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment;
-                    }
-
-                    // Update QC7FormConclusion
-                    var qc7formConclusion = await _context.QC7FormConclusions.FirstOrDefaultAsync(c => c.QC7FormID == qc7form.QC7FormID);
-                    if (qc7formConclusion != null)
-                    {
-                        qc7formConclusion.AnyRiskAssociated = viewModel.AnyRiskAssociated;
-
-                        // Set to null if not selected
-                        if (viewModel.AnyRiskAssociated == true)
-                        {
-                            qc7formConclusion.RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear;
-                            qc7formConclusion.IsSafeguardApplied = viewModel.IsSafeguardApplied;
-                            qc7formConclusion.NatureOfSafeguard = viewModel.NatureOfSafeguard;
-                        } else
-                        {
-                            qc7formConclusion.RiskExplanationCurrentYearPriorYear = null;
-                            qc7formConclusion.IsSafeguardApplied = false;
-                            qc7formConclusion.NatureOfSafeguard = null;
-                        }
-
-                        qc7formConclusion.ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated;
-                        qc7formConclusion.SafeguardReviewPartnerAssigned = viewModel.SafeguardReviewPartnerAssigned;
-                        qc7formConclusion.IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled;
-
-                        // Set to null if not selected
-                        if (viewModel.IsSuspiciousTransactionReportFiled == true)
-                        {
-                            qc7formConclusion.SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale;
-                        } else
-                        {
-                            qc7formConclusion.SuspiciousTransactionReportFiledRationale = null;
-                        }
-
-                        qc7formConclusion.EngagementRetainedRejected = viewModel.EngagementRetainedRejected;
-                        qc7formConclusion.EPHODApprovedBy = viewModel.EPHODApprovedBy;
-                        qc7formConclusion.MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy;
-                        qc7formConclusion.EPHODApprovedByDate = viewModel.EPHODApprovedByDate;
-                        qc7formConclusion.MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate;
-                    }
-
-                    // Update QC7FormTest entities
-                    foreach (var subForm in viewModel.SubForms)
-                    {
-                        // Check if the subform is applicable
-                        bool isApplicable = (subForm.QC7SubFormID == 1) ||
-                                            (subForm.QC7SubFormID == 2 && !viewModel.SubForm1NotApplicable) ||
-                                            (subForm.QC7SubFormID == 3 && !viewModel.SubForm2NotApplicable);
-
-                        foreach (var objective in subForm.Objectives)
-                        {
-                            foreach (var testDescription in objective.TestDescriptions)
+                            if (isApplicable)
                             {
-                                var qc7formTest = await _context.QC7FormTests
-                                    .FirstOrDefaultAsync(t => t.QC7FormID == qc7form.QC7FormID && t.QC7FormTestDescriptionID == testDescription.QC7FormTestDescriptionID);
-
-                                if (isApplicable)
+                                // Populate the TestDescriptions with posted data
+                                testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignBy"];
+                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
                                 {
-                                    // Populate the TestDescriptions with posted data
-                                    testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignBy"];
-                                    if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
-                                    {
-                                        // Use the parsed date
-                                        testDescription.SignDate = date;
-                                    }
-                                    testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].Comment"];
-
+                                    // Use the parsed date
+                                    testDescription.SignDate = date;
                                 }
-                                else
-                                {
-                                    // SubForm is not applicable, set fields to null or minimum values
-                                    testDescription.SignBy = null;
-                                    testDescription.SignDate = DateTime.MinValue; // or use nullable DateTime and set to null if appropriate
-                                    testDescription.Comment = null;
-                                }
+                                testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].Comment"];
 
-
-                                if (qc7formTest != null)
-                                {
-                                    qc7formTest.SignOffDate = testDescription.SignDate;
-                                    qc7formTest.SignOffBy = testDescription.SignBy;
-                                    qc7formTest.Comments = testDescription.Comment;
-                                }
-                                else
-                                {
-                                    qc7formTest = new QC7FormTest
-                                    {
-                                        QC7FormID = qc7form.QC7FormID,
-                                        QC7FormTestDescriptionID = testDescription.QC7FormTestDescriptionID,
-                                        SignOffDate = testDescription.SignDate,
-                                        SignOffBy = testDescription.SignBy,
-                                        Comments = testDescription.Comment
-                                    };
-                                    _context.Add(qc7formTest);
-                                }
-                            }
-                        }
-                    }
-
-                    // Update QC7FormFeeDetail entities
-                    foreach (var service in viewModel.Services)
-                    {
-                        var qc7formFeeDetail = await _context.QC7FormFeeDetails
-                            .FirstOrDefaultAsync(f => f.QC7FormFeeDetailID == service.QC6FormFeeDetailID);
-
-                        if (qc7formFeeDetail != null)
-                        {
-                            qc7formFeeDetail.NatureOfService = service.NatureOfService;
-
-                            // Check if selection is Other Non-Audit Services
-                            if (service.NatureOfService == "Other Non-Audit Services")
-                            {
-                                qc7formFeeDetail.OtherService = service.OtherService;
                             }
                             else
                             {
-                                qc7formFeeDetail.OtherService = null;
+                                // SubForm is not applicable, set fields to null or minimum values
+                                testDescription.SignBy = null;
+                                testDescription.SignDate = DateTime.MinValue; // or use nullable DateTime and set to null if appropriate
+                                testDescription.Comment = null;
                             }
 
-                            qc7formFeeDetail.Fee = service.Fee.Value;
+
+                            if (qc7formTest != null)
+                            {
+                                qc7formTest.SignOffDate = testDescription.SignDate;
+                                qc7formTest.SignOffBy = testDescription.SignBy;
+                                qc7formTest.Comments = testDescription.Comment;
+                            }
+                            else
+                            {
+                                qc7formTest = new QC7FormTest
+                                {
+                                    QC7FormID = qc7form.QC7FormID,
+                                    QC7FormTestDescriptionID = testDescription.QC7FormTestDescriptionID,
+                                    SignOffDate = testDescription.SignDate,
+                                    SignOffBy = testDescription.SignBy,
+                                    Comments = testDescription.Comment
+                                };
+                                _context.Add(qc7formTest);
+                            }
+                        }
+                    }
+                }
+
+                // Update QC7FormFeeDetail entities
+                foreach (var service in viewModel.Services)
+                {
+                    var qc7formFeeDetail = await _context.QC7FormFeeDetails
+                        .FirstOrDefaultAsync(f => f.QC7FormFeeDetailID == service.QC6FormFeeDetailID);
+
+                    if (qc7formFeeDetail != null)
+                    {
+                        qc7formFeeDetail.NatureOfService = service.NatureOfService;
+
+                        // Check if selection is Other Non-Audit Services
+                        if (service.NatureOfService == "Other Non-Audit Services")
+                        {
+                            qc7formFeeDetail.OtherService = service.OtherService;
                         }
                         else
                         {
-                            // Check if selection is Other Non-Audit Services
-                            if (service.NatureOfService != "Other Non-Audit Services")
-                            {
-                                service.OtherService = null;
-                            }
-
-                            qc7formFeeDetail = new QC7FormFeeDetail
-                            {
-                                QC7FormID = qc7form.QC7FormID,
-                                NatureOfService = service.NatureOfService,
-                                OtherService = service.OtherService,
-                                Fee = service.Fee.Value
-                            };
-                            _context.Add(qc7formFeeDetail);
+                            qc7formFeeDetail.OtherService = null;
                         }
+
+                        qc7formFeeDetail.Fee = service.Fee.Value;
                     }
-
-                    // Retrieve and process removed services
-                    var removedServices = Request.Form["RemovedServices[]"];
-                    var removedServiceIds = removedServices
-                        .Select(id => int.TryParse(id, out var parsedId) ? parsedId : (int?)null)
-                        .Where(id => id.HasValue)
-                        .Select(id => id.Value)
-                        .ToList();
-
-                    if (removedServiceIds.Any())
+                    else
                     {
-                        foreach (var id in removedServiceIds)
+                        // Check if selection is Other Non-Audit Services
+                        if (service.NatureOfService != "Other Non-Audit Services")
                         {
-                            var serviceToRemove = await _context.QC7FormFeeDetails
-                                .FirstOrDefaultAsync(f => f.QC7FormFeeDetailID == id);
-
-                            if (serviceToRemove != null)
-                            {
-                                _context.QC7FormFeeDetails.Remove(serviceToRemove);
-                            }
+                            service.OtherService = null;
                         }
-                        await _context.SaveChangesAsync();
+
+                        qc7formFeeDetail = new QC7FormFeeDetail
+                        {
+                            QC7FormID = qc7form.QC7FormID,
+                            NatureOfService = service.NatureOfService,
+                            OtherService = service.OtherService,
+                            Fee = service.Fee.Value
+                        };
+                        _context.Add(qc7formFeeDetail);
                     }
+                }
 
-                    // Save all changes
+                // Retrieve and process removed services
+                var removedServices = Request.Form["RemovedServices[]"];
+                var removedServiceIds = removedServices
+                    .Select(id => int.TryParse(id, out var parsedId) ? parsedId : (int?)null)
+                    .Where(id => id.HasValue)
+                    .Select(id => id.Value)
+                    .ToList();
+
+                if (removedServiceIds.Any())
+                {
+                    foreach (var id in removedServiceIds)
+                    {
+                        var serviceToRemove = await _context.QC7FormFeeDetails
+                            .FirstOrDefaultAsync(f => f.QC7FormFeeDetailID == id);
+
+                        if (serviceToRemove != null)
+                        {
+                            _context.QC7FormFeeDetails.Remove(serviceToRemove);
+                        }
+                    }
                     await _context.SaveChangesAsync();
-                    transaction.Commit();
+                }
 
-                    // Set the success message for the toast notification
-                    TempData["QC7UpdateMessage"] = "QC7 Form updated successfully.";
+                if (viewModel.OtherDocuments != null)
+                {
+                    // Attempt to parse QC7FormID from the view model
+                    if (int.TryParse(viewModel.QC7FormID, out int parsedQc7FormId))
+                    {
+                        // Find the existing document
+                        var existingDocument = await _context.QCDocuments
+                            .FirstOrDefaultAsync(x => x.QC7FormID == parsedQc7FormId);
 
-                    // List of recipients
-                    var recipients = new List<string>
+                        // Generate a unique file name for the new document
+                        var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                        // Check if the document exists
+                        if (existingDocument != null)
+                        {
+                            // Construct the file path
+                            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-OtherDocuments", existingDocument.FileName);
+
+                            // Remove the old file from wwwroot
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+
+                            // Update the old document
+                            existingDocument.FileName = uniqueFileName;
+
+                            // Save all changes
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            // Add to the db context
+                            _context.Add(new QCDocument
+                            {
+                                QC7FormID = parsedQc7FormId,
+                                FileName = uniqueFileName,
+                                DocumentType = "OtherDocuments"
+                            });
+
+                            // Save all changes
+                            await _context.SaveChangesAsync();
+                        }
+
+                        // Define the path for the new document
+                        var newFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-OtherDocuments", uniqueFileName);
+
+                        // Save the new document to the wwwroot folder
+                        using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+                        {
+                            viewModel.OtherDocuments.CopyTo(fileStream);
+                        }
+                    }
+                }
+
+                // Save all changes
+                await _context.SaveChangesAsync();
+
+                // Set the success message for the toast notification
+                TempData["QC7UpdateMessage"] = "QC7 Form updated successfully.";
+
+                // List of recipients
+                var recipients = new List<string>
                     {
                         viewModel.EPHODApprovedBy,
                         viewModel.MPHODQMPApprovedBy
                     };
 
-                    // Subject and body of the email
-                    var subject = "QC7 Form Update";
-                    var body = $"The QC7 Form {viewModel.FileReference} has been updated. Please login to the Audit Management System to review the QC7 Form.";
+                // Subject and body of the email
+                var subject = "QC7 Form Update";
+                var body = $"The QC7 Form {viewModel.FileReference} has been updated. Please login to the Audit Management System to review the QC7 Form.";
 
-                    // Send the email to each recipient
-                    foreach (var recipient in recipients)
-                    {
-                        await _emailSender.SendEmailAsync(recipient, subject, body);
-                    }
-
-                    if (roles.Contains("Admin"))
-                    {
-                        // Redirect to admin-specific page
-                        return RedirectToAction("QC7FormApprovalManagement");
-                    }
-                    else
-                    {
-                        // Redirect to user-specific page
-                        return RedirectToAction("QC7FormManagement");
-                    }
-                }
-                catch (Exception ex)
+                // Send the email to each recipient
+                foreach (var recipient in recipients)
                 {
-                    transaction.Rollback();
-                    // Log the error
-                    viewModel.ErrorMessage = "Error updating the form, please try again!";
-                    if (roles.Contains("Admin"))
-                    {
-                        // Redirect to admin-specific page
-                        return RedirectToAction("QC7FormApprovalManagement");
-                    }
-                    else
-                    {
-                        // Redirect to user-specific page
-                        return RedirectToAction("QC7FormManagement");
-                    }
+                    await _emailSender.SendEmailAsync(recipient, subject, body);
+                }
+
+                if (roles.Contains("Admin"))
+                {
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC7FormApprovalManagement");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC7FormManagement");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                viewModel.ErrorMessage = "Error updating the form, please try again!";
+                if (roles.Contains("Admin"))
+                {
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC7FormApprovalManagement");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC7FormManagement");
                 }
             }
         }
@@ -999,6 +1062,15 @@ namespace PKFAuditManagement.Controllers
                     });
                 }
 
+                // Retrieve documents for QC Form from database
+                var documentData = _context.QCDocuments.Where(x => x.QC7FormID.Equals(id)).FirstOrDefault();
+
+                // Retrieve and set the file path for other documents
+                if (documentData != null)
+                {
+                    viewModel.OtherDocumentsFileName = documentData.FileName;
+                }
+
                 return View("~/Views/General/QC7/ViewQC7Form.cshtml", viewModel);
             }
             catch
@@ -1047,223 +1119,252 @@ namespace PKFAuditManagement.Controllers
                 return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
             }
 
-            // Begin a transaction to ensure atomicity
-            using (var transaction = _context.Database.BeginTransaction())
+            try
             {
-                try
+                // Get the current user's ID
+                var userId = user?.Id;
+
+                // Re-validate form inputs for QC7 Form
+                if (viewModel.IsPublicInterestEntity == true)
                 {
-                    // Get the current user's ID
-                    var userId = user?.Id;
+                    viewModel.PublicInterestEntityType = null;
+                }
 
-                    // Re-validate form inputs for QC7 Form
-                    if (viewModel.IsPublicInterestEntity == true)
+                // QCForm File Reference will contain _NAS for Non-Auditor role creation
+                string fileReference = Helper.GenerateQCFormFileReference();
+
+
+                // Save viewModel data to EngagementTable
+                var qc7form = new QC7Form
+                {
+                    FileReference = fileReference,
+                    CreatedBy = userId,
+                    Client = viewModel.Client,
+                    PeriodEnded = viewModel.PeriodEnded.Value,
+                    EngagementType = viewModel.EngagementType,
+                    PreparedBy = viewModel.PreparedBy,
+                    PreparedByDate = viewModel.PreparedByDate,
+                    ReviewedBy = viewModel.ReviewedBy,
+                    ReviewedByDate = viewModel.ReviewedByDate,
+                    PriorYearFee = viewModel.PriorYearFee.Value,
+                    TimeCosts = viewModel.TimeCosts.Value,
+                    PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value,
+                    AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees,
+                    TypeOfClientActivities = viewModel.TypeOfClientActivities,
+                    RiskRatingPriorYear = viewModel.RiskRatingPriorYear,
+                    AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled,
+                    SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment,
+                    SafeguardReviewerName = viewModel.SafeguardReviewerName,
+                    AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees,
+                    GrandTotal = viewModel.GrandTotal.Value,
+                    AuditFee = viewModel.AuditFee.Value,
+                    FeeConcentration = viewModel.FeeConcentration.Value,
+                    ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value,
+                    BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
+                    ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value,
+                    IsPublicInterestEntity = viewModel.IsPublicInterestEntity,
+                    PublicInterestEntityType = viewModel.PublicInterestEntityType,
+                    Status = "Pending",
+                    FormSubmissionDate = DateTime.Now,
+                    IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable, // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                    IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
+                };
+                _context.QC7Forms.Add(qc7form);
+                _context.SaveChanges();
+
+                // Retrieve the QC7FormID from the saved entity
+                int qc7formId = qc7form.QC7FormID;
+
+                var qc7formConclusion = new QC7FormConclusion
+                {
+                    QC7FormID = qc7formId,
+                    AnyRiskAssociated = viewModel.AnyRiskAssociated,
+                    RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear,
+                    IsSafeguardApplied = viewModel.IsSafeguardApplied,
+                    NatureOfSafeguard = viewModel.NatureOfSafeguard,
+                    ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated,
+                    SafeguardReviewPartnerAssigned = viewModel.SafeguardReviewPartnerAssigned,
+                    IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled,
+                    SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale,
+                    EngagementRetainedRejected = viewModel.EngagementRetainedRejected,
+                    EMPreparedBy = viewModel.EMPreparedBy,
+                    EMPreparedByDate = viewModel.EMPreparedByDate.Value,
+                    EPHODApprovedBy = viewModel.EPHODApprovedBy,
+                    EPHODApprovedByDate = viewModel.EPHODApprovedByDate,
+                    MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy,
+                    MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate
+                };
+
+                // Add qc7formConclusion data to the database
+                _context.Add(qc7formConclusion);
+                _context.SaveChanges();
+
+                var tnaTneAssessment = new TNATNEAssessment
+                {
+                    QC7FormID = qc7formId,
+                    SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation,
+                };
+
+                // Add tnaTneAssessment data to the database
+                _context.Add(tnaTneAssessment);
+                _context.SaveChanges();
+
+                // Retrieve the tnaTneAssessmentID from the saved entity
+                int tnaTneAssessmentID = tnaTneAssessment.TNATNEAssessmentID;
+
+                var tnaTNESectionB = new TNATNESectionB
+                {
+                    TNATNEAssessmentID = tnaTneAssessmentID,
+                    IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit
+                };
+
+                // Save Q1 - Q4 if IsAudit == true, else only Save Q5
+                if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
+                {
+                    tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
+                    tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
+                    tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
+                    tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
+                    tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                }
+                else
+                {
+                    tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
+                }
+
+                // Add tnaTNESectionB data to the database
+                _context.Add(tnaTNESectionB);
+                _context.SaveChanges();
+
+                var tnaTNESectionD = new TNATNESectionD
+                {
+                    TNATNEAssessmentID = tnaTneAssessmentID,
+                    Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment,
+                    Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment,
+                    Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment,
+                    Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment,
+                    Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment,
+                };
+
+                // Add tnaTNESectionD data to the database
+                _context.Add(tnaTNESectionD);
+                _context.SaveChanges();
+
+                // Process the submitted data
+                foreach (var subForm in viewModel.SubForms)
+                {
+                    foreach (var objective in subForm.Objectives)
                     {
-                        viewModel.PublicInterestEntityType = null;
-                    }
-
-                    // QCForm File Reference will contain _NAS for Non-Auditor role creation
-                    string fileReference = Helper.GenerateQCFormFileReference();
-
-
-                    // Save viewModel data to EngagementTable
-                    var qc7form = new QC7Form
-                    {
-                        FileReference = fileReference,
-                        CreatedBy = userId,
-                        Client = viewModel.Client,
-                        PeriodEnded = viewModel.PeriodEnded.Value,
-                        EngagementType = viewModel.EngagementType,
-                        PreparedBy = viewModel.PreparedBy,
-                        PreparedByDate = viewModel.PreparedByDate,
-                        ReviewedBy = viewModel.ReviewedBy,
-                        ReviewedByDate = viewModel.ReviewedByDate,
-                        PriorYearFee = viewModel.PriorYearFee.Value,
-                        TimeCosts = viewModel.TimeCosts.Value,
-                        PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value,
-                        AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees,
-                        TypeOfClientActivities = viewModel.TypeOfClientActivities, 
-                        RiskRatingPriorYear = viewModel.RiskRatingPriorYear,
-                        AnySuspiciousTransactionReportFiled =  viewModel.AnySuspiciousTransactionReportFiled,
-                        SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment,
-                        SafeguardReviewerName = viewModel.SafeguardReviewerName,
-                        AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees,
-                        GrandTotal = viewModel.GrandTotal.Value,
-                        AuditFee = viewModel.AuditFee.Value,
-                        FeeConcentration = viewModel.FeeConcentration.Value,
-                        ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value,
-                        BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
-                        ProposedRecoveryRateCurrentYear = viewModel.ProposedRecoveryRateCurrentYear.Value,
-                        IsPublicInterestEntity = viewModel.IsPublicInterestEntity,
-                        PublicInterestEntityType = viewModel.PublicInterestEntityType,
-                        Status = "Pending",
-                        FormSubmissionDate = DateTime.Now,
-                        IsSubForm2NotApplicable = viewModel.SubForm1NotApplicable, // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
-                        IsSubForm3NotApplicable = viewModel.SubForm2NotApplicable // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
-                    };
-                    _context.QC7Forms.Add(qc7form);
-                    _context.SaveChanges();
-
-                    // Retrieve the QC7FormID from the saved entity
-                    int qc7formId = qc7form.QC7FormID;
-
-                    var qc7formConclusion = new QC7FormConclusion
-                    {
-                        QC7FormID = qc7formId,
-                        AnyRiskAssociated = viewModel.AnyRiskAssociated,
-                        RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear,
-                        IsSafeguardApplied = viewModel.IsSafeguardApplied,
-                        NatureOfSafeguard = viewModel.NatureOfSafeguard,
-                        ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated,
-                        SafeguardReviewPartnerAssigned = viewModel.SafeguardReviewPartnerAssigned,
-                        IsSuspiciousTransactionReportFiled = viewModel.IsSuspiciousTransactionReportFiled,
-                        SuspiciousTransactionReportFiledRationale = viewModel.SuspiciousTransactionReportFiledRationale,
-                        EngagementRetainedRejected = viewModel.EngagementRetainedRejected,
-                        EMPreparedBy = viewModel.EMPreparedBy,
-                        EMPreparedByDate = viewModel.EMPreparedByDate.Value,
-                        EPHODApprovedBy = viewModel.EPHODApprovedBy,
-                        EPHODApprovedByDate = viewModel.EPHODApprovedByDate,
-                        MPHODQMPApprovedBy = viewModel.MPHODQMPApprovedBy,
-                        MPHODQMPApprovedByDate = viewModel.MPHODQMPApprovedByDate
-                    };
-
-                    // Add qc7formConclusion data to the database
-                    _context.Add(qc7formConclusion);
-                    _context.SaveChanges();
-
-                    var tnaTneAssessment = new TNATNEAssessment
-                    {
-                        QC7FormID = qc7formId,
-                        SectionCEvaluation = viewModel.TNATNEAssessment.SectionCEvaluation,
-                    };
-
-                    // Add tnaTneAssessment data to the database
-                    _context.Add(tnaTneAssessment);
-                    _context.SaveChanges();
-
-                    // Retrieve the tnaTneAssessmentID from the saved entity
-                    int tnaTneAssessmentID = tnaTneAssessment.TNATNEAssessmentID;
-
-                    var tnaTNESectionB = new TNATNESectionB
-                    {
-                        TNATNEAssessmentID = tnaTneAssessmentID,
-                        IsAudit = viewModel.TNATNEAssessment.SectionB.IsAudit
-                    };
-
-                    // Save Q1 - Q4 if IsAudit == true, else only Save Q5
-                    if (viewModel.TNATNEAssessment.SectionB.IsAudit == "Audit")
-                    {
-                        tnaTNESectionB.Q1 = viewModel.TNATNEAssessment.SectionB.Q1;
-                        tnaTNESectionB.Q2 = viewModel.TNATNEAssessment.SectionB.Q2;
-                        tnaTNESectionB.Q3 = viewModel.TNATNEAssessment.SectionB.Q3;
-                        tnaTNESectionB.Q4 = viewModel.TNATNEAssessment.SectionB.Q4;
-                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
-                    }
-                    else
-                    {
-                        tnaTNESectionB.Q5 = viewModel.TNATNEAssessment.SectionB.Q5;
-                    }
-
-                    // Add tnaTNESectionB data to the database
-                    _context.Add(tnaTNESectionB);
-                    _context.SaveChanges();
-
-                    var tnaTNESectionD = new TNATNESectionD
-                    {
-                        TNATNEAssessmentID = tnaTneAssessmentID,
-                        Q1Comment = viewModel.TNATNEAssessment.SectionD.Q1Comment,
-                        Q2Comment = viewModel.TNATNEAssessment.SectionD.Q2Comment,
-                        Q3Comment = viewModel.TNATNEAssessment.SectionD.Q3Comment,
-                        Q4Comment = viewModel.TNATNEAssessment.SectionD.Q4Comment,
-                        Q5Comment = viewModel.TNATNEAssessment.SectionD.Q5Comment,
-                    };
-
-                    // Add tnaTNESectionD data to the database
-                    _context.Add(tnaTNESectionD);
-                    _context.SaveChanges();
-
-                    // Process the submitted data
-                    foreach (var subForm in viewModel.SubForms)
-                    {
-                        foreach (var objective in subForm.Objectives)
+                        foreach (var testDescription in objective.TestDescriptions)
                         {
-                            foreach (var testDescription in objective.TestDescriptions)
+                            // Populate the TestDescriptions with posted data
+                            testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignBy"];
+                            if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
                             {
-                                // Populate the TestDescriptions with posted data
-                                testDescription.SignBy = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignBy"];
-                                if (DateTime.TryParseExact(HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].SignDate"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
-                                {
-                                    // Use the parsed date
-                                    testDescription.SignDate = date;
-                                }
-                                testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].Comment"];
-
-                                // Save QC7FormTest
-                                var qc7formTest = new QC7FormTest
-                                {
-                                    QC7FormID = qc7formId,
-                                    QC7FormTestDescriptionID = testDescription.QC7FormTestDescriptionID,
-                                    SignOffDate = testDescription.SignDate,
-                                    SignOffBy = testDescription.SignBy,
-                                    Comments = testDescription.Comment
-                                };
-
-                                // Add qc7formTest to the context and save changes
-                                _context.Add(qc7formTest);
+                                // Use the parsed date
+                                testDescription.SignDate = date;
                             }
+                            testDescription.Comment = HttpContext.Request.Form[$"SubForms[{subForm.QC7SubFormID}].Objectives[{objective.QC7FormObjectiveID}].TestDescriptions[{testDescription.QC7FormTestDescriptionID}].Comment"];
+
+                            // Save QC7FormTest
+                            var qc7formTest = new QC7FormTest
+                            {
+                                QC7FormID = qc7formId,
+                                QC7FormTestDescriptionID = testDescription.QC7FormTestDescriptionID,
+                                SignOffDate = testDescription.SignDate,
+                                SignOffBy = testDescription.SignBy,
+                                Comments = testDescription.Comment
+                            };
+
+                            // Add qc7formTest to the context and save changes
+                            _context.Add(qc7formTest);
                         }
                     }
+                }
 
-                    // Process the submitted data
-                    foreach (var service in viewModel.Services)
+                // Process the submitted data
+                foreach (var service in viewModel.Services)
+                {
+                    // Save QC7FormFeeDetail
+                    var qC7FormFeeDetail = new QC7FormFeeDetail
                     {
-                        // Save QC7FormFeeDetail
-                        var qC7FormFeeDetail = new QC7FormFeeDetail
-                        {
-                            QC7FormID = qc7formId,
-                            NatureOfService = service.NatureOfService,
-                            Fee = service.Fee.Value,
-                            OtherService = service.OtherService,
-                        };
+                        QC7FormID = qc7formId,
+                        NatureOfService = service.NatureOfService,
+                        Fee = service.Fee.Value,
+                        OtherService = service.OtherService,
+                    };
 
-                        // Add qC7FormFeeDetail to the context and save changes
-                        _context.Add(qC7FormFeeDetail);
+                    // Add qC7FormFeeDetail to the context and save changes
+                    _context.Add(qC7FormFeeDetail);
+                }
+
+                _context.SaveChanges();
+
+                // Root folder name in S3
+                var uploadsRootFolder = "QC6FormDocuments";
+
+                // Check if null
+                if (viewModel.OtherDocuments != null)
+                {
+                    // Generate a unique filename
+                    var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                    // Get the path to wwwroot
+                    var uploadsFolder = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "QC7Form-OtherDocuments");
+
+                    // Ensure the uploads folder exists
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    // Get file path
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    // Save the file to wwwroot/uploads/OtherDocuments
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await viewModel.OtherDocuments.CopyToAsync(stream);
                     }
+
+                    // Add to the db context
+                    _context.Add(new QCDocument
+                    {
+                        QC7FormID = qc7formId,
+                        FileName = uniqueFileName,
+                        DocumentType = "OtherDocuments"
+                    });
 
                     _context.SaveChanges();
-                    transaction.Commit();
-
-                    await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC7 Form Creation",
-$"A new QC7 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
-
-                    // Set the success message for the toast notification
-                    TempData["QC7CreateMessage"] = "QC7 Form created successfully.";
-
-                    if (roles.Contains("Admin"))
-                    {
-                        // Redirect to admin-specific page
-                        return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
-                    }
-                    else
-                    {
-                        // Redirect to user-specific page
-                        return RedirectToAction("QC7FormManagement", "QC7Form");
-                    }
                 }
-                catch (Exception ex)
+
+                await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC7 Form Creation",
+                $"A new QC7 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
+
+                // Set the success message for the toast notification
+                TempData["QC7CreateMessage"] = "QC7 Form created successfully.";
+
+                if (roles.Contains("Admin"))
                 {
-                    transaction.Rollback();
-                    // Log the error
-                    viewModel.ErrorMessage = "An error occurred while processing your request. Please try again.";
-                    if (roles.Contains("Admin"))
-                    {
-                        // Redirect to admin-specific page
-                        return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
-                    }
-                    else
-                    {
-                        // Redirect to user-specific page
-                        return RedirectToAction("QC7FormManagement", "QC7Form");
-                    }
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC7FormManagement", "QC7Form");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                viewModel.ErrorMessage = "An error occurred while processing your request. Please try again.";
+                if (roles.Contains("Admin"))
+                {
+                    // Redirect to admin-specific page
+                    return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
+                }
+                else
+                {
+                    // Redirect to user-specific page
+                    return RedirectToAction("QC7FormManagement", "QC7Form");
                 }
             }
         }

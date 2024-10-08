@@ -54,34 +54,6 @@ namespace PKFAuditManagement.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // QC6Form to QC6FormTest relationship
-            modelBuilder.Entity<QC6Form>()
-                .HasMany(q => q.QC6FormTests)
-                .WithOne()
-                .HasForeignKey(t => t.QC6FormID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            // QC6Form to QC6FormConclusion relationship
-            modelBuilder.Entity<QC6Form>()
-                .HasOne(q => q.QC6FormConclusion)
-                .WithOne()
-                .HasForeignKey<QC6FormConclusion>(t => t.QC6FormID) 
-                .OnDelete(DeleteBehavior.NoAction);
-
-            // QC7Form to QC7FormTest relationship
-            modelBuilder.Entity<QC6Form>()
-                .HasMany(q => q.QC6FormTests)
-                .WithOne()
-                .HasForeignKey(t => t.QC6FormID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            // QC7Form to QC7FormConclusion relationship
-            modelBuilder.Entity<QC6Form>()
-                .HasOne(q => q.QC6FormConclusion)
-                .WithOne()
-                .HasForeignKey<QC6FormConclusion>(t => t.QC6FormID)
-                .OnDelete(DeleteBehavior.NoAction);
-
             // Configure QuizID as GUID
             modelBuilder.Entity<Quiz>()
                 .Property(q => q.QuizID)

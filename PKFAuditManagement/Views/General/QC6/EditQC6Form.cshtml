@@ -9,7 +9,7 @@
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">
-                    <form class="needs-validation" asp-action="UpdateQC6Form" asp-controller="QC6Form" id="qc6Form" method="post">
+                    <form class="needs-validation" asp-action="UpdateQC6Form" asp-controller="QC6Form" id="qc6Form" method="post" enctype="multipart/form-data">
                         <input type="hidden" class="form-control" asp-for="QC6FormID" value="@Model.QC6FormID">
                         <div class="card">
                             <div class="card-body">
@@ -615,17 +615,18 @@
                                             <thead>
                                                 <tr>
                                                     <th>Current Attachment</th>
-                                                    <th>View Attachment</th>
                                                     <th>Upload New Attachment</th>
+                                                    <th>View Uploaded Attachment</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <!-- BusinessProfile Row -->
+                                                <!-- Other Documents Row -->
                                                 <tr>
                                                     <td>
-                                                        @if (Model.BusinessProfileUrl != null)
+                                                        @if (Model.OtherDocumentsFileName != null)
                                                         {
-                                                            <span>Business Profile PDF</span>
+                                                            var fileUrl = Url.Content("~/uploads/QC6Form-OtherDocuments/" + Model.OtherDocumentsFileName);
+                                                            <a href="@fileUrl" target="_blank">View Document</a>
                                                         }
                                                         else
                                                         {
@@ -633,21 +634,14 @@
                                                         }
                                                     </td>
                                                     <td>
-                                                        @if (Model.BusinessProfileUrl != null)
-                                                        {
-                                                            <a href="@Model.BusinessProfileUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>No file available</span>
-                                                        }
+                                                        <input asp-for="OtherDocuments" type="file" class="form-control" accept="application/pdf" />
                                                     </td>
                                                     <td>
-                                                        <input asp-for="BusinessProfile" type="file" class="form-control" accept="application/pdf" />
+                                                        <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
                                                     </td>
                                                 </tr>
 
-                                                <!-- TrendSearch Row -->
+                                                @* <!-- TrendSearch Row -->
                                                 <tr>
                                                     <td>
                                                         @if (Model.TrendSearchUrl != null)
@@ -726,10 +720,10 @@
                                                     <td>
                                                         <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
                                                     </td>
-                                                </tr>
+                                                </tr> *@
                                             </tbody>
                                         </table>
-                                        <!-- Other Documents -->
+@*                                         <!-- Other Documents -->
                                         <div id="other-documents-container">
                                             <label>Other Documents</label>
                                             @for (int i = 0; i < Model.OtherDocumentUrls.Count; i++)
@@ -746,9 +740,9 @@
                                                     </div>
                                                 </div>
                                             }
-                                        </div>
-
-                                        <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button>
+                                        </div>  *@
+@* 
+                                        <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button> *@
                                     </div>
                                 </div>
                                 <div class="row mb-3">

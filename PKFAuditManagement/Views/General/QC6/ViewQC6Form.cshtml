@@ -591,13 +591,14 @@
                                             </div>
                                         </div>
 
-                                        <!-- Business Profile -->
+                                        <!-- Other Documents -->
                                         <div class="form-group mb-3">
-                                            <label asp-for="BusinessProfile">Company’s business profile in PDF</label>
+                                            <label asp-for="OtherDocuments">Consolidated Documents in PDF</label>
                                             <div class="d-flex align-items-center">
-                                                @if (Model.BusinessProfileUrl != null)
+                                                @if (Model.OtherDocumentsFileName != null)
                                                 {
-                                                    <a href="@Model.BusinessProfileUrl" target="_blank" class="me-2">Business Profile PDF</a>
+                                                    var fileUrl = Url.Content("~/uploads/QC6Form-OtherDocuments/" + Model.OtherDocumentsFileName);
+                                                    <a href="@fileUrl" target="_blank">View Document</a>
                                                 }
                                                 else
                                                 {
@@ -606,7 +607,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Trend Search -->
+                                       @*  <!-- Trend Search -->
                                         <div class="form-group mb-3">
                                             <label asp-for="TrendSearch">TREND search in PDF</label>
                                             <div class="d-flex align-items-center">
@@ -676,7 +677,7 @@
                                             {
                                                 <br /><span class="fw-bold">No file uploaded</span>
                                             }
-                                        </div>
+                                        </div> *@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
