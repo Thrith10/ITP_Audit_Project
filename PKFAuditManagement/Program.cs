@@ -59,12 +59,28 @@ builder.Services.Configure<SmtpOptions>(options =>
 // Service registrations
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IS3Service, S3Service>();
-// Register OpenAIService with the API key
+
+// Register OpenAIService with the OpenAI API key
 builder.Services.AddScoped<IOpenAIService>(provider =>
 {
     var apiKey = builder.Configuration["OPENAI_API_KEY"];
     return new OpenAIService(apiKey);
 });
+
+// Register EmbeddingService with the OpenAI API key
+builder.Services.AddScoped<IEmbeddingService>(provider =>
+{
+    var apiKey = builder.Configuration["OPENAI_API_KEY"];
+    return new EmbeddingService(apiKey);
+});
+
+// Register the MongoDB service with both the connection string and the IEmbeddingService
+builder.Services.AddScoped<IMongoDBService>(sp =>
+{
+    var embeddingService = sp.GetRequiredService<IEmbeddingService>(); // Resolve the IEmbeddingService
+    return new MongoDBService(builder.Configuration["MONGODB_CONNECTION_STRING"], embeddingService); // Pass both parameters to the constructor
+});
+
 
 builder.Services.AddTransient<IEmailSender, EmailSender>(sp =>
 {
