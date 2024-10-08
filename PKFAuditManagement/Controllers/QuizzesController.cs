@@ -57,6 +57,7 @@ namespace PKFAuditManagement.Controllers
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 var userId = currentUser?.Id;
+
                 // Create a new Quiz entity
                 var quiz = new Quiz
                 {
@@ -66,7 +67,6 @@ namespace PKFAuditManagement.Controllers
                     QuizEnd = quizViewModel.QuizEnd,
                     CreatedBy = userId,
                     CreatedDate = DateTime.Now,
-
                 };
 
                 // Add the quiz to the context first to generate the QuizID
@@ -80,17 +80,40 @@ namespace PKFAuditManagement.Controllers
                     {
                         QuizID = quiz.QuizID,
                         Description = questionViewModel.Description,
-                        Type = (QuestionType)questionViewModel.Type, 
-
+                        Type = (QuestionType)questionViewModel.Type,
                     };
 
                     // Handle question types
                     switch (questionViewModel.Type)
                     {
                         case QuestionType.TrueFalse:
-                        case QuestionType.SingleAnswerMCQ:
-                            // For True/False and SingleAnswerMCQ, use CorrectOptionText
+                            // For True/False, set CorrectOptionText and add options for "True" and "False"
                             question.CorrectOptionText = questionViewModel.CorrectOptionText;
+
+                            // Add the question to the context and save to generate the QuestionID
+                            _context.Questions.Add(question);
+                            await _context.SaveChangesAsync();
+
+                            // Add "True" and "False" as options
+                            var trueOption = new Option
+                            {
+                                QuestionID = question.QuestionID,
+                                OptionText = "True"
+                            };
+                            var falseOption = new Option
+                            {
+                                QuestionID = question.QuestionID,
+                                OptionText = "False"
+                            };
+                            _context.Option.Add(trueOption);
+                            _context.Option.Add(falseOption);
+                            break;
+
+                        case QuestionType.SingleAnswerMCQ:
+                            // For SingleAnswerMCQ, use CorrectOptionText
+                            question.CorrectOptionText = questionViewModel.CorrectOptionText;
+                            _context.Questions.Add(question);
+                            await _context.SaveChangesAsync();
                             break;
 
                         case QuestionType.MultiAnswerMCQ:
@@ -98,25 +121,25 @@ namespace PKFAuditManagement.Controllers
                             question.CorrectOptionText = questionViewModel.CorrectOptionTexts != null
                                 ? string.Join(';', questionViewModel.CorrectOptionTexts)
                                 : null;
+                            _context.Questions.Add(question);
+                            await _context.SaveChangesAsync();
                             break;
                     }
 
-                    // Add the question to the context and save to generate the QuestionID
-                    _context.Questions.Add(question);
-                    await _context.SaveChangesAsync();
-
-                    // Add options for each question
-                    foreach (var optionViewModel in questionViewModel.Options)
+                    // Add other options for non-TrueFalse questions
+                    if (questionViewModel.Type != QuestionType.TrueFalse)
                     {
-                        var option = new Option
+                        foreach (var optionViewModel in questionViewModel.Options)
                         {
-                            QuestionID = question.QuestionID,
-                            OptionText = optionViewModel.OptionText
-                        };
-                        _context.Option.Add(option);
+                            var option = new Option
+                            {
+                                QuestionID = question.QuestionID,
+                                OptionText = optionViewModel.OptionText
+                            };
+                            _context.Option.Add(option);
+                        }
+                        await _context.SaveChangesAsync(); // Save each option to get OptionID
                     }
-
-                    await _context.SaveChangesAsync(); // Save each option to get OptionID
                 }
 
                 // Handle selected participants by querying their UserID based on their email
@@ -154,11 +177,6 @@ namespace PKFAuditManagement.Controllers
 
             return View("~/Views/General/Quiz/CreateQuiz.cshtml", quizViewModel);
         }
-
-
-
-
-
 
         // GET: Quizzes
         [HttpGet]
@@ -380,34 +398,72 @@ namespace PKFAuditManagement.Controllers
                     switch (questionViewModel.Type)
                     {
                         case QuestionType.TrueFalse:
-                        case QuestionType.SingleAnswerMCQ:
-                            // For True/False and SingleAnswerMCQ, set CorrectOptionText
+                            // For True/False, set CorrectOptionText and add options for "True" and "False"
                             newQuestion.CorrectOptionText = questionViewModel.CorrectOptionText;
+
+                            // Add the new question to the quiz
+                            _context.Questions.Add(newQuestion);
+                            await _context.SaveChangesAsync(); // Save question to get QuestionID
+
+                            // Add "True" and "False" as options
+                            var trueOption = new Option
+                            {
+                                QuestionID = newQuestion.QuestionID,
+                                OptionText = "True"
+                            };
+                            var falseOption = new Option
+                            {
+                                QuestionID = newQuestion.QuestionID,
+                                OptionText = "False"
+                            };
+                            _context.Option.Add(trueOption);
+                            _context.Option.Add(falseOption);
                             break;
+
+                        case QuestionType.SingleAnswerMCQ:
+                            // For SingleAnswerMCQ, set CorrectOptionText
+                            newQuestion.CorrectOptionText = questionViewModel.CorrectOptionText;
+
+                            // Add the new question to the quiz
+                            _context.Questions.Add(newQuestion);
+                            await _context.SaveChangesAsync(); // Save question to get QuestionID
+
+                            // Add options for SingleAnswerMCQ
+                            foreach (var optionViewModel in questionViewModel.Options)
+                            {
+                                var newOption = new Option
+                                {
+                                    QuestionID = newQuestion.QuestionID,
+                                    OptionText = optionViewModel.OptionText
+                                };
+                                _context.Option.Add(newOption);
+                            }
+                            break;
+
                         case QuestionType.MultiAnswerMCQ:
                             // For MultiAnswerMCQ, join correct options into a string
                             newQuestion.CorrectOptionText = questionViewModel.CorrectOptionTexts != null
                                 ? string.Join(';', questionViewModel.CorrectOptionTexts)
                                 : null;
+
+                            // Add the new question to the quiz
+                            _context.Questions.Add(newQuestion);
+                            await _context.SaveChangesAsync(); // Save question to get QuestionID
+
+                            // Add options for MultiAnswerMCQ
+                            foreach (var optionViewModel in questionViewModel.Options)
+                            {
+                                var newOption = new Option
+                                {
+                                    QuestionID = newQuestion.QuestionID,
+                                    OptionText = optionViewModel.OptionText
+                                };
+                                _context.Option.Add(newOption);
+                            }
                             break;
                     }
 
-                    // Add the new question to the quiz
-                    _context.Questions.Add(newQuestion);
-                    await _context.SaveChangesAsync(); // Save question to get QuestionID
-
-                    // Add options for the new question
-                    foreach (var optionViewModel in questionViewModel.Options)
-                    {
-                        var newOption = new Option
-                        {
-                            QuestionID = newQuestion.QuestionID,
-                            OptionText = optionViewModel.OptionText
-                        };
-                        _context.Option.Add(newOption);
-                    }
-
-                    // Save options
+                    // Save options after adding them for each question
                     await _context.SaveChangesAsync();
                 }
 
@@ -440,6 +496,7 @@ namespace PKFAuditManagement.Controllers
             // If model state is invalid, return to the view
             return View("~/Views/General/Quiz/EditQuiz.cshtml", quizViewModel);
         }
+
 
 
 
@@ -504,6 +561,55 @@ namespace PKFAuditManagement.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Quiz deleted successfully!";
+            return RedirectToAction(nameof(ViewAllQuiz));
+        }
+
+        //This Method delete quiz that have associated data
+        // POST: Quizzes/ConfirmDeleteWithAssociation/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmDeleteWithAssociation(Guid id)
+        {
+            var quiz = await _context.Quiz
+                                     .Include(q => q.Questions)
+                                     .ThenInclude(q => q.Options)
+                                     .FirstOrDefaultAsync(q => q.QuizID == id);
+
+            if (quiz == null)
+            {
+                TempData["ErrorMessage"] = "Quiz not found.";
+                return RedirectToAction(nameof(ViewAllQuiz));
+            }
+
+            // Delete related QuizResponses
+            var relatedQuizResponses = await _context.QuizResponse
+                .Where(qr => qr.Question.QuizID == id)
+                .ToListAsync();
+
+            _context.QuizResponse.RemoveRange(relatedQuizResponses);
+
+            // Delete related Attempts
+            var relatedAttempts = await _context.Attempt
+                .Where(a => a.QuizID == id)
+                .ToListAsync();
+
+            _context.Attempt.RemoveRange(relatedAttempts);
+
+            // Delete related Participants
+            var relatedParticipants = await _context.Participants
+                .Where(p => p.QuizID == id)
+                .ToListAsync();
+
+            _context.Participants.RemoveRange(relatedParticipants);
+
+            // Save changes to delete related data
+            await _context.SaveChangesAsync();
+
+            // Delete the quiz itself
+            _context.Quiz.Remove(quiz);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Quiz and all associated data deleted successfully!";
             return RedirectToAction(nameof(ViewAllQuiz));
         }
 
