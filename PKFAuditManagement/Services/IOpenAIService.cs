@@ -60,8 +60,12 @@ namespace PKFAuditManagement.Services
                 // Get the completion from the API
                 var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
                 var choice = response.FirstChoice;
-
-                return choice;
+                
+                // Retrieve message content from the response
+                string messageContent = choice.Message.Content.ToString();
+                
+                // Return message 
+                return messageContent;
             }
             catch (Exception ex)
             {

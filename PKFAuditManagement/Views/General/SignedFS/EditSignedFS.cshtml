@@ -4,11 +4,6 @@
     .form-container {
         padding: 20px;
     }
-
-    .btn-primary {
-        margin-top: 1rem;
-        padding: 0.5rem 1rem;
-    }
 </style>
 <body>
     <main id="main" class="main">
@@ -65,17 +60,49 @@
                                                 <input asp-for="UserEmail" class="form-control" readonly />
                                                 <span asp-validation-for="UserEmail" class="text-danger"></span>
                                             </div>
-                                            <div class="form-group">
-                                                <label asp-for="FinancialStatement" class="control-label">Financial Statement (PDF)</label>
-                                                <input asp-for="FinancialStatement" type="file" class="form-control" />
-                                                <span asp-validation-for="FinancialStatement" class="text-danger"></span>
+                                            <div class="card border border-secondary mt-3">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <h5 class="card-title">Financial Statement</h5>
+                                                        </div>
+                                                    </div>
+
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Current Attachment</th>
+                                                                <th>Upload New Attachment</th>
+                                                                <th>View Uploaded Attachment</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr class="align-middle">
+                                                                <td>
+                                                                    @if (Model.FinancialStatementFileName != null)
+                                                                    {
+                                                                        var fileUrl = Url.Content("~/uploads/SignedFS-FinancialStatements/" + Model.FinancialStatementFileName);
+                                                                        <a href="@fileUrl" target="_blank">@Model.FinancialStatementFileName</a>
+                                                                    }
+                                                                </td>
+                                                                <td>
+                                                                    <input asp-for="FinancialStatement" type="file" class="form-control" accept="application/pdf" />
+                                                                    <span asp-validation-for="FinancialStatement" class="text-danger"></span>
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                                                </td>
+                                                            </tr>
+                                                       </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Update</button>
                                         </form>
 
                                         @section Scripts {
                                             @{
-                                                <script src="~/js/signed-fs-creation.js"></script>
+                                                <script src="~/js/signed-fs-edit.js"></script>
                                                 await Html.RenderPartialAsync("_ValidationScriptsPartial");
                                             }
 

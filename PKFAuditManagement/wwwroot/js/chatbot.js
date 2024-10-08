@@ -96,7 +96,7 @@ function respondToUser(userInput) {
         data: { 'userInput': userInput },
         success: function (response) {
             // Append bot response to chat
-            appendMessage('bot', response.response);
+            appendMessage('bot', response);
         },
         error: function (xhr, status, error) {
             console.error('Error:', error);
@@ -115,21 +115,4 @@ function appendMessage(sender, message) {
     messageElement.innerHTML = message;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
-    // if (sender === 'bot' && message === responses["default"]) {
-    //     const buttonYes = document.createElement('button');
-    //     buttonYes.textContent = '? Yes';
-    //     buttonYes.onclick = function () {
-    //         appendMessage('bot', responses["expert"]);
-    //     };
-    //     const buttonNo = document.createElement('button');
-    //     buttonNo.textContent = '? No';
-    //     buttonNo.onclick = function () {
-    //         appendMessage('bot', responses["no"]);
-    //     };
-    //     const buttonContainer = document.createElement('div');
-    //     buttonContainer.classList.add('button-container');
-    //     buttonContainer.appendChild(buttonYes);
-    //     buttonContainer.appendChild(buttonNo);
-    //     chatBox.appendChild(buttonContainer);
-    // }
 }

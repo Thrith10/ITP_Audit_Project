@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using DocumentFormat.OpenXml.InkML;
 using PKFAuditManagement.Services;
+using Microsoft.Extensions.Hosting;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -19,12 +20,14 @@ namespace PKFAuditManagement.Controllers
         private readonly IUserService _userService;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
+        private readonly IWebHostEnvironment _environment;
 
-        public SignedFSFormController(ApplicationDbContext context, UserManager<CustomUser> userManager, IUserService userService)
+        public SignedFSFormController(ApplicationDbContext context, UserManager<CustomUser> userManager, IUserService userService, IWebHostEnvironment environment)
         {
             _context = context;
             _userManager = userManager;
             _userService = userService;
+            _environment = environment;
         }
 
         [HttpGet]
@@ -74,15 +77,22 @@ namespace PKFAuditManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Save the uploaded file (Financial Statement)
-                var filePath = string.Empty;
-                if (model.FinancialStatement != null)
+                // Generate a unique filename
+                var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                // Get the path to wwwroot
+                var uploadsFolder = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "SignedFS-FinancialStatements");
+
+                // Ensure the uploads folder exists
+                Directory.CreateDirectory(uploadsFolder);
+
+                // Get file path
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Save the file to wwwroot/uploads/SignedFS-FinancialStatements
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    filePath = Path.Combine(filePath, model.FinancialStatement.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.FinancialStatement.CopyToAsync(stream);
-                    }
+                    await model.FinancialStatement.CopyToAsync(stream);
                 }
 
                 // Create the Signed FS entry
@@ -93,7 +103,7 @@ namespace PKFAuditManagement.Controllers
                     FinancialYearEnd = model.FinancialYearEnd,
                     PartnerEmail = model.PartnerEmail,
                     UserEmail = model.UserEmail,
-                    FilePath = filePath
+                    FilePath = uniqueFileName
                 };
 
                 _context.SignedFSForm.Add(signedFs);
@@ -136,6 +146,7 @@ namespace PKFAuditManagement.Controllers
                 FinancialYearEnd = job.FinancialYearEnd,
                 PartnerEmail = job.PartnerEmail,
                 UserEmail = job.UserEmail,
+                FinancialStatementFileName = job.FilePath,
                 PartnerEmailOptions = adminEmails.OrderBy(email => email).ToList(),
                 FinancialStatement = null // or set to a default value
             };
@@ -173,6 +184,36 @@ namespace PKFAuditManagement.Controllers
                 //    }
                 //    job.FilePath = filePath;
                 //}
+
+                if (model.FinancialStatement != null)
+                {
+                    // Generate a unique file name for the new document
+                    var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
+
+                    // Construct the file path
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/SignedFS-FinancialStatements", job.FilePath);
+
+                    // Remove the old file from wwwroot
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+
+                    // Update the old document
+                    job.FilePath = uniqueFileName;
+
+                    // Save all changes
+                    await _context.SaveChangesAsync();
+
+                    // Define the path for the new document
+                    var newFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/SignedFS-FinancialStatements", uniqueFileName);
+
+                    // Save the new document to the wwwroot folder
+                    using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        model.FinancialStatement.CopyTo(fileStream);
+                    }
+                }
 
                 _context.SignedFSForm.Update(job);
                 await _context.SaveChangesAsync();
@@ -214,7 +255,7 @@ namespace PKFAuditManagement.Controllers
                     return Json(new { success = false, message = "No signed financial statement found." });
                 }
 
-                _context.SignedFSForm.RemoveRange(fs);
+                _context.SignedFSForm.Remove(fs);
                 await _context.SaveChangesAsync();
                 return Json(new { success = true, message = "Signed Financial Statement deleted successfully!" });
             }

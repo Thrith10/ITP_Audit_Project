@@ -31,6 +31,7 @@ namespace PKFAuditManagement.ViewModels
         [Display(Name = "Financial Statement (PDF)")]
         public IFormFile FinancialStatement { get; set; }
 
+        public string? FinancialStatementFileName { get; set; }
         public List<string>? ClientNames { get; set; }
         public List<string>? PartnerEmailOptions { get; set; }
     }
