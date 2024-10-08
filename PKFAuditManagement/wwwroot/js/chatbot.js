@@ -86,6 +86,9 @@ function sendMessage() {
 
 // Function to get the chatbot's response via an AJAX request
 function respondToUser(userInput) {
+    const loadingIndicator = document.getElementById('loader');
+    loadingIndicator.style.display = 'block'; // Show loading indicator
+
     // Make AJAX request
     $.ajax({
         url: '/Chatbot/GetChatResponse',
@@ -97,6 +100,9 @@ function respondToUser(userInput) {
         },
         error: function (xhr, status, error) {
             console.error('Error:', error);
+        },
+        complete: function () {
+            loadingIndicator.style.display = 'none'; // Hide loading indicator after response is received
         }
     });
 }
