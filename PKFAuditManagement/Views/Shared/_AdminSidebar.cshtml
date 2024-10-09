@@ -13,7 +13,7 @@
         </a>
     </li><!-- End Dashboard Nav -->
 
-    <li class="nav-heading">Pages</li>
+    <li class="nav-heading">Audit Workflow</li>
 
     <li class="nav-item">
         <a class="nav-link @(currentController == "QC6Form" && currentAction == "QC6FormApprovalManagement" ? "active" : "collapsed")" asp-controller="QC6Form" asp-action="QC6FormApprovalManagement">
@@ -39,28 +39,36 @@
             <span>Manage Signed FS</span>
         </a>
     </li>
+
+    <li class="nav-heading">Staff Training</li>
+
     <li class="nav-item">
-        <a class="nav-link @(currentController == "Admin" && currentAction == "AccountManagement" ? "active" : "collapsed")" asp-controller="Admin" asp-action="AccountManagement">
-            <i class="bi bi-person"></i>
-            <span>Account Management</span>
+        <a class="nav-link @(currentController == "Quizzes" && currentAction == "ViewAllQuiz" ? "active" : "collapsed")" asp-controller="Quizzes" asp-action="ViewAllQuiz">
+            <i class="bi bi-clipboard2-check"></i>
+            <span>View Quizzes</span>
         </a>
     </li>
+
+    <li class="nav-heading">Administration</li>
+
+    <li class="nav-item">
+        <a class="nav-link @(currentController == "Chatbot" && currentAction == "ChatbotManagement" ? "active" : "collapsed")" asp-controller="Chatbot" asp-action="ChatbotManagement">
+            <i class="bi bi-chat"></i>
+            <span>Manage Chatbot</span>
+        </a>
+    </li>
+
     <li class="nav-item">
         <a class="nav-link @(currentController == "Reports" && currentAction == "GenerateReports" ? "active" : "collapsed")" asp-controller="Reports" asp-action="GenerateReports">
             <i class="bi bi-file-earmark-text"></i>
             <span>Generate Report</span>
         </a>
     </li>
+
     <li class="nav-item">
-        <a class="nav-link @(currentController == "Quizzes" && currentAction == "ViewAllQuiz" ? "active" : "collapsed")" asp-controller="Quizzes" asp-action="ViewAllQuiz">
+        <a class="nav-link @(currentController == "Admin" && currentAction == "AccountManagement" ? "active" : "collapsed")" asp-controller="Admin" asp-action="AccountManagement">
             <i class="bi bi-person"></i>
-            <span>View Quizzes</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link @(currentController == "Chatbot" && currentAction == "ChatbotManagement" ? "active" : "collapsed")" asp-controller="Chatbot" asp-action="ChatbotManagement">
-            <i class="bi bi-person"></i>
-            <span>Chatbot Management</span>
+            <span>Account Management</span>
         </a>
     </li>
     <!-- End Profile Page Nav -->
