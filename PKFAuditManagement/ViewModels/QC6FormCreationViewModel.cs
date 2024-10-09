@@ -1,4 +1,5 @@
-﻿using PKFAuditManagement.Models;
+﻿using MongoDB.Bson;
+using PKFAuditManagement.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace PKFAuditManagement.ViewModels
@@ -101,6 +102,7 @@ namespace PKFAuditManagement.ViewModels
         // File Uploads
         public IFormFile? OtherDocuments { get; set; }
         public string? OtherDocumentsFileName { get; set; }
+        public bool DeleteExistingFile { get; set; }
     }
 
     public class TNATNEAssessmentViewModel

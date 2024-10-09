@@ -309,6 +309,16 @@ $(document).ready(function () {
         documentIndex--;
     });
 
+    // Clear the file input when the 'Clear' button is clicked
+    $(document).on('click', '.clear-doc', function () {
+        var fileInput = $(this).siblings('input[type="file"]');
+        if (fileInput.val()) {
+            fileInput.val(''); // Clear the input value using jQuery method
+        } else {
+            alert('No file selected.');
+        }
+    });
+
     // Open PDF in a new tab
     $(document).on('click', '.preview-doc', function () {
         var fileInput = $(this).siblings('input[type="file"]')[0];

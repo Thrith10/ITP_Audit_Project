@@ -98,6 +98,7 @@ namespace PKFAuditManagement.ViewModels
         // File Uploads
         public IFormFile? OtherDocuments { get; set; }
         public string? OtherDocumentsFileName { get; set; }
+        public bool DeleteExistingFile { get; set; }
     }
 
     public class QC7SubFormViewModel

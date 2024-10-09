@@ -265,9 +265,9 @@
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
-                                                <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
-                                                    Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.">
-                                                    <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
+                                                <label class="col-sm-2 col-form-label">
+                                                    Fee concentration (Non-audit services fees / audit fees = x%) <br> <i>To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
+                                                    Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.</i>
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
                                                     <input type="number" class="form-control" id="feeConcentration" disabled>
@@ -537,17 +537,6 @@
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">
                                         Based on the above information, are there any risks associated with the proposed work? <span class="text-danger"> *</span>
-                                        <br>
-                                        If No: Accept engagement with no safeguard required.
-                                        <br>
-                                        If Yes, there is risk:
-                                        <br>
-                                        (a)	Explain what is the risk in current year compared to prior year
-                                        <br>
-                                        (b)	Are there any safeguards that should be applied? Yes / No
-                                        <br>
-                                        (c)	Specify the nature of the safeguard to address the issue(s) identified in the evaluation of continuance of engagement or client
-                                        <br>
                                     </label>
                                     <div class="col-sm-10 d-flex align-items-center">
                                         <input class="form-check-input" type="checkbox" id="risksAssociatedCheckbox" onchange="toggleSignificantRisk()" asp-for="AnyRiskAssociated">
@@ -639,18 +628,24 @@
                                                         @if (Model.OtherDocumentsFileName != null)
                                                         {
                                                             var fileUrl = Url.Content("~/uploads/QC7Form-OtherDocuments/" + Model.OtherDocumentsFileName);
-                                                            <a href="@fileUrl" target="_blank">View Document</a>
+                                                            <a href="@fileUrl" target="_blank" id="current-document-link" class="document-link">@Model.OtherDocumentsFileName</a>
                                                         }
                                                         else
                                                         {
-                                                            <span>No file uploaded</span>
+                                                            <span id="no-file-span" class="no-file-text">No file uploaded</span>
                                                         }
                                                     </td>
                                                     <td>
-                                                        <input asp-for="OtherDocuments" type="file" class="form-control" accept="application/pdf" />
+                                                        <input asp-for="OtherDocuments" id="file-input" type="file" class="form-control" accept="application/pdf" />
+                                                        <!-- Hidden input to track deletion status -->
+                                                        <input type="hidden" asp-for="DeleteExistingFile" id="delete-existing-file" value="false" />
+                                                        <span asp-validation-for="OtherDocuments" class="text-danger"></span>
                                                     </td>
                                                     <td>
                                                         <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-danger btn-sm clear-doc">Delete Files</button>
                                                     </td>
                                                 </tr>
                                            </tbody>
@@ -756,7 +751,7 @@
                                     &nbsp;&nbsp;3.	Large charities with donation income of S$10 million or more;
                                     <br><br>
                                     &nbsp;&nbsp;4.	Other public interest entities, such as banks, financial institutions, insurance entities, large pension schemes, large publicly funded charities (with donation in excess of S$10 million), and regulated fund management activities including if their financial statements are likely to be used across national boundaries (i.e., internationally) or if they are important National Institutions;
-                                    <br><br>a
+                                    <br><br>
                                     &nbsp;&nbsp;5.	“For sale” entities or those which are known to be targets for acquisition by another entity;
                                     <br><br>
                                     &nbsp;&nbsp;6.	Entities where a qualified audit report was issued in the last financial statements, or where a qualified audit report is expected to be issued in the current financial statements which is not due to a technical qualification such as those falling under H2;

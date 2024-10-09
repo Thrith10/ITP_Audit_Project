@@ -125,6 +125,50 @@
             alert('No file selected.');
         }
     });
+
+    // Clear the file input and strike through the document link when the 'Delete Files' button is clicked
+    $(document).on('click', '.clear-doc', function () {
+        // Get the file input and document link elements
+        var fileInput = $('#file-input');
+        var documentLink = $('#current-document-link');
+        var noFileSpan = $('#no-file-span');
+        var deleteHiddenInput = $('#delete-existing-file');
+
+        // If the document link already indicates deletion, do nothing
+        if (documentLink.length && documentLink.hasClass('deleted')) {
+            return; // Skip if already marked as deleted
+        }
+
+        // Strike through the existing document link if it exists
+        if (documentLink.length) {
+            documentLink.css('text-decoration', 'line-through'); // Strike through the link
+            documentLink.text(documentLink.text() + ' (Deleted)'); // Append '(Deleted)' to indicate removal
+            documentLink.css('color', 'red'); // Change the color to red
+            documentLink.addClass('deleted'); // Add a class to indicate it's been processed
+        } else if (noFileSpan.length) {
+            noFileSpan.text('No file uploaded'); // Show "No file uploaded" text if no document exists
+        }
+
+        // Clear the file input value
+        fileInput.val('');
+        deleteHiddenInput.val('true');
+
+        // If a new file is uploaded, reset the hidden input value to "false"
+        $('#file-input').on('change', function () {
+            var deleteHiddenInput = $('#delete-existing-file');
+            var documentLink = $('#current-document-link');
+
+            // Remove the deleted class and restore the link text if it was previously marked
+            if (documentLink.length && documentLink.hasClass('deleted')) {
+                documentLink.text(documentLink.text().replace(' (Deleted)', '')); // Remove the "(Deleted)" text
+                documentLink.css('text-decoration', 'none'); // Remove the strike-through
+                documentLink.css('color', ''); // Reset color
+                documentLink.removeClass('deleted'); // Remove the deleted class
+            }
+
+            deleteHiddenInput.val('false'); // Reset the delete flag
+        });
+    });
 });
 
 $("#autocomplete").autocomplete({

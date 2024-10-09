@@ -282,6 +282,16 @@ $(document).ready(function () {
             alert('No file selected.');
         }
     });
+
+    // Clear the file input when the 'Clear' button is clicked
+    $(document).on('click', '.clear-doc', function () {
+        var fileInput = $(this).siblings('input[type="file"]');
+        if (fileInput.val()) {
+            fileInput.val(''); // Clear the input value using jQuery method
+        } else {
+            alert('No file selected.');
+        }
+    });
 });
 
 // Toggling checkbox for suspicious transaction report for prior year displays the comment box

@@ -113,6 +113,95 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="card border border-secondary p-3 mb-3">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-9">
+                                                    <h5 class="card-title"> Fee from tax services, accounting, payroll, secretarial services and other non-audit services (if any) </h5>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-primary d-flex align-items-center " id="retrieveFeeDetailsButton">View NAS Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3 service input-field" id="services">
+                                                <!-- Hidden inputs for removed services will be added here -->
+                                                <div id="removedServicesContainer"></div>
+                                                @for (int i = 0; i < Model.Services.Count; i++)
+                                                {
+                                                        <div class="card border border-secondary p-3 mb-3">
+                                                            <div class="row mb-3 service input-field card-body">
+                                                                <div class="col-sm-12">
+                                                                    <h6 class="card-title">Service @(i + 1)</h6>
+                                                                </div>
+                                                                <input type="hidden" asp-for="Services[i].QC6FormFeeDetailID" />
+                                                                <div class="col-sm-6">
+                                                                    <label>Nature of Service:</label>
+                                                                    <select class="form-control" asp-for="Services[i].NatureOfService" onchange="showOtherServiceInput(this)">
+                                                                        <option value="Tax Services">Tax Services</option>
+                                                                        <option value="Accounting">Accounting</option>
+                                                                        <option value="Payroll">Payroll</option>
+                                                                        <option value="Secretarial Services">Secretarial Services</option>
+                                                                        <option value="Other Non-Audit Services">Other Non-Audit Services</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <label>Fee:<span class="text-danger"> *</span></label>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">$</span>
+                                                                        <input asp-for="Services[i].Fee" class="form-control fee-input" oninput="calculateTotalAndConcentration()" />
+                                                                    </div>
+                                                                </div>
+                                                            @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
+                                                            {
+                                                                        <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: block;">
+                                                                            <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
+                                                                            <input type="text" class="form-control" asp-for="Services[i].OtherService" required>
+                                                                        </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                        <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
+                                                                            <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
+                                                                            <input type="text" class="form-control" asp-for="Services[i].OtherService">
+                                                                        </div>
+                                                            }
+                                                            @if (i != 0)
+                                                            {
+                                                                        <div class="col-sm-12 mt-3">
+                                                                            <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
+                                                                        </div>
+                                                            }
+                                                            </div>
+                                                        </div>
+                                                }
+                                            </div>
+                                            <button type="button" class="btn btn-primary mb-3" id="addService">Add New Service</button>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="grandTotal" disabled>
+                                                    <input type="hidden" class="form-control" id="grandTotalHidden" asp-for="GrandTotal">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" oninput="calculateTotalAndConcentration()" required>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label class="col-sm-2 col-form-label">
+                                                    Fee concentration (Non-audit services fees / audit fees = x%) <br> <i> To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
+                                                    Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.</i>
+                                                </label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="number" class="form-control" id="feeConcentration" disabled>
+                                                    <input type="hidden" id="feeConcentrationHidden" asp-for="FeeConcentration">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
@@ -172,95 +261,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="card border border-secondary p-3 mb-3">
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-9">
-                                                    <h5 class="card-title"> Fee from tax services, accounting, payroll, secretarial services and other non-audit services (if any) </h5>
-                                                </div>
-                                                <div class="col-3">
-                                                    <button class="btn btn-primary d-flex align-items-center " id="retrieveFeeDetailsButton">View NAS Details</button>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3 service input-field" id="services">
-                                                <!-- Hidden inputs for removed services will be added here -->
-                                                <div id="removedServicesContainer"></div>
-                                                @for (int i = 0; i < Model.Services.Count; i++)
-                                                {
-                                                    <div class="card border border-secondary p-3 mb-3">
-                                                        <div class="row mb-3 service input-field card-body">
-                                                            <div class="col-sm-12">
-                                                                <h6 class="card-title">Service @(i + 1)</h6>
-                                                            </div>
-                                                            <input type="hidden" asp-for="Services[i].QC6FormFeeDetailID" />
-                                                            <div class="col-sm-6">
-                                                                <label>Nature of Service:</label>
-                                                                <select class="form-control" asp-for="Services[i].NatureOfService" onchange="showOtherServiceInput(this)">
-                                                                    <option value="Tax Services">Tax Services</option>
-                                                                    <option value="Accounting">Accounting</option>
-                                                                    <option value="Payroll">Payroll</option>
-                                                                    <option value="Secretarial Services">Secretarial Services</option>
-                                                                    <option value="Other Non-Audit Services">Other Non-Audit Services</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-sm-6">
-                                                                <label>Fee:<span class="text-danger"> *</span></label>
-                                                                <div class="input-group">
-                                                                    <span class="input-group-text">$</span>
-                                                                    <input asp-for="Services[i].Fee" class="form-control fee-input" oninput="calculateTotalAndConcentration()" />
-                                                                </div>
-                                                            </div>
-                                                            @if (!string.IsNullOrEmpty(Model.Services[i].OtherService))
-                                                            {
-                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: block;">
-                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
-                                                                    <input type="text" class="form-control" asp-for="Services[i].OtherService" required>
-                                                                </div>
-                                                            }
-                                                            else
-                                                            {
-                                                                <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
-                                                                    <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
-                                                                    <input type="text" class="form-control" asp-for="Services[i].OtherService">
-                                                                </div>
-                                                            }
-                                                            @if (i != 0)
-                                                            {
-                                                                <div class="col-sm-12 mt-3">
-                                                                    <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
-                                                                </div>
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                }
-                                            </div>
-                                            <button type="button" class="btn btn-primary mb-3" id="addService">Add New Service</button>
-                                            <div class="row mb-3">
-                                                <label class="col-sm-2 col-form-label">Grand Total Fee:</label>
-                                                <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="grandTotal" disabled>
-                                                    <input type="hidden" class="form-control" id="grandTotalHidden" asp-for="GrandTotal">
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label class="col-sm-2 col-form-label">Audit Fee:<span class="text-danger"> *</span> </label>
-                                                <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="auditFee" step="0.01" asp-for="AuditFee" oninput="calculateTotalAndConcentration()" required>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
-                                                    Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.">
-                                                    <span class="link-text">Fee concentration (Non-audit services fees / audit fees = x%)</span>
-                                                </label>
-                                                <div class="col-sm-10 d-flex align-items-center">
-                                                    <input type="number" class="form-control" id="feeConcentration" disabled>
-                                                    <input type="hidden" id="feeConcentrationHidden" asp-for="FeeConcentration">
-                                                    <span class="input-group-text">%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                     <br>
                                     <hr class="my-4">
 
@@ -617,6 +618,7 @@
                                                     <th>Current Attachment</th>
                                                     <th>Upload New Attachment</th>
                                                     <th>View Uploaded Attachment</th>
+                                                    <th>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -626,18 +628,24 @@
                                                         @if (Model.OtherDocumentsFileName != null)
                                                         {
                                                             var fileUrl = Url.Content("~/uploads/QC6Form-OtherDocuments/" + Model.OtherDocumentsFileName);
-                                                            <a href="@fileUrl" target="_blank">View Document</a>
+                                                            <a href="@fileUrl" target="_blank" id="current-document-link" class="document-link">@Model.OtherDocumentsFileName</a>
                                                         }
                                                         else
                                                         {
-                                                            <span>No file uploaded</span>
+                                                            <span id="no-file-span" class="no-file-text">No file uploaded</span>
                                                         }
                                                     </td>
                                                     <td>
-                                                        <input asp-for="OtherDocuments" type="file" class="form-control" accept="application/pdf" />
+                                                        <input asp-for="OtherDocuments" id="file-input" type="file" class="form-control" accept="application/pdf" />
+                                                        <!-- Hidden input to track deletion status -->
+                                                        <input type="hidden" asp-for="DeleteExistingFile" id="delete-existing-file" value="false" />
+                                                        <span asp-validation-for="OtherDocuments" class="text-danger"></span>
                                                     </td>
                                                     <td>
                                                         <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-danger btn-sm clear-doc">Delete Files</button>
                                                     </td>
                                                 </tr>
 

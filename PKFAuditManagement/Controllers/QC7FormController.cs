@@ -594,15 +594,15 @@ namespace PKFAuditManagement.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                if (viewModel.OtherDocuments != null)
+                // Attempt to parse QC7FormID from the view model
+                if (int.TryParse(viewModel.QC7FormID, out int parsedQc7FormId))
                 {
-                    // Attempt to parse QC7FormID from the view model
-                    if (int.TryParse(viewModel.QC7FormID, out int parsedQc7FormId))
-                    {
-                        // Find the existing document
-                        var existingDocument = await _context.QCDocuments
-                            .FirstOrDefaultAsync(x => x.QC7FormID == parsedQc7FormId);
+                    // Find the existing document
+                    var existingDocument = await _context.QCDocuments
+                        .FirstOrDefaultAsync(x => x.QC7FormID == parsedQc7FormId);
 
+                    if (viewModel.OtherDocuments != null)
+                    {
                         // Generate a unique file name for the new document
                         var uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
 
@@ -629,7 +629,7 @@ namespace PKFAuditManagement.Controllers
                             // Add to the db context
                             _context.Add(new QCDocument
                             {
-                                QC7FormID = parsedQc7FormId,
+                                QC6FormID = parsedQc7FormId,
                                 FileName = uniqueFileName,
                                 DocumentType = "OtherDocuments"
                             });
@@ -646,6 +646,22 @@ namespace PKFAuditManagement.Controllers
                         {
                             viewModel.OtherDocuments.CopyTo(fileStream);
                         }
+                    }
+
+                    // Remove the old document record if delete is requested and no new file is uploaded
+                    if (viewModel.DeleteExistingFile && viewModel.OtherDocuments == null)
+                    {
+                        // Construct the file path
+                        var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-OtherDocuments", existingDocument.FileName);
+
+                        // Remove the old file from wwwroot
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+
+                        _context.QCDocuments.Remove(existingDocument);
+                        await _context.SaveChangesAsync();
                     }
                 }
 
