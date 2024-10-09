@@ -39,12 +39,6 @@
             <span>Manage Signed FS</span>
         </a>
     </li>
-    @*     <li class="nav-item">
-            <a class="nav-link @(currentController == "Admin" && currentAction == "GenerateReport" ? "active" : "collapsed")" asp-controller="Admin" asp-action="GenerateReport">
-                <i class="bi bi-person"></i>
-                <span>Generate Report</span>
-            </a>
-        </li> *@
     <li class="nav-item">
         <a class="nav-link @(currentController == "Admin" && currentAction == "AccountManagement" ? "active" : "collapsed")" asp-controller="Admin" asp-action="AccountManagement">
             <i class="bi bi-person"></i>
@@ -55,12 +49,6 @@
         <a class="nav-link @(currentController == "Reports" && currentAction == "GenerateReports" ? "active" : "collapsed")" asp-controller="Reports" asp-action="GenerateReports">
             <i class="bi bi-file-earmark-text"></i>
             <span>Generate Report</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link @(currentController == "DisplayStatus" && currentAction == "DisplayStatus" ? "active" : "collapsed")" asp-controller="DisplayStatus" asp-action="DisplayStatus">
-            <i class="bi bi-list-check"></i>
-            <span>Display Status</span>
         </a>
     </li>
     <li class="nav-item">

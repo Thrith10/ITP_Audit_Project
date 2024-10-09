@@ -629,7 +629,7 @@ namespace PKFAuditManagement.Controllers
                             // Add to the db context
                             _context.Add(new QCDocument
                             {
-                                QC6FormID = parsedQc7FormId,
+                                QC7FormID = parsedQc7FormId,
                                 FileName = uniqueFileName,
                                 DocumentType = "OtherDocuments"
                             });
