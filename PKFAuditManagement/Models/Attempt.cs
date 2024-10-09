@@ -14,7 +14,7 @@ namespace PKFAuditManagement.Models
         public string UserID { get; set; }
 
         [Required]
-        public Guid QuizID { get; set; }  // Changed from int to Guid
+        public int QuizID { get; set; }  // Changed from int to Guid
 
         [Required]
         public DateTime AttemptDate { get; set; }

@@ -242,7 +242,7 @@ namespace PKFAuditManagement.Controllers
         }
 
 
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> Details(int id)
         {
             // Fetch the quiz with its questions and options
             var quiz = await _context.Quiz
@@ -296,7 +296,7 @@ namespace PKFAuditManagement.Controllers
 
         // GET: Quizzes/Edit
         [HttpGet]
-        public async Task<IActionResult> Edit(Guid id)
+        public async Task<IActionResult> Edit(int id)
         {
             var quiz = await _context.Quiz
                 .Include(q => q.Questions)
@@ -504,7 +504,7 @@ namespace PKFAuditManagement.Controllers
         // POST: Quizzes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id, bool deleteAssociated = false)
+        public async Task<IActionResult> DeleteConfirmed(int id, bool deleteAssociated = false)
         {
             var quiz = await _context.Quiz
                                      .Include(q => q.Questions)
@@ -568,7 +568,7 @@ namespace PKFAuditManagement.Controllers
         // POST: Quizzes/ConfirmDeleteWithAssociation/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmDeleteWithAssociation(Guid id)
+        public async Task<IActionResult> ConfirmDeleteWithAssociation(int id)
         {
             var quiz = await _context.Quiz
                                      .Include(q => q.Questions)
