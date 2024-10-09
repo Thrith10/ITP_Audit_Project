@@ -6,7 +6,7 @@ namespace PKFAuditManagement.Models
 {
     public class Quiz
     {
-        public int QuizID { get; set; }
+        public Guid QuizID { get; set; }
 
         [Required]
         [StringLength(255)]

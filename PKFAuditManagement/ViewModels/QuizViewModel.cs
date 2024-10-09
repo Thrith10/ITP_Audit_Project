@@ -10,7 +10,7 @@ namespace PKFAuditManagement.ViewModels
         public string UserID { get; set; }
 
         // New properties reflecting the Participants model
-        public int QuizID { get; set; }  // To map the participant to a specific quiz
+        public Guid QuizID { get; set; }  // To map the participant to a specific quiz
         public DateTime OverallCompletionDate { get; set; }
 
         public bool IsRequired { get; set; } = true;  // Default is true, similar to the Participants model
@@ -23,7 +23,7 @@ namespace PKFAuditManagement.ViewModels
 
     public class QuizViewModel
     {
-        public int QuizID { get; set; }  
+        public Guid QuizID { get; set; }  
         public bool CanEdit { get; set; }
         [Required]
         public string Title { get; set; }
@@ -84,7 +84,7 @@ namespace PKFAuditManagement.ViewModels
     public class AttemptViewModel
     {
         public string UserID { get; set; }
-        public int QuizID { get; set; }  // Changed from int to Guid
+        public Guid QuizID { get; set; }  // Changed from int to Guid
         public List<QuizResponseViewModel> Responses { get; set; }
     }
 

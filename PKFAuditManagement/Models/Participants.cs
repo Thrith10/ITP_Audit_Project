@@ -12,7 +12,7 @@ namespace PKFAuditManagement.Models
         public string UserID { get; set; }
 
         [Required]
-        public int QuizID { get; set; }
+        public Guid QuizID { get; set; }
 
         public bool IsRequired { get; set; } = true;
 
