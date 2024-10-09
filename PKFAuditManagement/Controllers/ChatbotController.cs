@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using PKFAuditManagement.Services;
 using PKFAuditManagement.Util;
 
@@ -16,9 +18,23 @@ namespace PKFAuditManagement.Controllers
             _mongoDBService = mongoDBService;
         }
 
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ChatbotManagement()
+        {
+            return View("~/Views/Admin/ChatbotManagement/ChatbotManagement.cshtml");
+        }
+
         [HttpPost]
         public async Task<IActionResult> GetChatResponse(string userInput)
         {
+            
+            //var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "RAGDocuments", "SSQM2.pdf");
+            //// Read a list of paragraphs from the PDF uploaded
+            //List<string> paragraphs = PdfReader.ReadPdf(filePath);
+
+            //// Paragraphs read will be saved to MongoDB collection
+            //await _mongoDBService.SaveParagraphsToMongoDBAsync(paragraphs, "SSQM2");
+
             // Call embedding service to generate embeddings based on user input
             double[] embeddings = await _embeddingService.GenerateEmbeddingsAsync(userInput);
 

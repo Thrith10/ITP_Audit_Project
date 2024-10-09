@@ -1,0 +1,82 @@
+﻿<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>Manage Chatbot</h1>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5 class="card-title">Manage Chatbot</h5>
+                            </div>
+                        </div>
+                        <p>The chatbot is designed to read information from your uploaded auditing documents. This page allows administrators to upload and remove from its existing knowledge base.</p>
+
+                        <!-- Document Table -->
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Document Name</th>
+                                    <th>Document Type</th>
+                                    <th>Size</th>
+                                    <th>Date Added</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="document-table-body">
+                                <!-- Placeholder for dynamically added rows -->
+                                <tr>
+                                    <td>Sample Document 1.pdf</td>
+                                    <td>PDF</td>
+                                    <td>1.2 MB</td>
+                                    <td>2024-10-01</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary preview-doc">Preview</button>
+                                        <button class="btn btn-sm btn-warning edit-doc">Edit</button>
+                                        <button class="btn btn-sm btn-danger remove-doc">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+        
+                        <!-- Add New Document Section -->
+                        <div class="mt-5">
+                            <h4>Add a New Document</h4>
+                            <form id="document-upload-form" class="form-inline">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-auto">
+                                        <input type="file" id="new-document" class="form-control" accept=".pdf,.doc,.docx" />
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="text" id="document-name" class="form-control" placeholder="Enter document name (optional)" />
+                                    </div>
+                                    <div class="col-auto">
+                                        <select id="document-type" class="form-select">
+                                            <option value="PDF">PDF</option>
+                                            <option value="Word">Word</option>
+                                            <option value="Text">Text</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-success" id="add-document-btn">Add Document</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main><!-- End #main -->
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script>
+        
+    </script>
+}
