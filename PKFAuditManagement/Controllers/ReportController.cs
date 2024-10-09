@@ -66,7 +66,8 @@ namespace PKFAuditManagement.Controllers
                     {"PredecessorAuditor", "Predecessor Auditor"},
                     {"ReasonsForDiscontinuance", "Reasons For Discontinuance"},
                     {"PublicInterestEntity", "Public Interest Entity"},
-                    {"PublicInterestEntityType", "Public Interest Entity Type"}
+                    {"PublicInterestEntityType", "Public Interest Entity Type"},
+                    {"SectionCEvaluation", "TNA/TNE status"} // Added TNATNEAssessments
                 },
                 ["QC6FormConclusions"] = new Dictionary<string, string>
                 {
@@ -83,7 +84,7 @@ namespace PKFAuditManagement.Controllers
                     {"EPHODApprovedBy", "Approved By Engagment Partner/Head of Division"},
                     {"EPHODApprovedByDate", "Engagment Partner/Head of Division Approved By Date"},
                     {"MPHODQMPApprovedBy", "Approved By Managing Partner/Head of Division/Quality Management Partner"},
-                    {"MPHODQMPApprovedByDate", "Managing Partner/Head of Division/Quality Management Partner Approved By Date"}
+                    {"MPHODQMPApprovedByDate", "Managing Partner/Head of Division/Quality Management Partner Approved By Date"},
                 },
                 ["QC7Forms"] = new Dictionary<string, string>
                 {
@@ -115,7 +116,8 @@ namespace PKFAuditManagement.Controllers
                     {"BudgetedTimeCost", "Budgeted Time Cost"},
                     {"ProposedRecoveryRateCurrentYear", "Proposed Recovery Rate Current Year"},
                     {"IsPublicInterestEntity", "Is Public Interest Entity"},
-                    {"PublicInterestEntityType", "Public Interest Entity Type"}
+                    {"PublicInterestEntityType", "Public Interest Entity Type"},
+                    {"SectionCEvaluation", "TNA/TNE status"} // Added TNATNEAssessments
                 },
                 ["QC7FormConclusions"] = new Dictionary<string, string>
                 {
@@ -163,7 +165,7 @@ namespace PKFAuditManagement.Controllers
                     {"EmailType", "Email Type"},
                     {"EmailBody", "Email Body"},
                     {"IsProcessed", "Is Processed"},
-                }
+                },
 
                 
             };
@@ -198,7 +200,11 @@ namespace PKFAuditManagement.Controllers
             var selectedSections = request.Fields.Where(f => f.IsSelected).Select(f => f.Section).FirstOrDefault();
 
             var fieldsToSelect = selectedFields.Select(f => {
-                if (f.StartsWith("QC6Forms")) {
+
+                if (f.Contains("SectionCEvaluation")) {
+                    return $"TNATNEAssessments.{f.Substring("QC6Forms_".Length)}";
+                }
+                else if (f.StartsWith("QC6Forms")) {
                     return $"QC6Forms.{f.Substring("QC6Forms_".Length)}";
                 }
                 else if (f.StartsWith("QC6FormConclusions")) {
@@ -235,6 +241,7 @@ namespace PKFAuditManagement.Controllers
                     SELECT {selectClause}
                     FROM QC6Forms
                     LEFT JOIN QC6FormConclusions ON QC6Forms.QC6FormID = QC6FormConclusions.QC6FormID
+                    LEFT JOIN TNATNEAssessments ON QC6Forms.QC6FormID = TNATNEAssessments.QC6FormID
                     WHERE QC6Forms.QC6FormID IN ({selectedFormIds})";
 
             }
@@ -244,6 +251,7 @@ namespace PKFAuditManagement.Controllers
                     SELECT {selectClause}
                     FROM QC7Forms
                     LEFT JOIN QC7FormConclusions ON QC7Forms.QC7FormID = QC7FormConclusions.QC7FormID
+                    LEFT JOIN TNATNEAssessments ON QC7Forms.QC7FormID = TNATNEAssessments.QC7FormID
                     WHERE QC7Forms.QC7FormID IN ({selectedFormIds})";
             }
 
