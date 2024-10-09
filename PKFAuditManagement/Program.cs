@@ -16,13 +16,10 @@ using DotNetEnv;
 var builder = WebApplication.CreateBuilder(args);
 
 // Load the .env file
-Env.Load();
+// Env.Load();
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+// Register HttpClient for dependency injection
+builder.Services.AddHttpClient();
 
 // Change options.SignIn.RequireConfirmedAccount = true if you want confirmed account email address
 builder.Services.AddDefaultIdentity<CustomUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -38,22 +35,26 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// Commented out background service
-/*builder.Services.AddHostedService<EmailBackgroundService>();*/
-
 // Load environment variables
 builder.Configuration.AddEnvironmentVariables();
-var emailPassword = builder.Configuration["SMTP_PASSWORD"];
+
+// Add services to the container.
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration["ConnectionString"];
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 
 // Configure SMTP options from environment variables
 builder.Services.Configure<SmtpOptions>(options =>
 {
-    options.Host = Environment.GetEnvironmentVariable("SMTP_HOST");
-    options.Port = int.Parse(Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587");
-    options.Username = Environment.GetEnvironmentVariable("SMTP_USERNAME");
-    options.Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
-    options.EnableSsl = bool.Parse(Environment.GetEnvironmentVariable("SMTP_ENABLESSL") ?? "true");
-    options.From = Environment.GetEnvironmentVariable("SMTP_FROM");
+    options.Host = builder.Configuration["SMTP_HOST"];
+    options.Port = int.Parse(builder.Configuration["SMTP_PORT"] ?? "587");
+    options.Username = builder.Configuration["SMTP_USERNAME"];
+    options.Password = builder.Configuration["SMTP_PASSWORD"];
+    options.EnableSsl = bool.Parse(builder.Configuration["SMTP_ENABLESSL"] ?? "true");
+    options.From = builder.Configuration["SMTP_FROM"];
 });
 
 // Service registrations
@@ -159,30 +160,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Data Seeder for mapping user to roles
-//using (var scope = app.Services.CreateScope())
-//{
-//    // Initialise an instance of the userManager
-//    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CustomUser>>();
-
-//    var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
-//    var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
-
-//    // Check if admin user has already been created
-//    if (await userManager.FindByEmailAsync(email) == null)
-//    {
-//        // Set details of the admin user
-//        var user = new CustomUser();
-//        user.UserName = email;
-//        user.Email = email;
-
-//        // Create a new admin account asynchronously
-//        await userManager.CreateAsync(user, password);
-
-//        await userManager.AddToRoleAsync(user, "Admin");
-//    }
-
-
-// Data Seeder for mapping user to roles
 using (var scope = app.Services.CreateScope())
 {
     // Initialise an instance of the userManager and roleManager
@@ -190,6 +167,9 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
     // Admin user details from configuration
+    //var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
+    //var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
+
     var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
     var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
 
