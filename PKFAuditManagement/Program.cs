@@ -18,6 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Load the .env file
 // Env.Load();
 
+// Enable legacy timestamp behavior for Npgsql
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 // Register HttpClient for dependency injection
 builder.Services.AddHttpClient();
 
@@ -39,10 +42,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-var connectionString = builder.Configuration["ConnectionString"];
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+//var connectionString = builder.Configuration["ConnectionString"];
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+            npgsqlOptions.CommandTimeout(300) 
+        ));
+
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
@@ -131,17 +139,17 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-// Run pending migrations
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
+//// Run pending migrations
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
 
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    if (context.Database.GetPendingMigrations().Any())
-    {
-        context.Database.Migrate();
-    }
-}
+//    var context = services.GetRequiredService<ApplicationDbContext>();
+//    if (context.Database.GetPendingMigrations().Any())
+//    {
+//        context.Database.Migrate();
+//    }
+//}
 
 // Data Seeder for User Roles
 using (var scope = app.Services.CreateScope())
@@ -167,9 +175,6 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
     // Admin user details from configuration
-    //var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
-    //var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
-
     var email = builder.Configuration["ADMIN_ACCOUNT_EMAIL"];
     var password = builder.Configuration["ADMIN_ACCOUNT_PASSWORD"];
 
