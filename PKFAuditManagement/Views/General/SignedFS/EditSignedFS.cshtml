@@ -42,12 +42,12 @@
                                             </div>
                                             <div class="form-group mb-3">
                                                 <label asp-for="AuditedReportDate" class="control-label">Audited Report Date</label>
-                                                <input asp-for="AuditedReportDate" class="form-control" type="date" />
+                                                <input asp-for="AuditedReportDate" class="form-control" type="date" required/>
                                                 <span asp-validation-for="AuditedReportDate" class="text-danger"></span>
                                             </div>
                                             <div class="form-group mb-3">
                                                 <label asp-for="FinancialYearEnd" class="control-label">Financial Year End</label>
-                                                <input asp-for="FinancialYearEnd" class="form-control" type="date" />
+                                                <input asp-for="FinancialYearEnd" class="form-control" type="date" required/>
                                                 <span asp-validation-for="FinancialYearEnd" class="text-danger"></span>
                                             </div>
                                             <div class="form-group mb-3">
@@ -86,7 +86,7 @@
                                                                     }
                                                                 </td>
                                                                 <td>
-                                                                    <input asp-for="FinancialStatement" type="file" class="form-control" accept="application/pdf" />
+                                                                    <input asp-for="FinancialStatement" type="file" class="form-control" accept="application/pdf" required/>
                                                                     <span asp-validation-for="FinancialStatement" class="text-danger"></span>
                                                                 </td>
                                                                 <td>
