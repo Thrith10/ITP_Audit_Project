@@ -158,7 +158,7 @@ namespace PKFAuditManagement.Controllers
                     QC6Status = qc6.Status ?? "Null",
                     QC7Status = qc7Form?.Status ?? "Null",
                     QC35Status = _context.QC35Forms.FirstOrDefault(q => q.ClientName == qc6.ProspectiveClient)?.Status ?? "Null",
-                    SignedFSStatus = _context.SignedFSForm.FirstOrDefault(q => q.UserEmail == qc6.ProspectiveClient)?.IsProcessed == true ? "Processed" : "Not Uploaded"
+                    SignedFSStatus = _context.SignedFSForm.FirstOrDefault(q => q.Client == qc6.ProspectiveClient)?.IsProcessed == true ? "Processed" : "Not Uploaded"
                 };
             }).ToList();
 

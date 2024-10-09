@@ -103,7 +103,8 @@ namespace PKFAuditManagement.Controllers
                     FinancialYearEnd = model.FinancialYearEnd,
                     PartnerEmail = model.PartnerEmail,
                     UserEmail = model.UserEmail,
-                    FilePath = uniqueFileName
+                    FilePath = uniqueFileName,
+                    IsProcessed = true
                 };
 
                 _context.SignedFSForm.Add(signedFs);
