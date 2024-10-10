@@ -13,6 +13,7 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Configuration;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -278,7 +279,7 @@ namespace PKFAuditManagement.Controllers
 
             Console.WriteLine("Query: " + selectClause);
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = new NpgsqlConnection(_connectionString))
             {
                 //connection.Open();
                 var result = await connection.QueryAsync<dynamic>(query);

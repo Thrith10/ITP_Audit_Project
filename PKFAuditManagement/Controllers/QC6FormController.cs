@@ -606,6 +606,7 @@ namespace PKFAuditManagement.Controllers
                 // List of recipients
                 var recipients = new List<string>
                     {
+                        viewModel.PreparedBy,
                         viewModel.EPHODApprovedBy,
                         viewModel.MPHODQMPApprovedBy
                     };
@@ -999,12 +1000,12 @@ namespace PKFAuditManagement.Controllers
                         // List of approvers
                         var recipients = new List<string>
                         {
-                        conclusion.EPHODApprovedBy,
-                        conclusion.MPHODQMPApprovedBy
+                            conclusion.EPHODApprovedBy,
+                            conclusion.MPHODQMPApprovedBy
                         };
 
                         // Subject and body of the email
-                        var subject = "QC6 Form Update";
+                        var subject = "QC6 Form Approval";
                         var body = $"The QC6 Form {engagement.FileReference} has been successfully approved and is currently active.";
 
                         // Send the email to all approvers on the creation of the QC6 form
