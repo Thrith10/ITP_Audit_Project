@@ -1,36 +1,6 @@
 ﻿@using PKFAuditManagement.Models
 @model List<QC6Form>
 
-<!-- Start of Alerts -->
-@{
-    var createMessage = TempData["QC6CreateMessage"] as string;
-    var updateMessage = TempData["QC6UpdateMessage"] as string;
-}
-@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
-{
-    <div class="alert alert-info">
-        @createMessage @updateMessage
-    </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const notyf = new Notyf({
-                position: { x: 'center', y: 'top' }
-            });
-
-            var createMessage = '@createMessage';
-            if (createMessage) {
-                notyf.success(createMessage);
-            }
-
-            var updateMessage = '@updateMessage';
-            if (updateMessage) {
-                notyf.success(updateMessage);
-            }
-        });
-    </script>
-}
-<!-- End of Alerts -->
-
 <main id="main" class="main">
 
     <div class="pagetitle">
@@ -139,6 +109,36 @@
         </div>
     </section>
 </main><!-- End #main -->
+
+<!-- Start of Alerts -->
+@{
+    var createMessage = TempData["QC6CreateMessage"] as string;
+    var updateMessage = TempData["QC6UpdateMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(createMessage) || !string.IsNullOrEmpty(updateMessage))
+{
+    <div class="alert alert-info">
+        @createMessage @updateMessage
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notyf = new Notyf({
+                position: { x: 'center', y: 'top' }
+            });
+
+            var createMessage = '@createMessage';
+            if (createMessage) {
+                notyf.success(createMessage);
+            }
+
+            var updateMessage = '@updateMessage';
+            if (updateMessage) {
+                notyf.success(updateMessage);
+            }
+        });
+    </script>
+}
+<!-- End of Alerts -->
 
 @section Scripts {
     <script src="~/js/qc6-form-management-user.js"></script>
