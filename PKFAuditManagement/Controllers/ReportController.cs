@@ -202,74 +202,86 @@ namespace PKFAuditManagement.Controllers
 
             var fieldsToSelect = selectedFields.Select(f => {
 
-                if (f.Contains("SectionCEvaluation")) {
-                    return $"TNATNEAssessments.{f.Substring("QC6Forms_".Length)}";
+                if (f.Contains("SectionCEvaluation"))
+                {
+                    return $"\"TNATNEAssessments\".\"{f.Substring("QC6Forms_".Length)}\"";
                 }
-                else if (f.StartsWith("QC6Forms")) {
-                    return $"QC6Forms.{f.Substring("QC6Forms_".Length)}";
+                else if (f.StartsWith("QC6Forms"))
+                {
+                    return $"\"QC6Forms\".\"{f.Substring("QC6Forms_".Length)}\"";
                 }
-                else if (f.StartsWith("QC6FormConclusions")) {
-                    return $"QC6FormConclusions.{f.Substring("QC6FormConclusions_".Length)}";
+                else if (f.StartsWith("QC6FormConclusions"))
+                {
+                    return $"\"QC6FormConclusions\".\"{f.Substring("QC6FormConclusions_".Length)}\"";
                 }
-                else if (f.StartsWith("QC7Forms")) {
-                    return $"QC7Forms.{f.Substring("QC7Forms_".Length)}";
+                else if (f.StartsWith("QC7Forms"))
+                {
+                    return $"\"QC7Forms\".\"{f.Substring("QC7Forms_".Length)}\"";
                 }
-                else if (f.StartsWith("QC7FormConclusions")) {
-                    return $"QC7FormConclusions.{f.Substring("QC7FormConclusions_".Length)}";
+                else if (f.StartsWith("QC7FormConclusions"))
+                {
+                    return $"\"QC7FormConclusions\".\"{f.Substring("QC7FormConclusions_".Length)}\"";
                 }
-                else if (f.StartsWith("QC35Forms")) {
-                    return $"QC35Forms.{f.Substring("QC35Forms_".Length)}";
+                else if (f.StartsWith("QC35Forms"))
+                {
+                    return $"\"QC35Forms\".\"{f.Substring("QC35Forms_".Length)}\"";
                 }
-                else if (f.Contains("DaysUntilDue")) {
-                    return $"DATEDIFF(DAY, GETDATE(), CAST(QC35ChecklistItems.Response AS DATE)) AS DaysUntilDue";
+                else if (f.Contains("DaysUntilDue"))
+                {
+                    return $"DATEDIFF(DAY, GETDATE(), CAST(QC35ChecklistItems.Response AS DATE)) AS \"DaysUntilDue\"";
                 }
-                else if (f.StartsWith("QC35ChecklistItems")) {
-                    return $"QC35ChecklistItems.{f.Substring("QC35ChecklistItems_".Length)}";
+                else if (f.StartsWith("QC35ChecklistItems"))
+                {
+                    return $"\"QC35ChecklistItems\".\"{f.Substring("QC35ChecklistItems_".Length)}\"";
                 }
-                else if (f.StartsWith("SignedFSForm")) {
-                    return $"SignedFSForm.{f.Substring("SignedFSForm_".Length)}";
+                else if (f.StartsWith("SignedFSForm"))
+                {
+                    return $"\"SignedFSForm\".\"{f.Substring("SignedFSForm_".Length)}\"";
                 }
-                else {
+                else
+                {
                     return null;
                 }
             }).Where(f => f != null).ToList();
 
             var selectClause = string.Join(", ", fieldsToSelect);
             var query = string.Empty;
-
-            if (selectedSections.Contains("QC6Form")) {
+            if (selectedSections.Contains("QC6Form"))
+            {
                 query += $@"
                     SELECT {selectClause}
-                    FROM QC6Forms
-                    LEFT JOIN QC6FormConclusions ON QC6Forms.QC6FormID = QC6FormConclusions.QC6FormID
-                    LEFT JOIN TNATNEAssessments ON QC6Forms.QC6FormID = TNATNEAssessments.QC6FormID
-                    WHERE QC6Forms.QC6FormID IN ({selectedFormIds})";
-
+                    FROM ""QC6Forms""
+                    LEFT JOIN ""QC6FormConclusions"" ON ""QC6Forms"".""QC6FormID"" = ""QC6FormConclusions"".""QC6FormID""
+                    LEFT JOIN ""TNATNEAssessments"" ON ""QC6Forms"".""QC6FormID"" = ""TNATNEAssessments"".""QC6FormID""
+                    WHERE ""QC6Forms"".""QC6FormID"" IN ({selectedFormIds})";
             }
 
-            if (selectedSections.Contains("QC7Form")) {
+            if (selectedSections.Contains("QC7Form"))
+            {
                 query += $@"
                     SELECT {selectClause}
-                    FROM QC7Forms
-                    LEFT JOIN QC7FormConclusions ON QC7Forms.QC7FormID = QC7FormConclusions.QC7FormID
-                    LEFT JOIN TNATNEAssessments ON QC7Forms.QC7FormID = TNATNEAssessments.QC7FormID
-                    WHERE QC7Forms.QC7FormID IN ({selectedFormIds})";
+                    FROM ""QC7Forms""
+                    LEFT JOIN ""QC7FormConclusions"" ON ""QC7Forms"".""QC7FormID"" = ""QC7FormConclusions"".""QC7FormID""
+                    LEFT JOIN ""TNATNEAssessments"" ON ""QC7Forms"".""QC7FormID"" = ""TNATNEAssessments"".""QC7FormID""
+                    WHERE ""QC7Forms"".""QC7FormID"" IN ({selectedFormIds})";
             }
 
-            if (selectedSections.Contains("QC35Form") || selectedSections.Contains("DaysUntilDue")) {
+            if (selectedSections.Contains("QC35Form") || selectedSections.Contains("DaysUntilDue"))
+            {
                 query += $@"
                     SELECT {selectClause}
-                    FROM QC35Forms
-                    LEFT JOIN QC35ChecklistItems ON QC35Forms.QC35FormID = QC35ChecklistItems.QC35FormID
-                    AND QC35CheckListItems.Description = 'Date of Audit Report'
-                    WHERE QC35Forms.QC35FormID IN ({selectedFormIds})";
+                    FROM ""QC35Forms""
+                    LEFT JOIN ""QC35ChecklistItems"" ON ""QC35Forms"".""QC35FormID"" = ""QC35ChecklistItems"".""QC35FormID""
+                    AND ""QC35ChecklistItems"".""Description"" = 'Date of Audit Report'
+                    WHERE ""QC35Forms"".""QC35FormID"" IN ({selectedFormIds})";
             }
 
-            if (selectedSections.Contains("SignedFSForm")) {
+            if (selectedSections.Contains("SignedFSForm"))
+            {
                 query += $@"
                     SELECT {selectClause}
-                    FROM SignedFSForm
-                    WHERE SignedFSForm.Id IN ({selectedFormIds})";
+                    FROM ""SignedFSForm""
+                    WHERE ""SignedFSForm"".""Id"" IN ({selectedFormIds})";
             }
 
             // Log the received data
@@ -278,6 +290,27 @@ namespace PKFAuditManagement.Controllers
             Console.WriteLine("Selected Sections: " + string.Join(", ", selectedSections));
 
             Console.WriteLine("Query: " + selectClause);
+
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                try
+                {
+                    await connection.OpenAsync(); // Open the connection asynchronously
+                    var result = await connection.QueryAsync<dynamic>(query);
+                    // Process the result here
+                }
+                catch (NpgsqlException ex)
+                {
+                    // Handle PostgreSQL specific exceptions
+                    Console.WriteLine($"PostgreSQL error: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Handle general exceptions
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                }
+            }
+
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
