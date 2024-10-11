@@ -4,6 +4,7 @@ using PKFAuditManagement.Models;
 using System.Linq;
 using PKFAuditManagement.Data;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -15,7 +16,7 @@ namespace PKFAuditManagement.Controllers
         {
             _context = context;
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult GenerateReports()
         {
             // Step 1: Retrieve the QC6 forms and their corresponding conclusions from the database
