@@ -50,6 +50,7 @@ namespace PKFAuditManagement.ViewModels
         [Required]
         public decimal? BudgetedFeeRecoveryRate { get; set; }
         public bool OutstandingUnpaidFees { get; set; }
+        public string? OutstandingUnpaidFeesComment { get; set; }
         [Required]
         public decimal? AuditFee { get; set; }
         [Required]

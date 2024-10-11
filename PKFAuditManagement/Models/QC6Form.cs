@@ -28,6 +28,7 @@ namespace PKFAuditManagement.Models
         [Precision(18, 2)]
         public required decimal BudgetedFeeRecoveryRate { get; set; }
         public bool OutstandingUnpaidFees { get; set; }
+        public string? OutstandingUnpaidFeesComment { get; set; }
         [Precision(18, 2)]
         public required decimal AuditFee { get; set; }
         [Precision(18, 2)]

@@ -144,6 +144,13 @@ namespace PKFAuditManagement.Controllers
                 viewModel.BudgetedTimeCost = qc6formData.BudgetedTimeCost;
                 viewModel.BudgetedFeeRecoveryRate = qc6formData.BudgetedFeeRecoveryRate;
                 viewModel.OutstandingUnpaidFees = qc6formData.OutstandingUnpaidFees;
+
+                // Check if Outstanding Unpaid Fees is true
+                if (viewModel.OutstandingUnpaidFees == true)
+                {
+                    viewModel.OutstandingUnpaidFeesComment = qc6formData.OutstandingUnpaidFeesComment;
+                }
+
                 viewModel.GrandTotal = qc6formData.GrandTotal;
                 viewModel.AuditFee = qc6formData.AuditFee;
                 viewModel.FeeConcentration = qc6formData.FeeConcentration;
@@ -296,6 +303,17 @@ namespace PKFAuditManagement.Controllers
                 qc6form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
                 qc6form.BudgetedFeeRecoveryRate = viewModel.BudgetedFeeRecoveryRate.Value;
                 qc6form.OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees;
+
+                // Check if Outstanding Unpaid Fees is selected
+                if (viewModel.OutstandingUnpaidFees == true)
+                {
+                    qc6form.OutstandingUnpaidFeesComment = viewModel.OutstandingUnpaidFeesComment;
+                }
+                else
+                {
+                    qc6form.OutstandingUnpaidFeesComment = null;
+                }
+
                 qc6form.GrandTotal = viewModel.GrandTotal.Value;
                 qc6form.AuditFee = viewModel.AuditFee.Value;
                 qc6form.FeeConcentration = viewModel.FeeConcentration.Value;
@@ -721,6 +739,13 @@ namespace PKFAuditManagement.Controllers
                 viewModel.BudgetedTimeCost = qc6formData.BudgetedTimeCost;
                 viewModel.BudgetedFeeRecoveryRate = qc6formData.BudgetedFeeRecoveryRate;
                 viewModel.OutstandingUnpaidFees = qc6formData.OutstandingUnpaidFees;
+
+                // Check if value is true, else don't set the comment 
+                if (viewModel.OutstandingUnpaidFees == true)
+                {
+                    viewModel.OutstandingUnpaidFeesComment = qc6formData.OutstandingUnpaidFeesComment;
+                }
+
                 viewModel.GrandTotal = qc6formData.GrandTotal;
                 viewModel.AuditFee = qc6formData.AuditFee;
                 viewModel.FeeConcentration = qc6formData.FeeConcentration;
@@ -730,7 +755,13 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PredecessorAuditor = qc6formData.PredecessorAuditor;
                 viewModel.ReasonsForDiscontinuance = qc6formData.ReasonsForDiscontinuance;
                 viewModel.IsPublicInterestEntity = qc6formData.PublicInterestEntity;
-                viewModel.PublicInterestEntityType = qc6formData.PublicInterestEntityType;
+
+                // Check if selected, else don't set the type
+                if (viewModel.IsPublicInterestEntity == true)
+                {
+                    viewModel.PublicInterestEntityType = qc6formData.PublicInterestEntityType;
+                }
+
                 viewModel.SubForm1NotApplicable = qc6formData.IsSubForm2NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
                 viewModel.SubForm2NotApplicable = qc6formData.IsSubForm3NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
 
@@ -1156,9 +1187,9 @@ namespace PKFAuditManagement.Controllers
                 var userId = user?.Id;
 
                 // Re-validate form inputs for QC6 Form
-                if (viewModel.IsPublicInterestEntity == true)
+                if (viewModel.OutstandingUnpaidFees == false)
                 {
-                    viewModel.PublicInterestEntityType = null;
+                    viewModel.OutstandingUnpaidFeesComment = null;
                 }
 
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
@@ -1191,6 +1222,7 @@ namespace PKFAuditManagement.Controllers
                     BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
                     BudgetedFeeRecoveryRate = viewModel.BudgetedFeeRecoveryRate.Value,
                     OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees,
+                    OutstandingUnpaidFeesComment = viewModel.OutstandingUnpaidFeesComment,
                     GrandTotal = viewModel.GrandTotal.Value,
                     AuditFee = viewModel.AuditFee.Value,
                     FeeConcentration = viewModel.FeeConcentration.Value,

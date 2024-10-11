@@ -169,6 +169,26 @@
             deleteHiddenInput.val('false'); // Reset the delete flag
         });
     });
+
+    // Function to toggle the comment input field based on radio selection
+    function toggleCommentInput() {
+        var yesSelected = document.getElementById('outstandingUnpaidFeesYes').checked;
+        var commentRow = document.getElementById('outstandingUnpaidFeesRow');
+        var commentInput = document.getElementById('outstandingUnpaidFeesCommentInput');
+
+        if (yesSelected) {
+            commentRow.style.display = 'flex';  // Show the comment row
+        } else {
+            commentRow.style.display = 'none';  // Hide the comment row
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('outstandingUnpaidFeesYes').addEventListener('change', toggleCommentInput);
+    document.getElementById('outstandingUnpaidFeesNo').addEventListener('change', toggleCommentInput);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleCommentInput();
 });
 
 $("#autocomplete").autocomplete({
