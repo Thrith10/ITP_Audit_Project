@@ -26,10 +26,7 @@ namespace PKFAuditManagement.ViewModels
         [EmailAddress]
         [Display(Name = "Your Email")]
         public string UserEmail { get; set; }
-
-        [Required]
-        [Display(Name = "Financial Statement (PDF)")]
-        public IFormFile FinancialStatement { get; set; }
+        public IFormFile? FinancialStatement { get; set; }
 
         public string? FinancialStatementFileName { get; set; }
         public List<string>? ClientNames { get; set; }
