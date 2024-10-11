@@ -21,12 +21,18 @@ namespace PKFAuditManagement.Models
         public required string PKFEntityProposingService { get; set; }
         public required string SourceOfReferral { get; set; }
         public required string NatureOfServiceForEstimateFee { get; set; }
+        [Precision(18, 2)]
         public required decimal EstimatedFee { get; set; }
+        [Precision(18, 2)]
         public required decimal BudgetedTimeCost { get; set; }
+        [Precision(18, 2)]
         public required decimal BudgetedFeeRecoveryRate { get; set; }
         public bool OutstandingUnpaidFees { get; set; }
+        [Precision(18, 2)]
         public required decimal AuditFee { get; set; }
+        [Precision(18, 2)]
         public required decimal GrandTotal { get; set; }
+        [Precision(18, 2)]
         public required decimal FeeConcentration { get; set; }
         public bool ConflictsCheckDone { get; set; }
         public required string TypeOfActivities { get; set; }
