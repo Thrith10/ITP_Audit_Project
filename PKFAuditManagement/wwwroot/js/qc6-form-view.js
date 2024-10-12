@@ -4,6 +4,7 @@ $(document).ready(function () {
     toggleSectionBResult();
     toggleSignificantRisk();
     toggleSTR();
+    togglePredecessorReasonsInput();
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -20,6 +21,18 @@ document.addEventListener("DOMContentLoaded", function () {
         rejectQC6Form(rejectButton.value);
     });
 });
+
+// Function to toggle the visibility of the reasons input field
+function togglePredecessorReasonsInput() {
+    var checkbox = document.getElementById("predecessorAuditorCheckbox");
+    var reasonsContainer = document.getElementById("reasonsContainer");
+
+    if (checkbox.checked) {
+        reasonsContainer.style.display = "";  // Show reasons input
+    } else {
+        reasonsContainer.style.display = "none";    // Hide reasons input
+    }
+}
 
 // Function to display comment risk level field based on checkbox value
 function toggleRiskLevel() {

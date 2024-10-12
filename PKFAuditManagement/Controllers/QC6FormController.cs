@@ -1242,6 +1242,12 @@ namespace PKFAuditManagement.Controllers
                     viewModel.BudgetedFeeRecoveryRateComment = null;
                 }
 
+                // Re-validate predecessor auditor for QC6 Form 
+                if (viewModel.PredecessorAuditor == false)
+                {
+                    viewModel.ReasonsForDiscontinuance = null;
+                }
+
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
                 string fileReference = Helper.GenerateQCFormFileReference();
 

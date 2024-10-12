@@ -386,6 +386,24 @@ function toggleRiskLevel() {
     }
 }
 
+// Function to toggle the visibility of the reasons input field
+function togglePredecessorReasonsInput() {
+    var checkbox = document.getElementById("predecessorAuditorCheckbox");
+    var reasonsContainer = document.getElementById("reasonsContainer");
+    var reasonsInput = document.getElementById("ReasonsForDiscontinuance");
+
+    if (checkbox.checked) {
+        reasonsContainer.style.display = "";  // Show reasons input
+        reasonsInput.disabled = false;
+        reasonsInput.setAttribute("required", "required"); // Mark as required
+    } else {
+        reasonsContainer.style.display = "none";    // Hide reasons input
+        reasonsInput.removeAttribute("required"); // Remove required attribute
+        reasonsInput.disabled = true;
+        reasonsInput.value = ""; // Clear the input value if hidden
+    }
+}
+
 // Toggling checkbox for any significant risk displays the comment box
 function toggleSignificantRisk() {
     var significantRiskCheckbox = document.getElementById('significantRiskCheckbox');

@@ -386,7 +386,7 @@ namespace PKFAuditManagement.Data
                     ConflictsCheckDone = true,
                     TypeOfActivities = "",
                     ComplexityOfEngagement = "",
-                    PredecessorAuditor = "",
+                    PredecessorAuditor = false,
                     ReasonsForDiscontinuance = "",
                     PublicInterestEntity = false,
                     PublicInterestEntityType = "",
@@ -550,7 +550,7 @@ namespace PKFAuditManagement.Data
                    IsSuspiciousTransactionReportFiled = false,
                    Satisfaction = "Yes.",
                    PreparedBy = ""
-                }
+               }
             );
 
             modelBuilder.Entity<QC6FormTest>().HasData(

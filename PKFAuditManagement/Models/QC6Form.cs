@@ -39,8 +39,8 @@ namespace PKFAuditManagement.Models
         public bool ConflictsCheckDone { get; set; }
         public required string TypeOfActivities { get; set; }
         public required string ComplexityOfEngagement { get; set; }
-        public string? PredecessorAuditor { get; set; }
-        public required string ReasonsForDiscontinuance { get; set; }
+        public bool PredecessorAuditor { get; set; }
+        public string? ReasonsForDiscontinuance { get; set; }
         public bool PublicInterestEntity { get; set; }
         public string? PublicInterestEntityType { get; set; }
         public bool IsSubForm2NotApplicable { get; set; }

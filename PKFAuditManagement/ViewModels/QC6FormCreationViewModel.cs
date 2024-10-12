@@ -63,8 +63,7 @@ namespace PKFAuditManagement.ViewModels
         public string? TypeOfActivities { get; set; }
         [Required]
         public string? ComplexityOfEngagement { get; set; }
-        public string? PredecessorAuditor { get; set; }
-        [Required]
+        public bool PredecessorAuditor { get; set; }
         public string? ReasonsForDiscontinuance { get; set; }
         public bool IsPublicInterestEntity { get; set; }
         public string? PublicInterestEntityType { get; set; }
