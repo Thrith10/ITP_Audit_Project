@@ -218,6 +218,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.Client = qc7formData.Client;
                 viewModel.PeriodEnded = qc7formData.PeriodEnded;
                 viewModel.EngagementType = qc7formData.EngagementType;
+                viewModel.Industry = qc7formData.Industry;
                 viewModel.PreparedBy = qc7formData.PreparedBy;
                 viewModel.PreparedByDate = qc7formData.PreparedByDate;
                 viewModel.ReviewedBy = qc7formData.ReviewedBy;
@@ -369,6 +370,7 @@ namespace PKFAuditManagement.Controllers
                 qc7form.Client = viewModel.Client;
                 qc7form.PeriodEnded = viewModel.PeriodEnded.Value;
                 qc7form.EngagementType = viewModel.EngagementType;
+                qc7form.Industry = viewModel.Industry;
                 qc7form.PreparedBy = viewModel.PreparedBy;
                 qc7form.PreparedByDate = viewModel.PreparedByDate;
                 qc7form.ReviewedBy = viewModel.ReviewedBy;
@@ -766,6 +768,9 @@ namespace PKFAuditManagement.Controllers
             // Combine the emails and remove any duplicates
             var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
+            // Append emails to viewModel
+            viewModel.AdminEmails = combinedEmails;
+
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
                                              .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
@@ -825,9 +830,6 @@ namespace PKFAuditManagement.Controllers
                 // Retrieve FeeDetail data
                 var feeDetailData = _context.QC7FormFeeDetails.Where(e => e.QC7FormID.Equals(id)).ToList();
 
-                // Append emails to viewModel
-                viewModel.AdminEmails = combinedEmails;
-
                 // Retrieve TNATNEAssessment data
                 var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC7FormID.Equals(id));
 
@@ -869,6 +871,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.Client = qc7formData.Client;
                 viewModel.PeriodEnded = qc7formData.PeriodEnded;
                 viewModel.EngagementType = qc7formData.EngagementType;
+                viewModel.Industry = qc7formData.Industry;
                 viewModel.PriorYearFee = qc7formData.PriorYearFee;
                 viewModel.TimeCosts = qc7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
@@ -1028,6 +1031,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.Client = QC7formData.Client;
                 viewModel.PeriodEnded = QC7formData.PeriodEnded;
                 viewModel.EngagementType = QC7formData.EngagementType;
+                viewModel.Industry = QC7formData.Industry;
                 viewModel.PreparedBy = QC7formData.PreparedBy;
                 viewModel.PreparedByDate = QC7formData.PreparedByDate;
                 viewModel.ReviewedBy = QC7formData.ReviewedBy;
@@ -1192,6 +1196,7 @@ namespace PKFAuditManagement.Controllers
                     Client = viewModel.Client,
                     PeriodEnded = viewModel.PeriodEnded.Value,
                     EngagementType = viewModel.EngagementType,
+                    Industry = viewModel.Industry,
                     PreparedBy = viewModel.PreparedBy,
                     PreparedByDate = viewModel.PreparedByDate,
                     ReviewedBy = viewModel.ReviewedBy,

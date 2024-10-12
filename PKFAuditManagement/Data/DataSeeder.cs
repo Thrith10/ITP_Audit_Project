@@ -367,6 +367,7 @@ namespace PKFAuditManagement.Data
                     ProspectiveClient = "",
                     PeriodEnded = null,
                     EngagementType = "",
+                    Industry = "",
                     PreparedBy = "",
                     PreparedByDate = DateTime.MinValue,
                     ReviewedBy = "",

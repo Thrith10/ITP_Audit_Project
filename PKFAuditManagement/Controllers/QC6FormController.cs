@@ -137,6 +137,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.ProspectiveClient = qc6formData.ProspectiveClient;
                 viewModel.PeriodEnded = qc6formData.PeriodEnded;
                 viewModel.EngagementType = qc6formData.EngagementType;
+                viewModel.Industry = qc6formData.Industry;
                 viewModel.PreparedBy = qc6formData.PreparedBy;
                 viewModel.PreparedByDate = qc6formData.PreparedByDate;
                 viewModel.ReviewedBy = qc6formData.ReviewedBy;
@@ -300,6 +301,7 @@ namespace PKFAuditManagement.Controllers
                 qc6form.ProspectiveClient = viewModel.ProspectiveClient;
                 qc6form.PeriodEnded = viewModel.PeriodEnded.Value;
                 qc6form.EngagementType = viewModel.EngagementType;
+                qc6form.Industry = viewModel.Industry;
                 qc6form.PreparedBy = viewModel.PreparedBy;
                 qc6form.PreparedByDate = viewModel.PreparedByDate;
                 qc6form.ReviewedBy = viewModel.ReviewedBy;
@@ -744,6 +746,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.ProspectiveClient = qc6formData.ProspectiveClient;
                 viewModel.PeriodEnded = qc6formData.PeriodEnded;
                 viewModel.EngagementType = qc6formData.EngagementType;
+                viewModel.Industry = qc6formData.Industry;
                 viewModel.PreparedBy = qc6formData.PreparedBy;
                 viewModel.PreparedByDate = qc6formData.PreparedByDate;
                 viewModel.ReviewedBy = qc6formData.ReviewedBy;
@@ -1265,6 +1268,7 @@ namespace PKFAuditManagement.Controllers
                     ProspectiveClient = viewModel.ProspectiveClient,
                     PeriodEnded = viewModel.PeriodEnded.Value,
                     EngagementType = viewModel.EngagementType,
+                    Industry = viewModel.Industry,
                     PreparedBy = viewModel.PreparedBy,
                     PreparedByDate = viewModel.PreparedByDate,
                     ReviewedBy = viewModel.ReviewedBy,

@@ -45,9 +45,14 @@ function confirmSelection() {
             }
         }
 
+        // Trigger the change event for the client select dropdown
+        $('#clientSelect').trigger('change');
+
         // Hide the modal
         $('#clientSearchModal').modal('hide');
     }
+
+
 }
 
 // Handle the change event for the select element

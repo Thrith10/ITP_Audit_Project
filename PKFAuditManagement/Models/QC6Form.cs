@@ -10,6 +10,7 @@ namespace PKFAuditManagement.Models
         public required string ProspectiveClient { get; set; }
         public DateTime? PeriodEnded { get; set; }
         public required string EngagementType { get; set; }
+        public required string Industry { get; set; }
         public required string PreparedBy { get; set; }
         public DateTime PreparedByDate { get; set; }
         public string? ReviewedBy { get; set; }
