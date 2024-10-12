@@ -369,6 +369,29 @@ $(document).ready(function () {
 
     // Initial load: Call the function to ensure the correct visibility based on the current selection
     toggleCommentInput();
+
+    // Toggling checkbox for any significant risk displays the comment box
+    function toggleSignificantRisk() {
+        var yesSelected = document.getElementById('anySignificantRiskYes').checked;
+        var significantRiskRow = document.getElementById('significantRiskRow');
+        var significantRiskComment = document.getElementById('significantRiskComment');
+
+        if (yesSelected) {
+            significantRiskRow.style.display = '';
+            significantRiskComment.disabled = false;
+        } else {
+            significantRiskRow.style.display = 'none';
+            significantRiskComment.disabled = true;
+            significantRiskComment.value = '';
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('anySignificantRiskYes').addEventListener('change', toggleSignificantRisk);
+    document.getElementById('anySignificantRiskNo').addEventListener('change', toggleSignificantRisk);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleSignificantRisk();
 });
 
 // Toggling checkbox for risk level displays the comment box
@@ -401,22 +424,6 @@ function togglePredecessorReasonsInput() {
         reasonsInput.removeAttribute("required"); // Remove required attribute
         reasonsInput.disabled = true;
         reasonsInput.value = ""; // Clear the input value if hidden
-    }
-}
-
-// Toggling checkbox for any significant risk displays the comment box
-function toggleSignificantRisk() {
-    var significantRiskCheckbox = document.getElementById('significantRiskCheckbox');
-    var significantRiskRow = document.getElementById('significantRiskRow');
-    var significantRiskComment = document.getElementById('significantRiskComment');
-
-    if (significantRiskCheckbox.checked) {
-        significantRiskRow.style.display = '';
-        significantRiskComment.disabled = false;
-    } else {
-        significantRiskRow.style.display = 'none';
-        significantRiskComment.disabled = true;
-        significantRiskComment.value = '';
     }
 }
 

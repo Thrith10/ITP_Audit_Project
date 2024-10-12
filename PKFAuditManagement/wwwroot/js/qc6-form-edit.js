@@ -1,7 +1,6 @@
 ﻿$(document).ready(function () {
     toggleRiskLevel();
     toggleSectionBResult();
-    toggleSignificantRisk();
     toggleSTR();
     togglePredecessorReasonsInput();
 
@@ -201,6 +200,29 @@
 
     // Initial load: Call the function to ensure the correct visibility based on the current selection
     toggleCommentInput();
+
+    // Toggling checkbox for any significant risk displays the comment box
+    function toggleSignificantRisk() {
+        var yesSelected = document.getElementById('anySignificantRiskYes').checked;
+        var significantRiskRow = document.getElementById('significantRiskRow');
+        var significantRiskComment = document.getElementById('significantRiskComment');
+
+        if (yesSelected) {
+            significantRiskRow.style.display = '';
+            significantRiskComment.disabled = false;
+        } else {
+            significantRiskRow.style.display = 'none';
+            significantRiskComment.disabled = true;
+            significantRiskComment.value = '';
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('anySignificantRiskYes').addEventListener('change', toggleSignificantRisk);
+    document.getElementById('anySignificantRiskNo').addEventListener('change', toggleSignificantRisk);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleSignificantRisk();
 });
 
 $("#autocomplete").autocomplete({
@@ -448,18 +470,6 @@ function toggleRiskLevel() {
         riskLevelRow.show();
     } else {
         riskLevelRow.hide();
-    }
-}
-
-// Function to display comment for significant risk field based on checkbox value
-function toggleSignificantRisk() {
-    var significantRiskCheckbox = $('#significantRiskCheckbox');
-    var significantRiskRow = $('#significantRiskRow');
-
-    if (significantRiskCheckbox.is(':checked')) {
-        significantRiskRow.show();
-    } else {
-        significantRiskRow.hide();
     }
 }
 

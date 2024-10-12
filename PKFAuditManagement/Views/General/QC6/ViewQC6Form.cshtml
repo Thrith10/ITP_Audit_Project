@@ -534,21 +534,29 @@
 
                                 <h5 class="card-title">Conclusion</h5>
                                 <div class="row mb-3">
-                                    <label for="inputEmail3" class="col-sm-2 col-form-label">
-                                        Are there any significant risks associated with the acceptance of the engagement?<span class="text-danger"> *</span>
-                                    </label>
-                                    <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input me-3" type="checkbox" onchange="toggleSignificantRisk()" id="significantRiskCheckbox" asp-for="AnySignificantRisk" disabled>
+                                    <label class="col-sm-2 col-form-label">Are there any significant risks associated with the acceptance of the engagement?<span class="text-danger"> *</span></label>
+                                    <div class="col-sm-10 d-flex flex-column">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="AnySignificantRisk" value="true" @(Model.AnySignificantRisk == true ? "checked" : "") disabled>
+                                            <label class="form-check-label">Yes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="AnySignificantRisk" value="false" @(Model.AnySignificantRisk == false ? "checked" : "") disabled>
+                                            <label class="form-check-label">No</label>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="row mb-3" id="significantRiskRow" style="display: none;">
-                                    <label for="inputEmail3" class="col-sm-2 col-form-label">
-                                        Describe these risks and what safeguards are disabled to reduce these risks to an acceptable level before acceptance of this engagement.
-                                    </label>
-                                    <div class="col-sm-10 d-flex align-items-center">
-                                        <textarea class="form-control" id="significantRiskComment" rows="4" asp-for="SignificantRiskComment" disabled></textarea>
+                                @if (Model.AnySignificantRisk == true)
+                                {
+                                    <div class="row mb-3">
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">
+                                            Describe these risks and what safeguards are disabled to reduce these risks to an acceptable level before acceptance of this engagement.
+                                        </label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <textarea class="form-control" id="significantRiskComment" rows="4" asp-for="SignificantRiskComment" disabled></textarea>
+                                        </div>
                                     </div>
-                                </div>
+                                }
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">New engagement / *client risk rated as: <br> *See <a>Appendix 2</a> for categories of risks<span class="text-danger"> *</span></label>
                                     <div class="col-sm-10 d-flex align-items-center">
