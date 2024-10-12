@@ -27,7 +27,7 @@ namespace PKFAuditManagement
                     // Only redirect when accessing the root or login page
                     if (context.Request.Path == "/" || context.Request.Path.StartsWithSegments("/Identity/Account/Login"))
                     {
-                        if (roles.Contains("Admin"))
+                        if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                         {
                             context.Response.Redirect("/Admin/AdminDashboard");
                             return;

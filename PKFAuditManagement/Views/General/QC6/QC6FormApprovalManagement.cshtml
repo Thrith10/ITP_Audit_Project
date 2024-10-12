@@ -13,13 +13,20 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-6">
-                                <h5 class="card-title">View All QC6 Forms</h5>
+                                <h5 class="card-title">Manage QC6 Forms</h5>
                             </div>
                             <div class="col-6 mt-3 text-end">
                                 <a asp-controller="QC6Form" asp-action="QC6FormCreation" class="btn btn-primary btn-lg">Create Form</a>
                             </div>
                         </div>
-                        <p>As an Admin, you will be able to view, edit and delete QC6 forms. Additionally, you will be able to approve or reject submitted QC6 forms.</p>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <p>The table displays the QC6 Forms that have been created by everyone. Administrators are able to create, edit and delete any QC6 Form.</p>
+                        }
+                        else
+                        {
+                            <p>The table displays the QC6 Forms that have been created by you. Reviewers are able to create, edit and delete QC6 Forms.</p>
+                        }
 
                         <div class="table-responsive">
                             <table class="table datatable" id="engagementTable">

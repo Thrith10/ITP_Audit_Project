@@ -45,14 +45,18 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/QC7/QC7FormManagement.cshtml", engagements);
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> QC7FormCreationAsync()
         {
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
+
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
@@ -63,16 +67,34 @@ namespace PKFAuditManagement.Controllers
                                              .ToListAsync(); // Fetch the ordered list of unique client names
 
             // Retrieve QC7Form data
-            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, ClientNames = clientNames, AdminEmails = adminEmails.OrderBy(email => email).ToList(), IsNewForm = true });
+            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, ClientNames = clientNames, AdminEmails = combinedEmails, IsNewForm = true });
 
             return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Reviewer")]
         public async Task<IActionResult> QC7FormApprovalManagement()
         {
-            // Retrieve engagement data from database
-            var qc7forms = _context.QC7Forms.ToList();
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+
+            // Check if the user is in the "Admin" role
+            bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
+            // Retrieve QC7Form data from the database
+            List<QC7Form> selectedForms;
+
+            if (isAdmin)
+            {
+                // If the user is an Admin, retrieve all forms
+                selectedForms = _context.QC7Forms.ToList();
+            }
+            else
+            {
+                // Otherwise, retrieve only those created by the current user
+                selectedForms = _context.QC7Forms.Where(e => e.CreatedBy.Equals(userId)).ToList();
+            }
 
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
@@ -99,13 +121,13 @@ namespace PKFAuditManagement.Controllers
             {
                 FirstApproverConclusions = qc7FormConclusionsFirstApprover,
                 SecondApproverConclusions = qc7FormConclusionsSecondApprover,
-                AllQC7Forms = qc7forms
+                AllQC7Forms = selectedForms
             };
 
             return View("~/Views/General/QC7/QC7FormApprovalManagement.cshtml", viewModel);
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> EditQC7Form(int id)
         {
             // Get the current user's ID
@@ -116,8 +138,12 @@ namespace PKFAuditManagement.Controllers
             }
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
+
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
             try
             {
@@ -129,8 +155,8 @@ namespace PKFAuditManagement.Controllers
                 // Populate Sub Forms
                 var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel());
 
-                // Append emails to viewModel
-                viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+                // Append combined emails to viewModel
+                viewModel.AdminEmails = combinedEmails;
 
                 // Retrieve Conclusion data
                 var conclusionData = _context.QC7FormConclusions.FirstOrDefault(e => e.QC7FormID.Equals(id));
@@ -285,7 +311,7 @@ namespace PKFAuditManagement.Controllers
             }
             catch (Exception ex)
             {
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -298,7 +324,7 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> UpdateQC7Form(QC7FormCreationViewModel viewModel)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -310,12 +336,15 @@ namespace PKFAuditManagement.Controllers
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
 
-            // Append emails to viewModel
-            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
+            // Append combined emails to viewModel
+            viewModel.AdminEmails = combinedEmails;
 
             if (!ModelState.IsValid)
             {
@@ -688,7 +717,7 @@ namespace PKFAuditManagement.Controllers
                     await _emailSender.SendEmailAsync(recipient, subject, body);
                 }
 
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -703,7 +732,7 @@ namespace PKFAuditManagement.Controllers
             {
                 // Log the error
                 viewModel.ErrorMessage = "Error updating the form, please try again!";
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -730,11 +759,12 @@ namespace PKFAuditManagement.Controllers
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
 
-            // Append emails to viewModel
-            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
@@ -796,7 +826,7 @@ namespace PKFAuditManagement.Controllers
                 var feeDetailData = _context.QC7FormFeeDetails.Where(e => e.QC7FormID.Equals(id)).ToList();
 
                 // Append emails to viewModel
-                viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+                viewModel.AdminEmails = combinedEmails;
 
                 // Retrieve TNATNEAssessment data
                 var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC7FormID.Equals(id));
@@ -928,7 +958,7 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> ViewQC7Form(int id)
         {
             // Get the current user's ID
@@ -1091,7 +1121,7 @@ namespace PKFAuditManagement.Controllers
             }
             catch
             {
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -1106,7 +1136,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> SubmitQC7Form(QC7FormCreationViewModel viewModel)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -1118,11 +1148,15 @@ namespace PKFAuditManagement.Controllers
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
 
-            // Append emails to viewModel
-            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
+
+            // Append combined emails to viewModel
+            viewModel.AdminEmails = combinedEmails;
 
             if (!ModelState.IsValid)
             {
@@ -1357,7 +1391,7 @@ namespace PKFAuditManagement.Controllers
                 // Set the success message for the toast notification
                 TempData["QC7CreateMessage"] = "QC7 Form created successfully.";
 
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
@@ -1372,7 +1406,7 @@ namespace PKFAuditManagement.Controllers
             {
                 // Log the error
                 viewModel.ErrorMessage = "An error occurred while processing your request. Please try again.";
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
@@ -1386,7 +1420,7 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "User,Admin,Non-Auditor")]
+        [Authorize(Roles = "User,Admin,Non-Auditor,Reviewer")]
         public IActionResult DeleteQC7Form(int id)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -1424,7 +1458,7 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Reviewer")]
         [HttpPost]
         [Route("/QC7Form/ApproveQC7Form/{id}")]
         public async Task<IActionResult> ApproveQC7Form(int id)
@@ -1530,7 +1564,7 @@ namespace PKFAuditManagement.Controllers
             return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Reviewer")]
         [HttpPost]
         [Route("/QC7Form/RejectQC7Form/{id}")]
         public async Task<IActionResult> RejectQC7Form(int id)

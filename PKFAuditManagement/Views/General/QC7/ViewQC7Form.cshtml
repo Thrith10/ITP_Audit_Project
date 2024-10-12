@@ -651,7 +651,7 @@
                                 </p>
                                 <div class="text-center">
                                     <a class="btn btn-primary" href="javascript:history.back()">Back</a>
-                                    @if (role == "Admin")
+                                    @if (role == "Admin" || role == "Reviewer")
                                     {
                                         if (Model.Status == "Pending" || Model.Status == "Pending 2nd Approval")
                                         {

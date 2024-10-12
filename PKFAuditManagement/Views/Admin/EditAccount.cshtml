@@ -55,7 +55,7 @@
                             </div>
                             <div class="col-12">
                                 <label for="role">Role</label>
-                                @Html.DropDownListFor(m => m.Role, new SelectList(new[] { "User", "Non-Auditor", "Admin" }), new { @class = "form-control" })
+                                @Html.DropDownListFor(m => m.Role, new SelectList(new[] { "User", "Non-Auditor", "Admin", "Reviewer" }), new { @class = "form-control" })
                             </div>
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary">Save Changes</button>

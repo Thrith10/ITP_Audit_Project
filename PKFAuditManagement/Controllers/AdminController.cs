@@ -27,18 +27,20 @@ namespace PKFAuditManagement.Controllers
             _emailSender = emailSender;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Reviewer")]
         public IActionResult AdminDashboard()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult CreateAccount()
         {
             var viewModel = new UserViewModel();
             return View("~/Views/Admin/CreateAccount.cshtml", viewModel);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult EditAccount()
         {
             return View("~/Views/Admin/EditAccount.cshtml");

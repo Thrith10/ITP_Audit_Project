@@ -15,13 +15,19 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-6">
-                                <h5 class="card-title">View All QC7 Forms</h5>
+                                <h5 class="card-title">Manage QC7 Forms</h5>
                             </div>
                             <div class="col-6 mt-3 text-end">
                                 <a asp-controller="QC7Form" asp-action="QC7FormCreation" class="btn btn-primary btn-lg">Create Form</a>
                             </div>
                         </div>
-                        <p>As an Admin, you will be able to view, edit and delete QC7 forms. Additionally, you will be able to approve or reject submitted QC7 forms.</p>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <p>The table displays the QC7 Forms that have been created by everyone. Administrators are able to create, edit and delete any QC7 Form.</p>
+                        } else
+                        {
+                            <p>The table displays the QC7 Forms that have been created by you. Reviewers are able to create, edit and delete QC7 Forms.</p>
+                        }
 
                         <!-- Table with stripped rows -->
                         <div class="table-responsive">
