@@ -232,13 +232,24 @@ $(document).ready(function () {
     function updateBudgetedFeeRecoveryRate() {
         var estimatedFee = parseFloat($("#EstimatedFee").val());
         var budgetedTimeCost = parseFloat($("#BudgetedTimeCost").val());
+        var commentBox = $("#commentBoxContainer");
+
         if (!isNaN(estimatedFee) && !isNaN(budgetedTimeCost) && budgetedTimeCost !== 0) {
             var budgetedFeeRecoveryRate = (estimatedFee / budgetedTimeCost) * 100;
             budgetedFeeRecoveryRate = budgetedFeeRecoveryRate.toFixed(2);
             $("#BudgetedFeeRecoveryRate").val(budgetedFeeRecoveryRate);
             $("#BudgetedFeeRecoveryRateHidden").val(budgetedFeeRecoveryRate);
+
+            // Check if recovery rate is below 30%
+            if (budgetedFeeRecoveryRate < 30) {
+                commentBox.show(); // Show the comment box
+            } else {
+                commentBox.hide(); // Hide the comment box
+            }
+
         } else {
             $("#BudgetedFeeRecoveryRate").val("");
+            commentBox.hide(); // Hide the comment box if values are not valid
         }
     }
 

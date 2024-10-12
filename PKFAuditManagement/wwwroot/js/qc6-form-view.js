@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
 // Function to display comment risk level field based on checkbox value
 function toggleRiskLevel() {
     var pieCheckbox = $('#pieCheckbox');

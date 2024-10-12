@@ -147,6 +147,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.EstimatedFee = qc6formData.EstimatedFee;
                 viewModel.BudgetedTimeCost = qc6formData.BudgetedTimeCost;
                 viewModel.BudgetedFeeRecoveryRate = qc6formData.BudgetedFeeRecoveryRate;
+                viewModel.BudgetedFeeRecoveryRateComment = qc6formData.BudgetedFeeRecoveryRateComment;
                 viewModel.OutstandingUnpaidFees = qc6formData.OutstandingUnpaidFees;
 
                 // Check if Outstanding Unpaid Fees is true
@@ -309,6 +310,14 @@ namespace PKFAuditManagement.Controllers
                 qc6form.EstimatedFee = viewModel.EstimatedFee.Value;
                 qc6form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
                 qc6form.BudgetedFeeRecoveryRate = viewModel.BudgetedFeeRecoveryRate.Value;
+
+                // Re-validate budgeted fee recovery rate for QC6 Form 
+                if (viewModel.BudgetedFeeRecoveryRate >= 30)
+                {
+                    viewModel.BudgetedFeeRecoveryRateComment = null;
+                }
+
+                qc6form.BudgetedFeeRecoveryRateComment = viewModel.BudgetedFeeRecoveryRateComment;
                 qc6form.OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees;
 
                 // Check if Outstanding Unpaid Fees is selected
@@ -745,6 +754,8 @@ namespace PKFAuditManagement.Controllers
                 viewModel.EstimatedFee = qc6formData.EstimatedFee;
                 viewModel.BudgetedTimeCost = qc6formData.BudgetedTimeCost;
                 viewModel.BudgetedFeeRecoveryRate = qc6formData.BudgetedFeeRecoveryRate;
+                viewModel.BudgetedFeeRecoveryRateComment = qc6formData.BudgetedFeeRecoveryRateComment;
+
                 viewModel.OutstandingUnpaidFees = qc6formData.OutstandingUnpaidFees;
 
                 // Check if value is true, else don't set the comment 
@@ -1219,10 +1230,16 @@ namespace PKFAuditManagement.Controllers
                 // Get the current user's ID
                 var userId = user?.Id;
 
-                // Re-validate form inputs for QC6 Form
+                // Re-validate outstanding unpaid fees for QC6 Form 
                 if (viewModel.OutstandingUnpaidFees == false)
                 {
                     viewModel.OutstandingUnpaidFeesComment = null;
+                }
+
+                // Re-validate budgeted fee recovery rate for QC6 Form 
+                if (viewModel.BudgetedFeeRecoveryRate >= 30)
+                {
+                    viewModel.BudgetedFeeRecoveryRateComment = null;
                 }
 
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
@@ -1254,6 +1271,7 @@ namespace PKFAuditManagement.Controllers
                     EstimatedFee = viewModel.EstimatedFee.Value,
                     BudgetedTimeCost = viewModel.BudgetedTimeCost.Value,
                     BudgetedFeeRecoveryRate = viewModel.BudgetedFeeRecoveryRate.Value,
+                    BudgetedFeeRecoveryRateComment = viewModel.BudgetedFeeRecoveryRateComment,
                     OutstandingUnpaidFees = viewModel.OutstandingUnpaidFees,
                     OutstandingUnpaidFeesComment = viewModel.OutstandingUnpaidFeesComment,
                     GrandTotal = viewModel.GrandTotal.Value,

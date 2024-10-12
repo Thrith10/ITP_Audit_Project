@@ -113,6 +113,17 @@
                                             </div>
                                         </div>
                                     </div>
+                                    @{
+                                        var budgetedFeeRecoveryRate = Model.BudgetedFeeRecoveryRate ?? 0; 
+                                        var showCommentBox = budgetedFeeRecoveryRate < 30;
+                                    }
+                                    <div class="row mb-3" id="commentBoxContainer" style="@(showCommentBox ? "" : "display: none;")">
+                                        <label class="col-sm-2 col-form-label">Comments on Budgeted Fee Recovery Rate</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="BudgetedFeeRecoveryRateComment" id="FeeRecoveryComments"
+                                                   placeholder="Please provide reasons if the recovery rate is below 30%">
+                                        </div>
+                                    </div>
                                     <div class="card border border-secondary p-3 mb-3">
                                         <div class="card-body">
                                             <div class="row">
