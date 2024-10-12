@@ -25,14 +25,16 @@ namespace PKFAuditManagement.ViewModels
         public decimal? EstimatedFee { get; set; }
         public decimal? BudgetedTimeCost { get; set; }
         public decimal? BudgetedFeeRecoveryRate { get; set; }
+        public string? BudgetedFeeRecoveryRateComment { get; set; }
         public bool OutstandingUnpaidFees { get; set; }
+        public string? OutstandingUnpaidFeesComment { get; set; }
         public decimal? AuditFee { get; set; }
         public decimal? GrandTotal { get; set; }
         public decimal? FeeConcentration { get; set; }
         public bool ConflictsCheckDone { get; set; }
         public string? TypeOfActivities { get; set; }
         public string? ComplexityOfEngagement { get; set; }
-        public string? PredecessorAuditor { get; set; }
+        public bool PredecessorAuditor { get; set; }
         public string? ReasonsForDiscontinuance { get; set; }
         public bool IsPublicInterestEntity { get; set; }
         public string? PublicInterestEntityType { get; set; }
