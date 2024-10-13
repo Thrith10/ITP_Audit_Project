@@ -153,8 +153,23 @@
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid audit fees?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="outstandingUnpaidAuditFeesYes" name="AnyOutstandingUnpaidAuditFees" value="true" @(Model.AnyOutstandingUnpaidAuditFees == true ? "checked" : "")>
+                                                <label class="form-check-label" for="outstandingUnpaidAuditFeesYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="outstandingUnpaidAuditFeesNo" name="AnyOutstandingUnpaidAuditFees" value="false" @(Model.AnyOutstandingUnpaidAuditFees == false ? "checked" : "")>
+                                                <label class="form-check-label" for="outstandingUnpaidAuditFeesNo">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3" id="outstandingUnpaidFeesRow" style="display: none;">
+                                        <label for="outstandingUnpaidFeesCommentInput" class="col-sm-2 col-form-label">
+                                            Comment on Outstanding Unpaid Audit Fees
+                                        </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidAuditFees">
+                                            <input class="form-control" id="outstandingUnpaidAuditFeesComment" asp-for="AnyOutstandingUnpaidAuditFeesComment">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -171,8 +186,15 @@
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any Suspicious Transaction Report filed with CAD in prior year(s)?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" onchange="toggleSuspiciousTransactionReportPriorYear()" id="suspiciousTransactionReportPriorYearCheckbox" asp-for="AnySuspiciousTransactionReportFiled">
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anySuspiciousTransactionReportFiledYes" name="AnySuspiciousTransactionReportFiled" value="true" @(Model.AnySuspiciousTransactionReportFiled == true ? "checked" : "")>
+                                                <label class="form-check-label" for="anySuspiciousTransactionReportFiledYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anySuspiciousTransactionReportFiledNo" name="AnySuspiciousTransactionReportFiled" value="false" @(Model.AnySuspiciousTransactionReportFiled == false ? "checked" : "")>
+                                                <label class="form-check-label" for="anySuspiciousTransactionReportFiledNo">No</label>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row mb-3" id="suspiciousTransactionReportPriorYearRow" style="display: none;">
@@ -189,51 +211,23 @@
                                     </div>            
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid non-audit fees?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidNonAuditFees">
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anyOutstandingUnpaidNonAuditFeesYes" name="AnyOutstandingUnpaidNonAuditFees" value="true" @(Model.AnyOutstandingUnpaidNonAuditFees == true ? "checked" : "")>
+                                                <label class="form-check-label" for="anyOutstandingUnpaidNonAuditFeesYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anyOutstandingUnpaidNonAuditFeesNo" name="AnyOutstandingUnpaidNonAuditFees" value="false" @(Model.AnyOutstandingUnpaidNonAuditFees == false ? "checked" : "")>
+                                                <label class="form-check-label" for="anyOutstandingUnpaidNonAuditFeesNo">No</label>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Proposed fee for current year<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" id="proposedFeeCurrentYear" step="0.01" placeholder="0.00" required>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" step="0.01" id="budgetedTimeCost" required>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.
-                                            And to disclose reasons for continuance if the recovery rate is below 30%.">
-                                            <span class="link-text">Proposed recovery rate for current year (Proposed fee for current year / Budgeted Time Cost)</span>
+                                    <div class="row mb-3" id="outstandingUnpaidNonAuditFeesRow" style="display: none;">
+                                        <label for="outstandingUnpaidAuditFeesCommentInput" class="col-sm-2 col-form-label">
+                                            Comment on Outstanding Unpaid Non-Audit Fees
                                         </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="number" class="form-control" disabled id="proposedRecoveryRateCurrentYear" placeholder="0.00">
-                                            <input type="hidden" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3" id="riskLevelRow" style="display:none;">
-                                        <label class="col-sm-2 col-form-label">Type of PIE</label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType">
-                                                <option value="Listed">Listed</option>
-                                                <option value="Financial Institution">Financial Institution</option>
-                                                <option value="Large Charity">Large Charity</option>
-                                                <option value="Large Institution of Public Character (“IPC”)">Large Institution of Public Character (“IPC”)</option>
-                                            </select>
+                                            <input class="form-control" id="outstandingUnpaidAuditFeesCommentInput" asp-for="AnyOutstandingUnpaidNonAuditFeesComment">
                                         </div>
                                     </div>
                                     <div class="card border border-secondary p-3 mb-3">
@@ -295,8 +289,10 @@
                                             </div>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">
-                                                    Fee concentration (Non-audit services fees / audit fees = x%) <br> <i>To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
-                                                    Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.</i>
+                                                    Fee concentration (Non-audit services fees / audit fees = x%) <br> <i>
+                                                        To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
+                                                        Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.
+                                                    </i>
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
                                                     <input type="number" class="form-control" id="feeConcentration" disabled>
@@ -304,6 +300,49 @@
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Proposed fee for current year<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" id="proposedFeeCurrentYear" step="0.01" placeholder="0.00" required>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" step="0.01" id="budgetedTimeCost" required>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.
+                                            And to disclose reasons for continuance if the recovery rate is below 30%.">
+                                            <span class="link-text">Proposed recovery rate for current year (Proposed fee for current year / Budgeted Time Cost)</span>
+                                        </label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="number" class="form-control" disabled id="proposedRecoveryRateCurrentYear" placeholder="0.00">
+                                            <input type="hidden" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3" id="riskLevelRow" style="display:none;">
+                                        <label class="col-sm-2 col-form-label">Type of PIE</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType">
+                                                <option value="Listed">Listed</option>
+                                                <option value="Financial Institution">Financial Institution</option>
+                                                <option value="Large Charity">Large Charity</option>
+                                                <option value="Large Institution of Public Character (“IPC”)">Large Institution of Public Character (“IPC”)</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <br>
@@ -633,8 +672,15 @@
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">
                                         Based on the above information, are there any risks associated with the proposed work? <span class="text-danger"> *</span>
                                     </label>
-                                    <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input" type="checkbox" id="risksAssociatedCheckbox" onchange="toggleRisksAssociated()" asp-for="AnyRiskAssociated">
+                                    <div class="col-sm-10 d-flex flex-column">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="anyRisksYes" name="AnyRiskAssociated" value="true" @(Model.AnyRiskAssociated == true ? "checked" : "")>
+                                            <label class="form-check-label" for="anyRisksYes">Yes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="anyRisksNo" name="AnyRiskAssociated" value="false" @(Model.AnyRiskAssociated == false ? "checked" : "")>
+                                            <label class="form-check-label" for="anyRisksNo">No</label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div id="risksAssociatedRow" style="display:none;">
@@ -646,8 +692,21 @@
                                     </div>
                                     <div class="row mb-3">
                                         <label for="inputPassword3" class="col-sm-2 col-form-label">(b)	Are there any safeguards that should be applied?</label>
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anySafeguardsYes" name="IsSafeguardApplied" value="true" @(Model.IsSafeguardApplied == true ? "checked" : "")>
+                                                <label class="form-check-label" for="anySafeguardsYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anySafeguardsNo" name="IsSafeguardApplied" value="false" @(Model.IsSafeguardApplied == false ? "checked" : "")>
+                                                <label class="form-check-label" for="anySafeguardsNo">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3" id="safeguardsAppliedRow" style="display:none;">
+                                        <label for="inputPassword3" class="col-sm-2 col-form-label">Name the safeguards that should be applied </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="isSafeguardApplied" asp-for="IsSafeguardApplied">
+                                            <input type="text" class="form-control" asp-for="SafeguardsApplied" id="safeguardsApplied">
                                         </div>
                                     </div>
                                     <div class="row mb-3">

@@ -7,6 +7,7 @@
         public bool AnyRiskAssociated { get; set; }
         public string? RiskExplanationCurrentYearPriorYear { get; set; }
         public bool IsSafeguardApplied { get; set; }
+        public string? SafeguardsApplied { get; set; }
         public string? NatureOfSafeguard { get; set; }
         public required string ContinuingEngagementRiskRated { get; set; }
         public string? SafeguardReviewPartnerAssigned { get; set; }

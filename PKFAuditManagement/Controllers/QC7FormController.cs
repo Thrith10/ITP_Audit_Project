@@ -228,12 +228,14 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
                 viewModel.PriorYearRecoveryRateComment = qc7formData.PriorYearRecoveryRateComment;
                 viewModel.AnyOutstandingUnpaidAuditFees = qc7formData.AnyOutstandingUnpaidAuditFees;
+                viewModel.AnyOutstandingUnpaidAuditFeesComment = qc7formData.AnyOutstandingUnpaidAuditFeesComment;
                 viewModel.TypeOfClientActivities = qc7formData.TypeOfClientActivities;
                 viewModel.RiskRatingPriorYear = qc7formData.RiskRatingPriorYear;
                 viewModel.AnySuspiciousTransactionReportFiled = qc7formData.AnySuspiciousTransactionReportFiled;
                 viewModel.SuspiciousTransactionReportFiledComment = qc7formData.SuspiciousTransactionReportFiledComment;
                 viewModel.SafeguardReviewerName = qc7formData.SafeguardReviewerName;
                 viewModel.AnyOutstandingUnpaidNonAuditFees = qc7formData.AnyOutstandingUnpaidNonAuditFees;
+                viewModel.AnyOutstandingUnpaidNonAuditFeesComment = qc7formData.AnyOutstandingUnpaidNonAuditFeesComment;
                 viewModel.GrandTotal = qc7formData.GrandTotal;
                 viewModel.AuditFee = qc7formData.AuditFee;
                 viewModel.FeeConcentration = qc7formData.FeeConcentration;
@@ -253,6 +255,12 @@ namespace PKFAuditManagement.Controllers
                     viewModel.RiskExplanationCurrentYearPriorYear = conclusionData.RiskExplanationCurrentYearPriorYear;
                     viewModel.IsSafeguardApplied = conclusionData.IsSafeguardApplied;
                     viewModel.NatureOfSafeguard = conclusionData.NatureOfSafeguard;
+
+                    // Only set safeguards applied if risks associated is true
+                    if (viewModel.IsSafeguardApplied == true)
+                    {
+                        viewModel.SafeguardsApplied = conclusionData.SafeguardsApplied;
+                    }
                 }
 
                 viewModel.ContinuingEngagementRiskRated = conclusionData.ContinuingEngagementRiskRated;
@@ -380,7 +388,7 @@ namespace PKFAuditManagement.Controllers
                 qc7form.TimeCosts = viewModel.TimeCosts.Value;
                 qc7form.PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value;
 
-                // Re-validate prior year recovery rate for QC6 Form 
+                // Re-validate prior year recovery rate for QC7 Form 
                 if (viewModel.PriorYearRecoveryRate >= 30)
                 {
                     viewModel.PriorYearRecoveryRateComment = null;
@@ -388,11 +396,20 @@ namespace PKFAuditManagement.Controllers
 
                 qc7form.PriorYearRecoveryRateComment = viewModel.PriorYearRecoveryRateComment;
                 qc7form.AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees;
+
+                // Check if Outstanding Unpaid Fees is selected
+                if (viewModel.AnyOutstandingUnpaidAuditFees == true)
+                {
+                    qc7form.AnyOutstandingUnpaidAuditFeesComment = viewModel.AnyOutstandingUnpaidAuditFeesComment;
+                }
+                else
+                {
+                    qc7form.AnyOutstandingUnpaidAuditFeesComment = null;
+                }
+
                 qc7form.TypeOfClientActivities = viewModel.TypeOfClientActivities;
                 qc7form.RiskRatingPriorYear = viewModel.RiskRatingPriorYear;
                 qc7form.AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled;
-                qc7form.GrandTotal = viewModel.GrandTotal.Value;
-                qc7form.AuditFee = viewModel.AuditFee.Value;
 
                 // Set to null if not selected
                 if (qc7form.AnySuspiciousTransactionReportFiled == false)
@@ -404,8 +421,21 @@ namespace PKFAuditManagement.Controllers
                     qc7form.SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment;
                 }
 
+                qc7form.GrandTotal = viewModel.GrandTotal.Value;
+                qc7form.AuditFee = viewModel.AuditFee.Value;
                 qc7form.SafeguardReviewerName = viewModel.SafeguardReviewerName;
                 qc7form.AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees;
+
+                // Check if Outstanding Unpaid Non-Audit Fees is selected
+                if (viewModel.AnyOutstandingUnpaidNonAuditFees == true)
+                {
+                    qc7form.AnyOutstandingUnpaidNonAuditFeesComment = viewModel.AnyOutstandingUnpaidNonAuditFeesComment;
+                }
+                else
+                {
+                    qc7form.AnyOutstandingUnpaidNonAuditFeesComment = null;
+                }
+
                 qc7form.FeeConcentration = viewModel.FeeConcentration.Value;
                 qc7form.ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value;
                 qc7form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
@@ -482,12 +512,18 @@ namespace PKFAuditManagement.Controllers
                         qc7formConclusion.RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear;
                         qc7formConclusion.IsSafeguardApplied = viewModel.IsSafeguardApplied;
                         qc7formConclusion.NatureOfSafeguard = viewModel.NatureOfSafeguard;
+
+                        if (viewModel.IsSafeguardApplied == true)
+                        {
+                            qc7formConclusion.SafeguardsApplied = viewModel.SafeguardsApplied;
+                        }
                     }
                     else
                     {
                         qc7formConclusion.RiskExplanationCurrentYearPriorYear = null;
                         qc7formConclusion.IsSafeguardApplied = false;
                         qc7formConclusion.NatureOfSafeguard = null;
+                        qc7formConclusion.SafeguardsApplied = null;
                     }
 
                     qc7formConclusion.ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated;
@@ -1049,12 +1085,14 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PriorYearRecoveryRate = QC7formData.PriorYearRecoveryRate;
                 viewModel.PriorYearRecoveryRateComment = QC7formData.PriorYearRecoveryRateComment;
                 viewModel.AnyOutstandingUnpaidAuditFees = QC7formData.AnyOutstandingUnpaidAuditFees;
+                viewModel.AnyOutstandingUnpaidAuditFeesComment = QC7formData.AnyOutstandingUnpaidAuditFeesComment;
                 viewModel.TypeOfClientActivities = QC7formData.TypeOfClientActivities;
                 viewModel.RiskRatingPriorYear = QC7formData.RiskRatingPriorYear;
                 viewModel.AnySuspiciousTransactionReportFiled = QC7formData.AnySuspiciousTransactionReportFiled;
                 viewModel.SuspiciousTransactionReportFiledComment = QC7formData.SuspiciousTransactionReportFiledComment;
                 viewModel.SafeguardReviewerName = QC7formData.SafeguardReviewerName;
                 viewModel.AnyOutstandingUnpaidNonAuditFees = QC7formData.AnyOutstandingUnpaidNonAuditFees;
+                viewModel.AnyOutstandingUnpaidNonAuditFeesComment = QC7formData.AnyOutstandingUnpaidNonAuditFeesComment;
                 viewModel.GrandTotal = QC7formData.GrandTotal;
                 viewModel.AuditFee = QC7formData.AuditFee;
                 viewModel.FeeConcentration = QC7formData.FeeConcentration;
@@ -1074,7 +1112,14 @@ namespace PKFAuditManagement.Controllers
                     viewModel.RiskExplanationCurrentYearPriorYear = conclusionData.RiskExplanationCurrentYearPriorYear;
                     viewModel.IsSafeguardApplied = conclusionData.IsSafeguardApplied;
                     viewModel.NatureOfSafeguard = conclusionData.NatureOfSafeguard;
+
+                    // Only set safeguards applied if risks associated is true
+                    if (viewModel.IsSafeguardApplied == true)
+                    {
+                        viewModel.SafeguardsApplied = conclusionData.SafeguardsApplied;
+                    }
                 }
+
                 viewModel.ContinuingEngagementRiskRated = conclusionData.ContinuingEngagementRiskRated;
                 viewModel.SafeguardReviewPartnerAssigned = conclusionData.SafeguardReviewPartnerAssigned;
 
@@ -1193,10 +1238,28 @@ namespace PKFAuditManagement.Controllers
                     viewModel.PublicInterestEntityType = null;
                 }
 
-                // Re-validate prior year recovery rate for QC6 Form 
+                // Re-validate prior year recovery rate for QC7 Form 
                 if (viewModel.PriorYearRecoveryRate >= 30)
                 {
                     viewModel.PriorYearRecoveryRateComment = null;
+                }
+
+                // Re-validate outstanding unpaid audit fees for QC7 Form 
+                if (viewModel.AnyOutstandingUnpaidAuditFees == false)
+                {
+                    viewModel.AnyOutstandingUnpaidAuditFeesComment = null;
+                }
+
+                // Re-validate outstanding unpaid fees for QC7 Form 
+                if (viewModel.AnySuspiciousTransactionReportFiled == false)
+                {
+                    viewModel.SuspiciousTransactionReportFiledComment = null;
+                }
+
+                // Re-validate outstanding unpaid non-audit fees for QC7 Form 
+                if (viewModel.AnyOutstandingUnpaidNonAuditFees == false)
+                {
+                    viewModel.AnyOutstandingUnpaidNonAuditFeesComment = null;
                 }
 
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
@@ -1221,12 +1284,14 @@ namespace PKFAuditManagement.Controllers
                     PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value,
                     PriorYearRecoveryRateComment = viewModel.PriorYearRecoveryRateComment,
                     AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees,
+                    AnyOutstandingUnpaidAuditFeesComment = viewModel.AnyOutstandingUnpaidAuditFeesComment,
                     TypeOfClientActivities = viewModel.TypeOfClientActivities,
                     RiskRatingPriorYear = viewModel.RiskRatingPriorYear,
                     AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled,
                     SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment,
                     SafeguardReviewerName = viewModel.SafeguardReviewerName,
                     AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees,
+                    AnyOutstandingUnpaidNonAuditFeesComment = viewModel.AnyOutstandingUnpaidNonAuditFeesComment,
                     GrandTotal = viewModel.GrandTotal.Value,
                     AuditFee = viewModel.AuditFee.Value,
                     FeeConcentration = viewModel.FeeConcentration.Value,
@@ -1246,12 +1311,27 @@ namespace PKFAuditManagement.Controllers
                 // Retrieve the QC7FormID from the saved entity
                 int qc7formId = qc7form.QC7FormID;
 
+                // Re-validate risks associated section for QC7 Form Conclusion
+                if (viewModel.AnyRiskAssociated == false)
+                {
+                    viewModel.RiskExplanationCurrentYearPriorYear = null;
+                    viewModel.IsSafeguardApplied = false;
+                    viewModel.NatureOfSafeguard = null;
+                }
+
+                // Re-validate safeguard applied for QC7 Form Conclusion
+                if (viewModel.IsSafeguardApplied == false)
+                {
+                    viewModel.SafeguardsApplied = null;
+                }
+
                 var qc7formConclusion = new QC7FormConclusion
                 {
                     QC7FormID = qc7formId,
                     AnyRiskAssociated = viewModel.AnyRiskAssociated,
                     RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear,
                     IsSafeguardApplied = viewModel.IsSafeguardApplied,
+                    SafeguardsApplied = viewModel.SafeguardsApplied,
                     NatureOfSafeguard = viewModel.NatureOfSafeguard,
                     ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated,
                     SafeguardReviewPartnerAssigned = viewModel.SafeguardReviewPartnerAssigned,
@@ -1372,7 +1452,7 @@ namespace PKFAuditManagement.Controllers
                 _context.SaveChanges();
 
                 // Root folder name in S3
-                var uploadsRootFolder = "QC6FormDocuments";
+                var uploadsRootFolder = "QC7FormDocuments";
 
                 // Check if null
                 if (viewModel.OtherDocuments != null)

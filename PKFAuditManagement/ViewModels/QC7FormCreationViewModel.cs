@@ -77,6 +77,7 @@ namespace PKFAuditManagement.ViewModels
         public bool AnyRiskAssociated { get; set; }
         public string? RiskExplanationCurrentYearPriorYear { get; set; }
         public bool IsSafeguardApplied { get; set; }
+        public string? SafeguardsApplied { get; set; }
         public string? NatureOfSafeguard { get; set; }
         [Required]
         public string? ContinuingEngagementRiskRated { get; set; }
