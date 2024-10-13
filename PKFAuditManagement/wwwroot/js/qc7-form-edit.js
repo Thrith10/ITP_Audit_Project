@@ -101,14 +101,24 @@ $(document).ready(function () {
     function updatePriorYearRecoveryRate() {
         var comp1 = parseFloat($("#comp1").val());
         var timeCosts = parseFloat($("#timeCosts").val());
+        var commentBox = $("#commentBoxContainer");
 
         if (!isNaN(comp1) && !isNaN(timeCosts) && timeCosts !== 0) {
             var priorYearRecoveryRate = (comp1 / timeCosts) * 100;
             priorYearRecoveryRate = priorYearRecoveryRate.toFixed(2);
             $("#PriorYearRecoveryRate").val(priorYearRecoveryRate);
             $("#PriorYearRecoveryRateHidden").val(priorYearRecoveryRate);
+
+            // Check if recovery rate is below 30%
+            if (priorYearRecoveryRate < 30) {
+                commentBox.show(); // Show the comment box
+            } else {
+                commentBox.hide(); // Hide the comment box
+            }
+
         } else {
             $("#PriorYearRecoveryRate").val("");
+            commentBox.hide(); // Hide the comment box if values are not valid
         }
     }
 

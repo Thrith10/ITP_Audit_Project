@@ -145,7 +145,12 @@
                                             <input type="hidden" asp-for="PriorYearRecoveryRate" id="PriorYearRecoveryRateHidden">
                                         </div>
                                     </div>
-
+                                    <div class="row mb-3" id="commentBoxContainer" style="display: none;">
+                                        <label class="col-sm-2 col-form-label">Comments on Prior Year's' Recovery Rate</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="PriorYearRecoveryRateComment" id="PriorYearRecoveryRateComment" placeholder="Please provide reasons if the recovery rate is below 30%">
+                                        </div>
+                                    </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid audit fees?<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">

@@ -226,6 +226,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PriorYearFee = qc7formData.PriorYearFee;
                 viewModel.TimeCosts = qc7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
+                viewModel.PriorYearRecoveryRateComment = qc7formData.PriorYearRecoveryRateComment;
                 viewModel.AnyOutstandingUnpaidAuditFees = qc7formData.AnyOutstandingUnpaidAuditFees;
                 viewModel.TypeOfClientActivities = qc7formData.TypeOfClientActivities;
                 viewModel.RiskRatingPriorYear = qc7formData.RiskRatingPriorYear;
@@ -378,13 +379,20 @@ namespace PKFAuditManagement.Controllers
                 qc7form.PriorYearFee = viewModel.PriorYearFee.Value;
                 qc7form.TimeCosts = viewModel.TimeCosts.Value;
                 qc7form.PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value;
+
+                // Re-validate prior year recovery rate for QC6 Form 
+                if (viewModel.PriorYearRecoveryRate >= 30)
+                {
+                    viewModel.PriorYearRecoveryRateComment = null;
+                }
+
+                qc7form.PriorYearRecoveryRateComment = viewModel.PriorYearRecoveryRateComment;
                 qc7form.AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees;
                 qc7form.TypeOfClientActivities = viewModel.TypeOfClientActivities;
                 qc7form.RiskRatingPriorYear = viewModel.RiskRatingPriorYear;
                 qc7form.AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled;
                 qc7form.GrandTotal = viewModel.GrandTotal.Value;
                 qc7form.AuditFee = viewModel.AuditFee.Value;
-
 
                 // Set to null if not selected
                 if (qc7form.AnySuspiciousTransactionReportFiled == false)
@@ -1039,6 +1047,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PriorYearFee = QC7formData.PriorYearFee;
                 viewModel.TimeCosts = QC7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = QC7formData.PriorYearRecoveryRate;
+                viewModel.PriorYearRecoveryRateComment = QC7formData.PriorYearRecoveryRateComment;
                 viewModel.AnyOutstandingUnpaidAuditFees = QC7formData.AnyOutstandingUnpaidAuditFees;
                 viewModel.TypeOfClientActivities = QC7formData.TypeOfClientActivities;
                 viewModel.RiskRatingPriorYear = QC7formData.RiskRatingPriorYear;
@@ -1179,9 +1188,15 @@ namespace PKFAuditManagement.Controllers
                 var userId = user?.Id;
 
                 // Re-validate form inputs for QC7 Form
-                if (viewModel.IsPublicInterestEntity == true)
+                if (viewModel.IsPublicInterestEntity == false)
                 {
                     viewModel.PublicInterestEntityType = null;
+                }
+
+                // Re-validate prior year recovery rate for QC6 Form 
+                if (viewModel.PriorYearRecoveryRate >= 30)
+                {
+                    viewModel.PriorYearRecoveryRateComment = null;
                 }
 
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
@@ -1204,6 +1219,7 @@ namespace PKFAuditManagement.Controllers
                     PriorYearFee = viewModel.PriorYearFee.Value,
                     TimeCosts = viewModel.TimeCosts.Value,
                     PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value,
+                    PriorYearRecoveryRateComment = viewModel.PriorYearRecoveryRateComment,
                     AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees,
                     TypeOfClientActivities = viewModel.TypeOfClientActivities,
                     RiskRatingPriorYear = viewModel.RiskRatingPriorYear,

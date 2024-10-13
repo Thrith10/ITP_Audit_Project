@@ -43,7 +43,9 @@ namespace PKFAuditManagement.ViewModels
         [Required]
         public decimal? TimeCosts { get; set; }
         public decimal? PriorYearRecoveryRate { get; set; }
+        public string? PriorYearRecoveryRateComment { get; set; }
         public bool AnyOutstandingUnpaidAuditFees { get; set; }
+        public string? AnyOutstandingUnpaidAuditFeesComment { get; set; }
         [Required]
         public string? TypeOfClientActivities { get; set; }
         [Required]
@@ -52,6 +54,7 @@ namespace PKFAuditManagement.ViewModels
         public string? SuspiciousTransactionReportFiledComment { get; set; }
         public string? SafeguardReviewerName { get; set; }
         public bool AnyOutstandingUnpaidNonAuditFees { get; set; }
+        public string? AnyOutstandingUnpaidNonAuditFeesComment { get; set; }
         [Required]
         public decimal? AuditFee { get; set; }
         [Required]

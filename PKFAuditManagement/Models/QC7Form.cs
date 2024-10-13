@@ -24,13 +24,16 @@ namespace PKFAuditManagement.Models
         public required decimal TimeCosts { get; set; }
         [Precision(18, 2)]
         public required decimal PriorYearRecoveryRate { get; set; }
+        public string? PriorYearRecoveryRateComment { get; set; }
         public bool AnyOutstandingUnpaidAuditFees { get; set; }
+        public string? AnyOutstandingUnpaidAuditFeesComment { get; set; }
         public required string TypeOfClientActivities { get; set; }
         public required string RiskRatingPriorYear { get; set; }
         public bool AnySuspiciousTransactionReportFiled { get; set; }
         public string? SuspiciousTransactionReportFiledComment { get; set; }
         public string? SafeguardReviewerName { get; set; }
         public bool AnyOutstandingUnpaidNonAuditFees { get; set; }
+        public string? AnyOutstandingUnpaidNonAuditFeesComment { get; set; }
         [Precision(18, 2)]
         public decimal AuditFee { get; set; }
         [Precision(18, 2)]
