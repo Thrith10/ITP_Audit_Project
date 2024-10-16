@@ -4,6 +4,7 @@ using PKFAuditManagement.Models;
 using System.Linq;
 using PKFAuditManagement.Data;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -15,7 +16,7 @@ namespace PKFAuditManagement.Controllers
         {
             _context = context;
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult GenerateReports()
         {
             // Step 1: Retrieve the QC6 forms and their corresponding conclusions from the database
@@ -56,14 +57,16 @@ namespace PKFAuditManagement.Controllers
                     EstimatedFee = qc6Form.EstimatedFee,
                     BudgetedTimeCost = qc6Form.BudgetedTimeCost,
                     BudgetedFeeRecoveryRate = qc6Form.BudgetedFeeRecoveryRate,
+                    BudgetedFeeRecoveryRateComment = qc6Form.BudgetedFeeRecoveryRateComment,
                     OutstandingUnpaidFees = qc6Form.OutstandingUnpaidFees,
+                    OutstandingUnpaidFeesComment = qc6Form.OutstandingUnpaidFeesComment,
                     AuditFee = qc6Form.AuditFee,
                     GrandTotal = qc6Form.GrandTotal,
                     FeeConcentration = qc6Form.FeeConcentration,
                     ConflictsCheckDone = qc6Form.ConflictsCheckDone,
                     TypeOfActivities = qc6Form.TypeOfActivities ?? string.Empty,
                     ComplexityOfEngagement = qc6Form.ComplexityOfEngagement ?? string.Empty,
-                    PredecessorAuditor = qc6Form.PredecessorAuditor ?? string.Empty,
+                    PredecessorAuditor = qc6Form.PredecessorAuditor,
                     ReasonsForDiscontinuance = qc6Form.ReasonsForDiscontinuance ?? string.Empty,
                     IsPublicInterestEntity = qc6Form.PublicInterestEntity,
                     PublicInterestEntityType = qc6Form.PublicInterestEntityType ?? string.Empty,
@@ -108,7 +111,7 @@ namespace PKFAuditManagement.Controllers
                     ConflictsCheckDone = qc7Form.AnySuspiciousTransactionReportFiled,
                     TypeOfActivities = qc7Form.TypeOfClientActivities,
                     ComplexityOfEngagement = qc7Form.RiskRatingPriorYear,
-                    PredecessorAuditor = qc7Form.SafeguardReviewerName,
+                    SafeguardReviewerName = qc7Form.SafeguardReviewerName,
                     ReasonsForDiscontinuance = qc7Form.SuspiciousTransactionReportFiledComment,
                     IsPublicInterestEntity = qc7Form.IsPublicInterestEntity,
                     PublicInterestEntityType = qc7Form.PublicInterestEntityType

@@ -1,8 +1,8 @@
 ﻿
 $(document).ready(function () {
     toggleRiskLevel();
-    toggleSignificantRisk();
     toggleSectionBResult();
+    toggleSafeguardsApplied();
     toggleSTR();
     toggleConSTR();
 });
@@ -35,15 +35,15 @@ function toggleRiskLevel() {
     }
 }
 
-// Function to display comment for significant risk field based on checkbox value
-function toggleSignificantRisk() {
-    var significantRiskCheckbox = $('#risksAssociatedCheckbox');
-    var significantRiskRow = $('#risksAssociatedRow');
+// Function to display comment for safeguards applied
+function toggleSafeguardsApplied() {
+    var strCheckbox = $('#strCheckbox');
+    var rationaleSTRRow = $('#rationaleSTRRow');
 
-    if (significantRiskCheckbox.is(':checked')) {
-        significantRiskRow.show();
+    if (strCheckbox.is(':checked')) {
+        rationaleSTRRow.show();
     } else {
-        significantRiskRow.hide();
+        rationaleSTRRow.hide();
     }
 }
 

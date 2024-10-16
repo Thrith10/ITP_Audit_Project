@@ -1,3 +1,60 @@
+// Store selected client
+let selectedClient = null;
+
+// Function to filter clients
+function filterClients() {
+    const searchInput = document.getElementById('searchClientInput').value.toLowerCase();
+    const clientItems = document.querySelectorAll('#clientList .list-group-item');
+
+    clientItems.forEach(item => {
+        const clientName = item.getAttribute('data-client').toLowerCase();
+        if (clientName.includes(searchInput)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Function to select a client
+function selectClient(clientName) {
+    selectedClient = clientName;
+
+    // Highlight the selected client
+    const clientItems = document.querySelectorAll('#clientList .list-group-item');
+    clientItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-client') === clientName) {
+            item.classList.add('active');
+        }
+    });
+
+    // Enable the "Ok" button
+    document.getElementById('confirmClientBtn').disabled = false;
+}
+
+// Function to confirm selection and update the dropdown
+function confirmSelection() {
+    if (selectedClient) {
+        // Find the client dropdown and set the selected value
+        const clientSelect = document.getElementById('clientSelect');
+        for (let i = 0; i < clientSelect.options.length; i++) {
+            if (clientSelect.options[i].value === selectedClient) {
+                clientSelect.selectedIndex = i;
+                break;
+            }
+        }
+
+        // Trigger the change event for the client select dropdown
+        $('#clientSelect').trigger('change');
+
+        // Hide the modal
+        $('#clientSearchModal').modal('hide');
+    }
+
+
+}
+
 // Handle the change event for the select element
 $("#clientSelect").on('change', function () {
     var selectedValue = $(this).val();
@@ -190,9 +247,7 @@ function toggleSubForm(subFormIndex) {
 $(document).ready(function () {
     toggleRiskLevel();
     toggleSectionBResult();
-    toggleRisksAssociated();
     toggleSuspiciousTransactionReport();
-    toggleSuspiciousTransactionReportPriorYear();
     calculateTotalAndConcentration();
 
 
@@ -200,14 +255,24 @@ $(document).ready(function () {
     function updatePriorYearRecoveryRate() {
         var comp1 = parseFloat($("#comp1").val());
         var timeCosts = parseFloat($("#timeCosts").val());
+        var commentBox = $("#commentBoxContainer");
 
         if (!isNaN(comp1) && !isNaN(timeCosts) && timeCosts !== 0) {
             var priorYearRecoveryRate = (comp1 / timeCosts) * 100;
             priorYearRecoveryRate = priorYearRecoveryRate.toFixed(2);
             $("#priorYearRate").val(priorYearRecoveryRate);
             $("#PriorYearRecoveryRateHidden").val(priorYearRecoveryRate);
+
+            // Check if recovery rate is below 30%
+            if (priorYearRecoveryRate < 30) {
+                commentBox.show(); // Show the comment box
+            } else {
+                commentBox.hide(); // Hide the comment box
+            }
+
         } else {
             $("#priorYearRate").val("");
+            commentBox.hide(); // Hide the comment box if values are not valid
         }
     }
 
@@ -292,23 +357,120 @@ $(document).ready(function () {
             alert('No file selected.');
         }
     });
-});
 
-// Toggling checkbox for suspicious transaction report for prior year displays the comment box
-function toggleSuspiciousTransactionReportPriorYear() {
-    var suspiciousTransactionReportPriorYearCheckbox = document.getElementById('suspiciousTransactionReportPriorYearCheckbox');
-    var suspiciousTransactionReportPriorYearRow = document.getElementById('suspiciousTransactionReportPriorYearRow');
-    var suspiciousTransactionReportFiledComment = document.getElementById('suspiciousTransactionReportFiledComment');
+    // Function to toggle the comment input field based on radio selection
+    function toggleUnpaidAuditFeeCommentInput() {
+        var yesSelected = document.getElementById('outstandingUnpaidAuditFeesYes').checked;
+        var commentRow = document.getElementById('outstandingUnpaidFeesRow');
+        var commentInput = document.getElementById('outstandingUnpaidAuditFeesComment');
 
-    if (suspiciousTransactionReportPriorYearCheckbox.checked) {
-        suspiciousTransactionReportPriorYearRow.style.display = '';
-        suspiciousTransactionReportFiledComment.disabled = false;
-    } else {
-        suspiciousTransactionReportPriorYearRow.style.display = 'none';
-        suspiciousTransactionReportFiledComment.disabled = true;
-        suspiciousTransactionReportFiledComment.value = '';
+        if (yesSelected) {
+            commentRow.style.display = 'flex';  // Show the comment row
+        } else {
+            commentRow.style.display = 'none';  // Hide the comment row
+            commentInput.value = '';  // Clear the comment input field
+        }
     }
-}
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('outstandingUnpaidAuditFeesYes').addEventListener('change', toggleUnpaidAuditFeeCommentInput);
+    document.getElementById('outstandingUnpaidAuditFeesNo').addEventListener('change', toggleUnpaidAuditFeeCommentInput);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleUnpaidAuditFeeCommentInput();
+
+    // Function to toggle the comment input field based on radio selection
+    function toggleSuspiciousTransactionReportPriorYearComment() {
+        var yesSelected = document.getElementById('anySuspiciousTransactionReportFiledYes').checked;
+        var commentRow = document.getElementById('suspiciousTransactionReportPriorYearRow');
+        var commentInput = document.getElementById('suspiciousTransactionReportFiledComment');
+
+        if (yesSelected) {
+            commentRow.style.display = 'flex';  // Show the comment row
+        } else {
+            commentRow.style.display = 'none';  // Hide the comment row
+            commentInput.value = '';  // Clear the comment input field
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('anySuspiciousTransactionReportFiledYes').addEventListener('change', toggleSuspiciousTransactionReportPriorYearComment);
+    document.getElementById('anySuspiciousTransactionReportFiledNo').addEventListener('change', toggleSuspiciousTransactionReportPriorYearComment);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleSuspiciousTransactionReportPriorYearComment();
+
+    // Function to toggle the comment input field based on radio selection
+    function toggleUnpaidNonAuditFeeCommentInput() {
+        var yesSelected = document.getElementById('anyOutstandingUnpaidNonAuditFeesYes').checked;
+        var commentRow = document.getElementById('outstandingUnpaidNonAuditFeesRow');
+        var commentInput = document.getElementById('outstandingUnpaidAuditFeesCommentInput');
+
+        if (yesSelected) {
+            commentRow.style.display = 'flex';  // Show the comment row
+        } else {
+            commentRow.style.display = 'none';  // Hide the comment row
+            commentInput.value = '';  // Clear the comment input field
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('anyOutstandingUnpaidNonAuditFeesYes').addEventListener('change', toggleUnpaidNonAuditFeeCommentInput);
+    document.getElementById('anyOutstandingUnpaidNonAuditFeesNo').addEventListener('change', toggleUnpaidNonAuditFeeCommentInput);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleUnpaidNonAuditFeeCommentInput();
+
+    // Toggling checkbox for risks associated (conclusion section) displays the comment box
+    function toggleRisksAssociated() {
+        var yesSelected = document.getElementById('anyRisksYes').checked;
+        var risksAssociatedRow = document.getElementById('risksAssociatedRow');
+        var riskExplanationCurrentYearPriorYear = document.getElementById('riskExplanationCurrentYearPriorYear');
+        var natureOfSafeguard = document.getElementById('natureOfSafeguard');
+
+        if (yesSelected) {
+            risksAssociatedRow.style.display = '';
+            riskExplanationCurrentYearPriorYear.disabled = false;
+            natureOfSafeguard.disabled = false;
+        } else {
+            risksAssociatedRow.style.display = 'none';
+            riskExplanationCurrentYearPriorYear.disabled = true;
+            natureOfSafeguard.disabled = true;
+            // Reset values
+            riskExplanationCurrentYearPriorYear.value = '';
+            natureOfSafeguard.value = '';
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('anyRisksYes').addEventListener('change', toggleRisksAssociated);
+    document.getElementById('anyRisksNo').addEventListener('change', toggleRisksAssociated);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleRisksAssociated();
+
+    // Toggling comment display for safeguards that should be applied
+    function toggleSafeguards() {
+        var yesSelected = document.getElementById('anySafeguardsYes').checked;
+        var safeguardsAppliedRow = document.getElementById('safeguardsAppliedRow');
+        var safeguardsApplied = document.getElementById('safeguardsApplied');
+
+        if (yesSelected) {
+            safeguardsAppliedRow.style.display = '';
+            safeguardsApplied.disabled = false;
+        } else {
+            safeguardsAppliedRow.style.display = 'none';
+            safeguardsApplied.disabled = true;
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('anySafeguardsYes').addEventListener('change', toggleSafeguards);
+    document.getElementById('anySafeguardsNo').addEventListener('change', toggleSafeguards);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleSafeguards();
+});
 
 // Toggling checkbox for suspicious transaction report (conclusion section) displays the comment box
 function toggleSuspiciousTransactionReport() {
@@ -338,31 +500,6 @@ function toggleRiskLevel() {
     } else {
         riskLevelRow.style.display = 'none';
         riskLevel.disabled = true;
-    }
-}
-
-// Toggling checkbox for risks associated (conclusion section) displays the comment box
-function toggleRisksAssociated() {
-    var risksAssociatedCheckbox = document.getElementById('risksAssociatedCheckbox');
-    var risksAssociatedRow = document.getElementById('risksAssociatedRow');
-    var riskExplanationCurrentYearPriorYear = document.getElementById('riskExplanationCurrentYearPriorYear');
-    var natureOfSafeguard = document.getElementById('natureOfSafeguard');
-    var isSafeguardApplied = document.getElementById('isSafeguardApplied');
-
-    if (risksAssociatedCheckbox.checked) {
-        risksAssociatedRow.style.display = '';
-        riskExplanationCurrentYearPriorYear.disabled = false;
-        natureOfSafeguard.disabled = false;
-        isSafeguardApplied.disabled = false;
-    } else {
-        risksAssociatedRow.style.display = 'none';
-        riskExplanationCurrentYearPriorYear.disabled = true;
-        natureOfSafeguard.disabled = true;
-        isSafeguardApplied.disabled = true;
-        // Reset values
-        riskExplanationCurrentYearPriorYear.value = '';
-        natureOfSafeguard.value = '';
-        isSafeguardApplied.value = false;
     }
 }
 

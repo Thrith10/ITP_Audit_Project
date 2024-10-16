@@ -45,14 +45,18 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/QC7/QC7FormManagement.cshtml", engagements);
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> QC7FormCreationAsync()
         {
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
+
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
@@ -63,16 +67,34 @@ namespace PKFAuditManagement.Controllers
                                              .ToListAsync(); // Fetch the ordered list of unique client names
 
             // Retrieve QC7Form data
-            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, ClientNames = clientNames, AdminEmails = adminEmails.OrderBy(email => email).ToList(), IsNewForm = true });
+            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, ClientNames = clientNames, AdminEmails = combinedEmails, IsNewForm = true });
 
             return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Reviewer")]
         public async Task<IActionResult> QC7FormApprovalManagement()
         {
-            // Retrieve engagement data from database
-            var qc7forms = _context.QC7Forms.ToList();
+            // Get the current user's ID
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+
+            // Check if the user is in the "Admin" role
+            bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
+            // Retrieve QC7Form data from the database
+            List<QC7Form> selectedForms;
+
+            if (isAdmin)
+            {
+                // If the user is an Admin, retrieve all forms
+                selectedForms = _context.QC7Forms.ToList();
+            }
+            else
+            {
+                // Otherwise, retrieve only those created by the current user
+                selectedForms = _context.QC7Forms.Where(e => e.CreatedBy.Equals(userId)).ToList();
+            }
 
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
@@ -99,13 +121,13 @@ namespace PKFAuditManagement.Controllers
             {
                 FirstApproverConclusions = qc7FormConclusionsFirstApprover,
                 SecondApproverConclusions = qc7FormConclusionsSecondApprover,
-                AllQC7Forms = qc7forms
+                AllQC7Forms = selectedForms
             };
 
             return View("~/Views/General/QC7/QC7FormApprovalManagement.cshtml", viewModel);
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> EditQC7Form(int id)
         {
             // Get the current user's ID
@@ -116,8 +138,12 @@ namespace PKFAuditManagement.Controllers
             }
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
+
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
             try
             {
@@ -129,8 +155,8 @@ namespace PKFAuditManagement.Controllers
                 // Populate Sub Forms
                 var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel());
 
-                // Append emails to viewModel
-                viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+                // Append combined emails to viewModel
+                viewModel.AdminEmails = combinedEmails;
 
                 // Retrieve Conclusion data
                 var conclusionData = _context.QC7FormConclusions.FirstOrDefault(e => e.QC7FormID.Equals(id));
@@ -192,6 +218,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.Client = qc7formData.Client;
                 viewModel.PeriodEnded = qc7formData.PeriodEnded;
                 viewModel.EngagementType = qc7formData.EngagementType;
+                viewModel.Industry = qc7formData.Industry;
                 viewModel.PreparedBy = qc7formData.PreparedBy;
                 viewModel.PreparedByDate = qc7formData.PreparedByDate;
                 viewModel.ReviewedBy = qc7formData.ReviewedBy;
@@ -199,13 +226,16 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PriorYearFee = qc7formData.PriorYearFee;
                 viewModel.TimeCosts = qc7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
+                viewModel.PriorYearRecoveryRateComment = qc7formData.PriorYearRecoveryRateComment;
                 viewModel.AnyOutstandingUnpaidAuditFees = qc7formData.AnyOutstandingUnpaidAuditFees;
+                viewModel.AnyOutstandingUnpaidAuditFeesComment = qc7formData.AnyOutstandingUnpaidAuditFeesComment;
                 viewModel.TypeOfClientActivities = qc7formData.TypeOfClientActivities;
                 viewModel.RiskRatingPriorYear = qc7formData.RiskRatingPriorYear;
                 viewModel.AnySuspiciousTransactionReportFiled = qc7formData.AnySuspiciousTransactionReportFiled;
                 viewModel.SuspiciousTransactionReportFiledComment = qc7formData.SuspiciousTransactionReportFiledComment;
                 viewModel.SafeguardReviewerName = qc7formData.SafeguardReviewerName;
                 viewModel.AnyOutstandingUnpaidNonAuditFees = qc7formData.AnyOutstandingUnpaidNonAuditFees;
+                viewModel.AnyOutstandingUnpaidNonAuditFeesComment = qc7formData.AnyOutstandingUnpaidNonAuditFeesComment;
                 viewModel.GrandTotal = qc7formData.GrandTotal;
                 viewModel.AuditFee = qc7formData.AuditFee;
                 viewModel.FeeConcentration = qc7formData.FeeConcentration;
@@ -225,6 +255,12 @@ namespace PKFAuditManagement.Controllers
                     viewModel.RiskExplanationCurrentYearPriorYear = conclusionData.RiskExplanationCurrentYearPriorYear;
                     viewModel.IsSafeguardApplied = conclusionData.IsSafeguardApplied;
                     viewModel.NatureOfSafeguard = conclusionData.NatureOfSafeguard;
+
+                    // Only set safeguards applied if risks associated is true
+                    if (viewModel.IsSafeguardApplied == true)
+                    {
+                        viewModel.SafeguardsApplied = conclusionData.SafeguardsApplied;
+                    }
                 }
 
                 viewModel.ContinuingEngagementRiskRated = conclusionData.ContinuingEngagementRiskRated;
@@ -285,7 +321,7 @@ namespace PKFAuditManagement.Controllers
             }
             catch (Exception ex)
             {
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -298,7 +334,7 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> UpdateQC7Form(QC7FormCreationViewModel viewModel)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -310,12 +346,15 @@ namespace PKFAuditManagement.Controllers
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
 
-            // Append emails to viewModel
-            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
+            // Append combined emails to viewModel
+            viewModel.AdminEmails = combinedEmails;
 
             if (!ModelState.IsValid)
             {
@@ -340,6 +379,7 @@ namespace PKFAuditManagement.Controllers
                 qc7form.Client = viewModel.Client;
                 qc7form.PeriodEnded = viewModel.PeriodEnded.Value;
                 qc7form.EngagementType = viewModel.EngagementType;
+                qc7form.Industry = viewModel.Industry;
                 qc7form.PreparedBy = viewModel.PreparedBy;
                 qc7form.PreparedByDate = viewModel.PreparedByDate;
                 qc7form.ReviewedBy = viewModel.ReviewedBy;
@@ -347,13 +387,29 @@ namespace PKFAuditManagement.Controllers
                 qc7form.PriorYearFee = viewModel.PriorYearFee.Value;
                 qc7form.TimeCosts = viewModel.TimeCosts.Value;
                 qc7form.PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value;
+
+                // Re-validate prior year recovery rate for QC7 Form 
+                if (viewModel.PriorYearRecoveryRate >= 30)
+                {
+                    viewModel.PriorYearRecoveryRateComment = null;
+                }
+
+                qc7form.PriorYearRecoveryRateComment = viewModel.PriorYearRecoveryRateComment;
                 qc7form.AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees;
+
+                // Check if Outstanding Unpaid Fees is selected
+                if (viewModel.AnyOutstandingUnpaidAuditFees == true)
+                {
+                    qc7form.AnyOutstandingUnpaidAuditFeesComment = viewModel.AnyOutstandingUnpaidAuditFeesComment;
+                }
+                else
+                {
+                    qc7form.AnyOutstandingUnpaidAuditFeesComment = null;
+                }
+
                 qc7form.TypeOfClientActivities = viewModel.TypeOfClientActivities;
                 qc7form.RiskRatingPriorYear = viewModel.RiskRatingPriorYear;
                 qc7form.AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled;
-                qc7form.GrandTotal = viewModel.GrandTotal.Value;
-                qc7form.AuditFee = viewModel.AuditFee.Value;
-
 
                 // Set to null if not selected
                 if (qc7form.AnySuspiciousTransactionReportFiled == false)
@@ -365,8 +421,21 @@ namespace PKFAuditManagement.Controllers
                     qc7form.SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment;
                 }
 
+                qc7form.GrandTotal = viewModel.GrandTotal.Value;
+                qc7form.AuditFee = viewModel.AuditFee.Value;
                 qc7form.SafeguardReviewerName = viewModel.SafeguardReviewerName;
                 qc7form.AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees;
+
+                // Check if Outstanding Unpaid Non-Audit Fees is selected
+                if (viewModel.AnyOutstandingUnpaidNonAuditFees == true)
+                {
+                    qc7form.AnyOutstandingUnpaidNonAuditFeesComment = viewModel.AnyOutstandingUnpaidNonAuditFeesComment;
+                }
+                else
+                {
+                    qc7form.AnyOutstandingUnpaidNonAuditFeesComment = null;
+                }
+
                 qc7form.FeeConcentration = viewModel.FeeConcentration.Value;
                 qc7form.ProposedFeeCurrentYear = viewModel.ProposedFeeCurrentYear.Value;
                 qc7form.BudgetedTimeCost = viewModel.BudgetedTimeCost.Value;
@@ -443,12 +512,18 @@ namespace PKFAuditManagement.Controllers
                         qc7formConclusion.RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear;
                         qc7formConclusion.IsSafeguardApplied = viewModel.IsSafeguardApplied;
                         qc7formConclusion.NatureOfSafeguard = viewModel.NatureOfSafeguard;
+
+                        if (viewModel.IsSafeguardApplied == true)
+                        {
+                            qc7formConclusion.SafeguardsApplied = viewModel.SafeguardsApplied;
+                        }
                     }
                     else
                     {
                         qc7formConclusion.RiskExplanationCurrentYearPriorYear = null;
                         qc7formConclusion.IsSafeguardApplied = false;
                         qc7formConclusion.NatureOfSafeguard = null;
+                        qc7formConclusion.SafeguardsApplied = null;
                     }
 
                     qc7formConclusion.ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated;
@@ -688,7 +763,7 @@ namespace PKFAuditManagement.Controllers
                     await _emailSender.SendEmailAsync(recipient, subject, body);
                 }
 
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -703,7 +778,7 @@ namespace PKFAuditManagement.Controllers
             {
                 // Log the error
                 viewModel.ErrorMessage = "Error updating the form, please try again!";
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -730,11 +805,15 @@ namespace PKFAuditManagement.Controllers
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
+
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
             // Append emails to viewModel
-            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+            viewModel.AdminEmails = combinedEmails;
 
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
@@ -795,9 +874,6 @@ namespace PKFAuditManagement.Controllers
                 // Retrieve FeeDetail data
                 var feeDetailData = _context.QC7FormFeeDetails.Where(e => e.QC7FormID.Equals(id)).ToList();
 
-                // Append emails to viewModel
-                viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
-
                 // Retrieve TNATNEAssessment data
                 var tnaTneAssessmentData = _context.TNATNEAssessments.FirstOrDefault(e => e.QC7FormID.Equals(id));
 
@@ -839,6 +915,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.Client = qc7formData.Client;
                 viewModel.PeriodEnded = qc7formData.PeriodEnded;
                 viewModel.EngagementType = qc7formData.EngagementType;
+                viewModel.Industry = qc7formData.Industry;
                 viewModel.PriorYearFee = qc7formData.PriorYearFee;
                 viewModel.TimeCosts = qc7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
@@ -928,7 +1005,7 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> ViewQC7Form(int id)
         {
             // Get the current user's ID
@@ -998,6 +1075,7 @@ namespace PKFAuditManagement.Controllers
                 viewModel.Client = QC7formData.Client;
                 viewModel.PeriodEnded = QC7formData.PeriodEnded;
                 viewModel.EngagementType = QC7formData.EngagementType;
+                viewModel.Industry = QC7formData.Industry;
                 viewModel.PreparedBy = QC7formData.PreparedBy;
                 viewModel.PreparedByDate = QC7formData.PreparedByDate;
                 viewModel.ReviewedBy = QC7formData.ReviewedBy;
@@ -1005,13 +1083,16 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PriorYearFee = QC7formData.PriorYearFee;
                 viewModel.TimeCosts = QC7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = QC7formData.PriorYearRecoveryRate;
+                viewModel.PriorYearRecoveryRateComment = QC7formData.PriorYearRecoveryRateComment;
                 viewModel.AnyOutstandingUnpaidAuditFees = QC7formData.AnyOutstandingUnpaidAuditFees;
+                viewModel.AnyOutstandingUnpaidAuditFeesComment = QC7formData.AnyOutstandingUnpaidAuditFeesComment;
                 viewModel.TypeOfClientActivities = QC7formData.TypeOfClientActivities;
                 viewModel.RiskRatingPriorYear = QC7formData.RiskRatingPriorYear;
                 viewModel.AnySuspiciousTransactionReportFiled = QC7formData.AnySuspiciousTransactionReportFiled;
                 viewModel.SuspiciousTransactionReportFiledComment = QC7formData.SuspiciousTransactionReportFiledComment;
                 viewModel.SafeguardReviewerName = QC7formData.SafeguardReviewerName;
                 viewModel.AnyOutstandingUnpaidNonAuditFees = QC7formData.AnyOutstandingUnpaidNonAuditFees;
+                viewModel.AnyOutstandingUnpaidNonAuditFeesComment = QC7formData.AnyOutstandingUnpaidNonAuditFeesComment;
                 viewModel.GrandTotal = QC7formData.GrandTotal;
                 viewModel.AuditFee = QC7formData.AuditFee;
                 viewModel.FeeConcentration = QC7formData.FeeConcentration;
@@ -1031,7 +1112,14 @@ namespace PKFAuditManagement.Controllers
                     viewModel.RiskExplanationCurrentYearPriorYear = conclusionData.RiskExplanationCurrentYearPriorYear;
                     viewModel.IsSafeguardApplied = conclusionData.IsSafeguardApplied;
                     viewModel.NatureOfSafeguard = conclusionData.NatureOfSafeguard;
+
+                    // Only set safeguards applied if risks associated is true
+                    if (viewModel.IsSafeguardApplied == true)
+                    {
+                        viewModel.SafeguardsApplied = conclusionData.SafeguardsApplied;
+                    }
                 }
+
                 viewModel.ContinuingEngagementRiskRated = conclusionData.ContinuingEngagementRiskRated;
                 viewModel.SafeguardReviewPartnerAssigned = conclusionData.SafeguardReviewPartnerAssigned;
 
@@ -1091,7 +1179,7 @@ namespace PKFAuditManagement.Controllers
             }
             catch
             {
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement");
@@ -1106,7 +1194,7 @@ namespace PKFAuditManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "User,Non-Auditor,Admin")]
+        [Authorize(Roles = "User,Non-Auditor,Admin,Reviewer")]
         public async Task<IActionResult> SubmitQC7Form(QC7FormCreationViewModel viewModel)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -1118,11 +1206,15 @@ namespace PKFAuditManagement.Controllers
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
 
-            // Retrieve all emails for users in the "Admin" role
+            // Retrieve all emails for users in the "Admin" and "Reviewer" roles
             var adminEmails = await _userService.GetUserEmailsInRoleAsync("Admin");
+            var reviewerEmails = await _userService.GetUserEmailsInRoleAsync("Reviewer");
 
-            // Append emails to viewModel
-            viewModel.AdminEmails = adminEmails.OrderBy(email => email).ToList();
+            // Combine the emails and remove any duplicates
+            var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
+
+            // Append combined emails to viewModel
+            viewModel.AdminEmails = combinedEmails;
 
             if (!ModelState.IsValid)
             {
@@ -1141,9 +1233,33 @@ namespace PKFAuditManagement.Controllers
                 var userId = user?.Id;
 
                 // Re-validate form inputs for QC7 Form
-                if (viewModel.IsPublicInterestEntity == true)
+                if (viewModel.IsPublicInterestEntity == false)
                 {
                     viewModel.PublicInterestEntityType = null;
+                }
+
+                // Re-validate prior year recovery rate for QC7 Form 
+                if (viewModel.PriorYearRecoveryRate >= 30)
+                {
+                    viewModel.PriorYearRecoveryRateComment = null;
+                }
+
+                // Re-validate outstanding unpaid audit fees for QC7 Form 
+                if (viewModel.AnyOutstandingUnpaidAuditFees == false)
+                {
+                    viewModel.AnyOutstandingUnpaidAuditFeesComment = null;
+                }
+
+                // Re-validate outstanding unpaid fees for QC7 Form 
+                if (viewModel.AnySuspiciousTransactionReportFiled == false)
+                {
+                    viewModel.SuspiciousTransactionReportFiledComment = null;
+                }
+
+                // Re-validate outstanding unpaid non-audit fees for QC7 Form 
+                if (viewModel.AnyOutstandingUnpaidNonAuditFees == false)
+                {
+                    viewModel.AnyOutstandingUnpaidNonAuditFeesComment = null;
                 }
 
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
@@ -1158,6 +1274,7 @@ namespace PKFAuditManagement.Controllers
                     Client = viewModel.Client,
                     PeriodEnded = viewModel.PeriodEnded.Value,
                     EngagementType = viewModel.EngagementType,
+                    Industry = viewModel.Industry,
                     PreparedBy = viewModel.PreparedBy,
                     PreparedByDate = viewModel.PreparedByDate,
                     ReviewedBy = viewModel.ReviewedBy,
@@ -1165,13 +1282,16 @@ namespace PKFAuditManagement.Controllers
                     PriorYearFee = viewModel.PriorYearFee.Value,
                     TimeCosts = viewModel.TimeCosts.Value,
                     PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value,
+                    PriorYearRecoveryRateComment = viewModel.PriorYearRecoveryRateComment,
                     AnyOutstandingUnpaidAuditFees = viewModel.AnyOutstandingUnpaidAuditFees,
+                    AnyOutstandingUnpaidAuditFeesComment = viewModel.AnyOutstandingUnpaidAuditFeesComment,
                     TypeOfClientActivities = viewModel.TypeOfClientActivities,
                     RiskRatingPriorYear = viewModel.RiskRatingPriorYear,
                     AnySuspiciousTransactionReportFiled = viewModel.AnySuspiciousTransactionReportFiled,
                     SuspiciousTransactionReportFiledComment = viewModel.SuspiciousTransactionReportFiledComment,
                     SafeguardReviewerName = viewModel.SafeguardReviewerName,
                     AnyOutstandingUnpaidNonAuditFees = viewModel.AnyOutstandingUnpaidNonAuditFees,
+                    AnyOutstandingUnpaidNonAuditFeesComment = viewModel.AnyOutstandingUnpaidNonAuditFeesComment,
                     GrandTotal = viewModel.GrandTotal.Value,
                     AuditFee = viewModel.AuditFee.Value,
                     FeeConcentration = viewModel.FeeConcentration.Value,
@@ -1191,12 +1311,27 @@ namespace PKFAuditManagement.Controllers
                 // Retrieve the QC7FormID from the saved entity
                 int qc7formId = qc7form.QC7FormID;
 
+                // Re-validate risks associated section for QC7 Form Conclusion
+                if (viewModel.AnyRiskAssociated == false)
+                {
+                    viewModel.RiskExplanationCurrentYearPriorYear = null;
+                    viewModel.IsSafeguardApplied = false;
+                    viewModel.NatureOfSafeguard = null;
+                }
+
+                // Re-validate safeguard applied for QC7 Form Conclusion
+                if (viewModel.IsSafeguardApplied == false)
+                {
+                    viewModel.SafeguardsApplied = null;
+                }
+
                 var qc7formConclusion = new QC7FormConclusion
                 {
                     QC7FormID = qc7formId,
                     AnyRiskAssociated = viewModel.AnyRiskAssociated,
                     RiskExplanationCurrentYearPriorYear = viewModel.RiskExplanationCurrentYearPriorYear,
                     IsSafeguardApplied = viewModel.IsSafeguardApplied,
+                    SafeguardsApplied = viewModel.SafeguardsApplied,
                     NatureOfSafeguard = viewModel.NatureOfSafeguard,
                     ContinuingEngagementRiskRated = viewModel.ContinuingEngagementRiskRated,
                     SafeguardReviewPartnerAssigned = viewModel.SafeguardReviewPartnerAssigned,
@@ -1317,7 +1452,7 @@ namespace PKFAuditManagement.Controllers
                 _context.SaveChanges();
 
                 // Root folder name in S3
-                var uploadsRootFolder = "QC6FormDocuments";
+                var uploadsRootFolder = "QC7FormDocuments";
 
                 // Check if null
                 if (viewModel.OtherDocuments != null)
@@ -1357,7 +1492,7 @@ namespace PKFAuditManagement.Controllers
                 // Set the success message for the toast notification
                 TempData["QC7CreateMessage"] = "QC7 Form created successfully.";
 
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
@@ -1372,7 +1507,7 @@ namespace PKFAuditManagement.Controllers
             {
                 // Log the error
                 viewModel.ErrorMessage = "An error occurred while processing your request. Please try again.";
-                if (roles.Contains("Admin"))
+                if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
                     // Redirect to admin-specific page
                     return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
@@ -1386,7 +1521,7 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "User,Admin,Non-Auditor")]
+        [Authorize(Roles = "User,Admin,Non-Auditor,Reviewer")]
         public IActionResult DeleteQC7Form(int id)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -1424,7 +1559,7 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Reviewer")]
         [HttpPost]
         [Route("/QC7Form/ApproveQC7Form/{id}")]
         public async Task<IActionResult> ApproveQC7Form(int id)
@@ -1530,7 +1665,7 @@ namespace PKFAuditManagement.Controllers
             return RedirectToAction("QC7FormApprovalManagement", "QC7Form");
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Reviewer")]
         [HttpPost]
         [Route("/QC7Form/RejectQC7Form/{id}")]
         public async Task<IActionResult> RejectQC7Form(int id)

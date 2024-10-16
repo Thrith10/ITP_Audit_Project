@@ -53,6 +53,15 @@
                                         </div>
                                     </div>
                                     <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Industry<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <select class="form-control" asp-for="Industry" disabled>
+                                                <option value="Industry1">Industry1</option>
+                                                <option value="Industry2">Industry2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
                                         <div class="col-sm-2">
                                             <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                         </div>
@@ -99,13 +108,40 @@
                                             <span class="input-group-text">%</span>
                                         </div>
                                     </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Any outstanding unpaid audit fees?<span class="text-danger"> *</span></label>
+                                    @{
+                                        var priorYearRecoveryRate = Model.PriorYearRecoveryRate ?? 0;
+                                        var showCommentBox = priorYearRecoveryRate < 30;
+                                    }
+                                    <div class="row mb-3" id="commentBoxContainer" style="@(showCommentBox ? "" : "display: none;")">
+                                        <label class="col-sm-2 col-form-label">Comments on Prior Year's Recovery Rate</label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidAuditFees" disabled>
+                                            <input type="text" class="form-control" asp-for="PriorYearRecoveryRateComment" id="FeeRecoveryComments" disabled>
                                         </div>
                                     </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Any outstanding unpaid audit fees?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="outstandingUnpaidAuditFeesYes" name="AnyOutstandingUnpaidAuditFees" value="true" @(Model.AnyOutstandingUnpaidAuditFees == true ? "checked" : "") disabled>
+                                                <label class="form-check-label" for="outstandingUnpaidAuditFeesYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="outstandingUnpaidAuditFeesNo" name="AnyOutstandingUnpaidAuditFees" value="false" @(Model.AnyOutstandingUnpaidAuditFees == false ? "checked" : "") disabled>
+                                                <label class="form-check-label" for="outstandingUnpaidAuditFeesNo">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if (Model.AnyOutstandingUnpaidAuditFees == true)
+                                    {
+                                        <div class="row mb-3" id="outstandingUnpaidFeesRow">
+                                            <label for="outstandingUnpaidFeesCommentInput" class="col-sm-2 col-form-label">
+                                                Comment on Outstanding Unpaid Audit Fees
+                                            </label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <input class="form-control" id="outstandingUnpaidFeesCommentInput" asp-for="AnyOutstandingUnpaidAuditFeesComment" disabled></input>
+                                            </div>
+                                        </div>
+                                    }
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Type of activities of client<span class="text-danger"> *</span> </label>
                                         <div class="col-sm-10 d-flex align-items-center">
@@ -120,16 +156,26 @@
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any Suspicious Transaction Report filed with CAD in prior year(s)?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="strCheckbox" asp-for="AnySuspiciousTransactionReportFiled" disabled>
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anySuspiciousTransactionReportFiledYes" name="AnySuspiciousTransactionReportFiled" value="true" @(Model.AnySuspiciousTransactionReportFiled == true ? "checked" : "") disabled>
+                                                <label class="form-check-label" for="anySuspiciousTransactionReportFiledYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anySuspiciousTransactionReportFiledNo" name="AnySuspiciousTransactionReportFiled" value="false" @(Model.AnySuspiciousTransactionReportFiled == false ? "checked" : "") disabled>
+                                                <label class="form-check-label" for="anySuspiciousTransactionReportFiledNo">No</label>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="row mb-3" id="rationaleSTRRow" style="display: none;">
-                                        <label class="col-sm-2 col-form-label">Comment for Suspicious Transaction Report filed</label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <textarea class="form-control" asp-for="SuspiciousTransactionReportFiledComment" id="suspiciousTransactionReportFiledComment" disabled></textarea>
+                                    @if (Model.AnySuspiciousTransactionReportFiled == true)
+                                    {
+                                        <div class="row mb-3" id="anySuspiciousTransactionReportFiledRow">
+                                            <label class="col-sm-2 col-form-label">Comment for Suspicious Transaction Report filed</label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <textarea class="form-control" asp-for="SuspiciousTransactionReportFiledComment" id="suspiciousTransactionReportFiledComment" disabled></textarea>
+                                            </div>
                                         </div>
-                                    </div>
+                                    }
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Name of safeguard reviewer (if applicable)</label>
                                         <div class="col-sm-10 d-flex align-items-center">
@@ -138,52 +184,28 @@
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid non-audit fees?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="AnyOutstandingUnpaidNonAuditFees" disabled>
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anyOutstandingUnpaidNonAuditFeesYes" name="AnyOutstandingUnpaidNonAuditFees" value="true" @(Model.AnyOutstandingUnpaidNonAuditFees == true ? "checked" : "") disabled>
+                                                <label class="form-check-label" for="anyOutstandingUnpaidNonAuditFeesYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="anyOutstandingUnpaidNonAuditFeesNo" name="AnyOutstandingUnpaidNonAuditFees" value="false" @(Model.AnyOutstandingUnpaidNonAuditFees == false ? "checked" : "") disabled>
+                                                <label class="form-check-label" for="anyOutstandingUnpaidNonAuditFeesNo">No</label>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Proposed fee for current year<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" placeholder="0.00" disabled>
+                                    @if (Model.AnyOutstandingUnpaidNonAuditFees == true)
+                                    {
+                                        <div class="row mb-3" id="outstandingUnpaidNonAuditFeesRow">
+                                            <label for="outstandingUnpaidNonAuditFeesCommentInput" class="col-sm-2 col-form-label">
+                                                Comment on Outstanding Unpaid Non-Audit Fees
+                                            </label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <input class="form-control" id="outstandingUnpaidNonAuditFeesCommentInput" asp-for="AnyOutstandingUnpaidNonAuditFeesComment" disabled></input>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" id="budgetedTimeCost" disabled>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.
-                                            And to disclose reasons for continuance if the recovery rate is below 30%.">
-                                            <span class="link-text">Proposed recovery rate for current year (Proposed fee for current year / Budgeted Time Cost)</span>
-                                        </label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="number" class="form-control" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden" disabled>
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity" disabled>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3" id="riskLevelRow" style="display:none;">
-                                        <label class="col-sm-2 col-form-label">Type of PIE</label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType" disabled>
-                                                <option value="Listed">Listed</option>
-                                                <option value="Financial Institution">Financial Institution</option>
-                                                <option value="Large Charity">Large Charity</option>
-                                                <option value="Large Institution of Public Character (“IPC”)">Large Institution of Public Character (“IPC”)</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    }
                                     <div class="card border border-secondary p-3 mb-3">
                                         <div class="card-body">
                                             <h5 class="card-title"> Non-audit fees charged for this client (tax, accounting, secretarial, XBRL etc) </h5>
@@ -237,14 +259,58 @@
                                             </div>
                                             <div class="row mb-3">
                                                 <label class="col-sm-2 col-form-label">
-                                                    Fee concentration (Non-audit services fees / audit fees = x%) <br> <i>To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
-                                                    Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.</i>
+                                                    Fee concentration (Non-audit services fees / audit fees = x%) <br> <i>
+                                                        To calculate before providing non-audit services (“NAS”) to disclose promptly to TCWG if the 50% threshold is crossed.
+                                                        Computed as % of NAS from client and its controlled entities (excluding ARS fees) over fees from audit of the financial statements from client and its controlled entities.
+                                                    </i>
                                                 </label>
                                                 <div class="col-sm-10 d-flex align-items-center">
                                                     <input type="number" class="form-control" id="feeConcentration" asp-for="FeeConcentration" disabled>
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Proposed fee for current year<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" asp-for="ProposedFeeCurrentYear" placeholder="0.00" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Budgeted Time Cost<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" asp-for="BudgetedTimeCost" placeholder="0.00" id="budgetedTimeCost" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Should at least be 30%.
+                                            And to disclose reasons for continuance if the recovery rate is below 30%.">
+                                            <span class="link-text">Proposed recovery rate for current year (Proposed fee for current year / Budgeted Time Cost)</span>
+                                        </label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="number" class="form-control" asp-for="ProposedRecoveryRateCurrentYear" id="proposedRecoveryRateCurrentYearHidden" disabled>
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Public Interest Entity (PIE)?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input class="form-check-input" type="checkbox" id="pieCheckbox" onchange="toggleRiskLevel()" asp-for="IsPublicInterestEntity" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3" id="riskLevelRow" style="display:none;">
+                                        <label class="col-sm-2 col-form-label">Type of PIE</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <select class="form-control" id="riskLevel" asp-for="PublicInterestEntityType" disabled>
+                                                <option value="Listed">Listed</option>
+                                                <option value="Financial Institution">Financial Institution</option>
+                                                <option value="Large Charity">Large Charity</option>
+                                                <option value="Large Institution of Public Character (“IPC”)">Large Institution of Public Character (“IPC”)</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <br>
@@ -478,23 +544,23 @@
                                                             </tr>
                                                     @foreach (var testDescription in objective.TestDescriptions)
                                                     {
-                                                                    <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC7FormTestDescriptionID" />
-                                                                    <tr class="text-zinc-700 dark:text-zinc-400">
-                                                                        <td>
-                                                                            <div>
-                                                                                <p>@Html.Raw(@testDescription.Description)</p>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                            <input type="text" class="form-control" placeholder="Signed By" value="@testDescription.SignBy" disabled />
-                                                                        </td>
-                                                                        <td>
-                                                                            <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" disabled />
-                                                                        </td>
-                                                                        <td>
-                                                                                        <textarea class="form-control" rows="3" placeholder="Ref/Comment" disabled>@testDescription.Comment</textarea>
-                                                                        </td>
-                                                                    </tr>
+                                                        <input type="hidden" name="SubForms[@subForm.QC7SubFormID].Objectives[@objective.QC7FormObjectiveID].TestDescriptions.Index" value="@testDescription.QC7FormTestDescriptionID" />
+                                                        <tr class="text-zinc-700 dark:text-zinc-400">
+                                                            <td>
+                                                                <div>
+                                                                    <p>@Html.Raw(@testDescription.Description)</p>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" placeholder="Signed By" value="@testDescription.SignBy" disabled />
+                                                            </td>
+                                                            <td>
+                                                                <input type="date" class="form-control" value="@testDescription.SignDate.ToString("yyyy-MM-dd")" disabled />
+                                                            </td>
+                                                            <td>
+                                                                <textarea class="form-control" rows="3" placeholder="Ref/Comment" disabled>@testDescription.Comment</textarea>
+                                                            </td>
+                                                        </tr>
                                                     }
                                                 }
                                                 </tbody>
@@ -507,30 +573,56 @@
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">
                                         Based on the above information, are there any risks associated with the proposed work? <span class="text-danger"> *</span>
                                     </label>
-                                    <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input" type="checkbox" id="risksAssociatedCheckbox" onchange="toggleRisksAssociated()" asp-for="AnyRiskAssociated" disabled>
-                                    </div>
-                                </div>
-                                <div id="risksAssociatedRow" style="display:none;">
-                                    <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">(a) Explain what is the risk in current year compared to prior year:</label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <textarea class="form-control" rows="4" asp-for="RiskExplanationCurrentYearPriorYear" id="riskExplanationCurrentYearPriorYear" disabled></textarea>
+                                    <div class="col-sm-10 d-flex flex-column">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="anyRisksYes" name="AnyRiskAssociated" value="true" disabled @(Model.AnyRiskAssociated == true ? "checked" : "")>
+                                            <label class="form-check-label" for="anyRisksYes">Yes</label>
                                         </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">(b)	Are there any safeguards that should be applied?</label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="isSafeguardApplied" asp-for="IsSafeguardApplied" disabled>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="inputPassword3" class="col-sm-2 col-form-label">(c)	Specify the nature of the safeguard to address the issue(s) identified in the evaluation of continuance of engagement or client: </label>
-                                        <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="NatureOfSafeguard" id="natureOfSafeguard" disabled>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="anyRisksNo" name="AnyRiskAssociated" value="false" disabled @(Model.AnyRiskAssociated == false ? "checked" : "")>
+                                            <label class="form-check-label" for="anyRisksNo">No</label>
                                         </div>
                                     </div>
                                 </div>
+                                @if (Model.AnyRiskAssociated == true)
+                                {
+                                    <div id="risksAssociatedRow">
+                                        <div class="row mb-3">
+                                            <label for="inputPassword3" class="col-sm-2 col-form-label">(a) Explain what is the risk in current year compared to prior year:</label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <textarea class="form-control" rows="4" asp-for="RiskExplanationCurrentYearPriorYear" id="riskExplanationCurrentYearPriorYear" disabled></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="inputPassword3" class="col-sm-2 col-form-label">(b)	Are there any safeguards that should be applied?</label>
+                                            <div class="col-sm-10 d-flex flex-column">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" id="anySafeguardsYes" name="IsSafeguardApplied" value="true" disabled @(Model.IsSafeguardApplied == true ? "checked" : "")>
+                                                    <label class="form-check-label" for="anySafeguardsYes">Yes</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" id="anySafeguardsNo" name="IsSafeguardApplied" value="false" disabled @(Model.IsSafeguardApplied == false ? "checked" : "")>
+                                                    <label class="form-check-label" for="anySafeguardsNo">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @if (Model.IsSafeguardApplied == true)
+                                        {
+                                            <div class="row mb-3" id="safeguardsAppliedRow">
+                                                <label for="inputPassword3" class="col-sm-2 col-form-label">Name the safeguards that should be applied </label>
+                                                <div class="col-sm-10 d-flex align-items-center">
+                                                    <input type="text" class="form-control" asp-for="SafeguardsApplied" id="safeguardsApplied" disabled>
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class="row mb-3">
+                                            <label for="inputPassword3" class="col-sm-2 col-form-label">(c)	Specify the nature of the safeguard to address the issue(s) identified in the evaluation of continuance of engagement or client: </label>
+                                            <div class="col-sm-10 d-flex align-items-center">
+                                                <input type="text" class="form-control" asp-for="NatureOfSafeguard" id="natureOfSafeguard" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                                 <div class="row mb-3">
                                     <label for="inputEmail3" class="col-sm-2 col-form-label">Continuing engagement / client *risk rated in current year as:<span class="text-danger"> *</span>  <br> *See <a>Appendix 1</a> for categories of risks</label>
                                     <div class="col-sm-10 d-flex align-items-center">
@@ -651,7 +743,7 @@
                                 </p>
                                 <div class="text-center">
                                     <a class="btn btn-primary" href="javascript:history.back()">Back</a>
-                                    @if (role == "Admin")
+                                    @if (role == "Admin" || role == "Reviewer")
                                     {
                                         if (Model.Status == "Pending" || Model.Status == "Pending 2nd Approval")
                                         {

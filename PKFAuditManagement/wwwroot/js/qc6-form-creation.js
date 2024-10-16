@@ -232,13 +232,24 @@ $(document).ready(function () {
     function updateBudgetedFeeRecoveryRate() {
         var estimatedFee = parseFloat($("#EstimatedFee").val());
         var budgetedTimeCost = parseFloat($("#BudgetedTimeCost").val());
+        var commentBox = $("#commentBoxContainer");
+
         if (!isNaN(estimatedFee) && !isNaN(budgetedTimeCost) && budgetedTimeCost !== 0) {
             var budgetedFeeRecoveryRate = (estimatedFee / budgetedTimeCost) * 100;
             budgetedFeeRecoveryRate = budgetedFeeRecoveryRate.toFixed(2);
             $("#BudgetedFeeRecoveryRate").val(budgetedFeeRecoveryRate);
             $("#BudgetedFeeRecoveryRateHidden").val(budgetedFeeRecoveryRate);
+
+            // Check if recovery rate is below 30%
+            if (budgetedFeeRecoveryRate < 30) {
+                commentBox.show(); // Show the comment box
+            } else {
+                commentBox.hide(); // Hide the comment box
+            }
+
         } else {
             $("#BudgetedFeeRecoveryRate").val("");
+            commentBox.hide(); // Hide the comment box if values are not valid
         }
     }
 
@@ -337,6 +348,50 @@ $(document).ready(function () {
             alert('No file selected.');
         }
     });
+
+    // Function to toggle the comment input field based on radio selection
+    function toggleCommentInput() {
+        var yesSelected = document.getElementById('outstandingUnpaidFeesYes').checked;
+        var commentRow = document.getElementById('outstandingUnpaidFeesRow');
+        var commentInput = document.getElementById('outstandingUnpaidFeesCommentInput');
+
+        if (yesSelected) {
+            commentRow.style.display = 'flex';  // Show the comment row
+        } else {
+            commentRow.style.display = 'none';  // Hide the comment row
+            commentInput.value = '';  // Clear the comment input field
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('outstandingUnpaidFeesYes').addEventListener('change', toggleCommentInput);
+    document.getElementById('outstandingUnpaidFeesNo').addEventListener('change', toggleCommentInput);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleCommentInput();
+
+    // Toggling checkbox for any significant risk displays the comment box
+    function toggleSignificantRisk() {
+        var yesSelected = document.getElementById('anySignificantRiskYes').checked;
+        var significantRiskRow = document.getElementById('significantRiskRow');
+        var significantRiskComment = document.getElementById('significantRiskComment');
+
+        if (yesSelected) {
+            significantRiskRow.style.display = '';
+            significantRiskComment.disabled = false;
+        } else {
+            significantRiskRow.style.display = 'none';
+            significantRiskComment.disabled = true;
+            significantRiskComment.value = '';
+        }
+    }
+
+    // Attach event listeners to the radio buttons
+    document.getElementById('anySignificantRiskYes').addEventListener('change', toggleSignificantRisk);
+    document.getElementById('anySignificantRiskNo').addEventListener('change', toggleSignificantRisk);
+
+    // Initial load: Call the function to ensure the correct visibility based on the current selection
+    toggleSignificantRisk();
 });
 
 // Toggling checkbox for risk level displays the comment box
@@ -354,19 +409,21 @@ function toggleRiskLevel() {
     }
 }
 
-// Toggling checkbox for any significant risk displays the comment box
-function toggleSignificantRisk() {
-    var significantRiskCheckbox = document.getElementById('significantRiskCheckbox');
-    var significantRiskRow = document.getElementById('significantRiskRow');
-    var significantRiskComment = document.getElementById('significantRiskComment');
+// Function to toggle the visibility of the reasons input field
+function togglePredecessorReasonsInput() {
+    var checkbox = document.getElementById("predecessorAuditorCheckbox");
+    var reasonsContainer = document.getElementById("reasonsContainer");
+    var reasonsInput = document.getElementById("ReasonsForDiscontinuance");
 
-    if (significantRiskCheckbox.checked) {
-        significantRiskRow.style.display = '';
-        significantRiskComment.disabled = false;
+    if (checkbox.checked) {
+        reasonsContainer.style.display = "";  // Show reasons input
+        reasonsInput.disabled = false;
+        reasonsInput.setAttribute("required", "required"); // Mark as required
     } else {
-        significantRiskRow.style.display = 'none';
-        significantRiskComment.disabled = true;
-        significantRiskComment.value = '';
+        reasonsContainer.style.display = "none";    // Hide reasons input
+        reasonsInput.removeAttribute("required"); // Remove required attribute
+        reasonsInput.disabled = true;
+        reasonsInput.value = ""; // Clear the input value if hidden
     }
 }
 

@@ -71,6 +71,15 @@
                                         </div>
                                     </div>
                                     <div class="row mb-3">
+                                        <label class="col-sm-2 col-form-label">Industry<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <select class="form-control" asp-for="Industry">
+                                                <option value="Industry1">Industry1</option>
+                                                <option value="Industry2">Industry2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
                                         <div class="col-sm-2">
                                             <strong>Prepared by:<span class="text-danger"> *</span></strong>
                                         </div>
@@ -139,7 +148,13 @@
                                                 <input type="hidden" asp-for="BudgetedFeeRecoveryRate" id="BudgetedFeeRecoveryRateHidden" />
                                             </div>
                                         </div>
-                                    </div> 
+                                    </div>
+                                    <div class="row mb-3" id="commentBoxContainer" style="display: none;">
+                                        <label class="col-sm-2 col-form-label">Comments on Budgeted Fee Recovery Rate</label>
+                                        <div class="col-sm-10 d-flex align-items-center">
+                                            <input type="text" class="form-control" asp-for="BudgetedFeeRecoveryRateComment" id="FeeRecoveryComments" placeholder="Please provide reasons if the recovery rate is below 30%">
+                                        </div>
+                                    </div>
                                     <div class="card border border-secondary p-3 mb-3">
                                         <div class="card-body">
                                             <div class="row p-3">
@@ -213,12 +228,27 @@
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Any outstanding unpaid fees?<span class="text-danger"> *</span></label>
+                                        <div class="col-sm-10 d-flex flex-column">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="outstandingUnpaidFeesYes" name="OutstandingUnpaidFees" value="true" @(Model.OutstandingUnpaidFees == true ? "checked" : "")>
+                                                <label class="form-check-label" for="outstandingUnpaidFeesYes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="outstandingUnpaidFeesNo" name="OutstandingUnpaidFees" value="false" @(Model.OutstandingUnpaidFees == false ? "checked" : "")>
+                                                <label class="form-check-label" for="outstandingUnpaidFeesNo">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3" id="outstandingUnpaidFeesRow" style="display: none;">
+                                        <label for="outstandingUnpaidFeesCommentInput" class="col-sm-2 col-form-label">
+                                            Comment on Outstanding Unpaid Fees
+                                        </label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="OutstandingUnpaidFees">
+                                            <input class="form-control" id="outstandingUnpaidFeesCommentInput" asp-for="OutstandingUnpaidFeesComment"></input>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Conflicts check done?<span class="text-danger"> *</span></label>
+                                        <label class="col-sm-2 col-form-label">Tick to confirm that firm’s independence procedures, and PKF network conflict of interest procedures, have been wholly complied with<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <input class="form-check-input" type="checkbox" id="gridCheck1" asp-for="ConflictsCheckDone">
                                         </div>
@@ -239,16 +269,16 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Predecessor Auditor</label>
+                                        <label class="col-sm-2 col-form-label">Predecessor Auditor? <span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="PredecessorAuditor">
+                                            <input class="form-check-input" type="checkbox" onchange="togglePredecessorReasonsInput()" id="predecessorAuditorCheckbox" asp-for="PredecessorAuditor">
                                         </div>
                                     </div>
 
-                                    <div class="row mb-3">
-                                        <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor<span class="text-danger"> *</span></label>
+                                    <div class="row mb-3" id="reasonsContainer" style="display: none;">
+                                        <label class="col-sm-2 col-form-label">Reasons for discontinuance of Predecessor Auditor <span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" required>
+                                            <input type="text" class="form-control" asp-for="ReasonsForDiscontinuance" id="ReasonsForDiscontinuance">
                                         </div>
                                     </div>
 
@@ -518,11 +548,16 @@
                                
                                 <h5 class="card-title">Conclusion</h5>
                                 <div class="row mb-3">
-                                    <label for="inputEmail3" class="col-sm-2 col-form-label">
-                                        Are there any significant risks associated with the acceptance of the engagement?<span class="text-danger"> *</span>
-                                    </label>
-                                    <div class="col-sm-10 d-flex align-items-center">
-                                        <input class="form-check-input me-3" type="checkbox" onchange="toggleSignificantRisk()" id="significantRiskCheckbox" asp-for="AnySignificantRisk">
+                                    <label class="col-sm-2 col-form-label"> Are there any significant risks associated with the acceptance of the engagement?<span class="text-danger"> *</span></label>
+                                    <div class="col-sm-10 d-flex flex-column">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="anySignificantRiskYes" name="AnySignificantRisk" value="true" @(Model.AnySignificantRisk == true ? "checked" : "")>
+                                            <label class="form-check-label" for="anySignificantRiskYes">Yes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="anySignificantRiskNo" name="AnySignificantRisk" value="false" @(Model.AnySignificantRisk == false ? "checked" : "")>
+                                            <label class="form-check-label" for="anySignificantRiskNo">No</label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row mb-3" id="significantRiskRow" style="display: none;">
@@ -786,9 +821,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="feeDetailsModalLabel">Fee Details</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body table-responsive">
                 <table class="table table-bordered" id="feeDetailsTable">

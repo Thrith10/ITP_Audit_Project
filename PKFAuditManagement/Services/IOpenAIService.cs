@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 using OpenAI;
 using OpenAI.Chat;
 using OpenAI.Models;
@@ -13,16 +15,25 @@ namespace PKFAuditManagement.Services
     public class OpenAIService : IOpenAIService
     {
         private readonly string _apiKey;
+        private readonly IMemoryCache _memoryCache;
+        private const string ChatHistoryCacheKey = "ChatHistory";
 
-        public OpenAIService(string apiKey)
+        // List to hold chat history (stored in memory during the session)
+        private List<Message> chatHistory = new List<Message>();
+
+        public OpenAIService(string apiKey, IMemoryCache memoryCache)
         {
             _apiKey = apiKey;
+            _memoryCache = memoryCache;
         }
 
         public async Task<string> GetChatResponseAsync(string userInput, string retrievalInput)
         {
             try
             {
+                // Retrieve the chat history from memory cache
+                var chatHistory = _memoryCache.TryGetValue(ChatHistoryCacheKey, out List<Message> cachedHistory) ? cachedHistory : new List<Message>();
+
                 // Initialise the OpenAI client
                 using var api = new OpenAIClient(_apiKey);
 
@@ -61,22 +72,31 @@ namespace PKFAuditManagement.Services
                 Here is the retrieved data from the knowledge base that must be used in your response:{retrievalInput}
                 ";
 
-                // Create the messages list including context and user input
-                var messages = new List<Message>
+                // Initialize chat history if it does not exist
+                if (chatHistory == null || !chatHistory.Any())
                 {
-                    new Message(Role.System, context),
-                    new Message(Role.User, userInput)
-                };
+                    chatHistory = new List<Message> { new Message(Role.System, context) };
+                }
 
-                // Create a ChatRequest with the messages and a model
-                var chatRequest = new ChatRequest(messages, Model.GPT4o);
+                // Add the user input to the chat history
+                chatHistory.Add(new Message(Role.User, userInput));
 
-                // Get the completion from the API
+                // Create the chat request
+                var chatRequest = new ChatRequest(chatHistory, Model.GPT4o);
+
+                // Get the response from the OpenAI API
                 var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
                 var choice = response.FirstChoice;
-                
+
                 // Retrieve message content from the response
                 string messageContent = choice.Message.Content.ToString();
+
+
+                // Add the assistant's response to the chat history
+                chatHistory.Add(new Message(Role.Assistant, messageContent));
+
+                // Store the updated chat history in memory cache
+                _memoryCache.Set(ChatHistoryCacheKey, chatHistory);
 
                 // Optionally, apply formatting to the response (custom formatting logic)
                 return FormatResponse(messageContent);

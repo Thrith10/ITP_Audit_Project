@@ -25,19 +25,27 @@
                                             <input type="hidden" asp-for="Id" />
                                             <div class="form-group mb-3">
                                                 <label asp-for="Client" class="control-label">Client</label>
-                                                <select asp-for="Client" class="form-control">
-                                                    @if (Model.ClientNames != null && Model.ClientNames.Any())
-                                                    {
-                                                        @foreach (var client in Model.ClientNames)
+                                                <div class="d-flex align-items-center">
+                                                    <!-- Dropdown -->
+                                                    <select asp-for="Client" class="form-control" id="clientSelect" style="flex-grow: 1;">
+                                                        @if (Model.ClientNames != null && Model.ClientNames.Any())
                                                         {
-                                                            <option value="@client">@client</option>
+                                                            @foreach (var client in Model.ClientNames)
+                                                            {
+                                                                <option value="@client">@client</option>
+                                                            }
                                                         }
-                                                    }
-                                                    else
-                                                    {
-                                                        <option disabled>No clients available</option>
-                                                    }
-                                                </select>
+                                                        else
+                                                        {
+                                                            <option disabled>No clients available</option>
+                                                        }
+                                                    </select>
+
+                                                    <!-- Modal Trigger Button -->
+                                                    <button type="button" class="btn btn-outline-secondary ms-2" data-bs-toggle="modal" data-bs-target="#clientSearchModal">
+                                                        <i class="bi bi-search"></i>
+                                                    </button>
+                                                </div>
                                                 <span asp-validation-for="Client" class="text-danger"></span>
                                             </div>
                                             <div class="form-group mb-3">
@@ -86,7 +94,7 @@
                                                                     }
                                                                 </td>
                                                                 <td>
-                                                                    <input asp-for="FinancialStatement" type="file" class="form-control" accept="application/pdf" required/>
+                                                                    <input asp-for="FinancialStatement" type="file" class="form-control" accept="application/pdf" />
                                                                     <span asp-validation-for="FinancialStatement" class="text-danger"></span>
                                                                 </td>
                                                                 <td>
@@ -126,3 +134,40 @@
 
     </main><!-- End #main -->
 </body>
+
+<!-- Modal for client search display -->
+<div class="modal fade" id="clientSearchModal" tabindex="-1" aria-labelledby="clientSearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientSearchModalLabel">Search and Select Client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Search Input -->
+                <input type="text" class="form-control mb-3" id="searchClientInput" placeholder="Search clients..." onkeyup="filterClients()">
+
+                <!-- Client List -->
+                <ul class="list-group" id="clientList">
+                    @if (Model.ClientNames != null && Model.ClientNames.Any())
+                    {
+                        @foreach (var client in Model.ClientNames)
+                        {
+                            <li class="list-group-item" data-client="@client" onclick="selectClient('@client')">
+                                @client
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item disabled">No clients available</li>
+                    }
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmClientBtn" disabled onclick="confirmSelection()">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>

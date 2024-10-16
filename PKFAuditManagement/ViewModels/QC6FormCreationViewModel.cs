@@ -29,6 +29,8 @@ namespace PKFAuditManagement.ViewModels
         [Required]
         public string? EngagementType { get; set; }
         [Required]
+        public string? Industry { get; set; }
+        [Required]
         public string? PreparedBy { get; set; }
         [Required]
         public DateTime PreparedByDate { get; set; }
@@ -49,7 +51,9 @@ namespace PKFAuditManagement.ViewModels
         public decimal? BudgetedTimeCost { get; set; }
         [Required]
         public decimal? BudgetedFeeRecoveryRate { get; set; }
+        public string? BudgetedFeeRecoveryRateComment { get; set; }
         public bool OutstandingUnpaidFees { get; set; }
+        public string? OutstandingUnpaidFeesComment { get; set; }
         [Required]
         public decimal? AuditFee { get; set; }
         [Required]
@@ -61,8 +65,7 @@ namespace PKFAuditManagement.ViewModels
         public string? TypeOfActivities { get; set; }
         [Required]
         public string? ComplexityOfEngagement { get; set; }
-        public string? PredecessorAuditor { get; set; }
-        [Required]
+        public bool PredecessorAuditor { get; set; }
         public string? ReasonsForDiscontinuance { get; set; }
         public bool IsPublicInterestEntity { get; set; }
         public string? PublicInterestEntityType { get; set; }

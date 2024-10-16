@@ -367,6 +367,7 @@ namespace PKFAuditManagement.Data
                     ProspectiveClient = "",
                     PeriodEnded = null,
                     EngagementType = "",
+                    Industry = "",
                     PreparedBy = "",
                     PreparedByDate = DateTime.MinValue,
                     ReviewedBy = "",
@@ -386,7 +387,7 @@ namespace PKFAuditManagement.Data
                     ConflictsCheckDone = true,
                     TypeOfActivities = "",
                     ComplexityOfEngagement = "",
-                    PredecessorAuditor = "",
+                    PredecessorAuditor = false,
                     ReasonsForDiscontinuance = "",
                     PublicInterestEntity = false,
                     PublicInterestEntityType = "",
@@ -550,7 +551,7 @@ namespace PKFAuditManagement.Data
                    IsSuspiciousTransactionReportFiled = false,
                    Satisfaction = "Yes.",
                    PreparedBy = ""
-                }
+               }
             );
 
             modelBuilder.Entity<QC6FormTest>().HasData(

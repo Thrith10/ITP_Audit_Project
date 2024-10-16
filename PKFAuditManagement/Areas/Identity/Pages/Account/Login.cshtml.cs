@@ -140,7 +140,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
                             return RedirectToPage("/Account/Manage/ChangePassword");
                         }
 
-                        if (roles.Contains("Admin"))
+                        if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                         {
                             return LocalRedirect(Url.Content("~/Admin/AdminDashboard"));
                         }

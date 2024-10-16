@@ -1,7 +1,7 @@
 ﻿@{
     var user = Context.User;
     string layout = "_Layout";
-    if (user.IsInRole("Admin"))
+    if (user.IsInRole("Admin") || user.IsInRole("Reviewer"))
     {
         layout = "_AdminLayout";
     }

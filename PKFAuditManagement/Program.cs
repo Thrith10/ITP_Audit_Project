@@ -24,6 +24,9 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 // Register HttpClient for dependency injection
 builder.Services.AddHttpClient();
 
+// Register IMemoryCache
+builder.Services.AddMemoryCache();
+
 // Change options.SignIn.RequireConfirmedAccount = true if you want confirmed account email address
 builder.Services.AddDefaultIdentity<CustomUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()

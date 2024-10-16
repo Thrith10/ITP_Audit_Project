@@ -32,6 +32,7 @@ namespace PKFAuditManagement.Controllers
 
         // GET: Quizzes/Create
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             var model = new QuizViewModel
@@ -180,6 +181,7 @@ namespace PKFAuditManagement.Controllers
 
         // GET: Quizzes
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             var quizzes = await _context.Quiz
@@ -209,6 +211,7 @@ namespace PKFAuditManagement.Controllers
         }
         // GET: Quizzes/ViewAllQuiz
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ViewAllQuiz()
         {
             // Get the current user
@@ -241,7 +244,7 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/Quiz/ViewAllQuiz.cshtml", quizListViewModel);
         }
 
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(Guid id)
         {
             // Fetch the quiz with its questions and options
@@ -296,6 +299,7 @@ namespace PKFAuditManagement.Controllers
 
         // GET: Quizzes/Edit
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(Guid id)
         {
             var quiz = await _context.Quiz
@@ -496,10 +500,6 @@ namespace PKFAuditManagement.Controllers
             // If model state is invalid, return to the view
             return View("~/Views/General/Quiz/EditQuiz.cshtml", quizViewModel);
         }
-
-
-
-
 
         // POST: Quizzes/Delete/5
         [HttpPost, ActionName("Delete")]
