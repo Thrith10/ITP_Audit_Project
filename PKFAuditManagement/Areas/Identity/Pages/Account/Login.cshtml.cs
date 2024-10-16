@@ -37,6 +37,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
         /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
+        public bool IsLockedOut { get; set; } = false; // Property to track lockout status
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -158,8 +159,10 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
                 }
                 if (result.IsLockedOut)
                 {
+                    IsLockedOut = true; // Set lockout flag
                     _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
+                    //return RedirectToPage("./Lockout");
+                    return Page();
                 }
                 else
                 {

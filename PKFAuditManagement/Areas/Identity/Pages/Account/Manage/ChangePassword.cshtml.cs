@@ -137,10 +137,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account.Manage
             _logger.LogInformation("User changed their password successfully.");
             StatusMessage = "Your password has been changed.";
 
-            // Set a flag to indicate success
-            TempData["PasswordChanged"] = true;
-
-            return RedirectToPage();
+            return RedirectToPage("/Account/Login");
         }
 
     }

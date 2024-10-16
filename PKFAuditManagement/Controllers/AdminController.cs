@@ -134,7 +134,7 @@ namespace PKFAuditManagement.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUser(string userId)
+        public async Task<IActionResult> SuspendUser(string userId)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -151,26 +151,31 @@ namespace PKFAuditManagement.Controllers
             {
                 try
                 {
-                    var result = await _userManager.DeleteAsync(user);
+                    // Set LockoutEnd to a very high value to suspend indefinitely
+                    user.LockoutEnd = DateTimeOffset.MaxValue;
+
+                    // Update the user lockout status in the database
+                    var result = await _userManager.UpdateAsync(user);
 
                     if (result.Succeeded)
                     {
                         await transaction.CommitAsync();
-                        return Json(new { success = true, message = "User deleted successfully!" });
+                        return Json(new { success = true, message = "User suspended successfully!" });
                     }
                     else
                     {
                         await transaction.RollbackAsync();
-                        return Json(new { success = false, message = "Failed to delete the user. Please try again." });
+                        return Json(new { success = false, message = "Failed to suspend the user. Please try again." });
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     await transaction.RollbackAsync();
                     return Json(new { success = false, message = "An error occurred while processing your request. Please try again." });
                 }
             }
         }
+
 
 
         [HttpGet]

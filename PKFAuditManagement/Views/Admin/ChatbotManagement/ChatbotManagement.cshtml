@@ -77,6 +77,39 @@
 @section Scripts {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script>
-        
+        document.getElementById('add-document-btn').addEventListener('click', function () {
+            var formData = new FormData();
+            var fileInput = document.getElementById('new-document');
+            var documentName = document.getElementById('document-name').value;
+
+            // Ensure a file is selected
+            if (!fileInput.files.length) {
+                alert("Please select a document to upload.");
+                return;
+            }
+
+            // Add the file and document name to the FormData
+            formData.append('file', fileInput.files[0]);
+            formData.append('documentName', documentName);
+
+            // AJAX request to upload the file
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/Chatbot/Upload', true);
+
+            // Define the callback when the upload is complete
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    alert('Document uploaded successfully');
+                    // Optionally, refresh the document list or update the UI
+                    location.reload();
+                } else {
+                    alert('Failed to upload document: ' + xhr.responseText);
+                }
+            };
+
+            // Send the form data via the request
+            xhr.send(formData);
+        });
     </script>
+
 }

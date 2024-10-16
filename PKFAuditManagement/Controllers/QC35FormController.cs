@@ -179,8 +179,8 @@ namespace PKFAuditManagement.Controllers
         [Route("/QC35Form/RejectQC35Form/{id}")]
         public async Task<IActionResult> RejectQC35Form(int id)
         {
-            // Get the request body as a string
-            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+                // Get the request body as a string
+                using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
             {
                 string requestBody = await reader.ReadToEndAsync();
 
@@ -227,21 +227,28 @@ namespace PKFAuditManagement.Controllers
                 // Check if current user is the second approver
                 if (currentUserEmail == engagement.SecondApprover)
                 {
-                    // Update the engagement status to "Rejected"
-                    engagement.Status = "Rejected";
-                    engagement.RejectionReason = rejectionReason; // Set the rejection reason
+                    if (engagement.IsFirstApproved == false)
+                    {
+                        return Forbid();
+                    }
+                    else
+                    {
+                        // Update the engagement status to "Rejected"
+                        engagement.Status = "Rejected";
+                        engagement.RejectionReason = rejectionReason; // Set the rejection reason
 
-                    // Reset approval status to repeat the approval process
-                    engagement.IsFirstApproved = false;
-                    engagement.IsSecondApproved = false;
+                        // Reset approval status to repeat the approval process
+                        engagement.IsFirstApproved = false;
+                        engagement.IsSecondApproved = false;
 
-                    _context.SaveChanges();
+                        _context.SaveChanges();
 
-                    // Send email to creator to notify about the rejection
-                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejected",
-                        $"Your QC35 Form has been rejected by: {engagement.SecondApprover}. Please make the necessary amendments and resubmit the form.");
+                        // Send email to creator to notify about the rejection
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejected",
+                            $"Your QC35 Form has been rejected by: {engagement.SecondApprover}. Please make the necessary amendments and resubmit the form.");
 
-                    return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
+                        return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
+                    }
                 }
 
                 // If neither the first nor the second approver, forbid the operation
@@ -504,10 +511,10 @@ namespace PKFAuditManagement.Controllers
                     
                     await transaction.CommitAsync();
 
-                    await _emailSender.SendEmailAsync(viewModel.PartnerName, "QC35 Form Creation",
+                    await _emailSender.SendEmailAsync(viewModel.ManagerName, "QC35 Form Creation",
                     $"A new QC35 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
 
-                    await _emailSender.SendEmailAsync(viewModel.ManagerName, "QC35 Form Creation",
+                    await _emailSender.SendEmailAsync(viewModel.PartnerName, "QC35 Form Creation",
                     $"A new QC35 Form has been created with File Reference: {fileReference} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
 
                     if (roles.Contains("Admin"))

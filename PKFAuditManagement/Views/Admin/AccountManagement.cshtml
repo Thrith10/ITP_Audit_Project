@@ -41,11 +41,11 @@
                                             <a asp-action="EditUser" asp-route-userId="@user.UserId" class="btn btn-link">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <!--
+                                            
                                             <button type="button" class="btn btn-link text-danger" onclick="confirmDelete('@user.UserId')">
-                                                <i class="fas fa-trash-alt"></i>
+                                                <i class="fas fa-user-slash"></i>
                                             </button>
-                                             -->
+                                            
                                         </td>
                                     </tr>
                                 }
@@ -65,17 +65,17 @@
         function confirmDelete(userId) {
             Swal.fire({
                 title: 'Are you sure?',
-                text: "Do you really want to delete this user?",
+                text: "Do you really want to suspend this user?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!',
+                confirmButtonText: 'Yes, suspend it!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '@Url.Action("DeleteUser", "Admin")',
+                        url: '@Url.Action("SuspendUser", "Admin")',
                         type: 'POST',
                         data: {
                             userId: userId,
