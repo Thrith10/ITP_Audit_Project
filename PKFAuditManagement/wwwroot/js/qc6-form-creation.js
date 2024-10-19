@@ -13,6 +13,9 @@ $("#autocomplete").autocomplete({
     }
 });
 
+
+
+
 // Add event listener to the "Add Service" button
 document.getElementById('addService').addEventListener('click', addService);
 
@@ -284,56 +287,39 @@ $(document).ready(function () {
     // Initial update of Budgeted fee recovery rate
     updateBudgetedFeeRecoveryRate();
 
-    var documentIndex = 1;
-    $('#add-more-docs').on('click', function () {
-        $('#other-documents-container').append(`
-            <div class="document-row card border mb-2" data-index="${documentIndex}">
-                <div class="card-body">
-                    <input type="text" class="form-control mt-3 mb-3" name="OtherDocuments[${documentIndex}].DocumentName" placeholder="Document Name" required/>
-                    <input type="file" class="form-control mb-3" name="OtherDocuments[${documentIndex}].File" accept="application/pdf" required/>
-                    <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                    <button type="button" class="btn btn-danger btn-sm remove-doc">Remove</button>
-                </div>
-            </div>
-        `);
-        documentIndex++;
-    });
+    // Add event listener to the "Add More Documents" button
+    document.getElementById('add-more-docs').addEventListener('click', addDocument);
 
-    // Remove a document row
-    $(document).on('click', '.remove-doc', function () {
-        // Remove the clicked document row
-        $(this).closest('.document-row').remove();
+    // Function to add a new document row
+    function addDocument() {
+        const docsContainer = document.getElementById('additional-docs-body');
+        const existingRowCount = docsContainer.querySelectorAll('tr.additional-doc-row').length; // Count only additional document rows
 
-        // Reindex the remaining document rows
-        $('#other-documents-container .document-row').each(function (index) {
-            $(this).attr('data-index', index); // Update the data-index attribute
+        const newRow = document.createElement('tr');
+        newRow.classList.add('additional-doc-row'); // Add a class to easily identify additional document rows
+        newRow.innerHTML = `
+        <td style="width: 30%;">
+            <input asp-for="AdditionalDocuments[${existingRowCount}].DocumentName" type="text" class="form-control" name="AdditionalDocuments[${existingRowCount}].DocumentName" placeholder="Document Name" required />
+        </td>
+        <td style="width: 40%;">
+            <input asp-for="AdditionalDocuments[${existingRowCount}].File" type="file" class="form-control" name="AdditionalDocuments[${existingRowCount}].File" accept="application/pdf" required />
+        </td>
+        <td style="width: 30%;">
+            <button type="button" class="btn btn-secondary btn-sm remove-uploaded-doc mr-2">Clear</button>
+            <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+            <button type="button" class="btn btn-danger btn-sm delete-row" onclick="removeDocument(this)">Delete Row</button>
+        </td>
+    `;
 
-            // Update the names of the input fields to match the new index
-            $(this).find('input[name^="OtherDocuments"]').each(function () {
-                var name = $(this).attr('name');
-                var newName = name.replace(/\[.*?\]/, '[' + index + ']');
-                $(this).attr('name', newName);
-            });
-        });
-
-        // Decrease the global documentIndex variable 
-        documentIndex--;
-    });
-
-    // Clear the file input when the 'Clear' button is clicked
-    $(document).on('click', '.clear-doc', function () {
-        var fileInput = $(this).siblings('input[type="file"]');
-        if (fileInput.val()) {
-            fileInput.val(''); // Clear the input value using jQuery method
-        } else {
-            alert('No file selected.');
-        }
-    });
+        docsContainer.appendChild(newRow);
+    }
 
     // Open PDF in a new tab
     $(document).on('click', '.preview-doc', function () {
-        var fileInput = $(this).siblings('input[type="file"]')[0];
-        if (fileInput.files.length > 0) {
+        // Find the closest <tr> and then look for the file input within it
+        var fileInput = $(this).closest('tr').find('input[type="file"]')[0];
+
+        if (fileInput && fileInput.files.length > 0) {  // Check if fileInput is defined
             var file = fileInput.files[0];
             var reader = new FileReader();
 
@@ -344,6 +330,19 @@ $(document).ready(function () {
             };
 
             reader.readAsArrayBuffer(file);
+        } else {
+            alert('No file selected.');
+        }
+    });
+
+    // Clear the file input when the 'Clear' button is clicked
+    $(document).on('click', '.remove-uploaded-doc', function () {
+        // Find the closest file input within the same row
+        var fileInput = $(this).closest('tr').find('input[type="file"]');
+
+        if (fileInput.val()) {
+            // Clear the file input value
+            fileInput.val('');
         } else {
             alert('No file selected.');
         }
@@ -392,7 +391,84 @@ $(document).ready(function () {
 
     // Initial load: Call the function to ensure the correct visibility based on the current selection
     toggleSignificantRisk();
+
+    // Check if either one is filled up
+    document.getElementById('qc6Form').addEventListener('submit', function (event) {
+        // Get the input fields
+        const documentNameInput = document.querySelector('input[name="AdditionalDocuments[0].DocumentName"]');
+        const fileInput = document.querySelector('input[name="AdditionalDocuments[0].File"]');
+        const submitButton = document.getElementById('submit-btn');
+        const tooltip = document.getElementById('tooltip');
+
+        // Check if either input is filled
+        const isDocumentNameFilled = documentNameInput.value.trim() !== '';
+        const isFileInputFilled = fileInput.files.length > 0;
+
+        // Prevent form submission if exactly one input is filled
+        if (isDocumentNameFilled !== isFileInputFilled) {
+            event.preventDefault();
+
+            // Show the tooltip
+            tooltip.style.display = 'block';
+
+            // Scroll to the tooltip
+            tooltip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Add the .is-invalid class to the inputs
+        if (isDocumentNameFilled) {
+            fileInput.classList.add('is-invalid');
+        } else if (isFileInputFilled) {
+            documentNameInput.classList.add('is-invalid');
+        }
+    });
 });
+
+// Function to remove a document row
+function removeDocument(button) {
+    const row = button.closest('tr');
+    const documentFilenameInput = row.querySelector('.document-filename');
+
+    // Get the document filename from the input
+    if (documentFilenameInput) {
+        const documentFilename = documentFilenameInput.value;
+
+        // Add the document filename to the deletedDocumentFilenames array
+        if (documentFilename) {
+            deletedDocumentFilenames.push(documentFilename);
+        }
+    }
+
+    row.remove();
+
+    // Update the indices of the additional document rows
+    updateDocumentIndices();
+}
+
+// Function to update the indices of the additional document rows
+function updateDocumentIndices() {
+    const docsContainer = document.getElementById('additional-docs-body');
+    const additionalDocRows = docsContainer.querySelectorAll('tr.additional-doc-row'); // Select only additional document rows
+
+    additionalDocRows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        inputs.forEach(input => {
+            // Update 'name' attribute
+            const name = input.getAttribute('name');
+            if (name) {
+                const newName = name.replace(/\[\d+\]/g, `[${index}]`); // Update index in 'name' attribute
+                input.setAttribute('name', newName);
+            }
+
+            // Update 'asp-for' attribute
+            const aspFor = input.getAttribute('asp-for');
+            if (aspFor) {
+                const newAspFor = aspFor.replace(/\[\d+\]/g, `[${index}]`); // Update index in 'asp-for' attribute
+                input.setAttribute('asp-for', newAspFor);
+            }
+        });
+    });
+}
 
 // Toggling checkbox for risk level displays the comment box
 function toggleRiskLevel() {
@@ -499,3 +575,93 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
     });
 });
 
+// Function to check for duplicate document names
+function checkDuplicateDocuments() {
+    const numOfDocuments = 5; // Replace with the actual number of documents
+    const docInputs = [];
+
+    for (let i = 0; i < numOfDocuments; i++) {
+        const docInput = document.querySelector(`input[name="AdditionalDocuments[${i}].DocumentName"]`);
+        if (docInput) {
+            docInputs.push(docInput);
+        }
+    }
+    const docNames = [];
+    let hasDuplicates = false;
+
+    // Remove any previous error tooltips, validation styles, and Bootstrap's is-valid/was-validated classes
+    docInputs.forEach(input => {
+        input.classList.remove('is-invalid', 'is-valid', 'was-validated');
+        input.removeAttribute('data-bs-toggle');
+        input.removeAttribute('data-bs-placement');
+        input.removeAttribute('title');
+    });
+
+    // Loop through the document name inputs to find duplicates
+    docInputs.forEach(input => {
+        const docName = input.value.trim().toLowerCase(); // Normalize to lowercase for comparison
+        // Check if the current input is not a file input
+        if (input.type !== 'file') {
+            if (docNames.includes(docName)) {
+                // If duplicate, add error styling and tooltip
+                input.classList.add('is-invalid');
+                input.setAttribute('data-bs-toggle', 'tooltip');
+                input.setAttribute('data-bs-placement', 'top');
+                input.setAttribute('title', 'Duplicate document name');
+                hasDuplicates = true;
+            } else {
+                docNames.push(docName);
+            }
+        }
+    });
+
+
+    // Initialize Bootstrap tooltips for invalid inputs
+    if (hasDuplicates) {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    }
+
+    // Scroll to the first invalid input if duplicates are found
+    if (hasDuplicates) {
+        const firstInvalidElement = document.querySelector('.is-invalid');
+        if (firstInvalidElement) {
+            firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    return !hasDuplicates; // Return false if duplicates were found
+}
+
+// Hook into the form submission event
+document.getElementById('qc6Form').addEventListener('submit', function (event) {
+    // Prevent default validation and handle manually
+    event.preventDefault(); // Stop the form from submitting
+
+    // Clear validation classes from file inputs without removing them
+    const fileInputs = this.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        input.classList.remove('is-invalid', 'is-valid', 'was-validated'); // Remove validation classes
+        // Optionally remove tooltip attributes if needed
+        input.removeAttribute('data-bs-toggle');
+        input.removeAttribute('data-bs-placement');
+        input.removeAttribute('title');
+    });
+
+    // Remove Bootstrap's automatic validation classes from the form
+    this.classList.remove('was-validated');
+    this.classList.remove('is-invalid');
+    // Check for duplicates in document names
+    if (!checkDuplicateDocuments()) {
+        // Prevent form submission if duplicates were found
+        event.stopPropagation();
+    } else {
+        // No duplicates, remove any automatic is-valid classes and submit the form programmatically
+        const inputs = this.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.classList.remove('is-valid'); // Remove Bootstrap's automatic valid class
+        });
+
+        this.submit();
+    }
+});

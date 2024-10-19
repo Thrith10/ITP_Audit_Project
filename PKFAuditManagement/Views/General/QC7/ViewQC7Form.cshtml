@@ -673,23 +673,64 @@
                                                 <h5 class="card-title">Optional Additional Documents (In PDF format)</h5>
                                             </div>
                                         </div>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 50%;">Document Name/Type</th>
+                                                    <th style="width: 50%;">Current Attachment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @* Row for Other Documents *@
+                                                <tr>
+                                                    <td>
+                                                        <input type="text" class="form-control" value="Consolidated Documents" disabled />
+                                                    </td>
+                                                    <td>
+                                                        @if (!string.IsNullOrEmpty(Model.OtherDocumentsFileName))
+                                                        {
+                                                            var otherDocUrl = Url.Content("~/uploads/QC7Form-OtherDocuments/" + Model.OtherDocumentsFileName);
+                                                            <a href="@otherDocUrl" target="_blank" class="document-link">@Model.OtherDocumentsFileName</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="no-file-text">No file uploaded</span>
+                                                        }
+                                                    </td>
+                                                </tr>
 
-                                        <!-- Other Documents -->
-                                        <div class="form-group mb-3">
-                                            <label asp-for="OtherDocuments">Consolidated Documents in PDF</label>
-                                            <div class="d-flex align-items-center">
-                                                @if (Model.OtherDocumentsFileName != null)
+                                                @* Loop through each document in the AdditionalDocuments list *@
+                                                @if (Model.AdditionalDocuments != null && Model.AdditionalDocuments.Count > 0)
                                                 {
-                                                    var fileUrl = Url.Content("~/uploads/QC7Form-OtherDocuments/" + Model.OtherDocumentsFileName);
-                                                    <a href="@fileUrl" target="_blank">View Document</a>
+                                                    for (int i = 0; i < Model.AdditionalDocuments.Count; i++)
+                                                    {
+                                                        var doc = Model.AdditionalDocuments[i];
+                                                        <tr>
+                                                            <td>
+                                                                <input type="text" class="form-control" name="OtherDocuments[@i].DocumentName" value="@doc.DocumentName" disabled />
+                                                            </td>
+                                                            <td>
+                                                                @if (!string.IsNullOrEmpty(doc.DocumentFileName))
+                                                                {
+                                                                    var otherDocUrl = Url.Content("~/uploads/QC7Form-AdditionalDocuments/" + @doc.DocumentFileName);
+                                                                    <a href="@otherDocUrl" target="_blank" class="document-link">@doc.DocumentFileName</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="no-file-text">No file uploaded</span>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
                                                 }
                                                 else
                                                 {
-                                                    <span class="fw-bold">No file uploaded</span>
+                                                    <tr>
+                                                        <td colspan="2" class="text-center">No additional documents available</td>
+                                                    </tr>
                                                 }
-                                            </div>
-                                        </div>
-
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                                 <div class="row mb-3">

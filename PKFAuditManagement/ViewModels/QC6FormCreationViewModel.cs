@@ -106,6 +106,17 @@ namespace PKFAuditManagement.ViewModels
         public IFormFile? OtherDocuments { get; set; }
         public string? OtherDocumentsFileName { get; set; }
         public bool DeleteExistingFile { get; set; }
+
+        public List<DocumentViewModel> AdditionalDocuments { get; set; } = new List<DocumentViewModel>();
+        public string? DeletedDocumentFilenames { get; set; }
+    }
+
+    public class DocumentViewModel
+    {
+        public string? OldDocumentName { get; set; }
+        public string? DocumentName { get; set; }
+        public string? DocumentFileName { get; set; }
+        public IFormFile? File { get; set; }
     }
 
     public class TNATNEAssessmentViewModel

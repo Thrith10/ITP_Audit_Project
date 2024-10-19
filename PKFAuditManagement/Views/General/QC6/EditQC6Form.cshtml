@@ -656,17 +656,20 @@
                                         <table class="table">
                                             <thead>
                                                 <tr>
+                                                    <th>Document Type</th>
                                                     <th>Current Attachment</th>
                                                     <th>Upload New Attachment</th>
-                                                    <th>View Uploaded Attachment</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody id="additional-docs-body">
                                                 <!-- Other Documents Row -->
                                                 <tr>
                                                     <td>
-                                                        @if (Model.OtherDocumentsFileName != null)
+                                                        <input type="text" class="form-control" value="Consolidated Documents" disabled />
+                                                    </td>
+                                                    <td>
+                                                        @if (!string.IsNullOrEmpty(Model.OtherDocumentsFileName))
                                                         {
                                                             var fileUrl = Url.Content("~/uploads/QC6Form-OtherDocuments/" + Model.OtherDocumentsFileName);
                                                             <a href="@fileUrl" target="_blank" id="current-document-link" class="document-link">@Model.OtherDocumentsFileName</a>
@@ -683,115 +686,58 @@
                                                         <span asp-validation-for="OtherDocuments" class="text-danger"></span>
                                                     </td>
                                                     <td>
+                                                        <button type="button" class="btn btn-secondary btn-sm remove-uploaded-doc mr-2">Clear</button>
                                                         <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                                                    </td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-danger btn-sm clear-doc">Delete Files</button>
+                                                        <button type="button" class="btn btn-danger btn-sm clear-doc">Remove Files</button>
                                                     </td>
                                                 </tr>
-
-                                                @* <!-- TrendSearch Row -->
-                                                <tr>
-                                                    <td>
-                                                        @if (Model.TrendSearchUrl != null)
-                                                        {
-                                                            <span>TREND Search PDF</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>No file uploaded</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        @if (Model.TrendSearchUrl != null)
-                                                        {
-                                                            <a href="@Model.TrendSearchUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>No file available</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
-                                                    </td>
-                                                </tr>
-
-                                                <!-- GoogleSearch Row -->
-                                                <tr>
-                                                    <td>
-                                                        @if (Model.GoogleSearchUrl != null)
-                                                        {
-                                                            <span>Google Search PDF</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>No file uploaded</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        @if (Model.GoogleSearchUrl != null)
-                                                        {
-                                                            <a href="@Model.GoogleSearchUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>No file available</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
-                                                    </td>
-                                                </tr>
-
-                                                <!-- LexisNexisSearch Row -->
-                                                <tr>
-                                                    <td>
-                                                        @if (Model.LexisNexisSearchUrl != null)
-                                                        {
-                                                            <span>Lexis Nexis Search PDF</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>No file uploaded</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        @if (Model.LexisNexisSearchUrl != null)
-                                                        {
-                                                            <a href="@Model.LexisNexisSearchUrl" target="_blank" class="btn btn-primary btn-sm">View</a>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>No file available</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
-                                                    </td>
-                                                </tr> *@
+                                                <!-- Hidden input to track deleted filenames -->
+                                                <input type="hidden" id="deletedDocuments" asp-for="DeletedDocumentFilenames" name="DeletedDocumentFilenames" />      
+                                                <!-- Additional Documents Rows -->
+                                                @if (Model.AdditionalDocuments != null && Model.AdditionalDocuments.Count > 0)
+                                                {
+                                                    for (int i = 0; i < Model.AdditionalDocuments.Count; i++)
+                                                    {
+                                                        var doc = Model.AdditionalDocuments[i];
+                                                        <tr class="additional-doc-row">
+                                                            <td>
+                                                                <input type="hidden" class="document-filename" value="@doc.DocumentFileName" />
+                                                                <input asp-for="AdditionalDocuments[i].OldDocumentName" type="hidden" name="AdditionalDocuments[@i].OldDocumentName" value="@doc.DocumentName" />
+                                                                <input asp-for="AdditionalDocuments[i].DocumentName" type="text" class="form-control" name="AdditionalDocuments[@i].DocumentName" value="@doc.DocumentName" placeholder="Document Name" required />
+                                                            </td>
+                                                            <td>
+                                                                @if (!string.IsNullOrEmpty(doc.DocumentFileName))
+                                                                {
+                                                                    var fileUrl = Url.Content("~/uploads/QC6Form-AdditionalDocuments/" + doc.DocumentFileName);
+                                                                    <a href="@fileUrl" target="_blank" class="document-link">@doc.DocumentFileName</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="no-file-text">No file uploaded</span>
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                <input asp-for="AdditionalDocuments[i].File" type="file" class="form-control" name="AdditionalDocuments[@i].File" accept="application/pdf"/>
+                                                                <span asp-validation-for="AdditionalDocuments[@i].File" class="text-danger"></span>
+                                                            </td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-secondary btn-sm remove-uploaded-doc mr-2">Clear</button>
+                                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                                                <button type="button" class="btn btn-danger btn-sm delete-row" onclick="removeDocument(this)">Delete Row</button>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr id="no-docs-row">
+                                                        <td colspan="4" class="text-center">No additional documents available</td>
+                                                    </tr>
+                                                }
                                             </tbody>
                                         </table>
-@*                                         <!-- Other Documents -->
-                                        <div id="other-documents-container">
-                                            <label>Other Documents</label>
-                                            @for (int i = 0; i < Model.OtherDocumentUrls.Count; i++)
-                                            {
-                                                var doc = Model.OtherDocumentUrls[i];
-                                                <div class="document-row card border mb-2">
-                                                    <div class="card-body">
-                                                        <input type="text" class="form-control mt-3 mb-3" name="OtherDocuments[@i].DocumentName" value="@doc.DocumentName" placeholder="Document Name" required />
-                                                        @if (doc.File != null)
-                                                        {
-                                                            <a href="@doc.File" target="_blank" class="me-2">Current @doc.DocumentName PDF</a>
-                                                        }
-                                                        <input type="file" class="form-control mb-3" name="OtherDocuments[@i].File" accept="application/pdf" />
-                                                    </div>
-                                                </div>
-                                            }
-                                        </div>  *@
-@* 
-                                        <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button> *@
+                                        <!-- Add More Documents Button -->
+                                        <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
