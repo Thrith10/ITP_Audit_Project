@@ -289,6 +289,11 @@ namespace PKFAuditManagement.Controllers
                 // Access validation errors
                 var errors = ModelState.Values.SelectMany(v => v.Errors);
 
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
                 // Pass the errors to the view
                 ViewBag.Errors = errors;
 
@@ -1192,7 +1197,7 @@ namespace PKFAuditManagement.Controllers
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine(ex);
             }
 
 
@@ -1878,13 +1883,19 @@ namespace PKFAuditManagement.Controllers
                 await file.CopyToAsync(stream);
             }
         }
-        public IActionResult RetrieveNASFeeDetails()
+        public IActionResult RetrieveNASFeeDetails(string clientName)
         {
             // Retrieve QC6 Forms where FileReference contains "NAS"
             var qc6Forms = _context.QC6Forms
-                .Where(e => e.FileReference.Contains("NAS"))
+                .Where(e => e.FileReference.Contains("NAS") && e.ProspectiveClient == clientName)
                 .Select(f => f.QC6FormID)
                 .ToList();
+
+            // No clients found
+            if (qc6Forms.Count == 0)
+            {
+                return Json(new { success = false, message = $"No client with name \"{clientName}\" found" });
+            }
 
             // Join QC6Forms with QC6FormFeeDetails
             var feeDetails = _context.QC6FormFeeDetails
@@ -1898,15 +1909,22 @@ namespace PKFAuditManagement.Controllers
                         fd.QC6FormFeeDetailID,
                         fd.QC6FormID,
                         fd.Fee,
-                        fd.NatureOfService,
+                        // Use OtherService if it's not null; otherwise, use NatureOfService
+                        NatureOfService = fd.OtherService != null ? $"{fd.NatureOfService} ({fd.OtherService})" : fd.NatureOfService,
                         f.FileReference,
+                        f.ProspectiveClient,
+                        f.AuditFee,
+                        f.GrandTotal,
+                        f.FeeConcentration,
                         f.PeriodEnded,
                         f.Status
-                    })
+                    }
+                )
                 .ToList();
 
+
             // Return the combined data as JSON
-            return Json(feeDetails);
+            return Json(new { success = true, data = feeDetails });
         }
 
         public string ExtractDocumentName(string s3Key)

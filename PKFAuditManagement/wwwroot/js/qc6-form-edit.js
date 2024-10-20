@@ -227,17 +227,18 @@ document.getElementById('addService').addEventListener('click', addService);
 // Function to add a new service field
 function addService() {
     const servicesContainer = document.getElementById('services');
-    const lastServiceIndex = servicesContainer.children.length;
+    // Get the current count of services to set the new index
+    const currentServiceCount = servicesContainer.querySelectorAll('.card').length;
 
     const serviceCard = document.createElement('div');
     serviceCard.className = 'card border border-secondary p-3 mb-3';
     serviceCard.innerHTML = `
         <div class="row mb-3 service input-field card-body">
-            <h6 class="card-title">Service ${lastServiceIndex}</h6>
-            <input type="hidden" asp-for="Services[${lastServiceIndex - 1}].QC6FormFeeDetailID" />
+            <h6 class="card-title">Service ${currentServiceCount + 1}</h6>
+            <input type="hidden" name="Services[${currentServiceCount}].QC6FormFeeDetailID" />
             <div class="col-sm-6">
                 <label>Nature of Service:</label>
-                <select class="form-control" asp-for="Services[${lastServiceIndex - 1}].NatureOfService" name="Services[${lastServiceIndex - 1}].NatureOfService" onchange="showOtherServiceInput(this)">
+                <select class="form-control" name="Services[${currentServiceCount}].NatureOfService" onchange="showOtherServiceInput(this)">
                     <option value="Tax Services">Tax Services</option>
                     <option value="Accounting">Accounting</option>
                     <option value="Payroll">Payroll</option>
@@ -249,12 +250,12 @@ function addService() {
                 <label>Fee:<span class="text-danger"> *</span></label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" name="Services[${lastServiceIndex - 1}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
+                    <input type="number" name="Services[${currentServiceCount}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
                 </div>
             </div>
-            <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex - 1}" style="display: none;">
+            <div class="col-sm-12 mt-3" id="otherServiceInput-${currentServiceCount}" style="display: none;">
                 <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
-                <input type="text" name="Services[${lastServiceIndex - 1}].OtherService" class="form-control">
+                <input type="text" name="Services[${currentServiceCount}].OtherService" class="form-control">
             </div>
             <div class="col-sm-12 mt-3">
                 <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
@@ -264,7 +265,6 @@ function addService() {
 
     servicesContainer.appendChild(serviceCard);
 }
-
 // Function for removing service
 function removeService(button) {
     // Find the parent card element
@@ -289,6 +289,14 @@ function removeService(button) {
     card.remove();
 
     // Update indexes of remaining services
+    updateServiceIndexes();
+
+    // Recalculate the total fee after removal
+    calculateTotalAndConcentration();
+}
+
+// Function to update the indexes of the services
+function updateServiceIndexes() {
     const servicesContainer = document.getElementById('services');
     const serviceCards = servicesContainer.getElementsByClassName('card');
     for (let i = 0; i < serviceCards.length; i++) {
@@ -296,29 +304,26 @@ function removeService(button) {
         const titleElement = card.querySelector('.card-title');
         titleElement.textContent = `Service ${i + 1}`;
 
-        const inputs = serviceCards[i].getElementsByTagName('input');
+        // Update input names and IDs
+        const inputs = card.getElementsByTagName('input');
         for (let j = 0; j < inputs.length; j++) {
             const name = inputs[j].getAttribute('name');
             const newName = name.replace(/\[\d+\]/g, `[${i}]`);
             inputs[j].setAttribute('name', newName);
         }
 
-        const selects = serviceCards[i].getElementsByTagName('select');
+        const selects = card.getElementsByTagName('select');
         for (let j = 0; j < selects.length; j++) {
             const name = selects[j].getAttribute('name');
             const newName = name.replace(/\[\d+\]/g, `[${i}]`);
             selects[j].setAttribute('name', newName);
         }
 
-        const otherServiceInputs = serviceCards[i].querySelectorAll('[id^="otherServiceInput-"]');
-        for (let j = 0; j < otherServiceInputs.length; j++) {
-            const input = otherServiceInputs[j];
-            input.id = `otherServiceInput-${i}`;
+        const otherServiceInput = card.querySelector('[id^="otherServiceInput-"]');
+        if (otherServiceInput) {
+            otherServiceInput.id = `otherServiceInput-${i}`;
         }
     }
-
-    // Recalculate the total fee after removal
-    calculateTotalAndConcentration();
 }
 
 // Function to display additional text field based on service field selection
@@ -506,14 +511,33 @@ function toggleSectionBResult() {
 
 // Display NAS modal
 document.getElementById('retrieveFeeDetailsButton').addEventListener('click', function (e) {
+    // Prevent default button behavior
+    e.preventDefault();
 
-    e.preventDefault(); // Prevent default button behavior
+    // Retrieve the client name from the input field
+    var clientName = document.getElementById('autocomplete').value;
+
+    // Check if the input field is empty
+    if (clientName.trim() === '') {
+        alert('Please enter a client name.');
+        return; // Exit the method if the field is empty
+    }
 
     $.ajax({
         url: '/QC6Form/RetrieveNASFeeDetails',
         method: 'GET',
+        data: {
+            clientName: clientName
+        },
         success: function (data) {
-            console.log('Data:', data);
+
+            if (!data.success) {
+                // Alert if no client is found
+                alert(data.message);
+                return; // Exit the function if no client found
+            }
+
+            var data = data.data;
 
             // Group fee details by QC6FormID
             var groupedFeeDetails = {};
@@ -523,27 +547,38 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
                 }
                 groupedFeeDetails[feeDetail.qC6FormID].push(feeDetail);
             });
-            console.log('Grouped Fee Details:', groupedFeeDetails);
+
+            // Set the modal title with the client name
+            var clientName = data[0].prospectiveClient;
+            $('#feeDetailsModalLabel').text('Fee Details for Client: ' + clientName);
 
             // Build the tbody HTML
             var tbodyHtml = '';
             Object.keys(groupedFeeDetails).forEach(function (qc6FormID) {
                 var feeDetailsList = groupedFeeDetails[qc6FormID];
-                console.log('QC6FormID:', qc6FormID, 'Fee Details List:', feeDetailsList);
 
-                // Display the QC6 Form File reference in one row
+                // Display the QC6 Form File reference, Client Name, and Financial Year End in the first row
                 tbodyHtml += '<tr>' +
-                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].fileReference + '</td>' +
-                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' +
+                    '<a href="/QC6Form/ViewQC6Form?id=' + feeDetailsList[0].qC6FormID + '" style="color: #007bff; text-decoration: underline;">' +
+                    feeDetailsList[0].fileReference +
+                    '</a>' +
+                    '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].prospectiveClient + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + formatDateToDDMMYYYY(feeDetailsList[0].periodEnded) + '</td>' +
                     '<td>' + feeDetailsList[0].natureOfService + '</td>' +
+                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].grandTotal + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].auditFee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].feeConcentration + '</td>' +
                     '</tr>';
 
-                // Display the fee details for this QC6 form in subsequent rows
+                // Display the fee details for this QC6 form in subsequent rows, except the first one
                 for (var i = 1; i < feeDetailsList.length; i++) {
                     var feeDetail = feeDetailsList[i];
                     tbodyHtml += '<tr>' +
-                        '<td>' + feeDetail.fee + '</td>' +
                         '<td>' + feeDetail.natureOfService + '</td>' +
+                        '<td>' + feeDetail.fee + '</td>' +
                         '</tr>';
                 }
             });
@@ -560,6 +595,16 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
         }
     });
 });
+
+// Function to format the date as dd/mm/yyyy
+function formatDateToDDMMYYYY(dateString) {
+    var date = new Date(dateString); // Create a Date object from the string
+    var day = String(date.getDate()).padStart(2, '0'); // Get the day, add leading zero if needed
+    var month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month, add leading zero if needed (0-based index)
+    var year = date.getFullYear(); // Get the full year
+
+    return day + '/' + month + '/' + year; // Return the formatted date
+}
 
 // Add event listener to the "Add More Documents" button
 document.getElementById('add-more-docs').addEventListener('click', addDocument);

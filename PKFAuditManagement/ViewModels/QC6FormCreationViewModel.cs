@@ -152,7 +152,7 @@ namespace PKFAuditManagement.ViewModels
 
     public class FeeDetailViewModel
     {
-        public int QC6FormFeeDetailID { get; set; }
+        public int? QC6FormFeeDetailID { get; set; }
         public string? NatureOfService { get; set; }
         public string? OtherService { get; set; }
         public decimal? Fee { get; set; }

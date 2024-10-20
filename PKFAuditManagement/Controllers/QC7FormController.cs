@@ -662,6 +662,8 @@ namespace PKFAuditManagement.Controllers
                         };
                         _context.Add(qc7formFeeDetail);
                     }
+
+                    await _context.SaveChangesAsync();
                 }
 
                 // Retrieve and process removed services
@@ -1411,6 +1413,11 @@ namespace PKFAuditManagement.Controllers
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
                 string fileReference = Helper.GenerateQCFormFileReference();
 
+                if (roles.Contains("Non-Auditor"))
+                {
+                    // Modify the fileReference if the "Non-Auditor" role is present
+                    fileReference += "_NAS";
+                }
 
                 // Save viewModel data to EngagementTable
                 var qc7form = new QC7Form
@@ -1999,13 +2006,19 @@ namespace PKFAuditManagement.Controllers
             return viewModel;
         }
 
-        public IActionResult RetrieveNASFeeDetails()
+        public IActionResult RetrieveNASFeeDetails(string clientName)
         {
             // Retrieve QC7 Forms where FileReference contains "NAS"
             var qc7Forms = _context.QC7Forms
-                .Where(e => e.FileReference.Contains("NAS"))
+                .Where(e => e.FileReference.Contains("NAS") && e.Client == clientName)
                 .Select(f => f.QC7FormID)
                 .ToList();
+
+            // No clients found
+            if (qc7Forms.Count == 0)
+            {
+                return Json(new { success = false, message = $"No QC7 Form with client name \"{clientName}\" found" });
+            }
 
             // Join QC7Forms with QC7FormFeeDetails
             var feeDetails = _context.QC7FormFeeDetails
@@ -2019,15 +2032,22 @@ namespace PKFAuditManagement.Controllers
                         fd.QC7FormFeeDetailID,
                         fd.QC7FormID,
                         fd.Fee,
-                        fd.NatureOfService,
+                        // Use OtherService if it's not null; otherwise, use NatureOfService
+                        NatureOfService = fd.OtherService != null ? $"{fd.NatureOfService} ({fd.OtherService})" : fd.NatureOfService,
                         f.FileReference,
+                        f.Client,
+                        f.AuditFee,
+                        f.GrandTotal,
+                        f.FeeConcentration,
                         f.PeriodEnded,
                         f.Status
-                    })
+                    }
+                )
                 .ToList();
 
+
             // Return the combined data as JSON
-            return Json(feeDetails);
+            return Json(new { success = true, data = feeDetails });
         }
     }
 }

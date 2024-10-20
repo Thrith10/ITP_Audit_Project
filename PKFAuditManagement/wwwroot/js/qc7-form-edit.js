@@ -520,18 +520,18 @@ document.getElementById('addService').addEventListener('click', addService);
 // Function to add a new service field
 function addService() {
     const servicesContainer = document.getElementById('services');
-    const currentServices = servicesContainer.getElementsByClassName('service');
-    const nextIndex = currentServices.length; // This will give the correct index for the next service
+    // Get the current count of services to set the new index
+    const currentServiceCount = servicesContainer.querySelectorAll('.card').length;
 
     const serviceCard = document.createElement('div');
     serviceCard.className = 'card border border-secondary p-3 mb-3';
     serviceCard.innerHTML = `
         <div class="row mb-3 service input-field card-body">
-            <h6 class="card-title">Service ${nextIndex + 1}</h6>
-            <input type="hidden" asp-for="Services[${nextIndex}].QC6FormFeeDetailID" />
+            <h6 class="card-title">Service ${currentServiceCount + 1}</h6>
+            <input type="hidden" name="Services[${currentServiceCount}].QC6FormFeeDetailID" />
             <div class="col-sm-6">
                 <label>Nature of Service:</label>
-                <select class="form-control" name="Services[${nextIndex}].NatureOfService" onchange="showOtherServiceInput(this)">
+                <select class="form-control" name="Services[${currentServiceCount}].NatureOfService" onchange="showOtherServiceInput(this)">
                     <option value="Tax Services">Tax Services</option>
                     <option value="Accounting">Accounting</option>
                     <option value="Payroll">Payroll</option>
@@ -543,12 +543,12 @@ function addService() {
                 <label>Fee:<span class="text-danger"> *</span></label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" name="Services[${nextIndex}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
+                    <input type="number" name="Services[${currentServiceCount}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
                 </div>
             </div>
-            <div class="col-sm-12 mt-3" id="otherServiceInput-${nextIndex}" style="display: none;">
+            <div class="col-sm-12 mt-3" id="otherServiceInput-${currentServiceCount}" style="display: none;">
                 <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
-                <input type="text" name="Services[${nextIndex}].OtherService" class="form-control">
+                <input type="text" name="Services[${currentServiceCount}].OtherService" class="form-control">
             </div>
             <div class="col-sm-12 mt-3">
                 <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
@@ -558,25 +558,38 @@ function addService() {
 
     servicesContainer.appendChild(serviceCard);
 }
-
 // Function for removing service
 function removeService(button) {
+    // Find the parent card element
     const card = button.closest('.card');
+
+    // Get the service ID input value before removing the card
     const serviceIdInput = card.querySelector('input[name$="QC6FormFeeDetailID"]');
 
     if (serviceIdInput) {
+        // Create a hidden input for the removed service ID
         const removedServicesContainer = document.getElementById('removedServicesContainer');
         const removedServiceInput = document.createElement('input');
         removedServiceInput.type = 'hidden';
         removedServiceInput.name = 'RemovedServices[]';
-        removedServiceInput.value = serviceIdInput.value;
+        removedServiceInput.value = serviceIdInput.value; // Pass the service ID here
+
+        // Append the hidden input to the container
         removedServicesContainer.appendChild(removedServiceInput);
     }
 
     // Remove the card element
     card.remove();
 
-    // Update the indexes of remaining services
+    // Update indexes of remaining services
+    updateServiceIndexes();
+
+    // Recalculate the total fee after removal
+    calculateTotalAndConcentration();
+}
+
+// Function to update the indexes of the services
+function updateServiceIndexes() {
     const servicesContainer = document.getElementById('services');
     const serviceCards = servicesContainer.getElementsByClassName('card');
     for (let i = 0; i < serviceCards.length; i++) {
@@ -584,31 +597,48 @@ function removeService(button) {
         const titleElement = card.querySelector('.card-title');
         titleElement.textContent = `Service ${i + 1}`;
 
-        const otherServiceInputs = serviceCards[i].querySelectorAll('[id^="otherServiceInput-"]');
-        for (let j = 0; j < otherServiceInputs.length; j++) {
-            const input = otherServiceInputs[j];
-            input.id = `otherServiceInput-${i}`;
+        // Update input names and IDs
+        const inputs = card.getElementsByTagName('input');
+        for (let j = 0; j < inputs.length; j++) {
+            const name = inputs[j].getAttribute('name');
+            const newName = name.replace(/\[\d+\]/g, `[${i}]`);
+            inputs[j].setAttribute('name', newName);
+        }
+
+        const selects = card.getElementsByTagName('select');
+        for (let j = 0; j < selects.length; j++) {
+            const name = selects[j].getAttribute('name');
+            const newName = name.replace(/\[\d+\]/g, `[${i}]`);
+            selects[j].setAttribute('name', newName);
+        }
+
+        const otherServiceInput = card.querySelector('[id^="otherServiceInput-"]');
+        if (otherServiceInput) {
+            otherServiceInput.id = `otherServiceInput-${i}`;
         }
     }
-
-    // Recalculate the total fee after removal
-    calculateTotalAndConcentration();
 }
 
 // Function to display additional text field based on service field selection
 function showOtherServiceInput(selectElement) {
     const selectedValue = selectElement.value;
+
+    // Extract the index from the element's name (e.g., "Services[0].NatureOfService")
     const index = selectElement.name.split('[')[1].split(']')[0];
+
+    // Find the "Other Service" input field associated with this select element
     const otherServiceInput = document.getElementById(`otherServiceInput-${index}`);
 
+    const inputField = otherServiceInput.querySelector('input');
+
     if (otherServiceInput) {
-        const inputField = otherServiceInput.querySelector('input');
+        // Show or hide the "Other Service" input field based on the selected value
         if (selectedValue === 'Other Non-Audit Services') {
             otherServiceInput.style.display = 'block';
-            inputField.setAttribute('required', 'required');
+            inputField.setAttribute('required', 'required'); // Add required attribute
         } else {
             otherServiceInput.style.display = 'none';
-            inputField.removeAttribute('required');
+            inputField.removeAttribute('required'); // Remove required attribute
         }
     }
 }
@@ -748,14 +778,33 @@ document.getElementById('engagementType').addEventListener('change', function ()
 
 // Display NAS modal
 document.getElementById('retrieveFeeDetailsButton').addEventListener('click', function (e) {
+    // Prevent default button behavior
+    e.preventDefault();
 
-    e.preventDefault(); // Prevent default button behavior
+    // Retrieve the client name from the input field
+    var clientName = document.getElementById('clientSelect').value;
+
+    // Check if the input field is empty
+    if (clientName.trim() === '') {
+        alert('Please enter a client name.');
+        return; // Exit the method if the field is empty
+    }
 
     $.ajax({
         url: '/QC7Form/RetrieveNASFeeDetails',
         method: 'GET',
+        data: {
+            clientName: clientName
+        },
         success: function (data) {
-            console.log('Data:', data);
+
+            if (!data.success) {
+                // Alert if no client is found
+                alert(data.message);
+                return; // Exit the function if no client found
+            }
+
+            var data = data.data;
 
             // Group fee details by QC7FormID
             var groupedFeeDetails = {};
@@ -765,27 +814,38 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
                 }
                 groupedFeeDetails[feeDetail.qC7FormID].push(feeDetail);
             });
-            console.log('Grouped Fee Details:', groupedFeeDetails);
+
+            // Set the modal title with the client name
+            var clientName = data[0].client;
+            $('#feeDetailsModalLabel').text('Fee Details for Client: ' + clientName);
 
             // Build the tbody HTML
             var tbodyHtml = '';
             Object.keys(groupedFeeDetails).forEach(function (qc7FormID) {
                 var feeDetailsList = groupedFeeDetails[qc7FormID];
-                console.log('QC7FormID:', qc7FormID, 'Fee Details List:', feeDetailsList);
 
-                // Display the QC7 Form File reference in one row
+                // Display the QC7 Form File reference, Client Name, and Financial Year End in the first row
                 tbodyHtml += '<tr>' +
-                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].fileReference + '</td>' +
-                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' +
+                    '<a href="/QC7Form/ViewQC7Form?id=' + feeDetailsList[0].qC7FormID + '" style="color: #007bff; text-decoration: underline;">' +
+                    feeDetailsList[0].fileReference +
+                    '</a>' +
+                    '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].client + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + formatDateToDDMMYYYY(feeDetailsList[0].periodEnded) + '</td>' +
                     '<td>' + feeDetailsList[0].natureOfService + '</td>' +
+                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].grandTotal + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].auditFee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].feeConcentration + '</td>' +
                     '</tr>';
 
-                // Display the fee details for this QC7 form in subsequent rows
+                // Display the fee details for this QC7 form in subsequent rows, except the first one
                 for (var i = 1; i < feeDetailsList.length; i++) {
                     var feeDetail = feeDetailsList[i];
                     tbodyHtml += '<tr>' +
-                        '<td>' + feeDetail.fee + '</td>' +
                         '<td>' + feeDetail.natureOfService + '</td>' +
+                        '<td>' + feeDetail.fee + '</td>' +
                         '</tr>';
                 }
             });
@@ -802,3 +862,13 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
         }
     });
 });
+
+// Function to format the date as dd/mm/yyyy
+function formatDateToDDMMYYYY(dateString) {
+    var date = new Date(dateString); // Create a Date object from the string
+    var day = String(date.getDate()).padStart(2, '0'); // Get the day, add leading zero if needed
+    var month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month, add leading zero if needed (0-based index)
+    var year = date.getFullYear(); // Get the full year
+
+    return day + '/' + month + '/' + year; // Return the formatted date
+}
