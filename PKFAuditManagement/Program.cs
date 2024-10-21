@@ -3,11 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
-using System.Net.Mail;
-using System.Net;
 using PKFAuditManagement.Interface;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
 using PKFAuditManagement.Services;
 using Amazon.S3;
 using Microsoft.Extensions.Caching.Memory;
@@ -160,7 +157,7 @@ using (var scope = app.Services.CreateScope())
     // Initialise an instance of the roleManager
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    var roles = new[] { "Admin", "User", "Non-Auditor" };
+    var roles = new[] { "Admin", "User", "Non-Auditor", "Reviewer" };
 
     // Iterate through the roles and add them to database if they have not been created
     foreach (var role in roles)
@@ -230,6 +227,5 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Admin user already exists.");
     }
 }
-
 
 app.Run();
