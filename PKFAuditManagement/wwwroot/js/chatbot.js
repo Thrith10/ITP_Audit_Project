@@ -1,13 +1,14 @@
 // Add event listeners for resize functionality
 document.addEventListener('DOMContentLoaded', function () {
     const chatbotPopup = document.getElementById('chatbot-popup');
+    const chatBox = document.getElementById('chat-box');
     let isResizing = false;
     let lastDownX = 0;
     let lastDownY = 0;
 
     // Start resizing when mouse is down on the handle
     chatbotPopup.addEventListener('mousedown', function (e) {
-        if (e.offsetX < 15 && e.offsetY < 15) {
+        if (e.offsetX < 30 && e.offsetY < 30) { // Adjust if necessary to make handle easier to grab
             isResizing = true;
             lastDownX = e.clientX;
             lastDownY = e.clientY;
@@ -16,19 +17,36 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Function to resize the widget
+    // Function to resize the chat-box
     function resize(e) {
         if (!isResizing) return;
 
-        const width = chatbotPopup.clientWidth - (e.clientX - lastDownX);
-        const height = chatbotPopup.clientHeight - (e.clientY - lastDownY);
+        const widthChange = e.clientX - lastDownX; // Change in width
+        const heightChange = e.clientY - lastDownY; // Change in height
 
-        // Prevent width and height from going below minimum size
-        if (width > 100 && height > 100) {
-            chatbotPopup.style.width = `${width}px`;
-            chatbotPopup.style.height = `${height}px`;
+        const newWidth = chatbotPopup.clientWidth - widthChange;
+        const newHeight = chatbotPopup.clientHeight - heightChange;
+
+        // Prevent width from going below minimum size
+        if (newWidth > 100) {
+            chatbotPopup.style.width = `${newWidth}px`;
         }
 
+        // Prevent height from going below minimum size
+        if (newHeight > 150) { // Minimum height for the entire popup
+            chatbotPopup.style.height = `${newHeight}px`;
+
+            // Adjust chat box height based on the new popup height
+            const chatInputHeight = document.querySelector('.chat-input').offsetHeight;
+            const maxHeight = newHeight - chatInputHeight;
+
+            // Set a minimum height for the chat box
+            if (maxHeight > 100) {
+                chatBox.style.height = `${maxHeight}px`;
+            }
+        }
+
+        // Update last positions
         lastDownX = e.clientX;
         lastDownY = e.clientY;
     }
@@ -57,10 +75,10 @@ document.getElementById('user-input').addEventListener('keypress', function (e) 
 // Toggle the chatbot popup
 function toggleChatbot() {
     const chatbotPopup = document.getElementById('chatbot-popup');
-    if (chatbotPopup.style.display === 'block') {
-        chatbotPopup.style.display = 'none';
+    if (chatbotPopup.classList.contains('visible')) {
+        chatbotPopup.classList.remove('visible');
     } else {
-        chatbotPopup.style.display = 'block';
+        chatbotPopup.classList.add('visible'); // Add class for visibility
         if (!hasOpened) {
             showDefaultMessage();
             hasOpened = true; // Set flag to true once the chatbot has been opened
