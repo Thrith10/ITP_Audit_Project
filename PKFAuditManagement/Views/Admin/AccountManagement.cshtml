@@ -38,15 +38,24 @@
                                         <td>@user.UserName</td>
                                         <td>@user.Role</td>
                                         <td>
-                                            <a asp-action="EditUser" asp-route-userId="@user.UserId" class="btn btn-link">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            
-                                            <button type="button" class="btn btn-link text-danger" onclick="confirmDelete('@user.UserId')">
-                                                <i class="fas fa-user-slash"></i>
-                                            </button>
-                                            
-                                        </td>
+                                            <div class="dropdown">
+                                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                </a>
+
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                    <li><a class="dropdown-item" href="@Url.Action("EditUser", new { userId  = @user.UserId })">Edit</a></li>
+                                                    @if (user.IsLockedOut)
+                                                    {
+                                                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="showActivateModal('@user.UserId')">Activate</a></li>
+                                                    }
+                                                    else
+                                                    {
+                                                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="showSuspendModal('@user.UserId')">Deactivate</a></li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </td>                                      
                                     </tr>
                                 }
                             </tbody>
@@ -62,7 +71,13 @@
 @section Scripts {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script>
-        function confirmDelete(userId) {
+        let selectedUserId = null;
+
+        // Function to show Swal.fire modal and set the selected user ID
+        function showSuspendModal(userId) {
+            selectedUserId = userId;
+
+            // Show Swal.fire modal
             Swal.fire({
                 title: 'Are you sure?',
                 text: "Do you really want to suspend this user?",
@@ -70,48 +85,112 @@
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, suspend it!',
+                confirmButtonText: 'Yes, suspend them!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: '@Url.Action("SuspendUser", "Admin")',
-                        type: 'POST',
-                        data: {
-                            userId: userId,
-                            __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
-                        },
-                        success: function (data) {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success',
-                                    text: data.message,
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    location.reload(); // Reload the page after successful deletion
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: data.message,
-                                    confirmButtonText: 'OK'
-                                });
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'An error occurred while processing your request. Please try again.',
-                                confirmButtonText: 'OK'
-                            });
-                            console.error(error);
-                        }
-                    });
+                    confirmSuspendUser();
                 }
             });
         }
+
+        // Function to confirm and suspend the user
+        function confirmSuspendUser() {
+            if (!selectedUserId) return;
+
+            $.ajax({
+                url: '@Url.Action("SuspendUser", "Admin")',
+                type: 'POST',
+                data: {
+                    userId: selectedUserId,
+                    __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+                },
+                success: function (data) {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Reload the page after successful suspension
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while processing your request. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                    console.error(error);
+                }
+            });
+        }
+
+        function showActivateModal(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to activate this user?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, activate them!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    activateUser(userId);
+                }
+            });
+        }
+
+        function activateUser(userId) {
+            $.ajax({
+                url: '@Url.Action("ActivateUser", "Admin")',
+                type: 'POST',
+                data: {
+                    userId: userId,
+                    __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+                },
+                success: function (data) {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Reload the page after successful activation
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while processing your request. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                    console.error(error);
+                }
+            });
+        }
+
     </script>
 }

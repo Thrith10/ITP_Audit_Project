@@ -119,7 +119,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
                 // Log attempt to login
                 _logger.LogInformation($"Attempting to log in user: {Input.Email}");
 
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
 
                 if (result.Succeeded)
                 {
@@ -161,6 +161,7 @@ namespace PKFAuditManagement.Areas.Identity.Pages.Account
                 {
                     IsLockedOut = true; // Set lockout flag
                     _logger.LogWarning("User account locked out.");
+                    ModelState.AddModelError(string.Empty, "Account Locked. Please contact Administrator for more information.");
                     //return RedirectToPage("./Lockout");
                     return Page();
                 }
