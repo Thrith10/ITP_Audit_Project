@@ -86,8 +86,8 @@ function sendMessage() {
 
 // Function to get the chatbot's response via an AJAX request
 function respondToUser(userInput) {
-    const loadingIndicator = document.getElementById('loader');
-    loadingIndicator.style.display = 'block'; // Show loading indicator
+    // Append a message for the bot response with a loading indicator
+    const loadingMessage = appendMessage('bot', createLoadingIndicator());
 
     // Make AJAX request
     $.ajax({
@@ -95,11 +95,12 @@ function respondToUser(userInput) {
         type: 'POST',
         data: { 'userInput': userInput },
         success: function (response) {
-            // Append bot response to chat
-            appendMessage('bot', response);
+            // Replace the loading indicator with the actual response
+            loadingMessage.innerHTML = response;
         },
         error: function (xhr, status, error) {
             console.error('Error:', error);
+            loadingMessage.innerHTML = 'Sorry, there was an error processing your request.';
         },
         complete: function () {
             loadingIndicator.style.display = 'none'; // Hide loading indicator after response is received
@@ -107,7 +108,11 @@ function respondToUser(userInput) {
     });
 }
 
-// Function to append a message to the chat box
+// Function to create a loading indicator with a GIF
+function createLoadingIndicator() {
+    return `<img src="/img/loading.gif" alt="Loading..." class="loading-indicator" width="24" height="24"/>`;
+}
+
 function appendMessage(sender, message) {
     const chatBox = document.getElementById('chat-box');
     const messageElement = document.createElement('div');
@@ -115,4 +120,6 @@ function appendMessage(sender, message) {
     messageElement.innerHTML = message;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    return messageElement; // Ensure this line is present
 }

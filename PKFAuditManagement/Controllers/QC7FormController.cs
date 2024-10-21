@@ -308,13 +308,31 @@ namespace PKFAuditManagement.Controllers
                     });
                 }
 
-                // Load existing documents
-                var documentData = _context.QCDocuments.Where(x => x.QC7FormID == id).FirstOrDefault();
+                // Retrieve documents for QC Form from database
+                var documentData = _context.QCDocuments.Where(x => x.QC7FormID.Equals(id)).ToList();
 
                 // Retrieve and set the file path for other documents
-                if (documentData != null)
+                if (documentData != null && documentData.Count > 0)
                 {
-                    viewModel.OtherDocumentsFileName = documentData.FileName;
+                    // Check for "OtherDocuments" and set the OtherDocumentsFileName
+                    var otherDocument = documentData.FirstOrDefault(doc => doc.DocumentType == "OtherDocuments");
+                    if (otherDocument != null)
+                    {
+                        viewModel.OtherDocumentsFileName = otherDocument.FileName;
+                    }
+                    else
+                    {
+                        viewModel.OtherDocumentsFileName = string.Empty;
+                    }
+
+                    // Populate the AdditionalDocuments list
+                    viewModel.AdditionalDocuments = documentData
+                        .Where(doc => doc.DocumentType != "OtherDocuments") // Exclude "OtherDocuments"
+                        .Select(doc => new DocumentViewModel
+                        {
+                            DocumentName = doc.DocumentType,
+                            DocumentFileName = doc.FileName
+                        }).ToList();
                 }
 
                 return View("~/Views/General/QC7/EditQC7Form.cshtml", viewModel);
@@ -644,6 +662,8 @@ namespace PKFAuditManagement.Controllers
                         };
                         _context.Add(qc7formFeeDetail);
                     }
+
+                    await _context.SaveChangesAsync();
                 }
 
                 // Retrieve and process removed services
@@ -672,9 +692,9 @@ namespace PKFAuditManagement.Controllers
                 // Attempt to parse QC7FormID from the view model
                 if (int.TryParse(viewModel.QC7FormID, out int parsedQc7FormId))
                 {
-                    // Find the existing document
+                    // Find the existing document for Other Documents
                     var existingDocument = await _context.QCDocuments
-                        .FirstOrDefaultAsync(x => x.QC7FormID == parsedQc7FormId);
+                        .FirstOrDefaultAsync(x => x.QC7FormID == parsedQc7FormId && x.DocumentType == "OtherDocuments");
 
                     if (viewModel.OtherDocuments != null)
                     {
@@ -723,25 +743,135 @@ namespace PKFAuditManagement.Controllers
                         }
                     }
 
-                    // Remove the old document record if delete is requested and no new file is uploaded
+                    // Handle deletion of files if requested
                     if (viewModel.DeleteExistingFile && viewModel.OtherDocuments == null)
                     {
-                        // Construct the file path
-                        var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-OtherDocuments", existingDocument.FileName);
-
-                        // Remove the old file from wwwroot
-                        if (System.IO.File.Exists(oldFilePath))
+                        // Find and delete the existing Other Document if requested
+                        if (existingDocument != null)
                         {
-                            System.IO.File.Delete(oldFilePath);
+                            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-OtherDocuments", existingDocument.FileName);
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                            _context.QCDocuments.Remove(existingDocument);
+
+                            // Save all changes
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+
+                    // Handle AdditionalDocuments
+                    if (viewModel.AdditionalDocuments != null && viewModel.AdditionalDocuments.Count > 0)
+                    {
+                        foreach (var document in viewModel.AdditionalDocuments)
+                        {
+                            // Find the existing document for AdditionalDocuments
+                            var existingAdditionalDoc = await _context.QCDocuments
+                                .FirstOrDefaultAsync(x => x.QC7FormID == parsedQc7FormId && x.DocumentType == document.OldDocumentName);
+
+                            // Generate a unique file name by including the QC7Form ID and document file name
+                            var uniqueFileName = parsedQc7FormId + "-" + document.DocumentName + "-" + Guid.NewGuid().ToString() + ".pdf";
+
+                            // Generate the new folder path based on the updated document name
+                            var newFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-AdditionalDocuments", uniqueFileName);
+
+                            // Check if a file is uploaded
+                            if (document.File != null && document.File.Length > 0)
+                            {
+                                // Handle existing document update or new document creation
+                                if (existingAdditionalDoc != null)
+                                {
+                                    // Generate the old folder path
+                                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-AdditionalDocuments/" + existingAdditionalDoc.FileName);
+
+                                    // Remove the old file from the folder
+                                    if (System.IO.File.Exists(oldFilePath))
+                                    {
+                                        System.IO.File.Delete(oldFilePath);
+                                    }
+
+                                    // Update document metadata
+                                    existingAdditionalDoc.FileName = uniqueFileName;
+                                    existingAdditionalDoc.DocumentType = document.DocumentName;
+                                }
+                                else
+                                {
+                                    // Add a new document if it doesn't exist
+                                    _context.Add(new QCDocument
+                                    {
+                                        QC7FormID = parsedQc7FormId,
+                                        FileName = uniqueFileName,
+                                        DocumentType = document.DocumentName
+                                    });
+                                }
+
+                                // Save the updated file
+                                using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+                                {
+                                    await document.File.CopyToAsync(fileStream);
+                                }
+
+                                // Commit database changes
+                                await _context.SaveChangesAsync();
+                            }
+                            // Handle document name change without file upload
+                            else if (existingAdditionalDoc != null && document.OldDocumentName != document.DocumentName)
+                            {
+                                // Generate the old folder path
+                                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-AdditionalDocuments/" + existingAdditionalDoc.FileName);
+
+                                // Rename the file in the file system by moving it to the new file name
+                                if (System.IO.File.Exists(oldFilePath))
+                                {
+                                    System.IO.File.Move(oldFilePath, newFilePath);
+                                }
+
+                                // Update document metadata with the new name
+                                existingAdditionalDoc.DocumentType = document.DocumentName;
+                                existingAdditionalDoc.FileName = uniqueFileName;
+
+                                // Save the change in the document name in the database
+                                await _context.SaveChangesAsync();
+                            }
+                        }
+                    }
+
+                    // Check if any existing documents are deleted
+                    if (viewModel.DeletedDocumentFilenames != null)
+                    {
+                        // Split through delimeter , in string
+                        List<string> deletedNames = viewModel.DeletedDocumentFilenames.Split(',')
+                                                                        .Select(name => name.Trim())
+                                                                        .ToList();
+
+                        // Loop through each filename in the list of deleted documents
+                        foreach (var deletedFilename in deletedNames)
+                        {
+                            // Find the existing document for AdditionalDocuments
+                            var existingAdditionalDoc = await _context.QCDocuments
+                                .FirstOrDefaultAsync(x => x.QC7FormID == parsedQc7FormId && x.FileName == deletedFilename);
+
+                            // Check if the document exists in the database
+                            if (existingAdditionalDoc != null)
+                            {
+                                // If delete is requested and the document exists, remove it
+                                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/QC7Form-AdditionalDocuments", existingAdditionalDoc.FileName);
+
+                                // Remove the old file from wwwroot
+                                if (System.IO.File.Exists(filePath))
+                                {
+                                    System.IO.File.Delete(filePath);
+                                }
+
+                                _context.QCDocuments.Remove(existingAdditionalDoc);
+                            }
                         }
 
-                        _context.QCDocuments.Remove(existingDocument);
+                        // Save changes to the database after processing all deletions
                         await _context.SaveChangesAsync();
                     }
                 }
-
-                // Save all changes
-                await _context.SaveChangesAsync();
 
                 // Set the success message for the toast notification
                 TempData["QC7UpdateMessage"] = "QC7 Form updated successfully.";
@@ -1167,12 +1297,30 @@ namespace PKFAuditManagement.Controllers
                 }
 
                 // Retrieve documents for QC Form from database
-                var documentData = _context.QCDocuments.Where(x => x.QC7FormID.Equals(id)).FirstOrDefault();
+                var documentData = _context.QCDocuments.Where(x => x.QC7FormID.Equals(id)).ToList();
 
                 // Retrieve and set the file path for other documents
-                if (documentData != null)
+                if (documentData != null && documentData.Count > 0)
                 {
-                    viewModel.OtherDocumentsFileName = documentData.FileName;
+                    // Check for "OtherDocuments" and set the OtherDocumentsFileName
+                    var otherDocument = documentData.FirstOrDefault(doc => doc.DocumentType == "OtherDocuments");
+                    if (otherDocument != null)
+                    {
+                        viewModel.OtherDocumentsFileName = otherDocument.FileName;
+                    }
+                    else
+                    {
+                        viewModel.OtherDocumentsFileName = string.Empty;
+                    }
+
+                    // Populate the AdditionalDocuments list
+                    viewModel.AdditionalDocuments = documentData
+                        .Where(doc => doc.DocumentType != "OtherDocuments") // Exclude "OtherDocuments"
+                        .Select(doc => new DocumentViewModel
+                        {
+                            DocumentName = doc.DocumentType,
+                            DocumentFileName = doc.FileName
+                        }).ToList();
                 }
 
                 return View("~/Views/General/QC7/ViewQC7Form.cshtml", viewModel);
@@ -1265,6 +1413,11 @@ namespace PKFAuditManagement.Controllers
                 // QCForm File Reference will contain _NAS for Non-Auditor role creation
                 string fileReference = Helper.GenerateQCFormFileReference();
 
+                if (roles.Contains("Non-Auditor"))
+                {
+                    // Modify the fileReference if the "Non-Auditor" role is present
+                    fileReference += "_NAS";
+                }
 
                 // Save viewModel data to EngagementTable
                 var qc7form = new QC7Form
@@ -1451,9 +1604,6 @@ namespace PKFAuditManagement.Controllers
 
                 _context.SaveChanges();
 
-                // Root folder name in S3
-                var uploadsRootFolder = "QC7FormDocuments";
-
                 // Check if null
                 if (viewModel.OtherDocuments != null)
                 {
@@ -1484,6 +1634,44 @@ namespace PKFAuditManagement.Controllers
                     });
 
                     _context.SaveChanges();
+                }
+
+                // Check if null, else upload the files
+                if (viewModel.AdditionalDocuments != null && viewModel.AdditionalDocuments.Count > 0)
+                {
+                    foreach (var document in viewModel.AdditionalDocuments)
+                    {
+                        if (document.File != null && document.File.Length > 0)
+                        {
+                            // Generate a unique filename
+                            var uniqueFileName = qc7formId + "-" + document.DocumentName + "-" + Guid.NewGuid().ToString() + ".pdf";
+
+                            // Get the path to wwwroot
+                            var uploadsFolder = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "QC7Form-AdditionalDocuments");
+
+                            // Ensure the uploads folder exists
+                            Directory.CreateDirectory(uploadsFolder);
+
+                            // Get file path
+                            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                            // Save the file
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await document.File.CopyToAsync(stream);
+                            }
+
+                            // Add to the db context
+                            _context.Add(new QCDocument
+                            {
+                                QC7FormID = qc7formId,
+                                FileName = uniqueFileName,
+                                DocumentType = document.DocumentName
+                            });
+
+                            _context.SaveChanges();
+                        }
+                    }
                 }
 
                 await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC7 Form Creation",
@@ -1542,6 +1730,32 @@ namespace PKFAuditManagement.Controllers
                 // Delete from QC7FormConclusions
                 var conclusions = _context.QC7FormConclusions.Where(c => c.QC7FormID == id);
                 _context.QC7FormConclusions.RemoveRange(conclusions);
+
+                // Delete from Documents Section if present
+                var documents = _context.QCDocuments.Where(c => c.QC7FormID == id).ToList();
+
+                if (documents.Count > 0)
+                {
+                    foreach (var document in documents)
+                    {
+                        // Construct the file path
+                        var uploadsFolder = document.DocumentType == "OtherDocuments"
+                            ? Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "QC7Form-OtherDocuments")
+                            : Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "QC7Form-AdditionalDocuments");
+
+                        var filePath = Path.Combine(uploadsFolder, document.FileName);
+
+                        // Delete the file if it exists
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            System.IO.File.Delete(filePath);
+                        }
+                    }
+
+                    // Remove all documents from the database
+                    _context.QCDocuments.RemoveRange(documents);
+                    _context.SaveChanges();
+                }
 
                 // Delete the QC7Form itself
                 _context.QC7Forms.Remove(qc7Form);
@@ -1792,13 +2006,19 @@ namespace PKFAuditManagement.Controllers
             return viewModel;
         }
 
-        public IActionResult RetrieveNASFeeDetails()
+        public IActionResult RetrieveNASFeeDetails(string clientName)
         {
             // Retrieve QC7 Forms where FileReference contains "NAS"
             var qc7Forms = _context.QC7Forms
-                .Where(e => e.FileReference.Contains("NAS"))
+                .Where(e => e.FileReference.Contains("NAS") && e.Client == clientName)
                 .Select(f => f.QC7FormID)
                 .ToList();
+
+            // No clients found
+            if (qc7Forms.Count == 0)
+            {
+                return Json(new { success = false, message = $"No QC7 Form with client name \"{clientName}\" found" });
+            }
 
             // Join QC7Forms with QC7FormFeeDetails
             var feeDetails = _context.QC7FormFeeDetails
@@ -1812,15 +2032,22 @@ namespace PKFAuditManagement.Controllers
                         fd.QC7FormFeeDetailID,
                         fd.QC7FormID,
                         fd.Fee,
-                        fd.NatureOfService,
+                        // Use OtherService if it's not null; otherwise, use NatureOfService
+                        NatureOfService = fd.OtherService != null ? $"{fd.NatureOfService} ({fd.OtherService})" : fd.NatureOfService,
                         f.FileReference,
+                        f.Client,
+                        f.AuditFee,
+                        f.GrandTotal,
+                        f.FeeConcentration,
                         f.PeriodEnded,
                         f.Status
-                    })
+                    }
+                )
                 .ToList();
 
+
             // Return the combined data as JSON
-            return Json(feeDetails);
+            return Json(new { success = true, data = feeDetails });
         }
     }
 }

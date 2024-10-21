@@ -80,42 +80,6 @@
     // Initial update of Budgeted fee recovery rate
     updateBudgetedFeeRecoveryRate();
 
-    var documentIndex = 1;
-    $('#add-more-docs').on('click', function () {
-        $('#other-documents-container').append(`
-            <div class="document-row card border mb-2" data-index="${documentIndex}">
-                <div class="card-body">
-                    <input type="text" class="form-control mt-3 mb-3" name="OtherDocuments[${documentIndex}].DocumentName" placeholder="Document Name" required/>
-                    <input type="file" class="form-control mb-3" name="OtherDocuments[${documentIndex}].File" accept="application/pdf" required/>
-                    <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                    <button type="button" class="btn btn-danger btn-sm remove-doc">Remove</button>
-                </div>
-            </div>
-        `);
-        documentIndex++;
-    });
-
-    // Remove a document row
-    $(document).on('click', '.remove-doc', function () {
-        // Remove the clicked document row
-        $(this).closest('.document-row').remove();
-
-        // Reindex the remaining document rows
-        $('#other-documents-container .document-row').each(function (index) {
-            $(this).attr('data-index', index); // Update the data-index attribute
-
-            // Update the names of the input fields to match the new index
-            $(this).find('input[name^="OtherDocuments"]').each(function () {
-                var name = $(this).attr('name');
-                var newName = name.replace(/\[.*?\]/, '[' + index + ']');
-                $(this).attr('name', newName);
-            });
-        });
-
-        // Decrease the global documentIndex variable 
-        documentIndex--;
-    });
-
     // Open PDF in a new tab
     $(document).on('click', '.preview-doc', function () {
         // Find the closest <tr> and then look for the file input within it
@@ -181,6 +145,20 @@
         });
     });
 
+    // Clear the file input when the 'Clear' button is clicked
+    $(document).on('click', '.remove-uploaded-doc', function () {
+        // Find the closest file input within the same row
+        var fileInput = $(this).closest('tr').find('input[type="file"]');
+
+        if (fileInput.val()) {
+            // Clear the file input value
+            fileInput.val('');
+        } else {
+            alert('No file selected.');
+        }
+    });
+
+
     // Function to toggle the comment input field based on radio selection
     function toggleCommentInput() {
         var yesSelected = document.getElementById('outstandingUnpaidFeesYes').checked;
@@ -223,6 +201,9 @@
 
     // Initial load: Call the function to ensure the correct visibility based on the current selection
     toggleSignificantRisk();
+
+    // Calculate document indices on load
+    updateDocumentIndices();
 });
 
 $("#autocomplete").autocomplete({
@@ -246,17 +227,18 @@ document.getElementById('addService').addEventListener('click', addService);
 // Function to add a new service field
 function addService() {
     const servicesContainer = document.getElementById('services');
-    const lastServiceIndex = servicesContainer.children.length;
+    // Get the current count of services to set the new index
+    const currentServiceCount = servicesContainer.querySelectorAll('.card').length;
 
     const serviceCard = document.createElement('div');
     serviceCard.className = 'card border border-secondary p-3 mb-3';
     serviceCard.innerHTML = `
         <div class="row mb-3 service input-field card-body">
-            <h6 class="card-title">Service ${lastServiceIndex}</h6>
-            <input type="hidden" asp-for="Services[${lastServiceIndex - 1}].QC6FormFeeDetailID" />
+            <h6 class="card-title">Service ${currentServiceCount + 1}</h6>
+            <input type="hidden" name="Services[${currentServiceCount}].QC6FormFeeDetailID" />
             <div class="col-sm-6">
                 <label>Nature of Service:</label>
-                <select class="form-control" asp-for="Services[${lastServiceIndex - 1}].NatureOfService" name="Services[${lastServiceIndex - 1}].NatureOfService" onchange="showOtherServiceInput(this)">
+                <select class="form-control" name="Services[${currentServiceCount}].NatureOfService" onchange="showOtherServiceInput(this)">
                     <option value="Tax Services">Tax Services</option>
                     <option value="Accounting">Accounting</option>
                     <option value="Payroll">Payroll</option>
@@ -268,12 +250,12 @@ function addService() {
                 <label>Fee:<span class="text-danger"> *</span></label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" name="Services[${lastServiceIndex - 1}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
+                    <input type="number" name="Services[${currentServiceCount}].Fee" step="0.01" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required>
                 </div>
             </div>
-            <div class="col-sm-12 mt-3" id="otherServiceInput-${lastServiceIndex - 1}" style="display: none;">
+            <div class="col-sm-12 mt-3" id="otherServiceInput-${currentServiceCount}" style="display: none;">
                 <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
-                <input type="text" name="Services[${lastServiceIndex - 1}].OtherService" class="form-control">
+                <input type="text" name="Services[${currentServiceCount}].OtherService" class="form-control">
             </div>
             <div class="col-sm-12 mt-3">
                 <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
@@ -283,7 +265,6 @@ function addService() {
 
     servicesContainer.appendChild(serviceCard);
 }
-
 // Function for removing service
 function removeService(button) {
     // Find the parent card element
@@ -308,6 +289,14 @@ function removeService(button) {
     card.remove();
 
     // Update indexes of remaining services
+    updateServiceIndexes();
+
+    // Recalculate the total fee after removal
+    calculateTotalAndConcentration();
+}
+
+// Function to update the indexes of the services
+function updateServiceIndexes() {
     const servicesContainer = document.getElementById('services');
     const serviceCards = servicesContainer.getElementsByClassName('card');
     for (let i = 0; i < serviceCards.length; i++) {
@@ -315,29 +304,26 @@ function removeService(button) {
         const titleElement = card.querySelector('.card-title');
         titleElement.textContent = `Service ${i + 1}`;
 
-        const inputs = serviceCards[i].getElementsByTagName('input');
+        // Update input names and IDs
+        const inputs = card.getElementsByTagName('input');
         for (let j = 0; j < inputs.length; j++) {
             const name = inputs[j].getAttribute('name');
             const newName = name.replace(/\[\d+\]/g, `[${i}]`);
             inputs[j].setAttribute('name', newName);
         }
 
-        const selects = serviceCards[i].getElementsByTagName('select');
+        const selects = card.getElementsByTagName('select');
         for (let j = 0; j < selects.length; j++) {
             const name = selects[j].getAttribute('name');
             const newName = name.replace(/\[\d+\]/g, `[${i}]`);
             selects[j].setAttribute('name', newName);
         }
 
-        const otherServiceInputs = serviceCards[i].querySelectorAll('[id^="otherServiceInput-"]');
-        for (let j = 0; j < otherServiceInputs.length; j++) {
-            const input = otherServiceInputs[j];
-            input.id = `otherServiceInput-${i}`;
+        const otherServiceInput = card.querySelector('[id^="otherServiceInput-"]');
+        if (otherServiceInput) {
+            otherServiceInput.id = `otherServiceInput-${i}`;
         }
     }
-
-    // Recalculate the total fee after removal
-    calculateTotalAndConcentration();
 }
 
 // Function to display additional text field based on service field selection
@@ -525,14 +511,33 @@ function toggleSectionBResult() {
 
 // Display NAS modal
 document.getElementById('retrieveFeeDetailsButton').addEventListener('click', function (e) {
+    // Prevent default button behavior
+    e.preventDefault();
 
-    e.preventDefault(); // Prevent default button behavior
+    // Retrieve the client name from the input field
+    var clientName = document.getElementById('autocomplete').value;
+
+    // Check if the input field is empty
+    if (clientName.trim() === '') {
+        alert('Please enter a client name.');
+        return; // Exit the method if the field is empty
+    }
 
     $.ajax({
         url: '/QC6Form/RetrieveNASFeeDetails',
         method: 'GET',
+        data: {
+            clientName: clientName
+        },
         success: function (data) {
-            console.log('Data:', data);
+
+            if (!data.success) {
+                // Alert if no client is found
+                alert(data.message);
+                return; // Exit the function if no client found
+            }
+
+            var data = data.data;
 
             // Group fee details by QC6FormID
             var groupedFeeDetails = {};
@@ -542,27 +547,38 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
                 }
                 groupedFeeDetails[feeDetail.qC6FormID].push(feeDetail);
             });
-            console.log('Grouped Fee Details:', groupedFeeDetails);
+
+            // Set the modal title with the client name
+            var clientName = data[0].prospectiveClient;
+            $('#feeDetailsModalLabel').text('Fee Details for Client: ' + clientName);
 
             // Build the tbody HTML
             var tbodyHtml = '';
             Object.keys(groupedFeeDetails).forEach(function (qc6FormID) {
                 var feeDetailsList = groupedFeeDetails[qc6FormID];
-                console.log('QC6FormID:', qc6FormID, 'Fee Details List:', feeDetailsList);
 
-                // Display the QC6 Form File reference in one row
+                // Display the QC6 Form File reference, Client Name, and Financial Year End in the first row
                 tbodyHtml += '<tr>' +
-                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].fileReference + '</td>' +
-                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' +
+                    '<a href="/QC6Form/ViewQC6Form?id=' + feeDetailsList[0].qC6FormID + '" style="color: #007bff; text-decoration: underline;">' +
+                    feeDetailsList[0].fileReference +
+                    '</a>' +
+                    '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].prospectiveClient + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + formatDateToDDMMYYYY(feeDetailsList[0].periodEnded) + '</td>' +
                     '<td>' + feeDetailsList[0].natureOfService + '</td>' +
+                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].grandTotal + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].auditFee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].feeConcentration + '</td>' +
                     '</tr>';
 
-                // Display the fee details for this QC6 form in subsequent rows
+                // Display the fee details for this QC6 form in subsequent rows, except the first one
                 for (var i = 1; i < feeDetailsList.length; i++) {
                     var feeDetail = feeDetailsList[i];
                     tbodyHtml += '<tr>' +
-                        '<td>' + feeDetail.fee + '</td>' +
                         '<td>' + feeDetail.natureOfService + '</td>' +
+                        '<td>' + feeDetail.fee + '</td>' +
                         '</tr>';
                 }
             });
@@ -578,4 +594,180 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
             console.log('Error:', error);
         }
     });
+});
+
+// Function to format the date as dd/mm/yyyy
+function formatDateToDDMMYYYY(dateString) {
+    var date = new Date(dateString); // Create a Date object from the string
+    var day = String(date.getDate()).padStart(2, '0'); // Get the day, add leading zero if needed
+    var month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month, add leading zero if needed (0-based index)
+    var year = date.getFullYear(); // Get the full year
+
+    return day + '/' + month + '/' + year; // Return the formatted date
+}
+
+// Add event listener to the "Add More Documents" button
+document.getElementById('add-more-docs').addEventListener('click', addDocument);
+
+// Array to hold the filenames of deleted documents
+let deletedDocumentFilenames = [];
+
+// Function to add a new document row
+function addDocument() {
+    const docsContainer = document.getElementById('additional-docs-body');
+    const existingRowCount = docsContainer.querySelectorAll('tr.additional-doc-row').length; // Count only additional document rows
+    const noDocsRow = document.getElementById('no-docs-row');
+
+    // Check if the 'No additional documents available' row exists and hide it
+    if (noDocsRow) {
+        noDocsRow.style.display = 'none';
+    }
+
+    const newRow = document.createElement('tr');
+    newRow.classList.add('additional-doc-row'); // Add a class to easily identify additional document rows
+    newRow.innerHTML = `
+        <td>
+            <input asp-for="AdditionalDocuments[${existingRowCount}].DocumentName" type="text" class="form-control" name="AdditionalDocuments[${existingRowCount}].DocumentName" placeholder="Document Name" required />
+        </td>
+        <td>
+            <span class="no-file-text">No file uploaded</span>
+        </td>
+        <td>
+            <input asp-for="AdditionalDocuments[${existingRowCount}].File" type="file" class="form-control" name="AdditionalDocuments[${existingRowCount}].File" accept="application/pdf" required />
+        </td>
+        <td>
+            <button type="button" class="btn btn-secondary btn-sm remove-uploaded-doc mr-2">Clear</button>
+            <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+            <button type="button" class="btn btn-danger btn-sm delete-row" onclick="removeDocument(this)">Delete Row</button>
+        </td>
+    `;
+
+    docsContainer.appendChild(newRow);
+}
+
+// Function to remove a document row
+function removeDocument(button) {
+    const row = button.closest('tr');
+    const documentFilenameInput = row.querySelector('.document-filename');
+
+    // Get the document filename from the input
+    if (documentFilenameInput) {
+        const documentFilename = documentFilenameInput.value;
+
+        // Add the document filename to the deletedDocumentFilenames array
+        if (documentFilename) {
+            deletedDocumentFilenames.push(documentFilename);
+        }
+    }
+
+    row.remove();
+
+    // Update the indices of the additional document rows
+    updateDocumentIndices();
+
+    // Update the hidden input with the deleted document filenames
+    updateDeletedDocumentsInput();
+}
+
+// Function to update the hidden input with deleted document filenames
+function updateDeletedDocumentsInput() {
+    const deletedDocumentsInput = document.getElementById('deletedDocuments');
+    if (deletedDocumentsInput) {
+        // Join the deleted document filenames array into a comma-separated string
+        deletedDocumentsInput.value = deletedDocumentFilenames.join(',');
+    }
+}
+
+// Function to update the indices of the additional document rows
+function updateDocumentIndices() {
+    const docsContainer = document.getElementById('additional-docs-body');
+    const additionalDocRows = docsContainer.querySelectorAll('tr.additional-doc-row'); // Select only additional document rows
+
+    additionalDocRows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        inputs.forEach(input => {
+            // Update 'name' attribute
+            const name = input.getAttribute('name');
+            if (name) {
+                const newName = name.replace(/\[\d+\]/g, `[${index}]`); // Update index in 'name' attribute
+                input.setAttribute('name', newName);
+            }
+
+            // Update 'asp-for' attribute
+            const aspFor = input.getAttribute('asp-for');
+            if (aspFor) {
+                const newAspFor = aspFor.replace(/\[\d+\]/g, `[${index}]`); // Update index in 'asp-for' attribute
+                input.setAttribute('asp-for', newAspFor);
+            }
+        });
+    });
+}
+
+// Function to check for duplicate document names
+function checkDuplicateDocuments() {
+    const docInputs = document.querySelectorAll('input[name^="AdditionalDocuments"][name$=".DocumentName"]');
+    const docNames = [];
+    let hasDuplicates = false;
+
+    // Remove any previous error tooltips, validation styles, and Bootstrap's is-valid/was-validated classes
+    docInputs.forEach(input => {
+        input.classList.remove('is-invalid', 'is-valid', 'was-validated');
+        input.removeAttribute('data-bs-toggle');
+        input.removeAttribute('data-bs-placement');
+        input.removeAttribute('title');
+    });
+
+    // Loop through the document name inputs to find duplicates
+    docInputs.forEach(input => {
+        const docName = input.value.trim().toLowerCase(); // Normalise to lowercase for comparison
+        if (docNames.includes(docName)) {
+            // If duplicate, add error styling and tooltip
+            input.classList.add('is-invalid');
+            input.setAttribute('data-bs-toggle', 'tooltip');
+            input.setAttribute('data-bs-placement', 'top');
+            input.setAttribute('title', 'Duplicate document name');
+            hasDuplicates = true;
+        } else {
+            docNames.push(docName);
+        }
+    });
+
+    // Initialise Bootstrap tooltips for invalid inputs
+    if (hasDuplicates) {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    }
+
+    // Scroll to the first invalid input if duplicates are found
+    if (hasDuplicates) {
+        const firstInvalidElement = document.querySelector('.is-invalid');
+        if (firstInvalidElement) {
+            firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    return !hasDuplicates; // Return false if duplicates were found
+}
+
+// Hook into the form submission event
+document.getElementById('qc6Form').addEventListener('submit', function (event) {
+    // Prevent default validation and handle manually
+    event.preventDefault(); // Stop the form from submitting
+
+    // Remove Bootstrap's automatic validation classes from the form
+    this.classList.remove('was-validated');
+
+    // Check for duplicates
+    if (!checkDuplicateDocuments()) {
+        // Prevent form submission if duplicates were found
+        event.stopPropagation();
+    } else {
+        // No duplicates, remove any automatic is-valid classes and submit the form programmatically
+        const inputs = this.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.classList.remove('is-valid'); // Remove Bootstrap's automatic valid class
+        });
+
+        this.submit();
+    }
 });

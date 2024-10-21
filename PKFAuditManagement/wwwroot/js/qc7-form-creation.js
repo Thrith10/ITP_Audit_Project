@@ -329,35 +329,6 @@ $(document).ready(function () {
     // Initial update of Prior year’s recovery rate
     updateProposedRecoveryRate();
 
-    // Open PDF in a new tab
-    $(document).on('click', '.preview-doc', function () {
-        var fileInput = $(this).siblings('input[type="file"]')[0];
-        if (fileInput.files.length > 0) {
-            var file = fileInput.files[0];
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                var blob = new Blob([e.target.result], { type: 'application/pdf' });
-                var url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            };
-
-            reader.readAsArrayBuffer(file);
-        } else {
-            alert('No file selected.');
-        }
-    });
-
-    // Clear the file input when the 'Clear' button is clicked
-    $(document).on('click', '.clear-doc', function () {
-        var fileInput = $(this).siblings('input[type="file"]');
-        if (fileInput.val()) {
-            fileInput.val(''); // Clear the input value using jQuery method
-        } else {
-            alert('No file selected.');
-        }
-    });
-
     // Function to toggle the comment input field based on radio selection
     function toggleUnpaidAuditFeeCommentInput() {
         var yesSelected = document.getElementById('outstandingUnpaidAuditFeesYes').checked;
@@ -470,7 +441,114 @@ $(document).ready(function () {
 
     // Initial load: Call the function to ensure the correct visibility based on the current selection
     toggleSafeguards();
+
+    // Add event listener to the "Add More Documents" button
+    document.getElementById('add-more-docs').addEventListener('click', addDocument);
+
+    // Function to add a new document row
+    function addDocument() {
+        const docsContainer = document.getElementById('additional-docs-body');
+        const existingRowCount = docsContainer.querySelectorAll('tr.additional-doc-row').length; // Count only additional document rows
+
+        const newRow = document.createElement('tr');
+        newRow.classList.add('additional-doc-row'); // Add a class to easily identify additional document rows
+        newRow.innerHTML = `
+        <td style="width: 30%;">
+            <input asp-for="AdditionalDocuments[${existingRowCount}].DocumentName" type="text" class="form-control" name="AdditionalDocuments[${existingRowCount}].DocumentName" placeholder="Document Name" required />
+        </td>
+        <td style="width: 40%;">
+            <input asp-for="AdditionalDocuments[${existingRowCount}].File" type="file" class="form-control" name="AdditionalDocuments[${existingRowCount}].File" accept="application/pdf" required />
+        </td>
+        <td style="width: 30%;">
+            <button type="button" class="btn btn-secondary btn-sm remove-uploaded-doc mr-2">Clear</button>
+            <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+            <button type="button" class="btn btn-danger btn-sm delete-row" onclick="removeDocument(this)">Delete Row</button>
+        </td>
+    `;
+
+        docsContainer.appendChild(newRow);
+    }
+
+    // Open PDF in a new tab
+    $(document).on('click', '.preview-doc', function () {
+        // Find the closest <tr> and then look for the file input within it
+        var fileInput = $(this).closest('tr').find('input[type="file"]')[0];
+
+        if (fileInput && fileInput.files.length > 0) {  // Check if fileInput is defined
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var blob = new Blob([e.target.result], { type: 'application/pdf' });
+                var url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            };
+
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('No file selected.');
+        }
+    });
+
+    // Clear the file input when the 'Clear' button is clicked
+    $(document).on('click', '.remove-uploaded-doc', function () {
+        // Find the closest file input within the same row
+        var fileInput = $(this).closest('tr').find('input[type="file"]');
+
+        if (fileInput.val()) {
+            // Clear the file input value
+            fileInput.val('');
+        } else {
+            alert('No file selected.');
+        }
+    });
 });
+
+// Function to remove a document row
+function removeDocument(button) {
+    const row = button.closest('tr');
+    const documentFilenameInput = row.querySelector('.document-filename');
+
+    // Get the document filename from the input
+    if (documentFilenameInput) {
+        const documentFilename = documentFilenameInput.value;
+
+        // Add the document filename to the deletedDocumentFilenames array
+        if (documentFilename) {
+            deletedDocumentFilenames.push(documentFilename);
+        }
+    }
+
+    row.remove();
+
+    // Update the indices of the additional document rows
+    updateDocumentIndices();
+}
+
+// Function to update the indices of the additional document rows
+function updateDocumentIndices() {
+    const docsContainer = document.getElementById('additional-docs-body');
+    const additionalDocRows = docsContainer.querySelectorAll('tr.additional-doc-row'); // Select only additional document rows
+
+    additionalDocRows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        inputs.forEach(input => {
+            // Update 'name' attribute
+            const name = input.getAttribute('name');
+            if (name) {
+                const newName = name.replace(/\[\d+\]/g, `[${index}]`); // Update index in 'name' attribute
+                input.setAttribute('name', newName);
+            }
+
+            // Update 'asp-for' attribute
+            const aspFor = input.getAttribute('asp-for');
+            if (aspFor) {
+                const newAspFor = aspFor.replace(/\[\d+\]/g, `[${index}]`); // Update index in 'asp-for' attribute
+                input.setAttribute('asp-for', newAspFor);
+            }
+        });
+    });
+}
 
 // Toggling checkbox for suspicious transaction report (conclusion section) displays the comment box
 function toggleSuspiciousTransactionReport() {
@@ -582,14 +660,33 @@ function toggleSectionBResult() {
 
 // Display NAS modal
 document.getElementById('retrieveFeeDetailsButton').addEventListener('click', function (e) {
+    // Prevent default button behavior
+    e.preventDefault();
 
-    e.preventDefault(); // Prevent default button behavior
+    // Retrieve the client name from the input field
+    var clientName = document.getElementById('clientSelect').value;
+
+    // Check if the input field is empty
+    if (clientName.trim() === '') {
+        alert('Please enter a client name.');
+        return; // Exit the method if the field is empty
+    }
 
     $.ajax({
         url: '/QC7Form/RetrieveNASFeeDetails',
         method: 'GET',
+        data: {
+            clientName: clientName
+        },
         success: function (data) {
-            console.log('Data:', data);
+
+            if (!data.success) {
+                // Alert if no client is found
+                alert(data.message);
+                return; // Exit the function if no client found
+            }
+
+            var data = data.data;
 
             // Group fee details by QC7FormID
             var groupedFeeDetails = {};
@@ -599,27 +696,38 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
                 }
                 groupedFeeDetails[feeDetail.qC7FormID].push(feeDetail);
             });
-            console.log('Grouped Fee Details:', groupedFeeDetails);
+
+            // Set the modal title with the client name
+            var clientName = data[0].client;
+            $('#feeDetailsModalLabel').text('Fee Details for Client: ' + clientName);
 
             // Build the tbody HTML
             var tbodyHtml = '';
             Object.keys(groupedFeeDetails).forEach(function (qc7FormID) {
                 var feeDetailsList = groupedFeeDetails[qc7FormID];
-                console.log('QC7FormID:', qc7FormID, 'Fee Details List:', feeDetailsList);
 
-                // Display the QC7 Form File reference in one row
+                // Display the QC7 Form File reference, Client Name, and Financial Year End in the first row
                 tbodyHtml += '<tr>' +
-                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].fileReference + '</td>' +
-                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' +
+                    '<a href="/QC7Form/ViewQC7Form?id=' + feeDetailsList[0].qC7FormID + '" style="color: #007bff; text-decoration: underline;">' +
+                    feeDetailsList[0].fileReference +
+                    '</a>' +
+                    '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].client + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + formatDateToDDMMYYYY(feeDetailsList[0].periodEnded) + '</td>' +
                     '<td>' + feeDetailsList[0].natureOfService + '</td>' +
+                    '<td>' + feeDetailsList[0].fee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].grandTotal + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].auditFee + '</td>' +
+                    '<td rowspan="' + feeDetailsList.length + '">' + feeDetailsList[0].feeConcentration + '</td>' +
                     '</tr>';
 
-                // Display the fee details for this QC7 form in subsequent rows
+                // Display the fee details for this QC7 form in subsequent rows, except the first one
                 for (var i = 1; i < feeDetailsList.length; i++) {
                     var feeDetail = feeDetailsList[i];
                     tbodyHtml += '<tr>' +
-                        '<td>' + feeDetail.fee + '</td>' +
                         '<td>' + feeDetail.natureOfService + '</td>' +
+                        '<td>' + feeDetail.fee + '</td>' +
                         '</tr>';
                 }
             });
@@ -636,3 +744,13 @@ document.getElementById('retrieveFeeDetailsButton').addEventListener('click', fu
         }
     });
 });
+
+// Function to format the date as dd/mm/yyyy
+function formatDateToDDMMYYYY(dateString) {
+    var date = new Date(dateString); // Create a Date object from the string
+    var day = String(date.getDate()).padStart(2, '0'); // Get the day, add leading zero if needed
+    var month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month, add leading zero if needed (0-based index)
+    var year = date.getFullYear(); // Get the full year
+
+    return day + '/' + month + '/' + year; // Return the formatted date
+}

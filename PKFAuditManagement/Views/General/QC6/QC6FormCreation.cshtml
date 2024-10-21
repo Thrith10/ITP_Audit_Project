@@ -1,6 +1,16 @@
 ﻿@using PKFAuditManagement.ViewModels
 @model QC6FormCreationViewModel
-
+<style>
+    .tooltip {
+        position: absolute;
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        padding: 5px;
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+</style>
 <div class="justify-content-center">
     <main id="main" class="main">
         <div class="pagetitle">
@@ -163,7 +173,6 @@
                                                 </div>
                                                 <div class="col-3 d-flex align-items-center">
                                                     <button class="btn btn-primary mr-2" id="retrieveFeeDetailsButton">View NAS Details</button>
-                                                    <i class="bi bi-info-circle ml-2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="The &apos;View NAS Details&apos; button allows you to view the NAS details"></i>
                                                 </div>
                                             </div>
                                             <div class="row mb-3 service input-field" id="services">
@@ -638,46 +647,45 @@
                                                 <h5 class="card-title">Optional Additional Documents (In PDF format)</h5>
                                             </div>
                                         </div>
-                                        <div class="form-group mb-3">
-                                            <label asp-for="OtherDocuments">Consolidated Documents in PDF</label>
-                                            <div class="d-flex align-items-center">
-                                                <input asp-for="OtherDocuments" type="file" class="form-control me-2" accept="application/pdf" />
-                                                <button type="button" class="btn btn-secondary btn-sm clear-doc mr-2">Clear</button>
-                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                                            </div>
-                                        </div>
-                                       @*  <div class="form-group mb-3">
-                                            <label asp-for="TrendSearch">TREND search in PDF</label>
-                                            <div class="d-flex align-items-center">
-                                                <input asp-for="TrendSearch" type="file" class="form-control" accept="application/pdf" />
-                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                                            </div>
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label asp-for="GoogleSearch">Google search in PDF</label>
-                                            <div class="d-flex align-items-center">
-                                                <input asp-for="GoogleSearch" type="file" class="form-control" accept="application/pdf" />
-                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                                            </div>
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label asp-for="LexisNexisSearch">Lexis Nexis search in PDF</label>
-                                            <div class="d-flex align-items-center">
-                                                <input asp-for="LexisNexisSearch" type="file" class="form-control" accept="application/pdf" />
-                                                <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                                            </div>
-                                        </div>
-                                        <div id="other-documents-container">
-                                            <label>Other Documents</label>
-                                            <div class="document-row card border mb-2">
-                                                <div class="card-body">
-                                                    <input type="text" class="form-control mt-3 mb-3" name="OtherDocuments[0].DocumentName" placeholder="Document Name" />
-                                                    <input type="file" class="form-control mb-3" name="OtherDocuments[0].File" accept="application/pdf" />
-                                                    <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
-                                                </div>
-                                            </div>
-                                        </div> *@
-                                        @* <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button> *@
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 30%;">Document Type</th>
+                                                    <th style="width: 40%;">Attachment</th>
+                                                    <th style="width: 30%;">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="additional-docs-body">
+                                                <!-- Other Documents Row -->
+                                                <tr>
+                                                    <td style="width: 30%;">
+                                                        <input type="text" class="form-control" value="Consolidated Documents" disabled />
+                                                    </td>
+                                                    <td style="width: 40%;">
+                                                        <input asp-for="OtherDocuments" id="file-input" type="file" class="form-control" accept="application/pdf" />
+                                                    </td>
+                                                    <td style="width: 30%;">
+                                                        <button type="button" class="btn btn-secondary btn-sm remove-uploaded-doc mr-2">Clear</button>
+                                                        <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                                    </td>
+                                                </tr>
+                                                <!-- Additional Documents Rows -->
+                                                <tr class="additional-doc-row">
+                                                    <td style="width: 30%;">
+                                                        <input type="text" class="form-control" name="AdditionalDocuments[0].DocumentName" placeholder="Document Name" />
+                                                    </td>
+                                                    <td style="width: 40%;">
+                                                        <input type="file" class="form-control" name="AdditionalDocuments[0].File" accept="application/pdf" />
+                                                    </td>
+                                                    <td style="width: 30%;">
+                                                        <button type="button" class="btn btn-secondary btn-sm remove-uploaded-doc mr-2">Clear</button>
+                                                        <button type="button" class="btn btn-primary btn-sm preview-doc">Preview</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- Add More Documents Button -->
+                                        <button type="button" id="add-more-docs" class="btn btn-primary mb-3">Add More Documents</button>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -816,26 +824,33 @@
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 <!-- Modal -->
-<div class="modal" id="feeDetailsModal" tabindex="-1" role="dialog" aria-labelledby="feeDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="feeDetailsModal" tabindex="-1" role="dialog" aria-labelledby="feeDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="feeDetailsModalLabel">Fee Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body table-responsive">
-                <table class="table table-bordered" id="feeDetailsTable">
-                    <thead>
-                        <tr>
-                            <th>File Reference</th>
-                            <th>Fee</th>
-                            <th>Audit Services</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Data will be populated here -->
-                    </tbody>
-                </table>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="feeDetailsTable">
+                        <thead>
+                            <tr>
+                                <th>File Reference</th>
+                                <th>Client Name</th>
+                                <th>Financial Year End</th>
+                                <th>Services</th>
+                                <th>Fee for Service ($)</th>
+                                <th>Grand Total Fee ($)</th>
+                                <th>Audit Fee ($)</th>
+                                <th>Fee Concentration (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -843,6 +858,7 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">

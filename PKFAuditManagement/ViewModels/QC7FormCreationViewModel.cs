@@ -105,6 +105,9 @@ namespace PKFAuditManagement.ViewModels
         public IFormFile? OtherDocuments { get; set; }
         public string? OtherDocumentsFileName { get; set; }
         public bool DeleteExistingFile { get; set; }
+
+        public List<DocumentViewModel> AdditionalDocuments { get; set; } = new List<DocumentViewModel>();
+        public string? DeletedDocumentFilenames { get; set; }
     }
 
     public class QC7SubFormViewModel
