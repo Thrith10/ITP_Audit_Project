@@ -34,7 +34,7 @@ namespace PKFAuditManagement.Services
             _database = _client.GetDatabase("audit_documents");
 
             // Reference to the embedded_movies collection
-            _collection = _database.GetCollection<BsonDocument>("v6");
+            _collection = _database.GetCollection<BsonDocument>("ep200_v2");
         }
 
         public async Task<string> SaveParagraphsToMongoDBAsync(List<(string SectionTitle, string Chunk)> paragraphs, string documentName)

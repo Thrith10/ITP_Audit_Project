@@ -56,13 +56,15 @@ namespace PKFAuditManagement.Controllers
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 var role = roles.FirstOrDefault(); // Since each user has only one role
+                var isLockedOut = await _userManager.IsLockedOutAsync(user); // Check if user is locked out
 
                 userViewModels.Add(new UserViewModel
                 {
                     UserId = user.Id,
                     UserName = user.UserName,
                     Email = user.Email,
-                    Role = role
+                    Role = role,
+                    IsLockedOut = isLockedOut // Pass the lockout status to the view
                 });
             }
 
@@ -88,7 +90,8 @@ namespace PKFAuditManagement.Controllers
                     {
                         UserName = viewModel.UserName,
                         Email = viewModel.Email,
-                        FullName = viewModel.FullName
+                        FullName = viewModel.FullName,
+                        LockoutEnabled = true // Enable account lockout for the new user
                     };
 
                     var defaultPassword = GenerateRandomPassword(); // Generate a random password
@@ -178,6 +181,50 @@ namespace PKFAuditManagement.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActivateUser(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, message = "User ID cannot be null or empty." });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found." });
+            }
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // Set LockoutEnd to null to activate the user
+                    user.LockoutEnd = null;
+
+                    // Update the user lockout status in the database
+                    var result = await _userManager.UpdateAsync(user);
+
+                    if (result.Succeeded)
+                    {
+                        await transaction.CommitAsync();
+                        return Json(new { success = true, message = "User activated successfully!" });
+                    }
+                    else
+                    {
+                        await transaction.RollbackAsync();
+                        return Json(new { success = false, message = "Failed to activate the user. Please try again." });
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    return Json(new { success = false, message = "An error occurred while processing your request. Please try again." });
+                }
+            }
+        }
 
 
         [HttpGet]
