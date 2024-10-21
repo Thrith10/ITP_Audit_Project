@@ -10,8 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using PKFAuditManagement.Services;
 using Amazon.S3;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using DotNetEnv;
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,7 +75,8 @@ builder.Services.AddScoped<IS3Service, S3Service>();
 builder.Services.AddScoped<IOpenAIService>(provider =>
 {
     var apiKey = builder.Configuration["OPENAI_API_KEY"];
-    return new OpenAIService(apiKey);
+    var memoryCache = provider.GetRequiredService<IMemoryCache>();
+    return new OpenAIService(apiKey, memoryCache);
 });
 
 // Register EmbeddingService with the OpenAI API key
