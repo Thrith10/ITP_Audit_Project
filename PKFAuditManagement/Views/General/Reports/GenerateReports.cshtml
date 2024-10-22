@@ -140,7 +140,8 @@
                                     <tr class="clientstatus-header" style="display: none;">
                                         <th><input type="checkbox" id="selectAllClientStatus" /> Select All</th>
                                         <th>CSClientName</th>
-                                        <th>Client Status Financial Year End</th>
+                                        <th>Client Name</th>
+                                        <th>Client Financial Year End</th>
                                         <th>QC6 First Approver</th>
                                         <th>QC6 Second Approver</th>
                                         <th>QC7 First Approver</th>
@@ -212,6 +213,7 @@
                                             {
                                                 <tr id="@form.CSClientName" class="clientstatus-form" style="display: none;">
                                                     <td><input type="checkbox" name="selectedForms" value="@form.CSClientName" class="selectClientStatus" /></td>
+                                                    <td>@form.CSClientName</td>
                                                     <td>@form.CSClientName</td>
                                                     <td>@form.ClientStatusFinancialYearEnd?.ToShortDateString()</td>
                                                     <td>@form.QC6FirstApprover</td>

@@ -3,15 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using PKFAuditManagement;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
-using System.Net.Mail;
-using System.Net;
 using PKFAuditManagement.Interface;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
 using PKFAuditManagement.Services;
 using Amazon.S3;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using DotNetEnv;
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,7 +72,8 @@ builder.Services.AddScoped<IS3Service, S3Service>();
 builder.Services.AddScoped<IOpenAIService>(provider =>
 {
     var apiKey = builder.Configuration["OPENAI_API_KEY"];
-    return new OpenAIService(apiKey);
+    var memoryCache = provider.GetRequiredService<IMemoryCache>();
+    return new OpenAIService(apiKey, memoryCache);
 });
 
 // Register EmbeddingService with the OpenAI API key
@@ -160,7 +157,7 @@ using (var scope = app.Services.CreateScope())
     // Initialise an instance of the roleManager
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    var roles = new[] { "Admin", "User", "Non-Auditor" };
+    var roles = new[] { "Admin", "User", "Non-Auditor", "Reviewer" };
 
     // Iterate through the roles and add them to database if they have not been created
     foreach (var role in roles)
@@ -230,6 +227,5 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Admin user already exists.");
     }
 }
-
 
 app.Run();
