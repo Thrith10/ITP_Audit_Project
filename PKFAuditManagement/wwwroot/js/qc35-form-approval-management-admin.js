@@ -1,4 +1,4 @@
-// This function deletes the QC6 form selected from the Admin Dashboard QC6 Form Management page
+// This function deletes the QC35 form selected from the Admin Dashboard QC35 Form Management page
 function confirmDelete(deleteUrl) {
     Swal.fire({
         title: 'Are you sure?',
@@ -46,3 +46,17 @@ function confirmDelete(deleteUrl) {
         }
     });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".approveLink").forEach(function (element) {
+        element.addEventListener("click", function (event) {
+            event.preventDefault();
+            var engagementId = event.target.getAttribute("data-engagement-id");
+            document.getElementById("approveFormId").value = engagementId;
+            var form = document.getElementById("approveForm");
+            form.action = '/QC35Form/ApproveQC35Form/' + engagementId;
+            form.submit();
+        });
+    });
+});
+

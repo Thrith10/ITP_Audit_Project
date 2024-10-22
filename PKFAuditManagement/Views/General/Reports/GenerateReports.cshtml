@@ -36,6 +36,7 @@
                 margin-right: 10px;
             }
 
+
         .hidden {
             display: none;
         }
@@ -76,20 +77,32 @@
                                     <option value="QC35">QC35 Forms</option>
                                     <option value="SignedFS">Signed Financial Statements</option>
                                     <option value="ClientStatus">Client Status</option> <!-- New option -->
+                                    <option value="Quiz">Quiz Reports</option> <!-- New Option -->
                                 </select>
                             </div>
 
                             <!-- Date filter -->
-                            <div class="date-filter" id="dateFilterContainer">
-                                <label for="startDate">Start Date:</label>
-                                <input type="date" id="startDate">
-                                <label for="endDate">End Date:</label>
-                                <input type="date" id="endDate">
-                                <button class="btn btn-primary" onclick="filterByDate()">Filter</button>
-                                <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                            <div class="date-filter row gx-2 align-items-end" id="dateFilterContainer">
+                                <div class="col-12 col-sm-4 col-md-3 mb-2">
+                                    <label for="startDate" class="form-label">Start Date:</label>
+                                    <input type="date" id="startDate" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-12 col-sm-4 col-md-3 mb-2">
+                                    <label for="endDate" class="form-label">End Date:</label>
+                                    <input type="date" id="endDate" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-6 col-sm-2 mb-2">
+                                    <button class="btn btn-primary btn-sm w-100" onclick="filterByDate()">Filter</button>
+                                </div>
+                                <div class="col-6 col-sm-2 mb-2">
+                                    <button class="btn btn-secondary btn-sm w-100" onclick="clearFilters()">Clear Filters</button>
+                                </div>
                             </div>
 
+
+
                             <!-- Table to display report data -->
+                            <div class="table-responsive">
                             <table class="table datatable" id="reportTable">
                                 <thead>
                                     <!-- QC6 Headers -->
@@ -150,6 +163,21 @@
                                         <th>QC7 Status</th>
                                         <th>QC35 Status</th>
                                         <th>SignedFS Status</th>
+                                    </tr>
+                                    <!-- Quiz Headers -->
+                                    <tr class="quiz-header" style="display: none;">
+                                        <th><input type="checkbox" id="selectAllQuiz" /> Select All</th>
+                                        <th>Quiz ID</th>
+                                        <th>Quiz Title</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Total Questions</th>
+                                        <th>Total Participants</th>
+                                        <th>Attendance</th>
+                                        <th>Feedback Submitted</th>
+                                        <th>Self-Assessment Done</th>
+                                        <th>Average Score</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -226,6 +254,25 @@
                                                     <td>@form.SignedFSStatus</td>
                                                 </tr>
                                             }
+                                            else if (form.FormType == "Quiz")
+                                            {
+                                                <tr class="quiz-form" style="display: none;">
+                                                    <td><input type="checkbox" name="selectedForms" value="@form.QuizID" class="selectQuiz" /></td>
+                                                    <td>@form.QuizID</td>
+                                                    <td>@form.QuizTitle</td>
+                                                    <td>@form.QuizStart.ToShortDateString()</td>
+                                                    <td>@form.QuizEnd.ToShortDateString()</td>
+                                                    <td>@form.TotalQuestions</td>
+                                                    <td>@form.TotalParticipants</td>
+                                                    <td>@form.AttendanceCount</td>
+                                                    <td>@form.FeedbackSubmitted</td>
+                                                    <td>@form.SelfAssessmentDone</td>
+                                                    <td>@form.AverageScore</td>
+                                                    <td>@form.QuizStatus</td>
+                                                </tr>
+                                            }
+
+
                                         }
                                     }
                                     else
@@ -236,6 +283,7 @@
                                     }
                                 </tbody>
                             </table>
+                            </div>
 
                             <!-- Form with checkboxes -->
                             <form id="checkboxFieldsForm" onsubmit="generateReport(event)"></form>
@@ -288,123 +336,52 @@
             $('#selectAllClientStatus').on('change', function () {
                 $('.selectClientStatus').prop('checked', this.checked); // Check or uncheck all Client Status checkboxes
             });
+
+        // **Select or Deselect All Quiz Checkboxes**
+        $('#selectAllQuiz').on('change', function () {
+            $('.selectQuiz').prop('checked', this.checked);
+        });
+
         });
 
         function filterForms() {
-            var formType = document.getElementById("formType").value;
+            const formType = document.getElementById("formType").value;
 
-            var qc6Forms = document.querySelectorAll(".qc6-form");
-            var qc7Forms = document.querySelectorAll(".qc7-form");
-            var qc35Forms = document.querySelectorAll(".qc35-form");
-            var signedFSForms = document.querySelectorAll(".signedfs-form");
-            var clientStatusForms = document.querySelectorAll(".clientstatus-form");
+            // All possible form types with their respective classes
+            const formClasses = ["qc6-form", "qc7-form", "qc35-form", "signedfs-form", "clientstatus-form", "quiz-form"];
+            const headerClasses = ["qc6-header", "qc7-header", "qc35-header", "signedfs-header", "clientstatus-header", "quiz-header"];
 
-            var headers = {
-                qc6: document.querySelectorAll(".qc6-header"),
-                qc7: document.querySelectorAll(".qc7-header"),
-                qc35: document.querySelectorAll(".qc35-header"),
-                signedfs: document.querySelectorAll(".signedfs-header"),
-                clientstatus: document.querySelectorAll(".clientstatus-header") // ClientStatus header
-            };
-
-            // Hide all headers initially
-            Object.values(headers).forEach(header => {
-                header.forEach(h => h.style.display = "none");
+            // Hide all forms and headers initially
+            formClasses.forEach(className => {
+                document.querySelectorAll(`.${className}`).forEach(form => (form.style.display = "none"));
             });
 
-            // Show header based on selected form type
-            if (formType === "QC6") {
-                qc6Forms.forEach(function (form) {
-                    form.style.display = "";
-                });
-                headers.qc6.forEach(h => h.style.display = "");
-                qc7Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                qc35Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                signedFSForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                clientStatusForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                document.querySelector('.date-filter').classList.remove('hidden');
-            } else if (formType === "QC7") {
-                qc6Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                headers.qc7.forEach(h => h.style.display = "");
-                qc7Forms.forEach(function (form) {
-                    form.style.display = "";
-                });
-                qc35Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                signedFSForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                clientStatusForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                document.querySelector('.date-filter').classList.remove('hidden');
-            } else if (formType === "QC35") {
-                qc6Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                headers.qc35.forEach(h => h.style.display = "");
-                qc35Forms.forEach(function (form) {
-                    form.style.display = "";
-                });
-                qc7Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                signedFSForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                clientStatusForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                document.querySelector('.date-filter').classList.add('hidden');
-            } else if (formType === "SignedFS") {
-                qc6Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                headers.signedfs.forEach(h => h.style.display = "");
-                qc35Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                signedFSForms.forEach(function (form) {
-                    form.style.display = "";
-                });
-                qc7Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                clientStatusForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                document.querySelector('.date-filter').classList.add('hidden');
-            } else if (formType === "ClientStatus") {
-                qc6Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                headers.clientstatus.forEach(h => h.style.display = "");
-                qc35Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                signedFSForms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                qc7Forms.forEach(function (form) {
-                    form.style.display = "none";
-                });
-                clientStatusForms.forEach(function (form) {
-                    form.style.display = "";
-                });
-                document.querySelector('.date-filter').classList.add('hidden'); // Hide date filter for Client Status
-            }
+            headerClasses.forEach(className => {
+                document.querySelectorAll(`.${className}`).forEach(header => (header.style.display = "none"));
+            });
+
+            // Show the selected form and its headers
+            document.querySelectorAll(`.${formType.toLowerCase()}-form`).forEach(form => (form.style.display = ""));
+            document.querySelectorAll(`.${formType.toLowerCase()}-header`).forEach(header => (header.style.display = ""));
+
+            // Toggle date filter visibility based on form type
+            const showDateFilter = formType === "QC6" || formType === "QC7";
+            document.querySelector(".date-filter").classList.toggle("hidden", !showDateFilter);
         }
+
+
+
+        function hideOtherForms(excludeClasses = []) {
+            const allClasses = ['qc6-form', 'qc7-form', 'qc35-form', 'signedfs-form', 'clientstatus-form', 'quiz-form'];
+            allClasses
+                .filter(cls => !excludeClasses.includes(cls))
+                .forEach(cls => {
+                    document.querySelectorAll(`.${cls}`).forEach(form => form.style.display = "none");
+                });
+        }
+
+
+
 
         function parseDate(dateStr) {
             if (!dateStr) return null;
@@ -423,6 +400,14 @@
         }
 
         function filterByDate() {
+
+            // Show a confirmation prompt before filtering
+            var userConfirmed = confirm("Filters by Prepared By Date");
+
+            if (!userConfirmed) {
+                return; // Exit if the user cancels the prompt
+            }
+
             var startDate = new Date(document.getElementById("startDate").value);
             var endDate = new Date(document.getElementById("endDate").value);
             var rows = document.querySelectorAll("#reportTable tbody tr");

@@ -5,11 +5,6 @@
     var errors = ViewBag.Errors as IEnumerable<Microsoft.AspNetCore.Mvc.ModelBinding.ModelError>;
 }
 
-<head>
-    <!-- Other head elements -->
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-</head>
 <main id="main" class="main">
 
     <div class="pagetitle">
@@ -76,52 +71,5 @@
 
 </main><!-- End #main -->
 @section Scripts {
-        <!-- Password Toggle Script -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
-        <script>
-
-            document.addEventListener("DOMContentLoaded", function () {
-                var successMessage = '@TempData["SuccessMessage"]';
-                var errorMessage = '@TempData["ErrorMessage"]';
-
-                /*
-                if (successMessage) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: successMessage,
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '@Url.Action("AccountManagement", "Admin")';
-                        }
-                    });
-                }
-
-                if (errorMessage) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: errorMessage,
-                        confirmButtonText: 'OK'
-                    });
-                }
-                */
-            });
-
-            function togglePassword(id) {
-                var field = document.getElementById(id);
-                var icon = field.nextElementSibling.querySelector('i');
-                if (field.type === "password") {
-                    field.type = "text";
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    field.type = "password";
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
-            }
-        </script>
+    <script src="~/js/create-account.js"></script>
 }

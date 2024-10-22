@@ -6,7 +6,7 @@ namespace PKFAuditManagement.ViewModels
 {
     public class ReportsViewModel
     {
-        public string FormType { get; set; } // "QC6" or "QC7"
+        public string FormType { get; set; } 
 
         // QC6 properties from QC6Form
         public int QC6FormID { get; set; }
@@ -112,6 +112,31 @@ namespace PKFAuditManagement.ViewModels
         public string QC7Status { get; set; }
         public string QC35Status { get; set; }
         public string SignedFSStatus { get; set; }
+
+        // Quiz-specific properties
+        public Guid QuizID { get; set; }
+        public string QuizTitle { get; set; }
+        public DateTime QuizStart { get; set; }
+        public DateTime QuizEnd { get; set; }
+
+        // General Performance
+        public int TotalQuestions { get; set; }
+        public int AverageScore { get; set; }
+
+        // Attendance
+        public int TotalParticipants { get; set; }
+        public int AttendanceCount { get; set; }  // Participants who attended
+
+        // Feedback Results
+        public int FeedbackSubmitted { get; set; }  // Number of participants who gave feedback
+
+        // Self-Assessment
+        public int SelfAssessmentDone { get; set; }  // Number of participants who completed self-assessment
+
+        // Status
+        public string QuizStatus { get; set; }
+
+
     }
 
     public class SelectFieldsViewModel
