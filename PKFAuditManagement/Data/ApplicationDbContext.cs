@@ -39,8 +39,10 @@ namespace PKFAuditManagement.Data
         public DbSet<QC35FormTestDescription> QC35FormTestDescriptions { get; set; }
         public DbSet<QC35ChecklistItem> QC35ChecklistItems { get; set; }
 
+        // DbSet for Signed FS 
         public DbSet<SignedFSForm> SignedFSForm { get; set; }
 
+        // DbSet for Quizzes
         public DbSet<Quiz> Quiz { get; set; }
         public DbSet<Questions> Questions { get; set; }
         public DbSet<Option> Option { get; set; }
@@ -48,7 +50,8 @@ namespace PKFAuditManagement.Data
         public DbSet<QuizResponse> QuizResponse { get; set; }
         public DbSet<Attempt> Attempt { get; set; }
 
-
+        // DbSet for Chatbot
+        public DbSet<ChatbotDocument> ChatbotDocuments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
