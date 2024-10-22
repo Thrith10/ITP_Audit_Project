@@ -1,4 +1,6 @@
-﻿<main id="main" class="main">
+﻿@model List<ChatbotDocument> 
+
+<main id="main" class="main">
 
     <div class="pagetitle">
         <h1>Manage Chatbot</h1>
@@ -7,7 +9,6 @@
     <section class="section">
         <div class="row">
             <div class="col-lg-12">
-
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
@@ -18,53 +19,51 @@
                         <p>The chatbot is designed to read information from your uploaded auditing documents. This page allows administrators to upload and remove from its existing knowledge base.</p>
 
                         <!-- Document Table -->
-                        <table class="table table-striped table-bordered">
+                        <table class="table doc-table mb-3">
                             <thead>
                                 <tr>
                                     <th>Document Name</th>
-                                    <th>Document Type</th>
-                                    <th>Size</th>
                                     <th>Date Added</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="document-table-body">
-                                <!-- Placeholder for dynamically added rows -->
-                                <tr>
-                                    <td>Sample Document 1.pdf</td>
-                                    <td>PDF</td>
-                                    <td>1.2 MB</td>
-                                    <td>2024-10-01</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-secondary preview-doc">Preview</button>
-                                        <button class="btn btn-sm btn-warning edit-doc">Edit</button>
-                                        <button class="btn btn-sm btn-danger remove-doc">Remove</button>
-                                    </td>
-                                </tr>
+                                @foreach (var document in Model)
+                                {
+                                    <tr>
+                                        <td>@document.Name</td>
+                                        <td>@document.DateAdded.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary preview-doc" onclick="previewDocument('@document.FilePath')">Preview</button>
+                                            <button class="btn btn-sm btn-danger remove-doc" onclick="removeDocument('@document.Id')">Remove</button>
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
-        
+                        <hr />
                         <!-- Add New Document Section -->
-                        <div class="mt-5">
-                            <h4>Add a New Document</h4>
-                            <form id="document-upload-form" class="form-inline">
+                        <div class="mt-3">
+                            <h5 class="card-title">Add a New Document</h5>
+                            <form id="document-upload-form" class="form-inline" enctype="multipart/form-data">
                                 <div class="row g-3 align-items-center">
-                                    <div class="col-auto">
-                                        <input type="file" id="new-document" class="form-control" accept=".pdf,.doc,.docx" />
+                                    <div class="col-md-4">
+                                        <label for="new-document" class="form-label">Upload Document</label>
+                                        <input type="file" id="new-document" class="form-control" accept=".pdf" required />
                                     </div>
-                                    <div class="col-auto">
-                                        <input type="text" id="document-name" class="form-control" placeholder="Enter document name (optional)" />
+                                    <div class="col-md-4">
+                                        <label for="document-name" class="form-label">Document Name</label>
+                                        <input type="text" id="document-name" class="form-control" placeholder="Enter document name" required />
                                     </div>
-                                    <div class="col-auto">
-                                        <select id="document-type" class="form-select">
+                                    <div class="col-md-4">
+                                        <label for="document-type" class="form-label">Document Type</label>
+                                        <select id="document-type" class="form-select" disabled>
                                             <option value="PDF">PDF</option>
-                                            <option value="Word">Word</option>
-                                            <option value="Text">Text</option>
                                         </select>
                                     </div>
-                                    <div class="col-auto">
-                                        <button type="button" class="btn btn-success" id="add-document-btn">Add Document</button>
-                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-primary" id="add-document-btn">Add Document</button>
                                 </div>
                             </form>
                         </div>
@@ -73,43 +72,15 @@
             </div>
         </div>
     </section>
+    <!-- Spinner HTML -->
+    <div id="loading-spinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 </main><!-- End #main -->
+
 @section Scripts {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <script>
-        document.getElementById('add-document-btn').addEventListener('click', function () {
-            var formData = new FormData();
-            var fileInput = document.getElementById('new-document');
-            var documentName = document.getElementById('document-name').value;
-
-            // Ensure a file is selected
-            if (!fileInput.files.length) {
-                alert("Please select a document to upload.");
-                return;
-            }
-
-            // Add the file and document name to the FormData
-            formData.append('file', fileInput.files[0]);
-            formData.append('documentName', documentName);
-
-            // AJAX request to upload the file
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/Chatbot/Upload', true);
-
-            // Define the callback when the upload is complete
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    alert('Document uploaded successfully');
-                    // Optionally, refresh the document list or update the UI
-                    location.reload();
-                } else {
-                    alert('Failed to upload document: ' + xhr.responseText);
-                }
-            };
-
-            // Send the form data via the request
-            xhr.send(formData);
-        });
-    </script>
-
+    <script src="~/js/chatbot-management.js"></script>
 }
