@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\js\excel-quiz-creation.js" />
-    <Content Remove="wwwroot\js\qc35-form-management-admin.js" />
+    <Content Remove="wwwroot\js\qc35-form-approval-management-admin.js" />
     <Content Remove="wwwroot\js\qc6-form-management-admin.js" />
     <Content Remove="wwwroot\js\qc7-form-edit.js" />
   </ItemGroup>
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\js\excel-quiz-creation.js" />
-    <None Include="wwwroot\js\qc35-form-management-admin.js" />
+    <None Include="wwwroot\js\qc35-form-approval-management-admin.js" />
     <None Include="wwwroot\js\qc6-form-management-admin.js" />
     <None Include="wwwroot\js\qc7-form-edit.js" />
   </ItemGroup>

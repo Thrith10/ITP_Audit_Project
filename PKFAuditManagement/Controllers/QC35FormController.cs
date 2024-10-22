@@ -301,6 +301,18 @@ namespace PKFAuditManagement.Controllers
                                              .OrderBy(name => name) // Order client names from A to Z
                                              .ToListAsync(); // Fetch the ordered list of unique client names
 
+            // Avoid duplicates in the checklist items based on the description
+            var checklistItems = qc35Form.ChecklistItems
+                .GroupBy(ci => ci.Description) // Group by description to eliminate duplicates
+                .Select(g => g.First()) // Select only the first occurrence of each unique description
+                .Select(ci => new QC35ChecklistItemViewModel
+                {
+                    QC35ChecklistItemID = ci.QC35ChecklistItemID,
+                    Description = ci.Description,
+                    Response = ci.Response
+                })
+                .ToList();
+
             var viewModel = new QC35FormViewModel
             {
                 QC35FormID = qc35Form.QC35FormID,
@@ -313,12 +325,16 @@ namespace PKFAuditManagement.Controllers
                 Status = qc35Form.Status,
                 ImageFileName = qc35Form.ImageFileName,
                 AdminEmails = combinedEmails,
+                ChecklistItems = checklistItems
+                /*
                 ChecklistItems = qc35Form.ChecklistItems.Select(ci => new QC35ChecklistItemViewModel
                 {
                     QC35ChecklistItemID = ci.QC35ChecklistItemID,
                     Description = ci.Description,
                     Response = ci.Response
                 }).ToList()
+                */
+
             };
 
             ViewBag.Roles = roles;
@@ -356,6 +372,18 @@ namespace PKFAuditManagement.Controllers
                                              .OrderBy(name => name) // Order client names from A to Z
                                              .ToListAsync(); // Fetch the ordered list of unique client names
 
+            // Avoid duplicates in the checklist items based on the description
+            var checklistItems = qc35Form.ChecklistItems
+                .GroupBy(ci => ci.Description) // Group by description to eliminate duplicates
+                .Select(g => g.First()) // Select only the first occurrence of each unique description
+                .Select(ci => new QC35ChecklistItemViewModel
+                {
+                    QC35ChecklistItemID = ci.QC35ChecklistItemID,
+                    Description = ci.Description,
+                    Response = ci.Response
+                })
+                .ToList();
+
             var viewModel = new QC35FormViewModel
             {
                 QC35FormID = qc35Form.QC35FormID,
@@ -368,12 +396,7 @@ namespace PKFAuditManagement.Controllers
                 Status = qc35Form.Status,
                 ImageFileName = qc35Form.ImageFileName,
                 AdminEmails = combinedEmails,
-                ChecklistItems = qc35Form.ChecklistItems.Select(ci => new QC35ChecklistItemViewModel
-                {
-                    QC35ChecklistItemID = ci.QC35ChecklistItemID,
-                    Description = ci.Description,
-                    Response = ci.Response
-                }).ToList()
+                ChecklistItems = checklistItems
             };
 
             ViewBag.Roles = roles;
@@ -474,6 +497,12 @@ namespace PKFAuditManagement.Controllers
                 return View("~/Views/General/QC35/QC35FormCreation.cshtml", viewModel);
             }
 
+            if (viewModel.ManagerName == viewModel.PartnerName)
+            {
+                ViewBag.ErrorMessage = "The Manager and Partner cannot be the same person. Please select different individuals for each role.";
+                return View("~/Views/General/QC35/QC35FormCreation.cshtml", viewModel);
+            }
+
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
@@ -513,7 +542,9 @@ namespace PKFAuditManagement.Controllers
                         PreparedBy = userEmail
                     };
 
+
                     _context.QC35Forms.Add(qc35Form);
+
                     await _context.SaveChangesAsync();
 
                     foreach (var item in viewModel.ChecklistItems)
@@ -596,6 +627,12 @@ namespace PKFAuditManagement.Controllers
                 return View("~/Views/General/QC35/EditQC35Form.cshtml", viewModel);
             }
 
+            if (viewModel.ManagerName == viewModel.PartnerName)
+            {
+                ViewBag.ErrorMessage = "The Manager and Partner cannot be the same person. Please select different individuals for each role.";
+                return View("~/Views/General/QC35/EditQC35Form.cshtml", viewModel);
+            }
+
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
@@ -649,7 +686,7 @@ namespace PKFAuditManagement.Controllers
 
                             if (checklistItem != null)
                             {
-                                checklistItem.Description = item.Description;
+                                //checklistItem.Description = item.Description;
                                 checklistItem.Response = item.Response;
                             }
                             else
@@ -712,7 +749,7 @@ namespace PKFAuditManagement.Controllers
                 {
                     await transaction.RollbackAsync();
                     ViewBag.ErrorMessage = "An error occurred while processing your request. Please try again.";
-                    return View("~/Views/General/QC35/QC35FormCreation.cshtml", viewModel);
+                    return View("~/Views/General/QC35/EditQC35Form.cshtml", viewModel);
                 }
             }
         }
