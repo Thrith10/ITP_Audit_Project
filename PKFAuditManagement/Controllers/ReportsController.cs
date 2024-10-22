@@ -5,6 +5,7 @@ using System.Linq;
 using PKFAuditManagement.Data;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -29,6 +30,12 @@ namespace PKFAuditManagement.Controllers
 
             var qc35Forms = _context.QC35Forms.ToList();
             var signedFSForms = _context.SignedFSForm.ToList();
+
+            // Retrieve Quiz data including participants and responses
+            var quizzes = _context.Quiz
+                .Include(q => q.Participants)
+                .Include(q => q.Questions)
+                .ToList();
 
             // Step 2: Map the data to the ViewModel, linking QC6FormConclusion with QC6Forms based on QC6FormID
             var reportDataQC6 = qc6Forms.Select(qc6Form =>
@@ -165,12 +172,42 @@ namespace PKFAuditManagement.Controllers
                 };
             }).ToList();
 
+            // Map Quiz data to ViewModel
+            var quizReportData = quizzes.Select(quiz => new ReportsViewModel
+            {
+                FormType = "Quiz",
+                QuizID = quiz.QuizID,
+                QuizTitle = quiz.Title,
+                QuizStart = quiz.QuizStart,
+                QuizEnd = quiz.QuizEnd,
+                TotalQuestions = quiz.Questions.Count,
+                TotalParticipants = quiz.Participants.Count,
+                AttendanceCount = quiz.Participants.Count(p => p.ClockedAttendance),
+                FeedbackSubmitted = quiz.Participants.Count(p => p.FeedbackDone),
+                SelfAssessmentDone = quiz.Participants.Count(p => p.OverallCompletion),
+
+                // Fetch responses and perform GroupBy on the client-side to avoid EF Core translation issues
+                AverageScore = (int)Math.Round(
+                    _context.QuizResponse
+                        .Where(r => r.Attempt.QuizID == quiz.QuizID)
+                        .ToList() // Materialize data to perform GroupBy in memory
+                        .GroupBy(r => r.AttemptID)
+                        .Select(g => g.Count())
+                        .DefaultIfEmpty(0)
+                        .Average()),
+
+                QuizStatus = quiz.QuizEnd < DateTime.Now ? "Completed" : "Ongoing"
+            }).ToList();
+
+
+
             // Concatenate all report data
             var reportData = reportDataQC6
                 .Concat(reportDataQC7)
                 .Concat(reportDataQC35)
                 .Concat(reportDataSignedFS)
                 .Concat(clientStatusData)  // Add Client Status data
+                .Concat(quizReportData)  // Add Quiz Report Data
                 .ToList();
 
             // Step 3: Pass the report data to the view
