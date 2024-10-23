@@ -46,7 +46,7 @@
                                         {
                                             <tr>
                                                 <td>
-                                                    <a href="@Url.Action("ViewQC35Form", "QC35Form", new { id = engagement.QC35FormID })" style="color: #007bff; text-decoration: underline;">FileReference</a>
+                                                    <a href="@Url.Action("ViewQC35Form", "QC35Form", new { id = engagement.QC35FormID })" style="color: #007bff; text-decoration: underline;">@engagement.FileReference</a>
                                                 </td>
                                                 <td>@engagement.ClientName</td>
                                                 <td>@engagement.ReportingYearEnd</td>
@@ -76,7 +76,8 @@
                                                         </a>
 
                                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                                            <li><a class="dropdown-item" href="@Url.Action("ViewQC35Form", new { id = engagement.QC35FormID })">Edit</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("ViewQC35Form", new { id = engagement.QC35FormID })">View</a></li>
+                                                            <li><a class="dropdown-item" href="@Url.Action("EditQC35Form", new { id = engagement.QC35FormID })">Edit</a></li>
                                                             <li><a class="dropdown-item" href="#" onclick="confirmDelete('@Url.Action("DeleteQC35Form", new { id = engagement.QC35FormID })')">Delete</a></li>
                                                         </ul>
 

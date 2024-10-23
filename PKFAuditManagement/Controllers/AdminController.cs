@@ -111,8 +111,16 @@ namespace PKFAuditManagement.Controllers
 
                         // Send email with the default password
                         await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been created",
-                            $"Your account has been created. Your temporary password is {defaultPassword}. " +
-                            $"Please change your password after logging in for the first time.");
+                            $"<p>Dear {viewModel.FullName},</p>" +
+                            $"<p>Your account has been successfully created.</p>" +
+                            $"<p>Your temporary password is: <strong>{defaultPassword}</strong></p>" +
+                            $"<p>Please change your password after logging in for the first time for security purposes.</p>" +
+                            $"<p>If you need any assistance, feel free to contact our support team.</p>" +
+                            $"<p>Thank you!</p>" +
+                            $"<p>Best regards,<br/>" +
+                            $"PKF Team</p>"
+                        );
+
 
                         await transaction.CommitAsync();
                         TempData["SuccessMessage"] = "Account created successfully!";
@@ -147,10 +155,20 @@ namespace PKFAuditManagement.Controllers
             }
 
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
-                return Json(new { success = false, message = "User not found." });
+                return NotFound("User not found.");
             }
+
+            var viewModel = new UserViewModel
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() // Assuming single role
+            };
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
@@ -164,6 +182,17 @@ namespace PKFAuditManagement.Controllers
 
                     if (result.Succeeded)
                     {
+                        await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been activated",
+                            $"<p>Dear {viewModel.FullName},</p>" +
+                            $"<p>We are pleased to inform you that your account has been successfully activated.</p>" +
+                            $"<p>You may now log in and start using the system.</p>" +
+                            $"<p>If you have any questions or need further assistance, feel free to contact our support team.</p>" +
+                            $"<p>Thank you!</p>" +
+                            $"<p>Best regards,<br/>" +
+                            $"PKF Team</p>"
+                        );
+
+
                         await transaction.CommitAsync();
                         return Json(new { success = true, message = "User suspended successfully!" });
                     }
@@ -192,10 +221,20 @@ namespace PKFAuditManagement.Controllers
             }
 
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
-                return Json(new { success = false, message = "User not found." });
+                return NotFound("User not found.");
             }
+
+            var viewModel = new UserViewModel
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() // Assuming single role
+            };
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
@@ -209,6 +248,19 @@ namespace PKFAuditManagement.Controllers
 
                     if (result.Succeeded)
                     {
+
+                        // Send email for activation
+                        await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been activated",
+                            $"<p>Dear {viewModel.FullName},</p>" +
+                            $"<p>We are pleased to inform you that your account has been successfully activated.</p>" +
+                            $"<p>You may now log in and start using the system.</p>" +
+                            $"<p>If you have any questions or need further assistance, feel free to contact our support team.</p>" +
+                            $"<p>Thank you!</p>" +
+                            $"<p>Best regards,<br/>" +
+                            $"PKF Team</p>"
+                        );
+
+
                         await transaction.CommitAsync();
                         return Json(new { success = true, message = "User activated successfully!" });
                     }
