@@ -820,7 +820,24 @@ namespace PKFAuditManagement.Controllers
                 InputStream = file.OpenReadStream()
             };
             request.Metadata.Add("Content-Type", file.ContentType);
+
+            try
+            {
             await s3client.PutObjectAsync(request);
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                // Handle S3-specific exceptions
+                Console.WriteLine($"S3 error: {s3Ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Handle general exceptions
+                Console.WriteLine($"General error: {ex.Message}");
+                throw;
+            }
+
             //return Ok($"File {prefix}/{file.FileName} uploaded to S3 successfully!");
             return fileName;
         }

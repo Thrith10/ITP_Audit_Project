@@ -61,10 +61,7 @@ namespace PKFAuditManagement.Controllers
                 signedFS = _context.SignedFSForm.Where(e => e.UserEmail.Equals(userEmail)).ToList();
             }
 
-            // Retrieve signed FS data from database
-            var signedFSForms = _context.SignedFSForm.ToList();
-
-            return View("~/Views/General/SignedFS/SignedFSFormManagement.cshtml", signedFSForms);
+            return View("~/Views/General/SignedFS/SignedFSFormManagement.cshtml", signedFS);
         }
 
         [HttpGet]
