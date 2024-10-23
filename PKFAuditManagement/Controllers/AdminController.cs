@@ -182,15 +182,15 @@ namespace PKFAuditManagement.Controllers
 
                     if (result.Succeeded)
                     {
-                        await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been activated",
+                        await _emailSender.SendEmailAsync(viewModel.Email, "Your account has been deactivated",
                             $"<p>Dear {viewModel.FullName},</p>" +
-                            $"<p>We are pleased to inform you that your account has been successfully activated.</p>" +
-                            $"<p>You may now log in and start using the system.</p>" +
-                            $"<p>If you have any questions or need further assistance, feel free to contact our support team.</p>" +
-                            $"<p>Thank you!</p>" +
+                            $"<p>We regret to inform you that your account has been deactivated.</p>" +
+                            $"<p>If you believe this is a mistake or if you have any questions, please contact our support team for further assistance.</p>" +
+                            $"<p>Thank you for your understanding.</p>" +
                             $"<p>Best regards,<br/>" +
                             $"PKF Team</p>"
                         );
+
 
 
                         await transaction.CommitAsync();
