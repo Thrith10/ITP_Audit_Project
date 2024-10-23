@@ -191,8 +191,6 @@ namespace PKFAuditManagement.Controllers
                             $"PKF Team</p>"
                         );
 
-
-
                         await transaction.CommitAsync();
                         return Json(new { success = true, message = "User suspended successfully!" });
                     }

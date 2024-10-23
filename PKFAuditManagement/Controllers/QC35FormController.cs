@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -134,12 +135,26 @@ namespace PKFAuditManagement.Controllers
                 _context.SaveChanges();
 
                 // Send email to creator to notify on approval
-                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Creation",
-                    $"Your new QC35 Form has been approved by: {engagement.FirstApprover}. The QC35 Form is awaiting the second approval.");
+                // Send email to creator to notify on approval
+                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Approval Notification",
+                    $"<p>Dear {engagement.PreparedBy},</p>" +
+                    $"<p>Your new QC35 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{engagement.FirstApprover}</strong>.</p>" +
+                    $"<p>The QC35 Form is now awaiting the second approval.</p>" +
+                    $"<p>If you need further information, please log in to the Audit Management System.</p>" +
+                    $"<p>Thank you!</p>" +
+                    $"<p>Best regards,<br/>" +
+                    $"PKF Team</p>"
+                );
 
                 // Send email to 2nd approver on action to take
-                await _emailSender.SendEmailAsync(engagement.SecondApprover, "QC35 Form Creation",
-                    $"A new QC35 Form {engagement.FileReference} has been approved by: {engagement.FirstApprover} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
+                await _emailSender.SendEmailAsync(engagement.SecondApprover, "QC35 Form Action Required",
+                    $"<p>Dear {engagement.SecondApprover},</p>" +
+                    $"<p>A new QC35 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{engagement.FirstApprover}</strong>.</p>" +
+                    $"<p>You have been designated as the second approver. Please log in to the System to approve or reject the QC35 Form.</p>" +
+                    $"<p>Thank you for your attention!</p>" +
+                    $"<p>Best regards,<br/>" +
+                    $"PKF Team</p>"
+                );
 
                 return Ok(new { success = true, message = "The QC35 Form has been approved." });
 
@@ -161,8 +176,14 @@ namespace PKFAuditManagement.Controllers
                 _context.SaveChanges();
 
                 // Send email to creator to notify on creation
-                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Creation",
-                    $"Your QC35 Form {engagement.FileReference} has been approved by: {engagement.FirstApprover}. Please login to the Audit Management System to view the QC35 Form.");
+                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Creation Notification",
+                    $"<p>Dear {engagement.PreparedBy},</p>" +
+                    $"<p>Your QC35 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{engagement.FirstApprover}</strong> & <strong>{engagement.SecondApprover}</strong>.</p>" +
+                    $"<p>Please log in to the Audit Management System to view the QC35 Form.</p>" +
+                    $"<p>Thank you for your attention!</p>" +
+                    $"<p>Best regards,<br/>" +
+                    $"PKF Team</p>"
+                );
 
                 // List of approvers
                 var recipients = new List<string>
@@ -171,13 +192,19 @@ namespace PKFAuditManagement.Controllers
                         engagement.SecondApprover
                         };
 
-                // Subject and body of the email
-                var subject = "QC35 Form Update";
-                var body = $"The QC35 Form {engagement.FileReference} has been successfully approved and is currently active.";
-
                 // Send the email to all approvers on the creation of the QC6 form
                 foreach (var recipient in recipients)
                 {
+                    // Subject and body of the email
+                    var subject = "QC35 Form Update";
+                    var body =
+                        $"<p>Dear {recipient},</p>" +
+                        $"<p>The QC35 Form <strong>{engagement.FileReference}</strong> has been successfully approved and is currently active.</p>" +
+                        $"<p>If you need further information, please log in to the Audit Management System.</p>" +
+                        $"<p>Thank you for your attention!</p>" +
+                        $"<p>Best regards,<br/>" +
+                        $"PKF Team</p>";
+
                     await _emailSender.SendEmailAsync(recipient, subject, body);
                 }
 
@@ -232,8 +259,15 @@ namespace PKFAuditManagement.Controllers
                     _context.SaveChanges();
 
                     // Send email to creator to notify about the rejection
-                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejected",
-                        $"Your QC35 Form has been rejected by: {engagement.FirstApprover}. Please make the necessary amendments and resubmit the form.");
+                    await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejection Notification",
+                        $"<p>Dear {engagement.PreparedBy},</p>" +
+                        $"<p>Your QC35 Form has been rejected by: <strong>{engagement.FirstApprover}</strong>.</p>" +
+                        $"<p>Please make the necessary amendments and resubmit the form.</p>" +
+                        $"<p>If you need further clarification, feel free to contact our support team.</p>" +
+                        $"<p>Thank you for your attention!</p>" +
+                        $"<p>Best regards,<br/>" +
+                        $"PKF Team</p>"
+                    );
 
                     return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
                 }
@@ -258,8 +292,15 @@ namespace PKFAuditManagement.Controllers
                         _context.SaveChanges();
 
                         // Send email to creator to notify about the rejection
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejected",
-                            $"Your QC35 Form has been rejected by: {engagement.SecondApprover}. Please make the necessary amendments and resubmit the form.");
+                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Rejection Notification",
+                            $"<p>Dear {engagement.PreparedBy},</p>" +
+                            $"<p>Your QC35 Form has been rejected by: <strong>{engagement.SecondApprover}</strong>.</p>" +
+                            $"<p>Please make the necessary amendments and resubmit the form.</p>" +
+                            $"<p>If you need further clarification, feel free to contact our support team.</p>" +
+                            $"<p>Thank you for your attention!</p>" +
+                            $"<p>Best regards,<br/>" +
+                            $"PKF Team</p>"
+                        );
 
                         return RedirectToAction("QC35FormApprovalManagement", "QC35Form");
                     }
@@ -568,11 +609,25 @@ namespace PKFAuditManagement.Controllers
                     
                     await transaction.CommitAsync();
 
-                    await _emailSender.SendEmailAsync(viewModel.ManagerName, "QC35 Form Creation",
-                    $"A new QC35 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
+                    // Send email to manager (first approver)
+                    await _emailSender.SendEmailAsync(viewModel.ManagerName, "QC35 Form Approval Required",
+                        $"<p>Dear {viewModel.ManagerName},</p>" +
+                        $"<p>A new QC35 Form has been created with File Reference: <strong>{fileReference}</strong>.</p>" +
+                        $"<p>You have been designated as the first approver. Please log in to the Audit Management System to approve or reject the QC35 Form.</p>" +
+                        $"<p>Thank you for your attention!</p>" +
+                        $"<p>Best regards,<br/>" +
+                        $"PKF Team</p>"
+                    );
 
-                    await _emailSender.SendEmailAsync(viewModel.PartnerName, "QC35 Form Creation",
-                    $"A new QC35 Form has been created with File Reference: {fileReference} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC35 Form.");
+                    // Send email to partner (second approver)
+                    await _emailSender.SendEmailAsync(viewModel.PartnerName, "QC35 Form Approval Required",
+                        $"<p>Dear {viewModel.PartnerName},</p>" +
+                        $"<p>A new QC35 Form has been created with File Reference: <strong>{fileReference}</strong>.</p>" +
+                        $"<p>You have been designated as the second approver. Please log in to the Audit Management System to approve or reject the QC35 Form.</p>" +
+                        $"<p>Thank you for your attention!</p>" +
+                        $"<p>Best regards,<br/>" +
+                        $"PKF Team</p>"
+                    );
 
                     if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                     {
@@ -723,14 +778,28 @@ namespace PKFAuditManagement.Controllers
                     {
                         if(qc35Form.PartnerName != oldPartnerName)
                         {
-                            await _emailSender.SendEmailAsync(qc35Form.PartnerName, "QC35 Form Update",
-                            $"The QC35 Form with File Reference: {qc35Form.FileReference} has been updated and you've been designated as the first approver. Please review the changes.");
+                            // Send email to partner (first approver) about form update
+                            await _emailSender.SendEmailAsync(qc35Form.PartnerName, "QC35 Form Update Notification",
+                                $"<p>Dear {qc35Form.PartnerName},</p>" +
+                                $"<p>The QC35 Form with File Reference: <strong>{qc35Form.FileReference}</strong> has been updated, and you have been designated as the first approver.</p>" +
+                                $"<p>Please review the changes and log in to the Audit Management System to take the necessary action.</p>" +
+                                $"<p>Thank you for your attention!</p>" +
+                                $"<p>Best regards,<br/>" +
+                                $"PKF Team</p>"
+                            );
                         }
 
                         if (qc35Form.ManagerName != oldManagerName)
                         {
-                            await _emailSender.SendEmailAsync(qc35Form.ManagerName, "QC35 Form Update",
-                            $"The QC35 Form with File Reference: {qc35Form.FileReference} has been updated and you've been designated as the second approver. Please review the changes.");
+                            // Send email to manager (second approver) about form update
+                            await _emailSender.SendEmailAsync(qc35Form.ManagerName, "QC35 Form Update Notification",
+                                $"<p>Dear {qc35Form.ManagerName},</p>" +
+                                $"<p>The QC35 Form with File Reference: <strong>{qc35Form.FileReference}</strong> has been updated, and you have been designated as the second approver.</p>" +
+                                $"<p>Please review the changes and log in to the Audit Management System to take the necessary action.</p>" +
+                                $"<p>Thank you for your attention!</p>" +
+                                $"<p>Best regards,<br/>" +
+                                $"PKF Team</p>"
+                            );
                         }
                     }
 
