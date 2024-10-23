@@ -26,7 +26,7 @@ function confirmSuspendUser() {
     if (!selectedUserId) return;
 
     $.ajax({
-        url: '@Url.Action("SuspendUser", "Admin")',
+        url: '/Admin/SuspendUser',
         type: 'POST',
         data: {
             userId: selectedUserId,
@@ -82,7 +82,7 @@ function showActivateModal(userId) {
 
 function activateUser(userId) {
     $.ajax({
-        url: '@Url.Action("ActivateUser", "Admin")',
+        url: '/Admin/ActivateUser/',
         type: 'POST',
         data: {
             userId: userId,
