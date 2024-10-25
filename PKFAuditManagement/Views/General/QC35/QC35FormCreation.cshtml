@@ -160,10 +160,13 @@
                                     </div>
                                 </div>
 
+                                <!-- Include the spinner partial -->
+                                @await Html.PartialAsync("_LoadingPartial")
+
                                 <div class="text-center">
                                     <button id="cancel-upload" type="button" class="btn btn-danger mt-3" style="display: none;">Cancel Upload</button>
                                     <button id="crop-image-button" type="button" class="btn btn-success mt-3" style="display:none;">Crop Image</button>
-                                    <button type="submit" class="mt-3 end-0 btn btn-primary">Submit QC35 Form</button>
+                                    <button type="submit" class="mt-3 end-0 btn btn-primary" onclick="displayBusyIndicator()">Submit QC35 Form</button>
                                 </div>
 
                                 <canvas id="canvas" style="display:none;"></canvas>
@@ -218,6 +221,12 @@
 
 @section Scripts {
     <script src="~/js/qc35-form-creation.js"></script>
+
+    <script>
+        function displayBusyIndicator() {
+            document.getElementById("loading").style.display = "block";
+        }
+    </script>
 }
 
 

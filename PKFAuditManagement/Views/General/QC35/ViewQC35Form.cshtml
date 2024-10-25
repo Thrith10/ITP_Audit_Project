@@ -164,6 +164,9 @@
                                     </div>
                                 }
 
+                                <!-- Include the spinner partial -->
+                                @await Html.PartialAsync("_LoadingPartial")
+
                                 <div class="text-center">
                                     @{
                                         var backUrl = (role == "Admin" || role == "Reviewer")

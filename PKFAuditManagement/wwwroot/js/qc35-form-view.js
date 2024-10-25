@@ -1,4 +1,5 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+﻿
+document.addEventListener("DOMContentLoaded", function () {
     // DOM elements
     const dropArea = document.getElementById("drop-area");
     const inputFile = document.getElementById("input-file");
@@ -107,8 +108,17 @@
     });
 });
 
+function displayBusyIndicator() {
+    console.log("Spinner activated"); // This log should appear when the button is clicked
+    document.getElementById("loading").style.display = "block";
+}
+
 // This function approves the QC35 form selected from the Admin Dashboard QC35 Form Management page
 function approveQC35Form(qc35FormId) {
+    console.log("approveQC35Form function called");  // Add this to see if it's being triggered
+    // Show the loading spinner
+
+
     Swal.fire({
         title: 'Are you sure?',
         text: 'Do you want to approve this QC35 Form?',
@@ -120,6 +130,7 @@ function approveQC35Form(qc35FormId) {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
+            displayBusyIndicator();
             // Send a POST request to the server
             $.ajax({
                 url: '/QC35Form/ApproveQC35Form/' + qc35FormId,
@@ -170,6 +181,7 @@ function rejectQC35Form(qc35FormId) {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
+            displayBusyIndicator();
             // Prompt user for rejection reason
             Swal.fire({
                 title: 'Rejection Reason',
@@ -232,3 +244,4 @@ function rejectQC35Form(qc35FormId) {
         }
     });
 }
+
