@@ -97,30 +97,6 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row mb-3">
-                                        <div class="col-sm-2">
-                                            <strong>Prepared by:<span class="text-danger"> *</span></strong>
-                                        </div>
-                                        <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="PreparedBy" value="@Model.UserEmail" required>
-                                        </div>
-                                        <div class="col">
-                                            <input type="date" class="form-control" asp-for="PreparedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-2">
-                                            <strong>Reviewed by:<span class="text-danger"> *</span></strong>
-                                        </div>
-                                        <div class="col">
-                                            <input type="text" class="form-control" placeholder="Signature" asp-for="ReviewedBy" required>
-                                            <span asp-validation-for="ReviewedBy" class="text-danger"></span>
-                                        </div>
-                                        <div class="col">
-                                            <input type="date" class="form-control" asp-for="ReviewedByDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
-                                            <span asp-validation-for="ReviewedByDate" class="text-danger"></span>
-                                        </div>
-                                    </div>
                                     <br>
                                     <hr class="my-4">
                                     <div class="row mb-3">
