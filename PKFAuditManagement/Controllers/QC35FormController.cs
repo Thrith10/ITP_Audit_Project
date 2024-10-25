@@ -129,7 +129,7 @@ namespace PKFAuditManagement.Controllers
             }
             var currentUserEmail = user?.Email;
 
-            if(currentUserEmail == engagement.FirstApprover)
+            if(currentUserEmail == engagement.FirstApprover && engagement.IsFirstApproved == false)
             {
                 engagement.IsFirstApproved = true;
                 engagement.Status = "Pending 2nd Approval";
