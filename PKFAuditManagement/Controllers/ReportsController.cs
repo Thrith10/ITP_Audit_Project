@@ -122,6 +122,7 @@ namespace PKFAuditManagement.Controllers
             {
                 FormType = "QC35",
                 QC35FormID = form.QC35FormID,
+                FileReference = form.FileReference,
                 CreatedBy = form.CreatedBy,
                 ClientName = form.ClientName,
                 ReportingYearEnd = form.ReportingYearEnd,
