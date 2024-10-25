@@ -137,7 +137,6 @@ namespace PKFAuditManagement.Controllers
                 _context.SaveChanges();
 
                 // Send email to creator to notify on approval
-                // Send email to creator to notify on approval
                 await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Approval Notification",
                     $"<p>Dear {engagement.PreparedBy},</p>" +
                     $"<p>Your new QC35 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{engagement.FirstApprover}</strong>.</p>" +
@@ -163,45 +162,36 @@ namespace PKFAuditManagement.Controllers
             }else if (currentUserEmail == engagement.SecondApprover)
             {
                 
-                if(engagement.IsFirstApproved == false)
+                if (engagement.IsFirstApproved == false)
                 {
                     return Forbid();
                 }
                 
                 engagement.IsSecondApproved = true;
 
-                if(engagement.IsFirstApproved == true && engagement.IsSecondApproved == true)
+                if (engagement.IsFirstApproved == true && engagement.IsSecondApproved == true)
                 {
                     engagement.Status = "Approved";
                 }
 
                 _context.SaveChanges();
 
-                // Send email to creator to notify on creation
-                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Creation Notification",
-                    $"<p>Dear {engagement.PreparedBy},</p>" +
-                    $"<p>Your QC35 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{engagement.FirstApprover}</strong> & <strong>{engagement.SecondApprover}</strong>.</p>" +
-                    $"<p>Please log in to the Audit Management System to view the QC35 Form.</p>" +
-                    $"<p>Thank you for your attention!</p>" +
-                    $"<p>Best regards,<br/>" +
-                    $"PKF Team</p>"
-                );
-
                 // List of approvers
                 var recipients = new List<string>
-                        {
-                        engagement.FirstApprover,
-                        engagement.SecondApprover
-                        };
+                {
+                    engagement.PreparedBy,
+                    engagement.FirstApprover,
+                    engagement.SecondApprover
+                };
 
                 // Send the email to all approvers on the creation of the QC6 form
                 foreach (var recipient in recipients)
                 {
                     // Subject and body of the email
-                    var subject = "QC35 Form Update";
+                    var subject = "QC35 Form Approval";
                     var body =
                         $"<p>Dear {recipient},</p>" +
-                        $"<p>The QC35 Form <strong>{engagement.FileReference}</strong> has been successfully approved and is currently active.</p>" +
+                        $"<p>The QC35 Form <strong>{engagement.FileReference}</strong> has been successfully approved by the second approver: <strong>{engagement.SecondApprover}</strong>, and is currently active.</p>" +
                         $"<p>If you need further information, please log in to the Audit Management System.</p>" +
                         $"<p>Thank you for your attention!</p>" +
                         $"<p>Best regards,<br/>" +
@@ -623,16 +613,6 @@ namespace PKFAuditManagement.Controllers
                         $"PKF Team</p>"
                     );
 
-                    // Send email to partner (second approver)
-                    await _emailSender.SendEmailAsync(viewModel.PartnerName, "QC35 Form Approval Required",
-                        $"<p>Dear {viewModel.PartnerName},</p>" +
-                        $"<p>A new QC35 Form has been created with File Reference: <strong>{fileReference}</strong>.</p>" +
-                        $"<p>You have been designated as the second approver. Please log in to the Audit Management System to approve or reject the QC35 Form.</p>" +
-                        $"<p>Thank you for your attention!</p>" +
-                        $"<p>Best regards,<br/>" +
-                        $"PKF Team</p>"
-                    );
-
                     if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                     {
                         // Redirect to admin-specific page
@@ -745,7 +725,6 @@ namespace PKFAuditManagement.Controllers
 
                             if (checklistItem != null)
                             {
-                                //checklistItem.Description = item.Description;
                                 checklistItem.Response = item.Response;
                             }
                             else

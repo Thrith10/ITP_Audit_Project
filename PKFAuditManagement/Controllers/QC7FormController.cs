@@ -219,10 +219,6 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PeriodEnded = qc7formData.PeriodEnded;
                 viewModel.EngagementType = qc7formData.EngagementType;
                 viewModel.Industry = qc7formData.Industry;
-                viewModel.PreparedBy = qc7formData.PreparedBy;
-                viewModel.PreparedByDate = qc7formData.PreparedByDate;
-                viewModel.ReviewedBy = qc7formData.ReviewedBy;
-                viewModel.ReviewedByDate = qc7formData.ReviewedByDate;
                 viewModel.PriorYearFee = qc7formData.PriorYearFee;
                 viewModel.TimeCosts = qc7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
@@ -398,10 +394,6 @@ namespace PKFAuditManagement.Controllers
                 qc7form.PeriodEnded = viewModel.PeriodEnded.Value;
                 qc7form.EngagementType = viewModel.EngagementType;
                 qc7form.Industry = viewModel.Industry;
-                qc7form.PreparedBy = viewModel.PreparedBy;
-                qc7form.PreparedByDate = viewModel.PreparedByDate;
-                qc7form.ReviewedBy = viewModel.ReviewedBy;
-                qc7form.ReviewedByDate = viewModel.ReviewedByDate;
                 qc7form.PriorYearFee = viewModel.PriorYearFee.Value;
                 qc7form.TimeCosts = viewModel.TimeCosts.Value;
                 qc7form.PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value;
@@ -1066,10 +1058,6 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PublicInterestEntityType = qc7formData.PublicInterestEntityType;
                 viewModel.SubForm1NotApplicable = qc7formData.IsSubForm2NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
                 viewModel.SubForm2NotApplicable = qc7formData.IsSubForm3NotApplicable; // ViewModel SubForm index starts from 0, while database stored as 1, 2 and 3
-                viewModel.PreparedBy = qc7formData.PreparedBy;
-                viewModel.PreparedByDate = qc7formData.PreparedByDate;
-                viewModel.ReviewedBy = qc7formData.ReviewedBy;
-                viewModel.ReviewedByDate = qc7formData.ReviewedByDate;
 
                 // Append ConclusionData for QC7FormConclusion
                 viewModel.AnyRiskAssociated = conclusionData.AnyRiskAssociated;
@@ -1206,10 +1194,6 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PeriodEnded = QC7formData.PeriodEnded;
                 viewModel.EngagementType = QC7formData.EngagementType;
                 viewModel.Industry = QC7formData.Industry;
-                viewModel.PreparedBy = QC7formData.PreparedBy;
-                viewModel.PreparedByDate = QC7formData.PreparedByDate;
-                viewModel.ReviewedBy = QC7formData.ReviewedBy;
-                viewModel.ReviewedByDate = QC7formData.ReviewedByDate;
                 viewModel.PriorYearFee = QC7formData.PriorYearFee;
                 viewModel.TimeCosts = QC7formData.TimeCosts;
                 viewModel.PriorYearRecoveryRate = QC7formData.PriorYearRecoveryRate;
@@ -1428,10 +1412,6 @@ namespace PKFAuditManagement.Controllers
                     PeriodEnded = viewModel.PeriodEnded.Value,
                     EngagementType = viewModel.EngagementType,
                     Industry = viewModel.Industry,
-                    PreparedBy = viewModel.PreparedBy,
-                    PreparedByDate = viewModel.PreparedByDate,
-                    ReviewedBy = viewModel.ReviewedBy,
-                    ReviewedByDate = viewModel.ReviewedByDate,
                     PriorYearFee = viewModel.PriorYearFee.Value,
                     TimeCosts = viewModel.TimeCosts.Value,
                     PriorYearRecoveryRate = viewModel.PriorYearRecoveryRate.Value,
@@ -1674,11 +1654,18 @@ namespace PKFAuditManagement.Controllers
                     }
                 }
 
-                await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC7 Form Creation",
-                $"A new QC7 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
+				// Send email to creator to notify on creation
+				await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC7 Form Approval Required",
+					$"<p>Dear {viewModel.EPHODApprovedBy},</p>" +
+					$"<p>A new QC7 Form has been created with File Reference: <strong>{fileReference}</strong>.</p>" +
+					$"<p>You have been designated as the first approver. Please log in to the Audit Management System to approve or reject the QC7 Form.</p>" +
+					$"<p>Thank you for your attention!</p>" +
+					$"<p>Best regards,<br/>" +
+					$"PKF Team</p>"
+				);
 
-                // Set the success message for the toast notification
-                TempData["QC7CreateMessage"] = "QC7 Form created successfully.";
+				// Set the success message for the toast notification
+				TempData["QC7CreateMessage"] = "QC7 Form created successfully.";
 
                 if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                 {
@@ -1812,15 +1799,28 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on approval
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
-                            $"Your new QC7 Form has been approved by: {conclusion.EPHODApprovedBy}. The QC7 Form is awaiting the second approval.");
+						// Send email to creator to notify on approval
+						await _emailSender.SendEmailAsync(conclusion.EMPreparedBy, "QC7 Form Approval Notification",
+							$"<p>Dear {conclusion.EMPreparedBy},</p>" +
+							$"<p>Your new QC7 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{conclusion.EPHODApprovedBy}</strong>.</p>" +
+							$"<p>The QC7 Form is now awaiting the second approval.</p>" +
+							$"<p>If you need further information, please log in to the Audit Management System.</p>" +
+							$"<p>Thank you!</p>" +
+							$"<p>Best regards,<br/>" +
+							$"PKF Team</p>"
+						);
 
-                        // Send email to 2nd approver on action to take
-                        await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC7 Form Creation",
-                            $"A new QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC7 Form.");
+						// Send email to 2nd approver on action to take
+						await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC7 Form Action Required",
+							$"<p>Dear {conclusion.MPHODQMPApprovedBy},</p>" +
+							$"<p>A new QC7 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{conclusion.EPHODApprovedBy}</strong>.</p>" +
+							$"<p>You have been designated as the second approver. Please log in to the System to approve or reject the QC7 Form.</p>" +
+							$"<p>Thank you for your attention!</p>" +
+							$"<p>Best regards,<br/>" +
+							$"PKF Team</p>"
+						);
 
-                        return Ok(new { success = true, message = "The QC7 Form has been approved." });
+						return Ok(new { success = true, message = "The QC7 Form has been approved." });
                     }
                 }
                 // If EPHOD approval is already set, check if MPHODQMP approval is not set
@@ -1843,28 +1843,31 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on creation
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
-                            $"Your QC7 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC7 Form.");
+						// List of approvers
+						var recipients = new List<string>
+						{
+							conclusion.EMPreparedBy,
+							conclusion.EPHODApprovedBy,
+							conclusion.MPHODQMPApprovedBy
+						};
 
-                        // List of approvers
-                        var recipients = new List<string>
-                        {
-                        conclusion.EPHODApprovedBy,
-                        conclusion.MPHODQMPApprovedBy
-                        };
+						// Send the email to all approvers on the creation of the QC7 form
+						foreach (var recipient in recipients)
+						{
+							// Subject and body of the email
+							var subject = "QC7 Form Approval";
+							var body =
+								$"<p>Dear {recipient},</p>" +
+								$"<p>The QC7 Form <strong>{engagement.FileReference}</strong> has been successfully approved by the second approver: <strong>{conclusion.MPHODQMPApprovedBy}</strong>, and is currently active.</p>" +
+								$"<p>If you need further information, please log in to the Audit Management System.</p>" +
+								$"<p>Thank you for your attention!</p>" +
+								$"<p>Best regards,<br/>" +
+								$"PKF Team</p>";
 
-                        // Subject and body of the email
-                        var subject = "QC7 Form Update";
-                        var body = $"The QC7 Form {engagement.FileReference} has been successfully approved and is currently active.";
+							await _emailSender.SendEmailAsync(recipient, subject, body);
+						}
 
-                        // Send the email to all approvers on the creation of the QC7 form
-                        foreach (var recipient in recipients)
-                        {
-                            await _emailSender.SendEmailAsync(recipient, subject, body);
-                        }
-
-                        return Ok(new { success = true, message = "The QC7 Form has been approved." });
+						return Ok(new { success = true, message = "The QC7 Form has been approved." });
                     }
                 }
 
@@ -1933,11 +1936,18 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on rejection
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
-                            $"Your new QC7 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+						// Send email to creator to notify about the rejection
+						await _emailSender.SendEmailAsync(conclusion.EMPreparedBy, "QC7 Form Rejection Notification",
+							$"<p>Dear {conclusion.EMPreparedBy},</p>" +
+							$"<p>Your QC7 Form has been rejected by: <strong>{conclusion.EPHODApprovedBy}</strong>.</p>" +
+							$"<p>Please make the necessary amendments and resubmit the form.</p>" +
+							$"<p>If you need further clarification, feel free to contact our support team.</p>" +
+							$"<p>Thank you for your attention!</p>" +
+							$"<p>Best regards,<br/>" +
+							$"PKF Team</p>"
+						);
 
-                        return Ok(new { success = true, message = "The QC7 Form has been rejected." });
+						return Ok(new { success = true, message = "The QC7 Form has been rejected." });
                     }
                 }
                 else if (conclusion.IsSecondApproved == false)
@@ -1959,11 +1969,18 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on rejection
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC7 Form Creation",
-                            $"Your new QC7 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+						// Send email to creator to notify about the rejection
+						await _emailSender.SendEmailAsync(conclusion.EMPreparedBy, "QC7 Form Rejection Notification",
+							$"<p>Dear {conclusion.EMPreparedBy},</p>" +
+							$"<p>Your QC7 Form has been rejected by: <strong>{conclusion.MPHODQMPApprovedBy}</strong>.</p>" +
+							$"<p>Please make the necessary amendments and resubmit the form.</p>" +
+							$"<p>If you need further clarification, feel free to contact our support team.</p>" +
+							$"<p>Thank you for your attention!</p>" +
+							$"<p>Best regards,<br/>" +
+							$"PKF Team</p>"
+						);
 
-                        return Ok(new { success = true, message = "The QC7 Form has been rejected." });
+						return Ok(new { success = true, message = "The QC7 Form has been rejected." });
                     }
                 }
 
