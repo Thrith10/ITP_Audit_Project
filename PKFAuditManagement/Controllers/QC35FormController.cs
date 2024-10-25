@@ -26,22 +26,24 @@ namespace PKFAuditManagement.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<CustomUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IAmazonS3 _s3Client;
         private readonly IConfiguration _configuration;
         private readonly string _bucketName;
+        private readonly string _accessKey;
+        private readonly string _secretKey;
         private readonly Interface.IEmailSender _emailSender;
 
         public QC35FormController(IUserService userService, ApplicationDbContext context, 
             UserManager<CustomUser> userManager, RoleManager<IdentityRole> roleManager, 
-            IConfiguration configuration, IAmazonS3 s3Client, Interface.IEmailSender emailSender)
+            IConfiguration configuration, Interface.IEmailSender emailSender)
         {
             _userService = userService;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
-            _s3Client = s3Client;
             _bucketName = _configuration["AWS_BUCKET_NAME"];
+            _accessKey = _configuration["AWS_ACCESS_KEY"];
+            _secretKey = _configuration["AWS_SECRET_KEY"];
             _emailSender = emailSender;
         }
 
@@ -135,7 +137,6 @@ namespace PKFAuditManagement.Controllers
                 _context.SaveChanges();
 
                 // Send email to creator to notify on approval
-                // Send email to creator to notify on approval
                 await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Approval Notification",
                     $"<p>Dear {engagement.PreparedBy},</p>" +
                     $"<p>Your new QC35 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{engagement.FirstApprover}</strong>.</p>" +
@@ -161,45 +162,36 @@ namespace PKFAuditManagement.Controllers
             }else if (currentUserEmail == engagement.SecondApprover)
             {
                 
-                if(engagement.IsFirstApproved == false)
+                if (engagement.IsFirstApproved == false)
                 {
                     return Forbid();
                 }
                 
                 engagement.IsSecondApproved = true;
 
-                if(engagement.IsFirstApproved == true && engagement.IsSecondApproved == true)
+                if (engagement.IsFirstApproved == true && engagement.IsSecondApproved == true)
                 {
                     engagement.Status = "Approved";
                 }
 
                 _context.SaveChanges();
 
-                // Send email to creator to notify on creation
-                await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC35 Form Creation Notification",
-                    $"<p>Dear {engagement.PreparedBy},</p>" +
-                    $"<p>Your QC35 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{engagement.FirstApprover}</strong> & <strong>{engagement.SecondApprover}</strong>.</p>" +
-                    $"<p>Please log in to the Audit Management System to view the QC35 Form.</p>" +
-                    $"<p>Thank you for your attention!</p>" +
-                    $"<p>Best regards,<br/>" +
-                    $"PKF Team</p>"
-                );
-
                 // List of approvers
                 var recipients = new List<string>
-                        {
-                        engagement.FirstApprover,
-                        engagement.SecondApprover
-                        };
+                {
+                    engagement.PreparedBy,
+                    engagement.FirstApprover,
+                    engagement.SecondApprover
+                };
 
                 // Send the email to all approvers on the creation of the QC6 form
                 foreach (var recipient in recipients)
                 {
                     // Subject and body of the email
-                    var subject = "QC35 Form Update";
+                    var subject = "QC35 Form Approval";
                     var body =
                         $"<p>Dear {recipient},</p>" +
-                        $"<p>The QC35 Form <strong>{engagement.FileReference}</strong> has been successfully approved and is currently active.</p>" +
+                        $"<p>The QC35 Form <strong>{engagement.FileReference}</strong> has been successfully approved by the second approver: <strong>{engagement.SecondApprover}</strong>, and is currently active.</p>" +
                         $"<p>If you need further information, please log in to the Audit Management System.</p>" +
                         $"<p>Thank you for your attention!</p>" +
                         $"<p>Best regards,<br/>" +
@@ -448,6 +440,8 @@ namespace PKFAuditManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> GetImage(string key)
         {
+            var s3Client = new AmazonS3Client(_accessKey, _secretKey, Amazon.RegionEndpoint.APSoutheast1);
+
             try
             {
                 var request = new GetObjectRequest
@@ -456,7 +450,7 @@ namespace PKFAuditManagement.Controllers
                     Key = key
                 };
 
-                using (var response = await _s3Client.GetObjectAsync(request))
+                using (var response = await s3Client.GetObjectAsync(request))
                 using (var responseStream = response.ResponseStream)
                 using (var memoryStream = new MemoryStream())
                 {
@@ -620,16 +614,6 @@ namespace PKFAuditManagement.Controllers
                         $"PKF Team</p>"
                     );
 
-                    // Send email to partner (second approver)
-                    await _emailSender.SendEmailAsync(viewModel.PartnerName, "QC35 Form Approval Required",
-                        $"<p>Dear {viewModel.PartnerName},</p>" +
-                        $"<p>A new QC35 Form has been created with File Reference: <strong>{fileReference}</strong>.</p>" +
-                        $"<p>You have been designated as the second approver. Please log in to the Audit Management System to approve or reject the QC35 Form.</p>" +
-                        $"<p>Thank you for your attention!</p>" +
-                        $"<p>Best regards,<br/>" +
-                        $"PKF Team</p>"
-                    );
-
                     if (roles.Contains("Admin") || roles.Contains("Reviewer"))
                     {
                         // Redirect to admin-specific page
@@ -742,7 +726,6 @@ namespace PKFAuditManagement.Controllers
 
                             if (checklistItem != null)
                             {
-                                //checklistItem.Description = item.Description;
                                 checklistItem.Response = item.Response;
                             }
                             else
@@ -874,9 +857,7 @@ namespace PKFAuditManagement.Controllers
         [HttpPost]
         public async Task<string> UploadFileAsync(IFormFile file, string bucketName, string? prefix)
         {
-            var accesskey = _configuration["AWS_ACCESS_KEY"];
-            var secretkey = _configuration["AWS_SECRET_KEY"];
-            var s3client = new AmazonS3Client(accesskey, secretkey, Amazon.RegionEndpoint.APSoutheast1);
+            var s3Client = new AmazonS3Client(_accessKey, _secretKey, Amazon.RegionEndpoint.APSoutheast1);
 
             // Generate a unique filename using GUID
             var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
@@ -893,7 +874,7 @@ namespace PKFAuditManagement.Controllers
 
             try
             {
-            await s3client.PutObjectAsync(request);
+            await s3Client.PutObjectAsync(request);
             }
             catch (AmazonS3Exception s3Ex)
             {
@@ -914,6 +895,8 @@ namespace PKFAuditManagement.Controllers
 
         private async Task<bool> DeleteFileAsync(string fileName)
         {
+            var s3Client = new AmazonS3Client(_accessKey, _secretKey, Amazon.RegionEndpoint.APSoutheast1);
+
             try
             {
                 var deleteObjectRequest = new DeleteObjectRequest
@@ -922,7 +905,7 @@ namespace PKFAuditManagement.Controllers
                     Key = fileName
                 };
 
-                await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+                await s3Client.DeleteObjectAsync(deleteObjectRequest);
                 return true;
             }
             catch (AmazonS3Exception ex)

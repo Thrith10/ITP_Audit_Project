@@ -139,10 +139,6 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PeriodEnded = qc6formData.PeriodEnded;
                 viewModel.EngagementType = qc6formData.EngagementType;
                 viewModel.Industry = qc6formData.Industry;
-                viewModel.PreparedBy = qc6formData.PreparedBy;
-                viewModel.PreparedByDate = qc6formData.PreparedByDate;
-                viewModel.ReviewedBy = qc6formData.ReviewedBy;
-                viewModel.ReviewedByDate = qc6formData.ReviewedByDate.Value;
                 viewModel.PKFEntityProposingService = qc6formData.PKFEntityProposingService;
                 viewModel.SourceOfReferral = qc6formData.SourceOfReferral;
                 viewModel.NatureOfServiceForEstimateFee = qc6formData.NatureOfServiceForEstimateFee;
@@ -313,10 +309,6 @@ namespace PKFAuditManagement.Controllers
                 qc6form.PeriodEnded = viewModel.PeriodEnded.Value;
                 qc6form.EngagementType = viewModel.EngagementType;
                 qc6form.Industry = viewModel.Industry;
-                qc6form.PreparedBy = viewModel.PreparedBy;
-                qc6form.PreparedByDate = viewModel.PreparedByDate;
-                qc6form.ReviewedBy = viewModel.ReviewedBy;
-                qc6form.ReviewedByDate = viewModel.ReviewedByDate;
                 qc6form.PKFEntityProposingService = viewModel.PKFEntityProposingService;
                 qc6form.SourceOfReferral = viewModel.SourceOfReferral;
                 qc6form.NatureOfServiceForEstimateFee = viewModel.NatureOfServiceForEstimateFee;
@@ -766,7 +758,7 @@ namespace PKFAuditManagement.Controllers
                 // List of recipients
                 var recipients = new List<string>
                     {
-                        viewModel.PreparedBy,
+                        viewModel.UserEmail,
                         viewModel.EPHODApprovedBy,
                         viewModel.MPHODQMPApprovedBy
                     };
@@ -871,10 +863,6 @@ namespace PKFAuditManagement.Controllers
                 viewModel.PeriodEnded = qc6formData.PeriodEnded;
                 viewModel.EngagementType = qc6formData.EngagementType;
                 viewModel.Industry = qc6formData.Industry;
-                viewModel.PreparedBy = qc6formData.PreparedBy;
-                viewModel.PreparedByDate = qc6formData.PreparedByDate;
-                viewModel.ReviewedBy = qc6formData.ReviewedBy;
-                viewModel.ReviewedByDate = qc6formData.ReviewedByDate.Value;
                 viewModel.PKFEntityProposingService = qc6formData.PKFEntityProposingService;
                 viewModel.SourceOfReferral = qc6formData.SourceOfReferral;
                 viewModel.NatureOfServiceForEstimateFee = qc6formData.NatureOfServiceForEstimateFee;
@@ -1137,13 +1125,26 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on approval
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
-                            $"Your new QC6 Form has been approved by: {conclusion.EPHODApprovedBy}. The QC6 Form is awaiting the second approval.");
+						// Send email to creator to notify on approval
+						await _emailSender.SendEmailAsync(conclusion.PreparedBy, "QC6 Form Approval Notification",
+	                        $"<p>Dear {conclusion.PreparedBy},</p>" +
+	                        $"<p>Your new QC6 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{conclusion.EPHODApprovedBy}</strong>.</p>" +
+	                        $"<p>The QC6 Form is now awaiting the second approval.</p>" +
+	                        $"<p>If you need further information, please log in to the Audit Management System.</p>" +
+	                        $"<p>Thank you!</p>" +
+	                        $"<p>Best regards,<br/>" +
+	                        $"PKF Team</p>"
+                        );
 
-                        // Send email to 2nd approver on action to take
-                        await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC6 Form Creation",
-                            $"A new QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy} and you've been designated as the second approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+						// Send email to 2nd approver on action to take
+						await _emailSender.SendEmailAsync(conclusion.MPHODQMPApprovedBy, "QC6 Form Action Required",
+	                        $"<p>Dear {conclusion.MPHODQMPApprovedBy},</p>" +
+	                        $"<p>A new QC6 Form <strong>{engagement.FileReference}</strong> has been approved by: <strong>{conclusion.EPHODApprovedBy}</strong>.</p>" +
+	                        $"<p>You have been designated as the second approver. Please log in to the System to approve or reject the QC6 Form.</p>" +
+	                        $"<p>Thank you for your attention!</p>" +
+	                        $"<p>Best regards,<br/>" +
+	                        $"PKF Team</p>"
+                        );
 
                         return Ok(new { success = true, message = "The QC6 Form has been approved." });
                     }
@@ -1168,26 +1169,29 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on creation
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
-                            $"Your QC6 Form {engagement.FileReference} has been approved by: {conclusion.EPHODApprovedBy}. Please login to the Audit Management System to view the QC6 Form.");
+						// List of approvers
+						var recipients = new List<string>
+				        {
+							conclusion.PreparedBy,
+					        conclusion.EPHODApprovedBy,
+							conclusion.MPHODQMPApprovedBy
+						};
 
-                        // List of approvers
-                        var recipients = new List<string>
-                        {
-                            conclusion.EPHODApprovedBy,
-                            conclusion.MPHODQMPApprovedBy
-                        };
+						// Send the email to all approvers on the creation of the QC6 form
+						foreach (var recipient in recipients)
+						{
+							// Subject and body of the email
+							var subject = "QC6 Form Approval";
+							var body =
+								$"<p>Dear {recipient},</p>" +
+								$"<p>The QC6 Form <strong>{engagement.FileReference}</strong> has been successfully approved by the second approver: <strong>{conclusion.MPHODQMPApprovedBy}</strong>, and is currently active.</p>" +
+								$"<p>If you need further information, please log in to the Audit Management System.</p>" +
+								$"<p>Thank you for your attention!</p>" +
+								$"<p>Best regards,<br/>" +
+								$"PKF Team</p>";
 
-                        // Subject and body of the email
-                        var subject = "QC6 Form Approval";
-                        var body = $"The QC6 Form {engagement.FileReference} has been successfully approved and is currently active.";
-
-                        // Send the email to all approvers on the creation of the QC6 form
-                        foreach (var recipient in recipients)
-                        {
-                            await _emailSender.SendEmailAsync(recipient, subject, body);
-                        }
+							await _emailSender.SendEmailAsync(recipient, subject, body);
+						}
 
                         return Ok(new { success = true, message = "The QC6 Form has been approved." });
                     }
@@ -1258,11 +1262,18 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on rejection
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
-                            $"Your new QC6 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+						// Send email to creator to notify about the rejection
+						await _emailSender.SendEmailAsync(conclusion.PreparedBy, "QC6 Form Rejection Notification",
+							$"<p>Dear {conclusion.PreparedBy},</p>" +
+							$"<p>Your QC6 Form has been rejected by: <strong>{conclusion.EPHODApprovedBy}</strong>.</p>" +
+							$"<p>Please make the necessary amendments and resubmit the form.</p>" +
+							$"<p>If you need further clarification, feel free to contact our support team.</p>" +
+							$"<p>Thank you for your attention!</p>" +
+							$"<p>Best regards,<br/>" +
+							$"PKF Team</p>"
+						);
 
-                        return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+						return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
                     }
                 } else if (conclusion.IsSecondApproved == false)
                 {
@@ -1282,11 +1293,18 @@ namespace PKFAuditManagement.Controllers
 
                         _context.SaveChanges();
 
-                        // Send email to creator to notify on rejection
-                        await _emailSender.SendEmailAsync(engagement.PreparedBy, "QC6 Form Creation",
-                            $"Your new QC6 Form has been rejected by: {conclusion.EPHODApprovedBy}. Please make the necessary amendments and submit the form.");
+						// Send email to creator to notify about the rejection
+						await _emailSender.SendEmailAsync(conclusion.PreparedBy, "QC6 Form Rejection Notification",
+							$"<p>Dear {conclusion.PreparedBy},</p>" +
+							$"<p>Your QC6 Form has been rejected by: <strong>{conclusion.MPHODQMPApprovedBy}</strong>.</p>" +
+							$"<p>Please make the necessary amendments and resubmit the form.</p>" +
+							$"<p>If you need further clarification, feel free to contact our support team.</p>" +
+							$"<p>Thank you for your attention!</p>" +
+							$"<p>Best regards,<br/>" +
+							$"PKF Team</p>"
+						);
 
-                        return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
+						return RedirectToAction("QC6FormApprovalManagement", "QC6Form");
                     }
                 }
 
@@ -1370,10 +1388,6 @@ namespace PKFAuditManagement.Controllers
                     PeriodEnded = viewModel.PeriodEnded.Value,
                     EngagementType = viewModel.EngagementType,
                     Industry = viewModel.Industry,
-                    PreparedBy = viewModel.PreparedBy,
-                    PreparedByDate = viewModel.PreparedByDate,
-                    ReviewedBy = viewModel.ReviewedBy,
-                    ReviewedByDate = viewModel.ReviewedByDate,
                     Status = "Pending",
                     FormSubmissionDate = DateTime.Now,
                     PKFEntityProposingService = viewModel.PKFEntityProposingService,
@@ -1602,8 +1616,15 @@ namespace PKFAuditManagement.Controllers
                     }
                 }
 
-                await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Creation",
-                $"A new QC6 Form has been created with File Reference: {fileReference} and you've been designated as the first approver. Please login to the Audit Management System to approve or reject the QC6 Form.");
+				// Send email to first approver to notify on creation
+				await _emailSender.SendEmailAsync(viewModel.EPHODApprovedBy, "QC6 Form Approval Required",
+					$"<p>Dear {viewModel.EPHODApprovedBy},</p>" +
+					$"<p>A new QC6 Form has been created with File Reference: <strong>{fileReference}</strong>.</p>" +
+					$"<p>You have been designated as the first approver. Please log in to the Audit Management System to approve or reject the QC6 Form.</p>" +
+					$"<p>Thank you for your attention!</p>" +
+					$"<p>Best regards,<br/>" +
+					$"PKF Team</p>"
+				);
 
                 // Set the success message for the toast notification
                 TempData["QC6CreateMessage"] = "QC6 Form created successfully.";

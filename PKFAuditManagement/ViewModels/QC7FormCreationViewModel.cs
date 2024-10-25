@@ -31,12 +31,6 @@ namespace PKFAuditManagement.ViewModels
         public string? EngagementType { get; set; }
         [Required]
         public string? Industry { get; set; }
-        [Required]
-        public string? PreparedBy { get; set; }
-        [Required]
-        public DateTime PreparedByDate { get; set; }
-        public string? ReviewedBy { get; set; }
-        public DateTime ReviewedByDate { get; set; }
         public DateTime FormSubmissionDate { get; set; }
         [Required]
         public decimal? PriorYearFee { get; set; }

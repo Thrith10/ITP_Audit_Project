@@ -113,7 +113,6 @@
                                         <th>Client</th>
                                         <th>Period Ended</th>
                                         <th>Engagement Type</th>
-                                        <th>Prepared By Date</th>
                                         <th>Form Submission Date</th> <!-- New column for MPHOD QMP Approved By Date -->
                                         <th>Status</th>
                                     </tr>
@@ -121,10 +120,10 @@
                                     <tr class="qc7-header" style="display: none;">
                                         <th><input type="checkbox" id="selectAllQc7" /> Select All</th>
                                         <th>Form ID</th>
+                                        <th>File Reference</th>
                                         <th>Client</th>
                                         <th>Engagement Type</th>
                                         <th>Period Ended</th>
-                                        <th>Prepared By Date</th>
                                         <th>Form Submission Date</th>
                                         <th>Status</th>
                                     </tr>
@@ -132,6 +131,7 @@
                                     <tr class="qc35-header" style="display: none;">
                                         <th><input type="checkbox" id="selectAllQc35" /> Select All</th>
                                         <th>Form ID</th>
+                                        <th>File Reference</th>
                                         <th>Client Name</th>
                                         <th>Partner Name</th>
                                         <th>Reporting Year End</th>
@@ -194,8 +194,7 @@
                                                     <td>@form.ProspectiveClient</td>
                                                     <td>@form.PeriodEnded.ToShortDateString()</td>
                                                     <td>@form.EngagementType</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
-                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td>
+                                                    <td>@form.FormSubmissionDate.ToShortDateString()</td>
                                                     <td>@form.Status</td>
                                                 </tr>
                                             }
@@ -204,11 +203,11 @@
                                                 <tr id="@form.QC7FormID" class="qc7-form" style="display: none;">
                                                     <td><input type="checkbox" name="selectedForms" value="@form.QC7FormID" class="selectQc7" /></td>
                                                     <td>@form.QC7FormID</td>
+                                                    <td>@form.FileReference</td>
                                                     <td>@form.ProspectiveClient</td>
                                                     <td>@form.EngagementType</td>
                                                     <td>@form.PeriodEnded.ToShortDateString()</td>
-                                                    <td>@form.PreparedByDate.ToShortDateString()</td>
-                                                    <td>@form.MPHODQMPApprovedByDate?.ToShortDateString()</td>
+                                                    <td>@form.FormSubmissionDate.ToShortDateString()</td>
                                                     <td>@form.Status</td>
                                                 </tr>
                                             }
@@ -217,6 +216,7 @@
                                                 <tr id="@form.QC35FormID" class="qc35-form" style="display: none;">
                                                     <td><input type="checkbox" name="selectedForms" value="@form.QC35FormID" class="selectQc35" /></td>
                                                     <td>@form.QC35FormID</td>
+                                                    <td>@form.FileReference</td>
                                                     <td>@form.ClientName</td>
                                                     <td>@form.PartnerName</td>
                                                     <td>@form.ReportingYearEnd?.ToShortDateString()</td>
@@ -402,7 +402,7 @@
         function filterByDate() {
 
             // Show a confirmation prompt before filtering
-            var userConfirmed = confirm("Filters by Prepared By Date");
+            var userConfirmed = confirm("Filters by Form Submission Date");
 
             if (!userConfirmed) {
                 return; // Exit if the user cancels the prompt
@@ -413,22 +413,22 @@
             var rows = document.querySelectorAll("#reportTable tbody tr");
 
             rows.forEach(function (row) {
-                var preparedByDateStr = row.cells[6].textContent.trim();
-                var preparedByDate = parseDate(preparedByDateStr);
+                var formSubmissionDateStr = row.cells[6].textContent.trim();
+                var formSubmissionDate = parseDate(formSubmissionDateStr);
                 var isFormTypeMatch = row.classList.contains("qc6-form") || row.classList.contains("qc7-form");
-
+                    
                 var dateRangeValid = false;
                 if (startDate && endDate) {
-                    dateRangeValid = (preparedByDate >= startDate && preparedByDate <= endDate);
+                    dateRangeValid = (formSubmissionDate >= startDate && formSubmissionDate <= endDate);
                 } else if (startDate) {
-                    dateRangeValid = (preparedByDate >= startDate);
+                    dateRangeValid = (formSubmissionDate >= startDate);
                 } else if (endDate) {
-                    dateRangeValid = (preparedByDate <= endDate);
+                    dateRangeValid = (formSubmissionDate <= endDate);
                 } else {
                     dateRangeValid = true; // If no date range is specified, always valid
                 }
 
-                if (preparedByDate && !isNaN(preparedByDate) && dateRangeValid && isFormTypeMatch) {
+                if (formSubmissionDate && !isNaN(formSubmissionDate) && dateRangeValid && isFormTypeMatch) {
                     row.style.display = "";
                 } else {
                     row.style.display = "none";

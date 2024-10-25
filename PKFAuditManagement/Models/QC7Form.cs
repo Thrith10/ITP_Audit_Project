@@ -11,10 +11,6 @@ namespace PKFAuditManagement.Models
         public DateTime PeriodEnded { get; set; }
         public required string EngagementType { get; set; }
         public required string Industry { get; set; }
-        public required string PreparedBy { get; set; }
-        public DateTime PreparedByDate { get; set; }
-        public string? ReviewedBy { get; set; }
-        public DateTime ReviewedByDate { get; set; }
         public required string Status { get; set; }
         public string? RejectionReason { get; set; }
         public DateTime FormSubmissionDate { get; set; }

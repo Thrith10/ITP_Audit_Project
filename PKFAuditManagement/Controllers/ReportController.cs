@@ -39,15 +39,10 @@ namespace PKFAuditManagement.Controllers
             {
                 ["QC6Forms"] = new Dictionary<string, string>
                 {
-                    {"CreatedBy", "Created By"},
                     {"FileReference", "File Reference"},
                     {"ProspectiveClient", "Prospective Client"},
                     {"PeriodEnded", "Period Ended"},
                     {"EngagementType", "Engagement Type"},
-                    {"PreparedBy", "Prepared By"},
-                    {"PreparedByDate", "Prepared By Date"},
-                    {"ReviewedBy", "Reviewed By"},
-                    {"ReviewedByDate", "Reviewed By Date"},
                     {"Status", "Status"},
                     {"RejectionReason", "Rejection Reason"},
                     {"FormSubmissionDate", "Form Submission Date"},
@@ -89,16 +84,10 @@ namespace PKFAuditManagement.Controllers
                 },
                 ["QC7Forms"] = new Dictionary<string, string>
                 {
-
-                    {"CreatedBy", "Created By"},
                     {"FileReference", "File Reference"},
                     {"Client", "Client"},
                     {"PeriodEnded", "Period Ended"},
                     {"EngagementType", "Engagement Type"},
-                    {"PreparedBy", "Prepared By"},
-                    {"PreparedByDate", "Prepared By Date"},
-                    {"ReviewedBy", "Reviewed By"},
-                    {"ReviewedByDate", "Reviewed By Date"},
                     {"Status", "Status"},
                     {"RejectionReason", "Rejection Reason"},
                     {"FormSubmissionDate", "Form Submission Date"},
@@ -140,20 +129,12 @@ namespace PKFAuditManagement.Controllers
                 },
                 ["QC35Forms"] = new Dictionary<string, string>
                 {
-                    {"CreatedBy", "Created By"},
+                    {"FileReference", "File Reference"},
                     {"ClientName", "Client Name"},
                     {"ReportingYearEnd", "Reporting Year End"},
                     {"PartnerName", "Partner Name"},
                     {"ManagerName", "Manager Name"},
-                    {"ImageFileName", "Image File Name"},
                     {"Status", "Status"},
-                },
-                ["QC35ChecklistItems"] = new Dictionary<string, string>
-                {
-                    {"QC35FormID", "QC35 Form ID"},
-                    {"Description", "Description"},
-                    {"Response", "Response"},
-                    {"DaysUntilDue", "Days Until Due"}
                 },
                 ["SignedFSForm"] = new Dictionary<string, string>
                 {

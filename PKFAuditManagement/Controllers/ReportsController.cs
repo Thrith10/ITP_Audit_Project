@@ -51,10 +51,6 @@ namespace PKFAuditManagement.Controllers
                     ProspectiveClient = qc6Form.ProspectiveClient ?? string.Empty,
                     PeriodEnded = qc6Form.PeriodEnded ?? DateTime.MinValue,
                     EngagementType = qc6Form.EngagementType ?? string.Empty,
-                    PreparedBy = conclusion?.PreparedBy ?? qc6Form.PreparedBy ?? string.Empty,  // Take from QC6FormConclusion or fallback to QC6Form
-                    PreparedByDate = conclusion?.PreparedByDate ?? qc6Form.PreparedByDate,  // Take from QC6FormConclusion or fallback to QC6Form
-                    ReviewedBy = qc6Form.ReviewedBy ?? string.Empty,
-                    ReviewedByDate = qc6Form.ReviewedByDate ?? DateTime.MinValue,
                     Status = qc6Form.Status ?? string.Empty,
                     RejectionReason = qc6Form.RejectionReason ?? string.Empty,
                     FormSubmissionDate = qc6Form.FormSubmissionDate,
@@ -97,11 +93,7 @@ namespace PKFAuditManagement.Controllers
                     ProspectiveClient = qc7Form.Client,
                     PeriodEnded = qc7Form.PeriodEnded,
                     EngagementType = qc7Form.EngagementType,
-                    PreparedBy = conclusion?.EMPreparedBy ?? qc7Form.PreparedBy,  // Take from QC7FormConclusion or fallback to QC7Form
-                    PreparedByDate = conclusion?.EMPreparedByDate ?? qc7Form.PreparedByDate,  // Take from QC7FormConclusion or fallback
                     MPHODQMPApprovedByDate = conclusion?.MPHODQMPApprovedByDate,  // MPHODQMPApprovedByDate from QC7FormConclusion
-                    ReviewedBy = qc7Form.ReviewedBy,
-                    ReviewedByDate = qc7Form.ReviewedByDate,
                     Status = qc7Form.Status,
                     RejectionReason = qc7Form.RejectionReason,
                     FormSubmissionDate = qc7Form.FormSubmissionDate,
@@ -130,6 +122,7 @@ namespace PKFAuditManagement.Controllers
             {
                 FormType = "QC35",
                 QC35FormID = form.QC35FormID,
+                FileReference = form.FileReference,
                 CreatedBy = form.CreatedBy,
                 ClientName = form.ClientName,
                 ReportingYearEnd = form.ReportingYearEnd,
