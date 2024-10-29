@@ -85,6 +85,16 @@ namespace PKFAuditManagement.Controllers
                 FilePath = $"/RAGDocuments/{fileName}"
             };
 
+            //    Read a list of paragraphs from the PDF uploaded
+                //List<string> paragraphs = PdfReader.ReadPdf(filePath);
+
+                List<(string SectionTitle, string Chunk)> paragraphs = PdfReader.ReadPdf(filePath);
+
+            //    // Paragraphs read will be saved to MongoDB collection
+                await _mongoDBService.SaveParagraphsToMongoDBAsync(paragraphs, documentName);
+
+            //    // Return the generated response
+
             // Save the document to the database 
             try
             {
@@ -141,7 +151,14 @@ namespace PKFAuditManagement.Controllers
             // Find similar documents in MongoDB using the generated embeddings
             //List<string> similarDocuments = await _mongoDBService.FindSimilarDocumentsAsync(embeddings);
 
-            List<(string SectionTitle, string ParagraphText)> similarDocuments = await _mongoDBService.FindSimilarDocumentsAsync(embeddings, userInput);
+            List<(string SectionTitle, string ParagraphText)> similarDocuments = 
+                await _mongoDBService.FindSimilarDocumentsAsync(embeddings, userInput);
+
+            // Get the first document from similarDocuments
+            var firstDocument = similarDocuments.FirstOrDefault();
+
+            // Extract the DocumentName, defaulting to an empty string if the list is empty
+            //string documentName = firstDocument.DocumentName ?? string.Empty;
 
             // Combine SectionTitle and ParagraphText for better context
             var combinedText = new StringBuilder();

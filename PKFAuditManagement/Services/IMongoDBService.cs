@@ -34,7 +34,7 @@ namespace PKFAuditManagement.Services
             _database = _client.GetDatabase("audit_documents");
 
             // Reference to the embedded_movies collection
-            _collection = _database.GetCollection<BsonDocument>("ep200_v2");
+            _collection = _database.GetCollection<BsonDocument>("docs_combined");
         }
 
         public async Task<string> SaveParagraphsToMongoDBAsync(List<(string SectionTitle, string Chunk)> paragraphs, string documentName)
@@ -128,6 +128,7 @@ namespace PKFAuditManagement.Services
 
                 directMatchResult.ForEach(doc =>
                 {
+                    //var documentName = doc["DocumentName"].ToString();
                     var sectionTitle = doc["SectionTitle"].ToString();
                     var paragraphText = doc["ParagraphText"].ToString();
                     documents.Add((sectionTitle, paragraphText));
@@ -156,6 +157,7 @@ namespace PKFAuditManagement.Services
 
                 await result.ForEachAsync(doc =>
                 {
+                    //var documentName = doc["DocumentName"].ToString();
                     var sectionTitle = doc["SectionTitle"].ToString();
                     var paragraphText = doc["ParagraphText"].ToString();
                     documents.Add((sectionTitle, paragraphText));
