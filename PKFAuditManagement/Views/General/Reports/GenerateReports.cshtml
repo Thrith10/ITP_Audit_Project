@@ -505,6 +505,8 @@
 
                         filteredFields.forEach(field => {
                             console.log('fieldsections:', field.section);
+                            console.log('formHeader:', formHeader);
+                            console.log('selectedFormType:', selectedFormType);
 
                             if (field.section.startsWith(selectedFormType)) {
                                 if (!formHeader && field.section === `${selectedFormType}Forms`) {
@@ -525,6 +527,13 @@
                                 if (!formHeader && field.section === `${selectedFormType}Form`) {
                                     const header = document.createElement('h5');
                                     header.innerText = `${selectedFormType}Form`;
+                                    form.appendChild(header);
+                                    formHeader = true;
+                                }
+                                // Temp fix for Client and Quiz forms
+                                if (!formHeader && field.section === `${selectedFormType}` || !formHeader && field.section === `Quiz`) {
+                                    const header = document.createElement('h5');
+                                    header.innerText = `${selectedFormType}`;
                                     form.appendChild(header);
                                     formHeader = true;
                                 }
