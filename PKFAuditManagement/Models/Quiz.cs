@@ -22,5 +22,10 @@ namespace PKFAuditManagement.Models
         public DateTime QuizEnd { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
+        // New property: List of topics
+        public ICollection<string> Topics { get; set; } = new List<string>();
+
+        // New property: Collection of feedback questions
+        public ICollection<Feedback> FeedbackQuestions { get; set; } = new List<Feedback>();
     }
 }

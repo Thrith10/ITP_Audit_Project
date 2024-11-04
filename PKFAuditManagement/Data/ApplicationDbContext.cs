@@ -49,6 +49,10 @@ namespace PKFAuditManagement.Data
         public DbSet<Participants> Participants { get; set; }
         public DbSet<QuizResponse> QuizResponse { get; set; }
         public DbSet<Attempt> Attempt { get; set; }
+        public DbSet<Feedback> Feedback { get; set; } // New DbSet for Feedback
+        public DbSet<SelfAssessment> SelfAssessment { get; set; } // New DbSet for SelfAssessment
+        public DbSet<SelfAssessmentRating> SelfAssessmentRating { get; set; } // New DbSet for SelfAssessmentRating
+
 
         // DbSet for Chatbot
         public DbSet<ChatbotDocument> ChatbotDocuments { get; set; }
@@ -94,6 +98,35 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(a => a.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.Quiz)
+                .WithMany(q => q.FeedbackQuestions)
+                .HasForeignKey(f => f.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SelfAssessment>()
+                .HasOne(sa => sa.Quiz)
+                .WithMany()
+                .HasForeignKey(sa => sa.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SelfAssessment>()
+                .HasOne(sa => sa.User)
+                .WithMany()
+                .HasForeignKey(sa => sa.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SelfAssessmentRating>()
+                .HasOne(sr => sr.SelfAssessment)
+                .WithMany(sa => sa.BeforeRatings)
+                .HasForeignKey(sr => sr.SelfAssessmentID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             new DataSeeder(modelBuilder).Seed();
         }
