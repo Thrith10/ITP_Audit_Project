@@ -4,6 +4,7 @@ namespace PKFAuditManagement.Models
 {
     public class Feedback
     {
+        [Key]
         public Guid FeedbackID { get; set; }
         public Guid QuizID { get; set; }  // Foreign key to Quiz
         public string UserID { get; set; } // Foreign key to User
@@ -17,7 +18,6 @@ namespace PKFAuditManagement.Models
 
         // Navigation properties
         public Quiz Quiz { get; set; }
-        public User User { get; set; } // Assuming a User model exists
     }
     public enum FeedbackType
     {

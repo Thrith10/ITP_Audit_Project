@@ -110,23 +110,12 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(f => f.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Feedback>()
-                .HasOne(f => f.User)
-                .WithMany()
-                .HasForeignKey(f => f.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SelfAssessment>()
                 .HasOne(sa => sa.Quiz)
                 .WithMany()
                 .HasForeignKey(sa => sa.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<SelfAssessment>()
-                .HasOne(sa => sa.User)
-                .WithMany()
-                .HasForeignKey(sa => sa.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SelfAssessmentRating>()
                 .HasOne(sr => sr.SelfAssessment)

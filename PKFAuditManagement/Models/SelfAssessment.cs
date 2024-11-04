@@ -1,7 +1,10 @@
-﻿namespace PKFAuditManagement.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PKFAuditManagement.Models
 {
     public class SelfAssessment
     {
+        [Key]
         public Guid SelfAssessmentID { get; set; }
         public Guid QuizID { get; set; }  // Foreign key to Quiz
         public string UserID { get; set; } // Foreign key to User
@@ -12,6 +15,7 @@
 
         // Navigation properties
         public Quiz Quiz { get; set; }
-        public User User { get; set; } // Assuming a User model exists
+
     }
+
 }
