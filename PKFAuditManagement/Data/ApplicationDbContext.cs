@@ -52,6 +52,8 @@ namespace PKFAuditManagement.Data
         public DbSet<Feedback> Feedback { get; set; } // New DbSet for Feedback
         public DbSet<SelfAssessment> SelfAssessment { get; set; } // New DbSet for SelfAssessment
         public DbSet<SelfAssessmentRating> SelfAssessmentRating { get; set; } // New DbSet for SelfAssessmentRating
+        public DbSet<QuizTopic> QuizTopic { get; set; } // New DbSet for QuizTopic
+
 
 
         // DbSet for Chatbot
@@ -72,6 +74,12 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(qn => qn.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Quiz>()
+                .HasMany(q => q.Topics)
+                .WithOne(t => t.Quiz)
+                .HasForeignKey(t => t.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Option>()
                 .HasOne(o => o.Question)
                 .WithMany(q => q.Options)
@@ -90,8 +98,6 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(qr => qr.QuestionID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-      
-            // New relationships
             modelBuilder.Entity<Attempt>()
                 .HasOne(a => a.Quiz)
                 .WithMany()
