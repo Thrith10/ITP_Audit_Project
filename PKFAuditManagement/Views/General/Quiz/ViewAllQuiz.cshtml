@@ -175,12 +175,21 @@
                     <div class="row">
                         <div class="col-xxl-12 col-md-12">
                             <div class="card info-card customers-card">
-                                <div class="card-header d-flex justify-content-between">
-                                    <h class="card-title">All Quizzes</h>
-                                    <a href="@Url.Action("Create", "Quizzes")" class="btn btn-primary btn-sm" id="create-btn">
-                                        Create Quiz
-                                    </a>
+                                <div class="card info-card customers-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h class="card-title">All Quizzes</h>
+                                        <div class="button-group d-flex gap-2">
+                                            <!-- Container for buttons with gap -->
+                                            <a href="@Url.Action("Create", "Quizzes")" class="btn btn-primary btn-sm" id="create-quiz-btn">
+                                                Create Quiz
+                                            </a>
+                                            <a href="@Url.Action("ViewAllFeedbackForms", "Feedback")" class="btn btn-primary btn-sm" id="view-feedback-forms-btn">
+                                                View Feedback Forms
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div class="card-body">
                                     <div class="form-container">
                                         @if (TempData["SuccessMessage"] != null)
