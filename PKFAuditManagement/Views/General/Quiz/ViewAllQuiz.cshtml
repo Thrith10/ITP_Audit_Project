@@ -115,10 +115,16 @@
         th {
             width: 30%;
         }
-
+ 
         th.actions,
         td.actions {
             width: 25%;
+     
+        }
+
+        .actions .btn {
+
+            margin-bottom: 0.5rem; /* Vertical spacing when wrapping */
         }
 
         /* Styling for tabs */
@@ -138,6 +144,25 @@
         .tab-content .table {
             margin-top: 1rem;
         }
+        /* Additional styling to allow text wrapping in date-time columns */
+        th.date-time,
+        td.date-time {
+            width: 15%; /* Adjusted to allow more space for wrapping */
+            white-space: normal; /* Enable text wrapping for date-time columns */
+            word-wrap: break-word;
+        }
+
+        /* Scrollable table on small screens */
+        .table-responsive {
+            overflow-x: auto;
+            display: block;
+        }
+
+        /* Reduced font size for smaller screens in table */
+        .small-screen-font {
+            font-size: 0.875rem;
+        }
+
     </style>
 
 </head>
@@ -192,6 +217,7 @@
                                                 @if (Model.Quizzes.Where(q => q.QuizEnd > DateTime.Now).OrderByDescending(q => q.QuizStart).Any())
                                                 {
                                                     <div class="table-container">
+                                                        <div class="table-responsive">
                                                         <table class="table table-bordered table-striped" id="upcomingQuizTable">
                                                             <thead class="table-dark">
                                                                 <tr>
@@ -225,6 +251,7 @@
 
                                                         </table>
                                                     </div>
+                                                    </div>
                                                 }
                                                 else
                                                 {
@@ -243,6 +270,7 @@
                                                 @if (Model.Quizzes.Where(q => q.QuizEnd < DateTime.Now).OrderByDescending(q => q.QuizEnd).Any())
                                                 {
                                                     <div class="table-container">
+                                                        <div class="table-responsive">
                                                         <table class="table table-bordered table-striped" id="pastQuizTable">
                                                             <thead class="table-dark">
                                                                 <tr>
@@ -275,6 +303,7 @@
                                                             </tbody>
 
                                                         </table>
+                                                    </div>
                                                     </div>
                                                 }
                                                 else
