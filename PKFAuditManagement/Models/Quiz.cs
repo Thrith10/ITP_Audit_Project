@@ -26,7 +26,10 @@ namespace PKFAuditManagement.Models
         // New property: List of topics
         public ICollection<QuizTopic> Topics { get; set; } = new List<QuizTopic>();
 
-        // New property: Collection of feedback questions
-        public ICollection<Feedback> FeedbackQuestions { get; set; } = new List<Feedback>();
+        public Guid FeedbackFormID { get; set; } // Foreign key to the associated Feedback Form
+        // Navigation properties
+        public FeedbackForm FeedbackForm { get; set; } // The feedback form attached to this quiz
+        public ICollection<FeedbackResponse> FeedbackResponses { get; set; } = new List<FeedbackResponse>(); // Collection of responses linked to this quiz
+
     }
 }
