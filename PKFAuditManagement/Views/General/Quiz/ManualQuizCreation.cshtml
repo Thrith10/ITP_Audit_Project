@@ -51,6 +51,38 @@
                                     </div>
 
                                     <input type="hidden" id="SelectedParticipants" name="SelectedParticipants" value="@Model.SelectedParticipants" />
+                                    <!-- Select Feedback Form Button -->
+                                    <div class="form-group mt-3">
+                                        <button type="button" class="btn btn-info btn-sm" id="select-feedback-form-btn">
+                                            <i class="bi bi-list-check"></i> Select Feedback Form
+                                        </button>
+                                        <input type="hidden" id="SelectedFeedbackFormId" name="SelectedFeedbackFormId" />
+                                        <p id="selected-feedback-form-text" class="text-muted mt-2">
+                                            No feedback form selected
+                                            
+                                        </p>
+                                        <span id="feedback-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745; margin-left: 5px;"></span>
+                                    </div>
+
+                                    <!-- New Topics Field Section -->
+                                    <div class="form-group mt-3">
+                                        <label for="Topics">Quiz Topics</label>
+                                        <div id="topics-container">
+                                            @for (int i = 0; i < Model.Topics.Count; i++)
+                                            {
+                                                <div class="input-group mb-2 topic-group" data-index="@i">
+                                                    <input type="text" class="form-control" name="Topics[@i].Name" value="@Model.Topics[i].Name" placeholder="Enter topic name" required />
+                                                    <button type="button" class="btn btn-danger btn-sm remove-topic">
+                                                        <i class="bi bi-trash"></i> Remove
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                        <button type="button" class="btn btn-secondary btn-sm" id="add-topic">
+                                            <i class="bi bi-plus-lg"></i> Add Topic
+                                        </button>
+                                    </div>
+
 
                                     <!-- Questions Section -->
                                     <div id="quiz-container">
@@ -209,6 +241,17 @@
                                         <button type="submit" id="submit-button" class="btn btn-primary btn-sm">Save</button>
                                     </div>
                                 </form>
+                                <!-- Modal structure for selecting feedback form -->
+                                <div id="feedback-form-modal" class="modal">
+                                    <div class="modal-content">
+                                        <span id="close-feedback-modal" class="close-modal">&times;</span>
+                                        <h5>Select Feedback Form</h5>
+                                        <ul id="feedback-forms-list" class="list-group">
+                                            <!-- Dynamically populated list of feedback forms -->
+                                        </ul>
+                                        <button type="button" id="confirm-feedback-form-btn" class="btn btn-primary mt-3">Confirm Selection</button>
+                                    </div>
+                                </div>
 
                                 <!-- Modal for Participants Selection -->
                                 <div id="participants-modal" class="modal">
@@ -248,6 +291,25 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Invalid Options Modal -->
+                                <div class="modal fade" id="invalidOptionsModal" tabindex="-1" aria-labelledby="invalidOptionsModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="invalidOptionsModalLabel">Validation Error</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p id="invalidOptionsMessage"> <!-- Dynamic message goes here --> </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>

@@ -59,13 +59,28 @@ namespace PKFAuditManagement.Controllers
                 return RedirectToAction(nameof(ViewAllFeedbackForms));
             }
 
-            // Remove feedback form and associated questions
+            // Check for linked quizzes
+            var linkedQuizzes = await _context.Quiz
+                .Where(q => q.FeedbackFormID == feedbackFormID)
+                .Select(q => q.Title) // Get only the quiz titles for display
+                .ToListAsync();
+
+            if (linkedQuizzes.Any())
+            {
+                // Pass the linked quizzes to TempData to display in the modal
+                TempData["LinkedQuizzes"] = linkedQuizzes;
+                TempData["ErrorMessage"] = "This feedback form is linked to quizzes and cannot be deleted until they are removed.";
+                return RedirectToAction(nameof(ViewAllFeedbackForms));
+            }
+
+            // If no linked quizzes, proceed to delete
             _context.FeedbackForms.Remove(feedbackForm);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Feedback form deleted successfully!";
             return RedirectToAction(nameof(ViewAllFeedbackForms));
         }
+
 
         // GET: Feedback/CreateFeedback
         [HttpGet]

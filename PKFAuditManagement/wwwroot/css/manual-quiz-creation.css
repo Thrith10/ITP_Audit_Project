@@ -23,7 +23,6 @@
     padding: 25px;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Soft shadow */
-    width: 40%; /* Slightly reduced width */
     max-width: 600px;
     font-family: 'Arial', sans-serif;
     position: relative; /* Enable positioning for the Confirm button */
@@ -300,3 +299,49 @@ h5 {
             border-bottom: none;
         }
 
+
+/* Selected feedback form text styling */
+#selected-feedback-form-text {
+    font-weight: normal;
+    color: #6c757d;
+    display: inline-flex;
+    align-items: center;
+}
+
+    #selected-feedback-form-text.selected {
+        font-weight: bold;
+        color: #000000; /* Black color when selected */
+    }
+
+/* Green tick icon styling, hidden by default */
+#feedback-selected-tick {
+    font-size: 1.2rem;
+    color: #28a745; /* Green color */
+    margin-left: 5px;
+    display: none; /* Hidden by default */
+}
+
+/* Show green tick icon when feedback form is selected */
+#selected-feedback-form-text.selected #feedback-selected-tick {
+    display: inline; /* Display the tick when a form is selected */
+}
+#invalidOptionsModal .modal-dialog {
+    max-width: 500px; /* Adjust the width as needed */
+}
+
+#invalidOptionsModal .modal-content {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#invalidOptionsModal .modal-header {
+    font-size: 1.25rem;
+    font-weight: bold;
+    border-bottom: none;
+}
+
+#invalidOptionsModal .modal-body {
+    font-size: 1rem;
+    color: #333;
+}
