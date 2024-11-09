@@ -652,12 +652,25 @@ namespace PKFAuditManagement.Controllers
             return Json(new { qrCodeImage });
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllWithUserRole()
         {
+            // Get the role ID for the "User" role
+            var userRoleId = await _context.Roles
+                .Where(r => r.Name == "User")
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrEmpty(userRoleId))
+            {
+                return Json(new List<UserViewModel>()); // Return an empty list if the role is not found
+            }
+
+            // Fetch users with the "User" role
             var users = await _context.Users
+                .Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == userRoleId))
                 .Select(u => new UserViewModel
                 {
-                    Email = u.Email,  // Ensure email is properly fetched
+                    Email = u.Email,
                     UserId = u.Id,
                     UserName = u.UserName
                 })
@@ -665,6 +678,7 @@ namespace PKFAuditManagement.Controllers
 
             return Json(users);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> EmailValidation([FromBody] List<string> emails)
