@@ -2,16 +2,24 @@ document.addEventListener('DOMContentLoaded', function () {
   
     var quizStartInput = document.getElementById('QuizStart');
     var quizEndInput = document.getElementById('QuizEnd');
+    //Topic
     var addTopicBtn = document.getElementById('add-topic');
     var topicsContainer = document.getElementById('topics-container');
-    const selectFeedbackFormBtn = document.getElementById('select-feedback-form-btn');
-    const feedbackFormModal = document.getElementById('feedback-form-modal'); // Modal element for feedback forms
-    const feedbackFormsList = document.getElementById('feedback-forms-list'); // Container for the list of feedback forms
-    const closeFeedbackModal = document.getElementById('close-feedback-modal'); // Close button in the modal
-    const confirmFeedbackFormBtn = document.getElementById('confirm-feedback-form-btn'); // Confirm selection button
-    const selectedFeedbackFormIdInput = document.getElementById('SelectedFeedbackFormId'); // Hidden input for selected feedback form ID
-    const selectedFeedbackFormText = document.getElementById('selected-feedback-form-text'); // Text element to show selected feedback form title
-    const feedbackSelectedTick = document.getElementById('feedback-selected-tick'); // Green tick icon for selected form
+    //Feedback
+    const feedbackFormListContainer = document.getElementById('feedback-form-list-container');
+    const closeFeedbackFormModal = document.getElementById('close-feedback-form-modal');
+    const confirmFeedbackFormSelectionBtn = document.getElementById('confirm-feedback-form-selection-btn');
+    const selectedFeedbackFormIdInput = document.getElementById('SelectedFeedbackFormId');
+    const selectedFeedbackFormTitleText = document.getElementById('selected-feedback-form-title');
+    const feedbackFormSelectedTick = document.getElementById('feedback-form-selected-tick');
+    const searchFeedbackFormInput = document.getElementById('search-feedback-form-input');
+    const prevFeedbackFormPageBtn = document.getElementById('prev-feedback-form-page');
+    const nextFeedbackFormPageBtn = document.getElementById('next-feedback-form-page');
+    const currentFeedbackFormPageNumber = document.getElementById('current-feedback-form-page-number');
+
+    let allFeedbackForms = [];
+    let currentFeedbackFormPage = 1;
+    const feedbackFormsPerPage = 10;
 
     //Participant Portion
     const selectParticipantsBtn = document.getElementById('select-participants-btn');
@@ -76,62 +84,103 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Load feedback forms dynamically (replace with actual API endpoint)
     function loadFeedbackForms() {
-        // Fetch available feedback forms from the server
-        fetch('/Quizzes/GetFeedbackForms') // Example API endpoint
+        fetch('/Quizzes/GetFeedbackForms') // Replace with the actual API endpoint
             .then(response => response.json())
             .then(data => {
-                feedbackFormsList.innerHTML = ''; // Clear existing items
-                data.forEach(form => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item list-group-item-action';
-                    listItem.textContent = form.title;
-                    listItem.dataset.id = form.id;
-                    listItem.addEventListener('click', function () {
-                        // Remove 'active' class from all items and apply it only to the selected one
-                        feedbackFormsList.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
-                        listItem.classList.add('active');
-
-                        // Set the hidden input value with the selected form ID
-                        selectedFeedbackFormIdInput.value = form.id;
-
-                        // Update the display text to show the selected feedback form title
-                        selectedFeedbackFormText.textContent = form.title;
-                        selectedFeedbackFormText.classList.add('selected'); // Add class for styling
-
-                        // Add a green tick beside the selected feedback form text
-                        feedbackSelectedTick.style.display = 'inline'; // Show the green tick icon
-                    });
-
-                    feedbackFormsList.appendChild(listItem);
-                });
+                allFeedbackForms = data;
+                currentFeedbackFormPage = 1;
+                renderFeedbackFormList();
             })
             .catch(error => console.error('Error fetching feedback forms:', error));
     }
 
-    // Open modal and load feedback forms
-    selectFeedbackFormBtn.addEventListener('click', function () {
-        feedbackFormModal.style.display = 'block';
+    function renderFeedbackFormList() {
+        const searchTerm = searchFeedbackFormInput.value.toLowerCase();
+        const filteredFeedbackForms = allFeedbackForms.filter(form =>
+            form.title.toLowerCase().includes(searchTerm)
+        );
+
+        const startIndex = (currentFeedbackFormPage - 1) * feedbackFormsPerPage;
+        const endIndex = startIndex + feedbackFormsPerPage;
+        const paginatedFeedbackForms = filteredFeedbackForms.slice(startIndex, endIndex);
+
+        feedbackFormListContainer.innerHTML = '';
+
+        paginatedFeedbackForms.forEach(form => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item list-group-item-action';
+            listItem.textContent = form.title;
+            listItem.dataset.id = form.id;
+
+            listItem.addEventListener('click', function () {
+                feedbackFormListContainer.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+                listItem.classList.add('active');
+
+                selectedFeedbackFormIdInput.value = form.id;
+                selectedFeedbackFormTitleText.textContent = form.title;
+                selectedFeedbackFormTitleText.classList.add('selected');
+                feedbackFormSelectedTick.style.display = 'inline';
+            });
+
+            feedbackFormListContainer.appendChild(listItem);
+        });
+
+        updateFeedbackFormPaginationControls(filteredFeedbackForms.length);
+    }
+
+    function updateFeedbackFormPaginationControls(totalItems) {
+        const totalPages = Math.ceil(totalItems / feedbackFormsPerPage);
+
+        prevFeedbackFormPageBtn.disabled = currentFeedbackFormPage === 1;
+        nextFeedbackFormPageBtn.disabled = currentFeedbackFormPage === totalPages || totalPages === 0;
+
+        currentFeedbackFormPageNumber.textContent = `Page ${currentFeedbackFormPage} of ${totalPages}`;
+    }
+
+    searchFeedbackFormInput.addEventListener('input', function () {
+        currentFeedbackFormPage = 1;
+        renderFeedbackFormList();
+    });
+
+    prevFeedbackFormPageBtn.addEventListener('click', function () {
+        if (currentFeedbackFormPage > 1) {
+            currentFeedbackFormPage--;
+            renderFeedbackFormList();
+        }
+    });
+
+    nextFeedbackFormPageBtn.addEventListener('click', function () {
+        const totalPages = Math.ceil(
+            allFeedbackForms.filter(form => form.title.toLowerCase().includes(searchFeedbackFormInput.value.toLowerCase())).length / feedbackFormsPerPage
+        );
+        if (currentFeedbackFormPage < totalPages) {
+            currentFeedbackFormPage++;
+            renderFeedbackFormList();
+        }
+    });
+
+    document.getElementById('select-feedback-form-btn').addEventListener('click', function () {
+        document.getElementById('feedback-form-modal').style.display = 'block';
         loadFeedbackForms();
     });
 
-    // Close modal
-    closeFeedbackModal.addEventListener('click', function () {
-        feedbackFormModal.style.display = 'none';
+    closeFeedbackFormModal.addEventListener('click', function () {
+        document.getElementById('feedback-form-modal').style.display = 'none';
     });
 
-    // Confirm selection and close modal
-    confirmFeedbackFormBtn.addEventListener('click', function () {
-        feedbackFormModal.style.display = 'none';
+    confirmFeedbackFormSelectionBtn.addEventListener('click', function () {
+        document.getElementById('feedback-form-modal').style.display = 'none';
     });
 
-    // Close modal when clicking outside the modal content
     window.addEventListener('click', function (event) {
-        if (event.target == feedbackFormModal) {
+        const feedbackFormModal = document.getElementById('feedback-form-modal');
+        if (event.target === feedbackFormModal) {
             feedbackFormModal.style.display = 'none';
         }
     });
+
+
 
     // Add new topic
     addTopicBtn.addEventListener('click', function () {
