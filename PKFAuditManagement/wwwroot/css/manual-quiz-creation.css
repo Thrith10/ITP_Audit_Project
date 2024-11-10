@@ -170,7 +170,6 @@ h5 {
     width: auto;
     height: auto;
     cursor: pointer; /* Ensure the cursor is a pointer over the button */
- 
 }
 
     /* Increase the size of the icon within the button */
@@ -284,6 +283,7 @@ h5 {
 #selected-feedback-form-text.selected #feedback-selected-tick {
     display: inline; /* Display the tick when a form is selected */
 }
+
 #invalidOptionsModal .modal-dialog {
     max-width: 500px; /* Adjust the width as needed */
 }
@@ -306,15 +306,15 @@ h5 {
 }
 
 
-    /* Modal Header */
-    #participants-modal h5 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #343a40;
-        text-align: center;
-        border-bottom: 1px solid #dee2e6;
-        padding-bottom: 10px;
-    }
+/* Modal Header */
+#participants-modal h5 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #343a40;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+}
 
 /* Close modal button styling */
 .close-modal {
@@ -396,7 +396,6 @@ h5 {
 /* Green tick styling */
 #participants-selected-tick {
     font-size: 1.25rem;
-
     color: #28a745;
     display: none; /* Initially hidden */
 }
@@ -408,7 +407,6 @@ h5 {
     color: #6c757d;
     display: inline-flex;
     align-items: center;
-
 }
 
     /* Selected state styling */
@@ -452,6 +450,7 @@ h5 {
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+
 .clickable {
     font-weight: bold;
     color: #007bff;
@@ -487,20 +486,7 @@ h5 {
     margin-top: 15px;
     width: 100%;
 }
-/* Modal Overlay */
-#feedback-form-modal {
-    display: none; /* Initially hidden */
-    position: fixed;
-    z-index: 1000;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+
 
     /* Centered Modal Content */
     #feedback-form-modal .modal-content {

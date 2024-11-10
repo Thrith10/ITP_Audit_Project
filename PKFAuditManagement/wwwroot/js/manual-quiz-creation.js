@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-  
+
     var quizStartInput = document.getElementById('QuizStart');
     var quizEndInput = document.getElementById('QuizEnd');
     //Topic
@@ -10,12 +10,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeFeedbackFormModal = document.getElementById('close-feedback-form-modal');
     const confirmFeedbackFormSelectionBtn = document.getElementById('confirm-feedback-form-selection-btn');
     const selectedFeedbackFormIdInput = document.getElementById('SelectedFeedbackFormId');
-    const selectedFeedbackFormTitleText = document.getElementById('selected-feedback-form-title');
-    const feedbackFormSelectedTick = document.getElementById('feedback-form-selected-tick');
     const searchFeedbackFormInput = document.getElementById('search-feedback-form-input');
     const prevFeedbackFormPageBtn = document.getElementById('prev-feedback-form-page');
     const nextFeedbackFormPageBtn = document.getElementById('next-feedback-form-page');
     const currentFeedbackFormPageNumber = document.getElementById('current-feedback-form-page-number');
+    const selectedFeedbackFormText = document.getElementById('selected-feedback-form-text'); // Ensure this targets the correct element
+    const feedbackFormSelectedTick = document.getElementById('feedback-selected-tick'); // Green tick icon for selected form
+
 
     let allFeedbackForms = [];
     let currentFeedbackFormPage = 1;
@@ -117,9 +118,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 feedbackFormListContainer.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
                 listItem.classList.add('active');
 
+                // Set the hidden input value with the selected form ID
                 selectedFeedbackFormIdInput.value = form.id;
-                selectedFeedbackFormTitleText.textContent = form.title;
-                selectedFeedbackFormTitleText.classList.add('selected');
+
+                // Update the display text to show the selected feedback form title
+                selectedFeedbackFormText.textContent = form.title; // Update `selected-feedback-form-text` element
+                selectedFeedbackFormText.classList.add('selected'); // Add class for styling
+
+                // Show the green tick beside the selected feedback form text
                 feedbackFormSelectedTick.style.display = 'inline';
             });
 
@@ -215,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // Open Participants Modal
-  
+
     selectParticipantsBtn.addEventListener('click', function () {
         participantsModal.style.display = 'block';
         loadParticipants();
@@ -375,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    
+
 
     // Close modal when clicking outside of modal content
     window.addEventListener('click', function (event) {
@@ -499,98 +505,98 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-document.addEventListener('change', function (e) {
-    if (e.target && e.target.matches('.question-type-select')) {
-        var questionCard = e.target.closest('.card');
-        var questionIndex = questionCard.getAttribute('data-index');
-        var selectedType = e.target.value;
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.matches('.question-type-select')) {
+            var questionCard = e.target.closest('.card');
+            var questionIndex = questionCard.getAttribute('data-index');
+            var selectedType = e.target.value;
 
-        // Call the function to update the fields based on the selected question type
-        updateQuestionTypeFields(questionIndex, selectedType);
-    }
-});
-
-function updateQuestionTypeFields(questionIndex, selectedType) {
-    var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
-
-    // Find or create the correct answer container (for True/False, MCQs, etc.)
-    var correctAnswerContainer = document.querySelector(`[data-index='${questionIndex}'] .correct-answer-container`);
-
-    // If the correct answer container doesn't exist, create it
-    if (!correctAnswerContainer) {
-        correctAnswerContainer = document.createElement('div');
-        correctAnswerContainer.className = 'form-group correct-answer-container';
-        var label = document.createElement('label');
-        label.textContent = 'Select the correct answer:';
-        correctAnswerContainer.appendChild(label);
-        document.querySelector(`[data-index='${questionIndex}'] .card-body`).appendChild(correctAnswerContainer);
-    } else {
-        // Clear the existing correct answer container
-        correctAnswerContainer.innerHTML = '';
-        var label = document.createElement('label');
-        label.textContent = 'Select the correct answer:';
-        correctAnswerContainer.appendChild(label);
-    }
-
-    optionsContainer.innerHTML = ''; // Clear existing options
-
-    // True/False question type handling
-    if (selectedType == '1') { // True/False
-        var trueOption = document.createElement('option');
-        trueOption.value = 'True';
-        trueOption.text = 'True';
-
-        var falseOption = document.createElement('option');
-        falseOption.value = 'False';
-        falseOption.text = 'False';
-
-        var select = document.createElement('select');
-        select.className = 'form-control';
-        select.name = `Questions[${questionIndex}].CorrectOptionText`;
-        select.appendChild(trueOption);
-        select.appendChild(falseOption);
-
-        correctAnswerContainer.appendChild(select);
-    }
-    // Single Answer MCQ or Multi-Answer MCQ handling
-    else if (selectedType == '2' || selectedType == '3') {
-        // Create one initial option field for SingleAnswerMCQ and MultiAnswerMCQ
-        createOptionField(questionIndex, 0);
-
-        // Add the "Add Option" button
-        var addOptionButton = document.createElement('button');
-        addOptionButton.type = 'button';
-        addOptionButton.className = 'btn btn-secondary btn-sm add-option';
-        addOptionButton.textContent = 'Add Option';
-        addOptionButton.setAttribute('data-question-index', questionIndex);
-        optionsContainer.appendChild(addOptionButton);
-
-        // Create a select or multi-select dropdown for correct answers
-        var select = document.createElement('select');
-        select.className = 'form-control';
-        select.name = `Questions[${questionIndex}].CorrectOptionText`;
-        if (selectedType == '3') {
-            select.multiple = true; // Allow multiple selection for Multi-Answer MCQ
-            select.classList.add('multi-select'); // Mark for Select2 initialization
+            // Call the function to update the fields based on the selected question type
+            updateQuestionTypeFields(questionIndex, selectedType);
         }
-        select.required = true;
+    });
 
-        correctAnswerContainer.appendChild(select);
+    function updateQuestionTypeFields(questionIndex, selectedType) {
+        var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
 
-        // Update the dropdown with the available options
-        updateDropdown(questionIndex);
+        // Find or create the correct answer container (for True/False, MCQs, etc.)
+        var correctAnswerContainer = document.querySelector(`[data-index='${questionIndex}'] .correct-answer-container`);
 
-        // Initialize Select2 for multi-select dropdown
-        if (selectedType == '3') {
-            $(`[data-index='${questionIndex}'] .multi-select`).select2({
-                placeholder: "Select correct answers",
-                allowClear: true
-            });
+        // If the correct answer container doesn't exist, create it
+        if (!correctAnswerContainer) {
+            correctAnswerContainer = document.createElement('div');
+            correctAnswerContainer.className = 'form-group correct-answer-container';
+            var label = document.createElement('label');
+            label.textContent = 'Select the correct answer:';
+            correctAnswerContainer.appendChild(label);
+            document.querySelector(`[data-index='${questionIndex}'] .card-body`).appendChild(correctAnswerContainer);
+        } else {
+            // Clear the existing correct answer container
+            correctAnswerContainer.innerHTML = '';
+            var label = document.createElement('label');
+            label.textContent = 'Select the correct answer:';
+            correctAnswerContainer.appendChild(label);
+        }
+
+        optionsContainer.innerHTML = ''; // Clear existing options
+
+        // True/False question type handling
+        if (selectedType == '1') { // True/False
+            var trueOption = document.createElement('option');
+            trueOption.value = 'True';
+            trueOption.text = 'True';
+
+            var falseOption = document.createElement('option');
+            falseOption.value = 'False';
+            falseOption.text = 'False';
+
+            var select = document.createElement('select');
+            select.className = 'form-control';
+            select.name = `Questions[${questionIndex}].CorrectOptionText`;
+            select.appendChild(trueOption);
+            select.appendChild(falseOption);
+
+            correctAnswerContainer.appendChild(select);
+        }
+        // Single Answer MCQ or Multi-Answer MCQ handling
+        else if (selectedType == '2' || selectedType == '3') {
+            // Create one initial option field for SingleAnswerMCQ and MultiAnswerMCQ
+            createOptionField(questionIndex, 0);
+
+            // Add the "Add Option" button
+            var addOptionButton = document.createElement('button');
+            addOptionButton.type = 'button';
+            addOptionButton.className = 'btn btn-secondary btn-sm add-option';
+            addOptionButton.textContent = 'Add Option';
+            addOptionButton.setAttribute('data-question-index', questionIndex);
+            optionsContainer.appendChild(addOptionButton);
+
+            // Create a select or multi-select dropdown for correct answers
+            var select = document.createElement('select');
+            select.className = 'form-control';
+            select.name = `Questions[${questionIndex}].CorrectOptionText`;
+            if (selectedType == '3') {
+                select.multiple = true; // Allow multiple selection for Multi-Answer MCQ
+                select.classList.add('multi-select'); // Mark for Select2 initialization
+            }
+            select.required = true;
+
+            correctAnswerContainer.appendChild(select);
+
+            // Update the dropdown with the available options
+            updateDropdown(questionIndex);
+
+            // Initialize Select2 for multi-select dropdown
+            if (selectedType == '3') {
+                $(`[data-index='${questionIndex}'] .multi-select`).select2({
+                    placeholder: "Select correct answers",
+                    allowClear: true
+                });
+            }
         }
     }
-}
 
-// Function to create an option field dynamically
+    // Function to create an option field dynamically
     function createOptionField(questionIndex, optionIndex) {
         var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
 
@@ -617,44 +623,44 @@ function updateQuestionTypeFields(questionIndex, selectedType) {
         updateDropdown(questionIndex); // Update the dropdown
     }
 
-// Additional quiz logic for options and questions
-function updateDropdown(questionIndex) {
-    var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
-    var select = document.querySelector(`[data-index='${questionIndex}'] select[name*='CorrectOptionText']`);
+    // Additional quiz logic for options and questions
+    function updateDropdown(questionIndex) {
+        var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
+        var select = document.querySelector(`[data-index='${questionIndex}'] select[name*='CorrectOptionText']`);
 
-    // Ensure the select element exists before attempting to update it
-    if (select === null) {
-        console.error('CorrectOptionText select element not found for questionIndex:', questionIndex);
-        return;
-    }
+        // Ensure the select element exists before attempting to update it
+        if (select === null) {
+            console.error('CorrectOptionText select element not found for questionIndex:', questionIndex);
+            return;
+        }
 
-    select.innerHTML = ''; // Clear existing options
+        select.innerHTML = ''; // Clear existing options
 
-    var inputs = optionsContainer.querySelectorAll('input[type="text"]');
-    inputs.forEach(function (input) {
-        var option = document.createElement('option');
-        option.value = input.value; // Use input value as option value
-        option.text = input.value;
-        select.appendChild(option);
-    });
-
-    // Initialize Select2 for the multi-select if required
-    if (select.classList.contains('multi-select')) {
-        $(`[data-index='${questionIndex}'] .multi-select`).select2({
-            placeholder: "Select correct answers",
-            allowClear: true
+        var inputs = optionsContainer.querySelectorAll('input[type="text"]');
+        inputs.forEach(function (input) {
+            var option = document.createElement('option');
+            option.value = input.value; // Use input value as option value
+            option.text = input.value;
+            select.appendChild(option);
         });
+
+        // Initialize Select2 for the multi-select if required
+        if (select.classList.contains('multi-select')) {
+            $(`[data-index='${questionIndex}'] .multi-select`).select2({
+                placeholder: "Select correct answers",
+                allowClear: true
+            });
+        }
     }
-}
 
-function getOptions(questionIndex) {
-    var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
-    return Array.from(optionsContainer.querySelectorAll('input[type="text"]')).map(input => input.value.trim());
-}
+    function getOptions(questionIndex) {
+        var optionsContainer = document.querySelector(`[data-index='${questionIndex}'] .options-container`);
+        return Array.from(optionsContainer.querySelectorAll('input[type="text"]')).map(input => input.value.trim());
+    }
 
-function isOptionUnique(options, newValue) {
-    return options.filter(option => option === newValue).length === 1;
-}
+    function isOptionUnique(options, newValue) {
+        return options.filter(option => option === newValue).length === 1;
+    }
     function showInvalidOptionsPopup(message) {
         // Set the message in the modal body dynamically
         document.getElementById('invalidOptionsMessage').innerHTML = message;
@@ -669,33 +675,33 @@ function isOptionUnique(options, newValue) {
 
 
 
-document.addEventListener('input', function (e) {
-    if (e.target && e.target.matches('.option-group input[type="text"]')) {
-        var questionCard = e.target.closest('.card');
-        var questionIndex = questionCard.getAttribute('data-index');
-        var allOptions = getOptions(questionIndex);
-        var newValue = e.target.value.trim();
+    document.addEventListener('input', function (e) {
+        if (e.target && e.target.matches('.option-group input[type="text"]')) {
+            var questionCard = e.target.closest('.card');
+            var questionIndex = questionCard.getAttribute('data-index');
+            var allOptions = getOptions(questionIndex);
+            var newValue = e.target.value.trim();
 
-        // Update dropdown for correct answer
-        updateDropdown(questionIndex);
+            // Update dropdown for correct answer
+            updateDropdown(questionIndex);
 
-        // Remove existing validation classes
-        var optionInputs = document.querySelectorAll(`[data-index='${questionIndex}'] .option-group input[type="text"]`);
-        optionInputs.forEach(function (input) {
-            input.classList.remove('is-invalid');
-        });
+            // Remove existing validation classes
+            var optionInputs = document.querySelectorAll(`[data-index='${questionIndex}'] .option-group input[type="text"]`);
+            optionInputs.forEach(function (input) {
+                input.classList.remove('is-invalid');
+            });
 
-        // Apply invalid class only to duplicate options
-        allOptions.forEach(function (option) {
-            if (!isOptionUnique(allOptions, option)) {
-                var invalidInputs = Array.from(optionInputs).filter(input => input.value.trim() === option);
-                invalidInputs.forEach(input => input.classList.add('is-invalid'));
-            }
-        });
-    }
-});
+            // Apply invalid class only to duplicate options
+            allOptions.forEach(function (option) {
+                if (!isOptionUnique(allOptions, option)) {
+                    var invalidInputs = Array.from(optionInputs).filter(input => input.value.trim() === option);
+                    invalidInputs.forEach(input => input.classList.add('is-invalid'));
+                }
+            });
+        }
+    });
 
-// Event listener to handle the addition of new option fields
+    // Event listener to handle the addition of new option fields
     document.addEventListener('click', function (e) {
         if (e.target && e.target.matches('.add-option')) {
             var questionIndex = e.target.getAttribute('data-question-index');
@@ -792,21 +798,21 @@ document.addEventListener('input', function (e) {
             });
         });
     }
-function updateIndexes() {
-    var cards = document.querySelectorAll('#quiz-container .card');
-    cards.forEach(function (card, index) {
-        card.setAttribute('data-index', index);
-        card.querySelector('.card-title').textContent = `Question ${index + 1}:`;
-        var inputs = card.querySelectorAll('input, select');
-        inputs.forEach(function (input) {
-            var name = input.getAttribute('name');
-            if (name) {
-                var newName = name.replace(/Questions\[\d+\]/, `Questions[${index}]`);
-                input.setAttribute('name', newName);
-            }
+    function updateIndexes() {
+        var cards = document.querySelectorAll('#quiz-container .card');
+        cards.forEach(function (card, index) {
+            card.setAttribute('data-index', index);
+            card.querySelector('.card-title').textContent = `Question ${index + 1}:`;
+            var inputs = card.querySelectorAll('input, select');
+            inputs.forEach(function (input) {
+                var name = input.getAttribute('name');
+                if (name) {
+                    var newName = name.replace(/Questions\[\d+\]/, `Questions[${index}]`);
+                    input.setAttribute('name', newName);
+                }
+            });
         });
-    });
-}
+    }
 
     function validateQuiz() {
         var isValid = true;
