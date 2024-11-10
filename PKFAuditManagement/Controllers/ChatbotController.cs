@@ -85,17 +85,13 @@ namespace PKFAuditManagement.Controllers
                 FilePath = $"/RAGDocuments/{fileName}"
             };
 
+
             //    Read a list of paragraphs from the PDF uploaded
-                //List<string> paragraphs = PdfReader.ReadPdf(filePath);
+            List<(string SectionTitle, string Chunk)> paragraphs = PdfReader.ReadPdf(filePath);
 
-                List<(string SectionTitle, string Chunk)> paragraphs = PdfReader.ReadPdf(filePath);
+            // Paragraphs read will be saved to MongoDB collection
+            await _mongoDBService.SaveParagraphsToMongoDBAsync(paragraphs, documentName);
 
-            //    // Paragraphs read will be saved to MongoDB collection
-                await _mongoDBService.SaveParagraphsToMongoDBAsync(paragraphs, documentName);
-
-            //    // Return the generated response
-
-            // Save the document to the database 
             try
             {
                 _context.Add(document);

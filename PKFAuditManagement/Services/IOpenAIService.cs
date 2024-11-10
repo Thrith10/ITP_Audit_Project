@@ -91,7 +91,6 @@ namespace PKFAuditManagement.Services
                 // Retrieve message content from the response
                 string messageContent = choice.Message.Content.ToString();
 
-
                 // Add the assistant's response to the chat history
                 chatHistory.Add(new Message(Role.Assistant, messageContent));
 
@@ -145,6 +144,7 @@ namespace PKFAuditManagement.Services
             });
 
             return messageContent;
+            //return $"{messageContent}{Environment.NewLine}{Environment.NewLine}Cited from \"{documentName}\"";
         }
 
     }
