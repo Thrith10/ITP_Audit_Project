@@ -115,10 +115,16 @@
         th {
             width: 30%;
         }
-
+ 
         th.actions,
         td.actions {
             width: 25%;
+     
+        }
+
+        .actions .btn {
+
+            margin-bottom: 0.5rem; /* Vertical spacing when wrapping */
         }
 
         /* Styling for tabs */
@@ -138,6 +144,25 @@
         .tab-content .table {
             margin-top: 1rem;
         }
+        /* Additional styling to allow text wrapping in date-time columns */
+        th.date-time,
+        td.date-time {
+            width: 15%; /* Adjusted to allow more space for wrapping */
+            white-space: normal; /* Enable text wrapping for date-time columns */
+            word-wrap: break-word;
+        }
+
+        /* Scrollable table on small screens */
+        .table-responsive {
+            overflow-x: auto;
+            display: block;
+        }
+
+        /* Reduced font size for smaller screens in table */
+        .small-screen-font {
+            font-size: 0.875rem;
+        }
+
     </style>
 
 </head>
@@ -150,12 +175,21 @@
                     <div class="row">
                         <div class="col-xxl-12 col-md-12">
                             <div class="card info-card customers-card">
-                                <div class="card-header d-flex justify-content-between">
-                                    <h class="card-title">All Quizzes</h>
-                                    <a href="@Url.Action("Create", "Quizzes")" class="btn btn-primary btn-sm" id="create-btn">
-                                        Create Quiz
-                                    </a>
+                                <div class="card info-card customers-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h class="card-title">All Quizzes</h>
+                                        <div class="button-group d-flex gap-2">
+                                            <!-- Container for buttons with gap -->
+                                            <a href="@Url.Action("Create", "Quizzes")" class="btn btn-primary btn-sm" id="create-quiz-btn">
+                                                Create Quiz
+                                            </a>
+                                            <a href="@Url.Action("ViewAllFeedbackForms", "Feedback")" class="btn btn-primary btn-sm" id="view-feedback-forms-btn">
+                                                View Feedback Forms
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div class="card-body">
                                     <div class="form-container">
                                         @if (TempData["SuccessMessage"] != null)
@@ -192,6 +226,7 @@
                                                 @if (Model.Quizzes.Where(q => q.QuizEnd > DateTime.Now).OrderByDescending(q => q.QuizStart).Any())
                                                 {
                                                     <div class="table-container">
+                                                        <div class="table-responsive">
                                                         <table class="table table-bordered table-striped" id="upcomingQuizTable">
                                                             <thead class="table-dark">
                                                                 <tr>
@@ -225,6 +260,7 @@
 
                                                         </table>
                                                     </div>
+                                                    </div>
                                                 }
                                                 else
                                                 {
@@ -243,6 +279,7 @@
                                                 @if (Model.Quizzes.Where(q => q.QuizEnd < DateTime.Now).OrderByDescending(q => q.QuizEnd).Any())
                                                 {
                                                     <div class="table-container">
+                                                        <div class="table-responsive">
                                                         <table class="table table-bordered table-striped" id="pastQuizTable">
                                                             <thead class="table-dark">
                                                                 <tr>
@@ -275,6 +312,7 @@
                                                             </tbody>
 
                                                         </table>
+                                                    </div>
                                                     </div>
                                                 }
                                                 else

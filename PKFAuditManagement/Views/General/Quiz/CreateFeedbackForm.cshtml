@@ -1,0 +1,135 @@
+﻿@model PKFAuditManagement.ViewModels.FeedbackFormViewModel
+
+<section class="section dashboard d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+    <div class="col-12 col-lg-8">
+        <!-- Mega Card -->
+        <div class="card shadow-lg p-4 mb-5 bg-white rounded">
+            <div class="card-header text-center">
+                <h2 class="card-title mb-0" style="font-size: 1.75rem; font-weight: bold;">Create Feedback Form</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-container">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+                    <form asp-action="CreateFeedback" method="post">
+                        <!-- Feedback Form Title -->
+                        <div class="form-group mb-3">
+                            <label for="Title" class="form-label font-weight-bold" style="font-weight: bold;">Feedback Form Title</label>
+                            <input type="text" class="form-control form-control-lg" id="Title" name="Title" value="@Model.Title" required />
+                        </div>
+
+                        <!-- Questions Section with Scrollable Area -->
+                        <div id="feedback-form-container" style="max-height: 400px; overflow-y: auto;">
+                            @for (int i = 0; i < Model.Questions.Count; i++)
+                            {
+                                <div class="card mb-3 shadow-sm" data-index="@i">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="card-title">Question @(i + 1):</h5>
+                                            @if (i > 0)
+                                            {
+                                                <button type="button" class="btn btn-danger btn-sm remove-question">
+                                                    <i class="bi bi-trash"></i> Remove Question
+                                                </button>
+                                            }
+                                        </div>
+
+                                        <!-- Question Type Dropdown -->
+                                        <div class="form-group mb-2">
+                                            <label for="Questions[@i].Type" class="form-label">Question Type</label>
+                                            @{
+                                                var options = new List<string>();
+                                                foreach (var type in Enum.GetValues(typeof(PKFAuditManagement.Models.FeedbackType)))
+                                                {
+                                                    bool isSelected = Model.Questions[i].Type.Equals((FeedbackType)type);
+                                                    string selectedAttribute = isSelected ? "selected=\"selected\"" : "";
+                                                    options.Add($"<option value=\"{type}\" {selectedAttribute}>{type}</option>");
+                                                }
+                                            }
+                                            <select class="form-control" name="Questions[@i].Type" required>
+                                                <option value="" disabled selected>Select the Question Type</option>
+                                                @Html.Raw(string.Join("", options))
+                                            </select>
+                                        </div>
+
+                                        <!-- Question Text -->
+                                        <div class="form-group mb-2">
+                                            <label for="Questions[@i].QuestionText" class="form-label">Question Text</label>
+                                            <input type="text" class="form-control" name="Questions[@i].QuestionText" value="@Model.Questions[i].QuestionText" required />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Buttons to Add Questions and Submit -->
+                        <div class="btn-container d-flex gap-3 mt-4 justify-content-center">
+                            <button type="button" class="btn btn-secondary btn-lg add-question" id="add-question">
+                                <i class="bi bi-plus-lg"></i> Add Question
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg">Save Feedback Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- End of Mega Card -->
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Automatically hide the sidebar if it exists
+            $('#sidebar').addClass('collapsed'); // Adjust ID based on your actual sidebar component
+
+            // Add new question
+            $('#add-question').on('click', function () {
+                var index = $('#feedback-form-container .card').length;
+
+                var newQuestionHtml = `
+                            <div class="card mb-3 shadow-sm" data-index="${index}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="card-title">Question ${index + 1}:</h5>
+                                        <button type="button" class="btn btn-danger btn-sm remove-question">
+                                            <i class="bi bi-trash"></i> Remove Question
+                                        </button>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label for="Questions[${index}].Type" class="form-label">Question Type</label>
+                                        <select class="form-control" name="Questions[${index}].Type" required>
+                                            <option value="" disabled selected>Select the Question Type</option>
+        @foreach (var type in Enum.GetValues(typeof(PKFAuditManagement.Models.FeedbackType)))
+        {
+                                                    <option value="@type">@type</option>
+        }
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label for="Questions[${index}].QuestionText" class="form-label">Question Text</label>
+                                        <input type="text" class="form-control" name="Questions[${index}].QuestionText" required />
+                                    </div>
+                                </div>
+                            </div>`;
+                $('#feedback-form-container').append(newQuestionHtml);
+            });
+
+            // Remove question
+            $(document).on('click', '.remove-question', function () {
+                $(this).closest('.card').remove();
+                // Reindex remaining questions
+                $('#feedback-form-container .card').each(function (index) {
+                    $(this).attr('data-index', index);
+                    $(this).find('.card-title').text('Question ' + (index + 1) + ':');
+                    $(this).find('input[name^="Questions["]').attr('name', `Questions[${index}].QuestionText`);
+                    $(this).find('select[name^="Questions["]').attr('name', `Questions[${index}].Type`);
+                });
+            });
+        });
+    </script>
+}

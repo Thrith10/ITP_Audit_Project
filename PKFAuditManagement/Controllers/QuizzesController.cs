@@ -68,6 +68,8 @@ namespace PKFAuditManagement.Controllers
                     QuizEnd = quizViewModel.QuizEnd,
                     CreatedBy = userId,
                     CreatedDate = DateTime.Now,
+                    FeedbackFormID = quizViewModel.SelectedFeedbackFormId 
+
                 };
 
                 // Add the quiz to the context first to generate the QuizID
@@ -170,6 +172,21 @@ namespace PKFAuditManagement.Controllers
                     }
 
                     await _context.SaveChangesAsync();
+                }
+                // Handle topics
+                if (quizViewModel.Topics != null && quizViewModel.Topics.Any())
+                {
+                    foreach (var topicViewModel in quizViewModel.Topics)
+                    {
+                        var quizTopic = new QuizTopic
+                        {
+                            QuizID = quiz.QuizID,
+                            Name = topicViewModel.Name
+                        };
+                        _context.QuizTopic.Add(quizTopic);
+                    }
+
+                    await _context.SaveChangesAsync(); // Save all topics linked to the quiz
                 }
 
                 TempData["SuccessMessage"] = "Quiz created successfully!";
@@ -635,12 +652,25 @@ namespace PKFAuditManagement.Controllers
             return Json(new { qrCodeImage });
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllWithUserRole()
         {
+            // Get the role ID for the "User" role
+            var userRoleId = await _context.Roles
+                .Where(r => r.Name == "User")
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrEmpty(userRoleId))
+            {
+                return Json(new List<UserViewModel>()); // Return an empty list if the role is not found
+            }
+
+            // Fetch users with the "User" role
             var users = await _context.Users
+                .Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == userRoleId))
                 .Select(u => new UserViewModel
                 {
-                    Email = u.Email,  // Ensure email is properly fetched
+                    Email = u.Email,
                     UserId = u.Id,
                     UserName = u.UserName
                 })
@@ -648,6 +678,7 @@ namespace PKFAuditManagement.Controllers
 
             return Json(users);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> EmailValidation([FromBody] List<string> emails)
@@ -734,6 +765,30 @@ namespace PKFAuditManagement.Controllers
 
             // Return the existing ManualQuizCreation PartialView with the mapped QuizViewModel
             return PartialView("~/Views/General/Quiz/QuizAutoFilled.cshtml", quizViewModel);
+        }
+
+        // GET: Feedback/GetFeedbackForms
+        [HttpGet]
+        public async Task<IActionResult> GetFeedbackForms()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var userId = currentUser?.Id;
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var feedbackForms = await _context.FeedbackForms
+                .Where(f => f.CreatedBy == userId) // Filter by current user's ID
+                .Select(f => new
+                {
+                    Id = f.FeedbackFormID,
+                    Title = f.Title
+                })
+                .ToListAsync();
+
+            return Json(feedbackForms);
         }
 
 

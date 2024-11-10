@@ -1,0 +1,174 @@
+﻿@model PKFAuditManagement.ViewModels.FeedbackFormListViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Existing styles... */
+        .form-container {
+            padding: 20px;
+        }
+
+        .table-container {
+            margin-top: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #012970;
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #create-btn {
+            padding: 4px 12px;
+            font-size: 0.875rem;
+        }
+
+        .actions .btn {
+            margin-bottom: 0.5rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <main id="main" class="main">
+        <section class="section dashboard">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card info-card customers-card">
+                        <div class="card-header d-flex justify-content-between">
+                            <h class="card-title">All Feedback Forms</h>
+                            <a href="@Url.Action("CreateFeedback", "Feedback")" class="btn btn-primary btn-sm" id="create-btn">
+                                Create Feedback Form
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-container">
+                                @if (TempData["SuccessMessage"] != null)
+                                {
+                                    <div class="alert alert-success">
+                                        @TempData["SuccessMessage"]
+                                    </div>
+                                }
+                                @if (TempData["ErrorMessage"] != null)
+                                {
+                                    <div class="alert alert-danger">
+                                        @Html.Raw(TempData["ErrorMessage"].ToString())
+                                    </div>
+                                }
+
+                                @if (Model.FeedbackForms.Any())
+                                {
+                                    <div class="table-container">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Feedback Form Title</th>
+                                                        <th class="date-time">Created Date</th>
+                                                        <th class="actions">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var form in Model.FeedbackForms)
+                                                    {
+                                                        <tr>
+                                                            <td>@form.Title</td>
+                                                            <td class="date-time">
+                                                                @(form.CreatedDate.HasValue ? form.CreatedDate.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")
+                                                            </td>
+                                                            <td class="actions">
+                                                                <a href="@Url.Action("ViewFeedbackForm", "Feedback", new { id = form.FeedbackFormID })" class="btn btn-primary btn-sm">View Details</a>
+                                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-feedback-id="@form.FeedbackFormID">
+                                                                    <i class="bi bi-trash"></i> Delete Form
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-feedback-container">
+                                        <i class="bi bi-folder-x icon"></i>
+                                        <h5>No Feedback Forms Available</h5>
+                                        <a href="@Url.Action("CreateFeedback", "Feedback")" class="btn btn-primary btn-sm">Create Feedback Form</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Feedback Form Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (TempData["LinkedQuizzes"] != null)
+                    {
+                        <p class="text-danger">
+                            This feedback form is linked to the following quizzes and cannot be deleted until they are removed:
+                        </p>
+                        <ul>
+                            @foreach (var quiz in TempData["LinkedQuizzes"] as List<string>)
+                            {
+                                <li>@quiz</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>Are you sure you want to delete this feedback form? This action cannot be undone.</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteForm" method="post" asp-action="DeleteFeedbackForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="feedbackFormID" name="feedbackFormID" value="" />
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        @if (TempData["LinkedQuizzes"] == null)
+                        {
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Handle Delete button click
+            $('#deleteModal').on('show.bs.modal', function (e) {
+                var feedbackFormID = $(e.relatedTarget).data('feedback-id');
+                $('#feedbackFormID').val(feedbackFormID);
+            });
+        });
+    </script>
+</body>
+</html>

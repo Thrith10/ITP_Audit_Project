@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -22,5 +23,13 @@ namespace PKFAuditManagement.Models
         public DateTime QuizEnd { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
+        // New property: List of topics
+        public ICollection<QuizTopic> Topics { get; set; } = new List<QuizTopic>();
+
+        public Guid FeedbackFormID { get; set; } // Foreign key to the associated Feedback Form
+        // Navigation properties
+        public FeedbackForm FeedbackForm { get; set; } // The feedback form attached to this quiz
+        public ICollection<FeedbackResponse> FeedbackResponses { get; set; } = new List<FeedbackResponse>(); // Collection of responses linked to this quiz
+
     }
 }

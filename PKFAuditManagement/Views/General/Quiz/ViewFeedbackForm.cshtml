@@ -1,0 +1,109 @@
+﻿@model PKFAuditManagement.ViewModels.FeedbackFormViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        /* Full-screen container for centering */
+        body, html {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            background-color: #f2f5f9;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Main container styling */
+        .container {
+            max-width: 1000px; /* Made the container much larger */
+            width: 100%;
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Header styling */
+        .header h1 {
+            font-size: 36px; /* Increased font size for title */
+            font-weight: bold;
+            color: #01579b;
+            margin-bottom: 5px;
+        }
+
+        .created-date {
+            font-size: 18px; /* Made the created date font larger */
+            color: #6c757d;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 30px; /* Space between date and questions */
+        }
+
+        /* Styling each question card */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: left;
+            transition: box-shadow 0.3s ease;
+        }
+
+            .question-card:hover {
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            }
+
+        /* Question type and title styling */
+        .question-type, .question-title {
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+            .question-type i, .question-title i {
+                margin-right: 8px;
+            }
+
+        .question-type {
+            color: #ff7043; /* Different color for type */
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+            <h1>@Model.Title</h1>
+        <p class="created-date">
+            <strong>Created Date:</strong> @(Model.CreatedDate.HasValue ? Model.CreatedDate.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")
+        </p>
+
+        <section>
+            @if (Model.Questions != null && Model.Questions.Any())
+            {
+                @foreach (var question in Model.Questions)
+                {
+                    <div class="question-card">
+                        <p class="question-type">
+                            <i class="bi bi-info-circle"></i> Type: @question.Type
+                        </p>
+                        <p class="question-title">
+                            <i class="bi bi-question-circle"></i> Question: @question.QuestionText
+                        </p>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted">No questions available for this feedback form.</p>
+            }
+        </section>
+    </main>
+</body>
+</html>

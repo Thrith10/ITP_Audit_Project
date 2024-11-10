@@ -49,6 +49,14 @@ namespace PKFAuditManagement.Data
         public DbSet<Participants> Participants { get; set; }
         public DbSet<QuizResponse> QuizResponse { get; set; }
         public DbSet<Attempt> Attempt { get; set; }
+           public DbSet<FeedbackForm> FeedbackForms { get; set; }
+        public DbSet<FeedbackQuestion> FeedbackQuestions { get; set; }
+        public DbSet<FeedbackResponse> FeedbackResponses { get; set; }
+        public DbSet<SelfAssessment> SelfAssessment { get; set; } // New DbSet for SelfAssessment
+        public DbSet<SelfAssessmentRating> SelfAssessmentRating { get; set; } // New DbSet for SelfAssessmentRating
+        public DbSet<QuizTopic> QuizTopic { get; set; } // New DbSet for QuizTopic
+
+
 
         // DbSet for Chatbot
         public DbSet<ChatbotDocument> ChatbotDocuments { get; set; }
@@ -66,6 +74,12 @@ namespace PKFAuditManagement.Data
                 .HasMany(q => q.Questions)
                 .WithOne(qn => qn.Quiz)
                 .HasForeignKey(qn => qn.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Quiz>()
+                .HasMany(q => q.Topics)
+                .WithOne(t => t.Quiz)
+                .HasForeignKey(t => t.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Option>()
@@ -86,14 +100,51 @@ namespace PKFAuditManagement.Data
                 .HasForeignKey(qr => qr.QuestionID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-      
-            // New relationships
             modelBuilder.Entity<Attempt>()
                 .HasOne(a => a.Quiz)
                 .WithMany()
                 .HasForeignKey(a => a.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Configure FeedbackForm and its relationships
+            modelBuilder.Entity<FeedbackForm>()
+          .Property(ff => ff.FeedbackFormID)
+          .HasDefaultValueSql("NEWID()");
+
+            modelBuilder.Entity<FeedbackForm>()
+                .HasMany(ff => ff.Questions)
+                .WithOne(q => q.FeedbackForm)
+                .HasForeignKey(q => q.FeedbackFormID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Quiz>()
+                .HasOne(q => q.FeedbackForm)
+                .WithMany() // Assuming a one-to-one relationship from Quiz to FeedbackForm
+                .HasForeignKey(q => q.FeedbackFormID)
+                .OnDelete(DeleteBehavior.Restrict); // Use Restrict instead of Cascade to avoid cycle conflicts
+
+            modelBuilder.Entity<Quiz>()
+                .HasMany(q => q.FeedbackResponses)
+                .WithOne(fr => fr.Quiz)
+                .HasForeignKey(fr => fr.QuizID)
+                .OnDelete(DeleteBehavior.Restrict); // Use Restrict instead of Cascade to avoid cycle conflicts
+
+            modelBuilder.Entity<FeedbackResponse>()
+                .Property(fr => fr.FeedbackResponseID)
+                .HasDefaultValueSql("NEWID()");
+
+
+            modelBuilder.Entity<SelfAssessment>()
+                .HasOne(sa => sa.Quiz)
+                .WithMany()
+                .HasForeignKey(sa => sa.QuizID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SelfAssessmentRating>()
+                .HasOne(sr => sr.SelfAssessment)
+                .WithMany(sa => sa.BeforeRatings)
+                .HasForeignKey(sr => sr.SelfAssessmentID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             new DataSeeder(modelBuilder).Seed();
         }

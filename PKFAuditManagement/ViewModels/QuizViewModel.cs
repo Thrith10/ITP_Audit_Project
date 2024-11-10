@@ -40,9 +40,16 @@ namespace PKFAuditManagement.ViewModels
         public List<QuestionViewModel> Questions { get; set; } = new List<QuestionViewModel>();
         public string? SelectedParticipants { get; set; }
         public string? QRImageURL { get; set; }
+        public List<TopicViewModel> Topics { get; set; } = new List<TopicViewModel>();
+        public Guid SelectedFeedbackFormId { get; set; }
 
-
-
+    }
+    public class TopicViewModel
+    {
+        public Guid TopicID { get; set; }  // Unique identifier for each topic
+        [Required]
+        [StringLength(255)]
+        public string Name { get; set; }  // Name of the topic
     }
     public class QuestionViewModel
     {
