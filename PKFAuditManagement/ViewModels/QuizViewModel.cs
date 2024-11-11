@@ -42,6 +42,8 @@ namespace PKFAuditManagement.ViewModels
         public string? QRImageURL { get; set; }
         public List<TopicViewModel> Topics { get; set; } = new List<TopicViewModel>();
         public Guid SelectedFeedbackFormId { get; set; }
+        public Guid SelectedSelfAssessmentFormId { get; set; } // New field for self-assessment form
+
 
     }
     public class TopicViewModel

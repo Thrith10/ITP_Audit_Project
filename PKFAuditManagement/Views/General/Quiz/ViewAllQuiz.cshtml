@@ -186,6 +186,9 @@
                                             <a href="@Url.Action("ViewAllFeedbackForms", "Feedback")" class="btn btn-primary btn-sm" id="view-feedback-forms-btn">
                                                 View Feedback Forms
                                             </a>
+                                            <a href="@Url.Action("ViewAllSelfAssessmentForms", "SelfAssessment")" class="btn btn-primary btn-sm" id="view-self-assessment-forms-btn">
+                                                View Self Assessment Form
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -247,8 +250,10 @@
                                                                         <td class="date-time">@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
                                                                         <td class="actions">
                                                                             <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">View Details</a>
+                                                                                <button type="button" class="btn btn-warning btn-sm edit-quiz-btn" data-quiz-id="@quiz.QuizID">
+                                                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                                                </button>
                                                                             <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">Show QR Code</button>
-
                                                                             <!-- Button that triggers the Delete Confirmation Modal -->
                                                                             <button type="button" class="btn btn-danger btn-sm" data-bs-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#deleteModal">
                                                                                 <i class="bi bi-trash"></i> Delete
@@ -300,8 +305,10 @@
                                                                             <td class="date-time">@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
                                                                             <td class="actions">
                                                                                 <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">View Details</a>
-                                                                                <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">Show QR Code</button>
-
+                                                                                <button type="button" class="btn btn-warning btn-sm edit-quiz-btn" data-quiz-id="@quiz.QuizID">
+                                                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                                                </button>
+                                                                     
                                                                                 <!-- Button that triggers the Delete Confirmation Modal -->
                                                                                 <button type="button" class="btn btn-danger btn-sm" data-bs-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#deleteModal">
                                                                                     <i class="bi bi-trash"></i> Delete
@@ -403,6 +410,24 @@
             </div>
         </div>
     </div>
+    <!-- Edit Not Allowed Modal -->
+    <div class="modal fade" id="editNotAllowedModal" tabindex="-1" aria-labelledby="editNotAllowedModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editNotAllowedModalLabel">Edit Not Allowed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Editing this quiz is not allowed because there are existing attempts linked to it. Please delete the quiz if you wish to make changes.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Filter Upcoming Quizzes
@@ -477,6 +502,28 @@
                 $(this).toggleClass('ascending', !ascending);
                 $(this).toggleClass('descending', ascending);
                 sortTable(table, colIndex, !ascending);
+            });
+        });
+        $('.edit-quiz-btn').on('click', function () {
+            var quizId = $(this).data('quiz-id');
+
+            // Perform an AJAX request to check for attempts linked to this quiz
+            $.ajax({
+                url: '@Url.Action("CheckQuizAttempts", "Quizzes")', // Controller method to check attempts
+                type: 'POST',
+                data: { id: quizId },
+                success: function (response) {
+                    if (response.hasAttempts) {
+                        // If attempts are linked, show an alert that edit is not allowed
+                        $('#editNotAllowedModal').modal('show'); // Show custom modal for edit restriction
+                    } else {
+                        // Redirect to Edit page if no attempts are linked
+                        window.location.href = '@Url.Action("Edit", "Quizzes")/' + quizId;
+                    }
+                },
+                error: function () {
+                    alert('Error checking quiz attempts.');
+                }
             });
         });
     </script>

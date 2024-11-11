@@ -43,11 +43,12 @@
                                         <button type="button" id="select-participants-btn" class="btn btn-secondary btn-sm">Select Participants</button>
                                         <span class="separator">OR</span>
                                         <button type="button" id="upload-participants-btn" class="btn btn-secondary btn-sm">Upload via Excel</button>
-                                        <p id="selected-participants-text" class="text-muted mt-2">No participants selected</p>
+                                        <p id="selected-participants-text" class="text-muted mt-2" style="cursor: pointer;">No participants selected</p>
                                         <span id="participants-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745;"></span>
                                     </div>
-                                    <input type="file" id="ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
 
+                                 
+                                    <input type="file" id="ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
 
                                     <input type="hidden" id="SelectedParticipants" name="SelectedParticipants" value="@Model.SelectedParticipants" />
                                     <!-- Select Feedback Form Button -->
@@ -61,6 +62,19 @@
 
                                         </p>
                                         <span id="feedback-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745; margin-left: 5px;"></span>
+                                    </div>
+
+                                    <!-- Select Self-Assessment Form Button -->
+                                    <div class="form-group mt-3">
+                                        <!-- Self-Assessment Form Selection Button -->
+                                        <button type="button" class="btn btn-info btn-sm" id="select-self-assessment-form-btn">
+                                            <i class="bi bi-list-check"></i> Select Self-Assessment Form
+                                        </button>
+
+                                        <!-- Hidden input to store selected Self-Assessment Form ID -->
+                                        <input type="hidden" id="SelectedSelfAssessmentFormId" name="SelectedSelfAssessmentFormId" />
+                                        <span id="selected-self-assessment-form-text" class="unselected-text">No self-assessment form selected</span>
+                                        <span id="self-assessment-selected-tick" class="bi bi-check-circle-fill" style="display: none;"></span>
                                     </div>
 
                                     <!-- New Topics Field Section -->
@@ -265,36 +279,82 @@
                                 </div>
 
                                 <!-- Modal for Participants Selection -->
-                                <div id="participants-modal" class="modal">
-                                    <div class="modal-content">
-                                        <span class="close-modal">&times;</span>
-                                        <h5>Select Participants</h5>
+                                <div id="participants-modal" class="modal fade" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Select Participants</h5>
+                                                <button type="button" class="close-modal btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
 
-                                        <!-- Search Box for real-time filtering -->
-                                        <div class="form-group search-box-container">
-                                            <input type="text" id="search-participants" class="form-control" placeholder="Search participants by email" />
-                                            <button type="button" id="select-all-btn" class="btn btn-secondary mt-2">Select All</button>
+                                            <!-- Search Box for real-time filtering -->
+                                            <div class="modal-body">
+                                                <div class="form-group search-box-container">
+                                                    <input type="text" id="search-participants" class="form-control" placeholder="Search participants by email" />
+                                                    <button type="button" id="select-all-btn" class="btn btn-secondary mt-2">Select All</button>
+                                                </div>
 
+                                                <!-- Participants List -->
+                                                <ul id="participants-list" class="list-group mt-3">
+                                                    <!-- Dynamically populated list of participants will go here -->
+                                                </ul>
+                                            </div>
+
+                                            <!-- Pagination Controls and Confirm button -->
+                                            <div class="modal-footer">
+                                                <div id="pagination-controls" class="pagination-controls d-flex justify-content-center align-items-center mt-3 w-100">
+                                                    <button id="prev-page" class="btn btn-outline-primary btn-sm me-2">Previous</button>
+                                                    <span id="current-page-number" class="mx-2">1</span>
+                                                    <button id="next-page" class="btn btn-outline-primary btn-sm ms-2">Next</button>
+                                                </div>
+                                                <button type="button" id="confirm-participants-btn" class="btn btn-primary mt-3">Confirm</button>
+                                            </div>
                                         </div>
-
-                                        <!-- Participants List -->
-                                        <ul id="participants-list" class="list-group">
-                                            <!-- Dynamically populated list of participants will go here -->
-                                        </ul>
-
-                                        <!-- Pagination Controls -->
-                                        <div id="pagination-controls" class="pagination-controls d-flex justify-content-center align-items-center mt-3">
-                                            <button id="prev-page" class="btn btn-outline-primary btn-sm me-2">Previous</button>
-                                            <span id="current-page-number" class="mx-2">1</span>
-                                            <button id="next-page" class="btn btn-outline-primary btn-sm ms-2">Next</button>
-                                        </div>
-
-                                        <!-- Confirm button to finalize selection -->
-                                        <button type="button" id="confirm-participants-btn" class="btn btn-primary mt-3">Confirm</button>
                                     </div>
                                 </div>
 
+                                <!-- Modal for displaying selected participants -->
+                                <div id="selected-participants-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="selectedParticipantsModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="selectedParticipantsModalLabel">Selected Participants</h5>
+                                                <button type="button" id="close-selected-participants-modal" class="btn-close" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <ul id="selected-participants-list" class="list-group">
+                                                    <!-- Dynamically populated list of selected participants -->
+                                                </ul>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" id="close-participants-modal-btn" class="btn btn-secondary">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Self-Assessment Form Modal -->
+                                <div id="self-assessment-form-modal" class="modal" style="display: none;">
+                                    <div class="modal-content">
+                                        <span id="close-self-assessment-form-modal" class="close-modal">&times;</span>
+                                        <h5>Select Self-Assessment Form</h5>
 
+                                        <!-- Search box for filtering self-assessment forms -->
+                                        <input type="text" id="search-self-assessment-form-input" placeholder="Search self-assessment forms" class="form-control mb-3">
+
+                                        <!-- Self-Assessment Forms List -->
+                                        <ul id="self-assessment-form-list-container" class="list-group mb-3"></ul>
+
+                                        <!-- Pagination controls for Self-Assessment Forms -->
+                                        <div class="pagination-controls mt-3 d-flex justify-content-center">
+                                            <button id="prev-self-assessment-form-page" class="btn btn-secondary">Prev</button>
+                                            <span id="current-self-assessment-form-page-number" class="mx-3">Page 1</span>
+                                            <button id="next-self-assessment-form-page" class="btn btn-secondary">Next</button>
+                                        </div>
+
+                                        <!-- Confirm selection button -->
+                                        <button type="button" id="confirm-self-assessment-form-selection-btn" class="btn btn-primary mt-3">Confirm Selection</button>
+                                    </div>
+                                </div>
 
                                 <!-- Invalid Options Modal -->
                                 <div class="modal fade" id="invalidOptionsModal" tabindex="-1" aria-labelledby="invalidOptionsModalLabel" aria-hidden="true">

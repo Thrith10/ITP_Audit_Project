@@ -24,8 +24,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Participant Portion
     const selectParticipantsBtn = document.getElementById('select-participants-btn');
-    const participantsModal = document.getElementById('participants-modal');
-    const closeParticipantsModal = document.getElementById('close-participants-modal');
+    const participantsModal = new bootstrap.Modal(document.getElementById('participants-modal'), {
+        backdrop: false, // Prevents closing on clicking outside if desired
+        keyboard: true
+    });    const closeParticipantsModal = document.getElementById('close-participants-modal');
     const confirmParticipantsBtn = document.getElementById('confirm-participants-btn');
     const participantsList = document.getElementById('participants-list');
     const selectedParticipantsInput = document.getElementById('SelectedParticipants');
@@ -39,6 +41,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectAllBtn = document.getElementById('select-all-btn');
     let isSelectAll = false; // To track the select/deselect state
 
+    //Check selected participants modal
+    const selectedParticipantsModal = new bootstrap.Modal(document.getElementById("selected-participants-modal"), {
+        backdrop: false // This disables the backdrop
+    });
+    const selectedParticipantsList = document.getElementById("selected-participants-list");
+    const closeParticipantsModalBtn = document.getElementById("close-participants-modal-btn");
+
+    //Self-Assessment
+    const selfAssessmentFormListContainer = document.getElementById('self-assessment-form-list-container');
+    const closeSelfAssessmentFormModal = document.getElementById('close-self-assessment-form-modal');
+    const confirmSelfAssessmentFormSelectionBtn = document.getElementById('confirm-self-assessment-form-selection-btn');
+    const selectedSelfAssessmentFormIdInput = document.getElementById('SelectedSelfAssessmentFormId');
+    const searchSelfAssessmentFormInput = document.getElementById('search-self-assessment-form-input');
+    const prevSelfAssessmentFormPageBtn = document.getElementById('prev-self-assessment-form-page');
+    const nextSelfAssessmentFormPageBtn = document.getElementById('next-self-assessment-form-page');
+    const currentSelfAssessmentFormPageNumber = document.getElementById('current-self-assessment-form-page-number');
+    const selectedSelfAssessmentFormText = document.getElementById('selected-self-assessment-form-text'); // Display element for selected form
+    const selfAssessmentFormSelectedTick = document.getElementById('self-assessment-selected-tick'); // Green tick icon
+
+    // Ensure default values for pagination and form data
+    let allSelfAssessmentForms = [];
+    let currentSelfAssessmentFormPage = 1;
+    const selfAssessmentFormsPerPage = 10;
 
 
 
@@ -186,6 +211,108 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    //Self-Assessment
+    function loadSelfAssessmentForms() {
+        fetch('/Quizzes/GetSelfAssessmentForms') // Replace with the actual endpoint for self-assessment forms
+            .then(response => response.json())
+            .then(data => {
+                allSelfAssessmentForms = data;
+                currentSelfAssessmentFormPage = 1;
+                renderSelfAssessmentFormList();
+            })
+            .catch(error => console.error('Error fetching self-assessment forms:', error));
+    }
+
+    function renderSelfAssessmentFormList() {
+        const searchTerm = searchSelfAssessmentFormInput.value.toLowerCase();
+        const filteredSelfAssessmentForms = allSelfAssessmentForms.filter(form =>
+            form.title.toLowerCase().includes(searchTerm)
+        );
+
+        const startIndex = (currentSelfAssessmentFormPage - 1) * selfAssessmentFormsPerPage;
+        const endIndex = startIndex + selfAssessmentFormsPerPage;
+        const paginatedSelfAssessmentForms = filteredSelfAssessmentForms.slice(startIndex, endIndex);
+
+        selfAssessmentFormListContainer.innerHTML = '';
+
+        paginatedSelfAssessmentForms.forEach(form => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item list-group-item-action';
+            listItem.textContent = form.title;
+            listItem.dataset.id = form.id;
+
+            listItem.addEventListener('click', function () {
+                selfAssessmentFormListContainer.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+                listItem.classList.add('active');
+
+                // Set the hidden input value with the selected form ID
+                selectedSelfAssessmentFormIdInput.value = form.id;
+
+                // Update the display text to show the selected self-assessment form title
+                selectedSelfAssessmentFormText.textContent = form.title;
+                selectedSelfAssessmentFormText.classList.add('selected'); // Add class for styling
+
+                // Show the green tick beside the selected form text
+                selfAssessmentFormSelectedTick.style.display = 'inline';
+            });
+
+            selfAssessmentFormListContainer.appendChild(listItem);
+        });
+
+        updateSelfAssessmentFormPaginationControls(filteredSelfAssessmentForms.length);
+    }
+
+    function updateSelfAssessmentFormPaginationControls(totalItems) {
+        const totalPages = Math.ceil(totalItems / selfAssessmentFormsPerPage);
+
+        prevSelfAssessmentFormPageBtn.disabled = currentSelfAssessmentFormPage === 1;
+        nextSelfAssessmentFormPageBtn.disabled = currentSelfAssessmentFormPage === totalPages || totalPages === 0;
+
+        currentSelfAssessmentFormPageNumber.textContent = `Page ${currentSelfAssessmentFormPage} of ${totalPages}`;
+    }
+
+    searchSelfAssessmentFormInput.addEventListener('input', function () {
+        currentSelfAssessmentFormPage = 1;
+        renderSelfAssessmentFormList();
+    });
+
+    prevSelfAssessmentFormPageBtn.addEventListener('click', function () {
+        if (currentSelfAssessmentFormPage > 1) {
+            currentSelfAssessmentFormPage--;
+            renderSelfAssessmentFormList();
+        }
+    });
+
+    nextSelfAssessmentFormPageBtn.addEventListener('click', function () {
+        const totalPages = Math.ceil(
+            allSelfAssessmentForms.filter(form => form.title.toLowerCase().includes(searchSelfAssessmentFormInput.value.toLowerCase())).length / selfAssessmentFormsPerPage
+        );
+        if (currentSelfAssessmentFormPage < totalPages) {
+            currentSelfAssessmentFormPage++;
+            renderSelfAssessmentFormList();
+        }
+    });
+
+    document.getElementById('select-self-assessment-form-btn').addEventListener('click', function () {
+        document.getElementById('self-assessment-form-modal').style.display = 'block';
+        loadSelfAssessmentForms();
+    });
+
+    closeSelfAssessmentFormModal.addEventListener('click', function () {
+        document.getElementById('self-assessment-form-modal').style.display = 'none';
+    });
+
+    confirmSelfAssessmentFormSelectionBtn.addEventListener('click', function () {
+        document.getElementById('self-assessment-form-modal').style.display = 'none';
+    });
+
+    window.addEventListener('click', function (event) {
+        const selfAssessmentFormModal = document.getElementById('self-assessment-form-modal');
+        if (event.target === selfAssessmentFormModal) {
+            selfAssessmentFormModal.style.display = 'none';
+        }
+    });
+
 
 
     // Add new topic
@@ -221,14 +348,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // Open Participants Modal
-
     selectParticipantsBtn.addEventListener('click', function () {
-        participantsModal.style.display = 'block';
+        participantsModal.show();
         loadParticipants();
     });
 
     selectParticipantsBtn.addEventListener('click', function () {
-        participantsModal.style.display = 'block';
+        participantsModal.show();
         loadParticipants();
     });
     // Load participants from the server
@@ -366,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Confirm participant selection
     confirmParticipantsBtn.addEventListener('click', function () {
         selectedParticipantsInput.value = selectedParticipants.join(';'); // Store selected participants in hidden input
-        participantsModal.style.display = 'none'; // Close modal
+        participantsModal.hide();
         updateParticipantsCount();
     });
 
@@ -381,13 +507,36 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-
-
     // Close modal when clicking outside of modal content
     window.addEventListener('click', function (event) {
         if (event.target == participantsModal) {
-            participantsModal.style.display = 'none';
+            participantsModal.hide();
         }
+    });
+    // Event listener to open the modal when "selected-participants-text" is clicked
+    selectedParticipantsText.addEventListener("click", function () {
+        // Clear the list before populating
+        selectedParticipantsList.innerHTML = "";
+
+        // Populate the modal list with selected participants
+        if (selectedParticipants.length === 0) {
+            selectedParticipantsList.innerHTML = "<li class='list-group-item'>No participants selected.</li>";
+        } else {
+            selectedParticipants.forEach(participant => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+                listItem.textContent = participant; // Use participant name or email as needed
+                selectedParticipantsList.appendChild(listItem);
+            });
+        }
+
+        // Show the modal
+        selectedParticipantsModal.show();
+    });
+
+    // Event listener to close the modal
+    closeParticipantsModalBtn.addEventListener("click", function () {
+        selectedParticipantsModal.hide();
     });
 
     // Trigger file input click when 'Upload via Excel' button is clicked
@@ -860,18 +1009,21 @@ document.addEventListener('DOMContentLoaded', function () {
             multiSelect.parentElement.appendChild(hiddenInput);
         });
 
-        // Validation for feedback form and topics
+        // Validation for feedback form, self-assessment form, and topics
         const feedbackFormIdInput = document.getElementById('SelectedFeedbackFormId');
+        const selfAssessmentFormIdInput = document.getElementById('SelectedSelfAssessmentFormId'); // Ensure this input exists for self-assessment selection
         const topicsContainer = document.getElementById('topics-container');
         const topicInputs = topicsContainer.querySelectorAll('input[type="text"]');
         const hasTopics = Array.from(topicInputs).some(input => input.value.trim() !== '');
         const hasFeedbackForm = feedbackFormIdInput && feedbackFormIdInput.value.trim() !== '';
+        const hasSelfAssessmentForm = selfAssessmentFormIdInput && selfAssessmentFormIdInput.value.trim() !== '';
 
-        // Display errors in a modal and prevent form submission if topics or feedback form are missing
-        if (!hasTopics || !hasFeedbackForm) {
+        // Display errors in a modal and prevent form submission if topics, feedback form, or self-assessment form are missing
+        if (!hasTopics || !hasFeedbackForm || !hasSelfAssessmentForm) {
             let errorMessage = '';
             if (!hasTopics) errorMessage += 'Please add at least one topic.<br>';
             if (!hasFeedbackForm) errorMessage += 'Please select a feedback form.<br>';
+            if (!hasSelfAssessmentForm) errorMessage += 'Please select a self-assessment form.<br>';
 
             showInvalidOptionsPopup(errorMessage); // Display the error message(s) in a modal
             e.preventDefault(); // Prevent form submission
@@ -879,6 +1031,7 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault(); // Prevent form submission if there are other validation errors
         }
     });
+
 
 
 });

@@ -49,11 +49,13 @@ namespace PKFAuditManagement.Data
         public DbSet<Participants> Participants { get; set; }
         public DbSet<QuizResponse> QuizResponse { get; set; }
         public DbSet<Attempt> Attempt { get; set; }
-           public DbSet<FeedbackForm> FeedbackForms { get; set; }
+        public DbSet<FeedbackForm> FeedbackForms { get; set; }
         public DbSet<FeedbackQuestion> FeedbackQuestions { get; set; }
         public DbSet<FeedbackResponse> FeedbackResponses { get; set; }
-        public DbSet<SelfAssessment> SelfAssessment { get; set; } // New DbSet for SelfAssessment
-        public DbSet<SelfAssessmentRating> SelfAssessmentRating { get; set; } // New DbSet for SelfAssessmentRating
+        // DbSet properties for Self-Assessment and Quiz entities
+        public DbSet<SelfAssessmentForm> SelfAssessmentForms { get; set; }
+        public DbSet<SelfAssessmentQuestion> SelfAssessmentQuestions { get; set; }
+        public DbSet<SelfAssessmentResponse> SelfAssessmentResponses { get; set; }
         public DbSet<QuizTopic> QuizTopic { get; set; } // New DbSet for QuizTopic
 
 
@@ -133,18 +135,31 @@ namespace PKFAuditManagement.Data
                 .Property(fr => fr.FeedbackResponseID)
                 .HasDefaultValueSql("NEWID()");
 
+            // SelfAssessmentForm has a one-to-many relationship with SelfAssessmentQuestion
+            modelBuilder.Entity<SelfAssessmentForm>()
+                .HasMany(saf => saf.Questions)
+                .WithOne(q => q.SelfAssessmentForm)
+                .HasForeignKey(q => q.SelfAssessmentFormID)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<SelfAssessment>()
-                .HasOne(sa => sa.Quiz)
+            // SelfAssessmentResponse has a one-to-many relationship with SelfAssessmentQuestion
+            modelBuilder.Entity<SelfAssessmentResponse>()
+                .HasOne(sar => sar.SelfAssessmentQuestion)
                 .WithMany()
-                .HasForeignKey(sa => sa.QuizID)
+                .HasForeignKey(sar => sar.SelfAssessmentQuestionID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<SelfAssessmentRating>()
-                .HasOne(sr => sr.SelfAssessment)
-                .WithMany(sa => sa.BeforeRatings)
-                .HasForeignKey(sr => sr.SelfAssessmentID)
+            // SelfAssessmentResponse has a one-to-one relationship with Quiz (or foreign key relationship)
+            modelBuilder.Entity<SelfAssessmentResponse>()
+                .HasOne(sar => sar.Quiz)
+                .WithMany()
+                .HasForeignKey(sar => sar.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // SelfAssessmentResponse has an enum type property `Stage` stored as a string
+            modelBuilder.Entity<SelfAssessmentResponse>()
+                .Property(sar => sar.Stage)
+                .HasConversion<string>();
 
             new DataSeeder(modelBuilder).Seed();
         }

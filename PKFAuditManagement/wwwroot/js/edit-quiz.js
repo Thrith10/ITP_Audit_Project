@@ -1,18 +1,50 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
-    var selectParticipantsBtn = document.getElementById('select-participants-btn');
-    var participantsModal = document.getElementById('participants-modal');
-    var closeModal = document.querySelector('.close-modal');
-    var confirmParticipantsBtn = document.getElementById('confirm-participants-btn');
-    var participantsList = document.querySelector('.participants-list');
-    var participantsCountSpan = document.getElementById('participants-count');
-    var selectedParticipants = []; // Stores selected participants across all pages
-    var selectedParticipantsInput = document.getElementById('SelectedParticipants'); // Hidden input for selected participants
-    const selectedParticipantsModal = document.getElementById('selectedParticipantsModal');
-    const closeSelectedParticipantsModal = document.getElementById('closeSelectedParticipantsModal');
-    const selectedParticipantsList = document.getElementById('selectedParticipantsList');
+    //Topic
+    var addTopicBtn = document.getElementById('add-topic');
+    var topicsContainer = document.getElementById('topics-container');
+    //Feedback
+    const feedbackFormListContainer = document.getElementById('feedback-form-list-container');
+    const closeFeedbackFormModal = document.getElementById('close-feedback-form-modal');
+    const confirmFeedbackFormSelectionBtn = document.getElementById('confirm-feedback-form-selection-btn');
+    const selectedFeedbackFormIdInput = document.getElementById('SelectedFeedbackFormId');
+    const searchFeedbackFormInput = document.getElementById('search-feedback-form-input');
+    const prevFeedbackFormPageBtn = document.getElementById('prev-feedback-form-page');
+    const nextFeedbackFormPageBtn = document.getElementById('next-feedback-form-page');
+    const currentFeedbackFormPageNumber = document.getElementById('current-feedback-form-page-number');
+    const selectedFeedbackFormText = document.getElementById('selected-feedback-form-text'); // Ensure this targets the correct element
+    const feedbackFormSelectedTick = document.getElementById('feedback-selected-tick'); // Green tick icon for selected form
+
+
+    let allFeedbackForms = [];
+    let currentFeedbackFormPage = 1;
+    const feedbackFormsPerPage = 10;
+
+    //Participant Portion
+    const selectParticipantsBtn = document.getElementById('select-participants-btn');
+    const participantsModal = new bootstrap.Modal(document.getElementById('participants-modal'), {
+        backdrop: false, // Prevents closing on clicking outside if desired
+        keyboard: true
+    }); const closeParticipantsModal = document.getElementById('close-participants-modal');
+    const confirmParticipantsBtn = document.getElementById('confirm-participants-btn');
+    const participantsList = document.getElementById('participants-list');
+    const selectedParticipantsInput = document.getElementById('SelectedParticipants');
+    const selectedParticipantsText = document.getElementById('selected-participants-text');
+    const participantsSelectedTick = document.getElementById('participants-selected-tick');
+    let selectedParticipants = [];
+    let allParticipants = [];
     let currentPage = 1;
-    const emailsPerPage = 30;
-    let totalPages = 1;
+    const participantsPerPage = 10;
+    const searchBox = document.getElementById('search-participants');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    let isSelectAll = false; // To track the select/deselect state
+
+    //Check selected participants modal
+    const selectedParticipantsModal = new bootstrap.Modal(document.getElementById("selected-participants-modal"), {
+        backdrop: false // This disables the backdrop
+    });
+    const selectedParticipantsList = document.getElementById("selected-participants-list");
+    const closeParticipantsModalBtn = document.getElementById("close-participants-modal-btn");
+
     var quizStartInput = document.getElementById('QuizStart');
     var quizEndInput = document.getElementById('QuizEnd');
 
@@ -58,124 +90,331 @@
             quizEndInput.showPicker();
         });
     }
+    function loadFeedbackForms() {
+        fetch('/Quizzes/GetFeedbackForms') // Replace with the actual API endpoint
+            .then(response => response.json())
+            .then(data => {
+                allFeedbackForms = data;
+                currentFeedbackFormPage = 1;
+                renderFeedbackFormList();
+            })
+            .catch(error => console.error('Error fetching feedback forms:', error));
+    }
 
-    // Fetch participants and update participant count
-    participantsCountSpan.addEventListener('click', function () {
-        const selectedParticipants = selectedParticipantsInput.value.split(';').filter(email => email.trim() !== '');
-        selectedParticipantsList.innerHTML = '';
+    function renderFeedbackFormList() {
+        const searchTerm = searchFeedbackFormInput.value.toLowerCase();
+        const filteredFeedbackForms = allFeedbackForms.filter(form =>
+            form.title.toLowerCase().includes(searchTerm)
+        );
 
-        if (selectedParticipants.length > 0) {
-            selectedParticipants.forEach(email => {
-                const listItem = document.createElement('li');
-                listItem.textContent = email;
-                selectedParticipantsList.appendChild(listItem);
+        const startIndex = (currentFeedbackFormPage - 1) * feedbackFormsPerPage;
+        const endIndex = startIndex + feedbackFormsPerPage;
+        const paginatedFeedbackForms = filteredFeedbackForms.slice(startIndex, endIndex);
+
+        feedbackFormListContainer.innerHTML = '';
+
+        paginatedFeedbackForms.forEach(form => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item list-group-item-action';
+            listItem.textContent = form.title;
+            listItem.dataset.id = form.id;
+
+            listItem.addEventListener('click', function () {
+                feedbackFormListContainer.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+                listItem.classList.add('active');
+
+                // Set the hidden input value with the selected form ID
+                selectedFeedbackFormIdInput.value = form.id;
+
+                // Update the display text to show the selected feedback form title
+                selectedFeedbackFormText.textContent = form.title; // Update `selected-feedback-form-text` element
+                selectedFeedbackFormText.classList.add('selected'); // Add class for styling
+
+                // Show the green tick beside the selected feedback form text
+                feedbackFormSelectedTick.style.display = 'inline';
             });
-        } else {
-            const emptyMessage = document.createElement('li');
-            emptyMessage.textContent = 'No participants selected';
-            selectedParticipantsList.appendChild(emptyMessage);
-        }
 
-        selectedParticipantsModal.style.display = 'block';
+            feedbackFormListContainer.appendChild(listItem);
+        });
+
+        updateFeedbackFormPaginationControls(filteredFeedbackForms.length);
+    }
+
+    function updateFeedbackFormPaginationControls(totalItems) {
+        const totalPages = Math.ceil(totalItems / feedbackFormsPerPage);
+
+        prevFeedbackFormPageBtn.disabled = currentFeedbackFormPage === 1;
+        nextFeedbackFormPageBtn.disabled = currentFeedbackFormPage === totalPages || totalPages === 0;
+
+        currentFeedbackFormPageNumber.textContent = `Page ${currentFeedbackFormPage} of ${totalPages}`;
+    }
+
+    searchFeedbackFormInput.addEventListener('input', function () {
+        currentFeedbackFormPage = 1;
+        renderFeedbackFormList();
     });
 
-    // Modal close handlers
-    closeSelectedParticipantsModal.addEventListener('click', function () {
-        selectedParticipantsModal.style.display = 'none';
+    prevFeedbackFormPageBtn.addEventListener('click', function () {
+        if (currentFeedbackFormPage > 1) {
+            currentFeedbackFormPage--;
+            renderFeedbackFormList();
+        }
+    });
+
+    nextFeedbackFormPageBtn.addEventListener('click', function () {
+        const totalPages = Math.ceil(
+            allFeedbackForms.filter(form => form.title.toLowerCase().includes(searchFeedbackFormInput.value.toLowerCase())).length / feedbackFormsPerPage
+        );
+        if (currentFeedbackFormPage < totalPages) {
+            currentFeedbackFormPage++;
+            renderFeedbackFormList();
+        }
+    });
+
+    document.getElementById('select-feedback-form-btn').addEventListener('click', function () {
+        document.getElementById('feedback-form-modal').style.display = 'block';
+        loadFeedbackForms();
+    });
+
+    closeFeedbackFormModal.addEventListener('click', function () {
+        document.getElementById('feedback-form-modal').style.display = 'none';
+    });
+
+    confirmFeedbackFormSelectionBtn.addEventListener('click', function () {
+        document.getElementById('feedback-form-modal').style.display = 'none';
     });
 
     window.addEventListener('click', function (event) {
-        if (event.target == selectedParticipantsModal) {
-            selectedParticipantsModal.style.display = 'none';
+        const feedbackFormModal = document.getElementById('feedback-form-modal');
+        if (event.target === feedbackFormModal) {
+            feedbackFormModal.style.display = 'none';
         }
     });
 
-    // Confirm button to update participant list and count
-    confirmParticipantsBtn.addEventListener('click', function () {
-        selectedParticipantsInput.value = selectedParticipants.join(';');
-        participantsCountSpan.textContent = `${selectedParticipants.length} participants selected`;
-        participantsModal.style.display = 'none';
 
-        if (selectedParticipants.length > 0) {
-            participantsCountSpan.style.fontWeight = 'bold';
-            participantsCountSpan.style.color = 'green';
-        } else {
-            participantsCountSpan.style.fontWeight = 'normal';
-            participantsCountSpan.style.color = 'blue';
+
+    // Add new topic
+    addTopicBtn.addEventListener('click', function () {
+        var index = topicsContainer.querySelectorAll('.topic-group').length;
+
+        var newTopicHtml = `
+        <div class="input-group mb-2 topic-group" data-index="${index}">
+            <input type="text" class="form-control" name="Topics[${index}].Name" placeholder="Enter topic name" required />
+            <button type="button" class="btn btn-danger btn-sm remove-topic">
+                <i class="bi bi-trash"></i> Remove
+            </button>
+        </div>`;
+
+        topicsContainer.insertAdjacentHTML('beforeend', newTopicHtml);
+    });
+
+    // Remove topic
+    document.addEventListener('click', function (event) {
+        if (event.target && event.target.classList.contains('remove-topic')) {
+            var topicGroup = event.target.closest('.topic-group');
+            topicGroup.remove();
+
+            // Re-index topics to maintain consistency in form data
+            var topicGroups = topicsContainer.querySelectorAll('.topic-group');
+            topicGroups.forEach((topicGroup, index) => {
+                topicGroup.setAttribute('data-index', index);
+                var input = topicGroup.querySelector('input');
+                input.setAttribute('name', `Topics[${index}].Name`);
+            });
         }
     });
 
-    // Open participant selection modal
+
+    // Open Participants Modal
     selectParticipantsBtn.addEventListener('click', function () {
-        fetchParticipants(); // Fetch participants on modal open
-        participantsModal.style.display = 'block';
+        participantsModal.show();
+        loadParticipants();
     });
 
-    // Close modal functionality
-    closeModal.addEventListener('click', function () {
-        participantsModal.style.display = 'none';
+    selectParticipantsBtn.addEventListener('click', function () {
+        participantsModal.show();
+        loadParticipants();
     });
-
-    window.addEventListener('click', function (event) {
-        if (event.target == participantsModal) {
-            participantsModal.style.display = 'none';
-        }
-    });
-
-    // Fetch participants function
-    function fetchParticipants(page = 1) {
-        fetch('/Quizzes/GetAllUsers')
+    // Load participants from the server
+    function loadParticipants() {
+        fetch('/Quizzes/GetAllWithUserRole')
             .then(response => response.json())
             .then(users => {
-                const startIndex = (page - 1) * emailsPerPage;
-                const endIndex = page * emailsPerPage;
-                const paginatedUsers = users.slice(startIndex, endIndex);
-
-                participantsList.innerHTML = '';
-                totalPages = Math.ceil(users.length / emailsPerPage);
-
-                paginatedUsers.forEach(user => {
-                    if (user.email) {
-                        const isChecked = selectedParticipants.includes(user.email) ? 'checked' : '';
-                        const userItem = `
-                            <label>
-                                <input type="checkbox" class="participant-checkbox" value="${user.email}" ${isChecked} /> ${user.email}
-                            </label>`;
-                        participantsList.insertAdjacentHTML('beforeend', userItem);
-                    }
-                });
-
-                document.querySelector('.current-page').textContent = page;
-
-                const checkboxes = document.querySelectorAll('.participant-checkbox');
-                checkboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', function () {
-                        if (checkbox.checked) {
-                            if (!selectedParticipants.includes(checkbox.value)) {
-                                selectedParticipants.push(checkbox.value);
-                            }
-                        } else {
-                            selectedParticipants = selectedParticipants.filter(email => email !== checkbox.value);
-                        }
-                    });
-                });
+                allParticipants = users;
+                currentPage = 1;
+                renderParticipantsList();
             })
             .catch(error => console.error('Error fetching participants:', error));
     }
 
-    // Pagination controls
-    document.querySelector('.next-page').addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            fetchParticipants(currentPage);
+    // Render the participants list based on the current page and search term
+    function renderParticipantsList() {
+        const searchTerm = searchBox.value.toLowerCase();
+        const filteredParticipants = allParticipants.filter(user =>
+            user.email.toLowerCase().includes(searchTerm)
+        );
+
+        const startIndex = (currentPage - 1) * participantsPerPage;
+        const endIndex = startIndex + participantsPerPage;
+        const paginatedParticipants = filteredParticipants.slice(startIndex, endIndex);
+
+        participantsList.innerHTML = '';
+
+        paginatedParticipants.forEach(user => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item list-group-item-action participant-item';
+            listItem.textContent = user.email;
+            listItem.dataset.id = user.UserId;
+
+            // Highlight if already selected
+            if (selectedParticipants.includes(user.email)) {
+                listItem.classList.add('selected');
+            }
+
+            // Toggle selection on click
+            listItem.addEventListener('click', function () {
+                if (selectedParticipants.includes(user.email)) {
+                    selectedParticipants = selectedParticipants.filter(email => email !== user.email);
+                    listItem.classList.remove('selected');
+                } else {
+                    selectedParticipants.push(user.email);
+                    listItem.classList.add('selected');
+                }
+                updateParticipantsCount();
+            });
+
+            participantsList.appendChild(listItem);
+        });
+
+        updatePaginationControls(filteredParticipants.length);
+        updateSelectAllButtonText();
+    }
+
+    // Update the participants count display
+    function updateParticipantsCount() {
+        participantsCountSpan.textContent = `${selectedParticipants.length} participants selected`;
+        participantsCountSpan.style.fontWeight = selectedParticipants.length > 0 ? 'bold' : 'normal';
+    }
+
+    // Toggle between Select All and Deselect All
+    selectAllBtn.addEventListener('click', function () {
+        if (isSelectAll) {
+            selectedParticipants = []; // Clear selection
+            participantsList.querySelectorAll('.participant-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            isSelectAll = false;
+        } else {
+            selectedParticipants = allParticipants.map(user => user.email); // Select all emails
+            participantsList.querySelectorAll('.participant-item').forEach(item => {
+                item.classList.add('selected');
+            });
+            isSelectAll = true;
+        }
+        updateSelectAllButtonText();
+        updateParticipantsCount();
+    });
+
+    // Update Select All / Deselect All button text
+    function updateSelectAllButtonText() {
+        selectAllBtn.textContent = isSelectAll ? 'Deselect All' : 'Select All';
+    }
+
+    // Update pagination controls
+    function updatePaginationControls(totalItems) {
+        const totalPages = Math.ceil(totalItems / participantsPerPage);
+
+        document.getElementById('prev-page').disabled = currentPage === 1;
+        document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+
+        document.getElementById('current-page-number').textContent = `Page ${currentPage} of ${totalPages}`;
+    }
+
+    // Event listener for search input to filter participants in real-time
+    searchBox.addEventListener('input', function () {
+        currentPage = 1; // Reset to first page on new search
+        renderParticipantsList();
+    });
+
+    // Pagination control buttons
+    document.getElementById('prev-page').addEventListener('click', function () {
+        if (currentPage > 1) {
+            currentPage--;
+            renderParticipantsList();
         }
     });
 
-    document.querySelector('.prev-page').addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            fetchParticipants(currentPage);
+    document.getElementById('next-page').addEventListener('click', function () {
+        const totalPages = Math.ceil(
+            allParticipants.filter(user => user.email.toLowerCase().includes(searchBox.value.toLowerCase())).length / participantsPerPage
+        );
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderParticipantsList();
         }
+    });
+
+    // Initial load
+    loadParticipants();
+    // Real-time filter for participants based on search input
+    document.getElementById('search-participants').addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+
+        // Filter the full list of participants to match the search term
+        const filteredUsers = allParticipants.filter(user => user.email.toLowerCase().includes(searchTerm));
+
+        // Re-render the participants list with filtered users
+        renderParticipantsList(filteredUsers);
+    });
+
+    // Confirm participant selection
+    confirmParticipantsBtn.addEventListener('click', function () {
+        selectedParticipantsInput.value = selectedParticipants.join(';'); // Store selected participants in hidden input
+        participantsModal.hide();
+        updateParticipantsCount();
+    });
+
+    // Function to update the participants count display
+    function updateParticipantsCount() {
+        selectedParticipantsText.textContent = `${selectedParticipants.length} participants selected`;
+        participantsSelectedTick.style.display = selectedParticipants.length > 0 ? 'inline' : 'none'; // Show green tick if participants are selected
+        if (selectedParticipants.length > 0) {
+            selectedParticipantsText.classList.add('selected');
+        } else {
+            selectedParticipantsText.classList.remove('selected');
+        }
+    }
+
+    // Close modal when clicking outside of modal content
+    window.addEventListener('click', function (event) {
+        if (event.target == participantsModal) {
+            participantsModal.hide();
+        }
+    });
+    // Event listener to open the modal when "selected-participants-text" is clicked
+    selectedParticipantsText.addEventListener("click", function () {
+        // Clear the list before populating
+        selectedParticipantsList.innerHTML = "";
+
+        // Populate the modal list with selected participants
+        if (selectedParticipants.length === 0) {
+            selectedParticipantsList.innerHTML = "<li class='list-group-item'>No participants selected.</li>";
+        } else {
+            selectedParticipants.forEach(participant => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+                listItem.textContent = participant; // Use participant name or email as needed
+                selectedParticipantsList.appendChild(listItem);
+            });
+        }
+
+        // Show the modal
+        selectedParticipantsModal.show();
+    });
+
+    // Event listener to close the modal
+    closeParticipantsModalBtn.addEventListener("click", function () {
+        selectedParticipantsModal.hide();
     });
 
     // Handle file upload for Excel

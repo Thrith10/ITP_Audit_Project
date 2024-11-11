@@ -68,7 +68,10 @@ namespace PKFAuditManagement.Controllers
                     QuizEnd = quizViewModel.QuizEnd,
                     CreatedBy = userId,
                     CreatedDate = DateTime.Now,
-                    FeedbackFormID = quizViewModel.SelectedFeedbackFormId 
+                    FeedbackFormID = quizViewModel.SelectedFeedbackFormId,
+                    SelfAssessmentFormID = quizViewModel.SelectedSelfAssessmentFormId // Set selected self-assessment form ID
+
+
 
                 };
 
@@ -323,6 +326,7 @@ namespace PKFAuditManagement.Controllers
                 .Include(q => q.Questions)
                     .ThenInclude(q => q.Options)
                 .Include(q => q.Participants)
+                 .Include(q => q.Topics) 
                 .FirstOrDefaultAsync(q => q.QuizID == id);
 
             if (quiz == null)
@@ -345,6 +349,7 @@ namespace PKFAuditManagement.Controllers
                 Description = quiz.Description,
                 QuizStart = quiz.QuizStart,
                 QuizEnd = quiz.QuizEnd,
+                SelectedFeedbackFormId = quiz.FeedbackFormID, // Load Feedback Form ID
                 Questions = quiz.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionID = q.QuestionID,
@@ -357,6 +362,10 @@ namespace PKFAuditManagement.Controllers
                         OptionText = o.OptionText
                     }).ToList()
                 }).ToList(),
+                Topics = quiz.Topics.Select(t => new TopicViewModel
+                {
+                    Name = t.Name
+                }).ToList(), // Populate topics for the quiz
                 SelectedParticipants = selectedParticipants
             };
 
@@ -375,6 +384,7 @@ namespace PKFAuditManagement.Controllers
                     .Include(q => q.Questions)
                         .ThenInclude(q => q.Options)
                     .Include(q => q.Participants)
+                    .Include(q => q.Topics) // Include existing topics for deletion
                     .FirstOrDefaultAsync(q => q.QuizID == quizViewModel.QuizID);
 
                 if (quiz == null)
@@ -387,6 +397,8 @@ namespace PKFAuditManagement.Controllers
                 quiz.Description = quizViewModel.Description;
                 quiz.QuizStart = quizViewModel.QuizStart;
                 quiz.QuizEnd = quizViewModel.QuizEnd;
+                quiz.FeedbackFormID = quizViewModel.SelectedFeedbackFormId; // Update Feedback Form ID
+
 
                 // Clear existing questions and options
                 var existingQuestions = quiz.Questions.ToList();
@@ -789,6 +801,36 @@ namespace PKFAuditManagement.Controllers
                 .ToListAsync();
 
             return Json(feedbackForms);
+        }
+        // GET: SelfAssessment/GetSelfAssessmentForms
+        [HttpGet]
+        public async Task<IActionResult> GetSelfAssessmentForms()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var userId = currentUser?.Id;
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var selfAssessmentForms = await _context.SelfAssessmentForms
+                .Where(f => f.CreatedBy == userId) // Filter by current user's ID
+                .Select(f => new
+                {
+                    Id = f.SelfAssessmentFormID,
+                    Title = f.Title
+                })
+                .ToListAsync();
+
+            return Json(selfAssessmentForms);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckQuizAttempts(Guid id)
+        {
+            var hasAttempts = await _context.Attempt.AnyAsync(a => a.QuizID == id); 
+            return Json(new { hasAttempts = hasAttempts });
         }
 
 

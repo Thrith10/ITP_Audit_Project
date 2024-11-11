@@ -1,4 +1,4 @@
-﻿@model PKFAuditManagement.ViewModels.FeedbackFormListViewModel
+﻿@model PKFAuditManagement.ViewModels.SelfAssessmentFormListViewModel
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,41 +21,6 @@
             margin-bottom: 1rem;
         }
 
-        .card-title {
-            font-size: 20px;
-            font-weight: 500;
-            color: #012970;
-            font-family: "Poppins", sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        #create-btn {
-            padding: 4px 12px;
-            font-size: 0.875rem;
-        }
-
-        .actions .btn {
-            margin-bottom: 0.5rem;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .form-container {
-            padding: 20px;
-        }
-
-        .table-container {
-            margin-top: 1rem;
-        }
-
-        .search-input {
-            width: 100%;
-            max-width: 300px;
-            margin-bottom: 1rem;
-        }
 
         .card-title {
             font-size: 20px;
@@ -79,19 +44,18 @@
             overflow-x: auto;
         }
 
-        /* Center align the no feedback message */
-        .no-feedback-container {
+        .no-assessment-container {
             text-align: center;
             padding: 2rem;
             color: #6c757d;
         }
 
-            .no-feedback-container .icon {
+            .no-assessment-container .icon {
                 font-size: 4rem;
                 color: #adb5bd;
             }
 
-            .no-feedback-container h5 {
+            .no-assessment-container h5 {
                 font-size: 1.25rem;
                 margin-top: 1rem;
                 color: #343a40;
@@ -105,9 +69,9 @@
                 <div class="col-12">
                     <div class="card info-card customers-card">
                         <div class="card-header d-flex justify-content-between">
-                            <h class="card-title">All Feedback Forms</h>
-                            <a href="@Url.Action("CreateFeedback", "Feedback")" class="btn btn-primary btn-sm" id="create-btn">
-                                Create Feedback Form
+                            <h class="card-title">All Self-Assessment Forms</h>
+                            <a href="@Url.Action("CreateSelfAssessment", "SelfAssessment")" class="btn btn-primary btn-sm" id="create-btn">
+                                Create Self-Assessment Form
                             </a>
                         </div>
                         <div class="card-body">
@@ -124,22 +88,22 @@
                                         @Html.Raw(TempData["ErrorMessage"].ToString())
                                     </div>
                                 }
-                                <input type="text" id="searchFeedbackInput" class="form-control search-input" placeholder="Search feedback forms...">
-
-                                @if (Model.FeedbackForms.Any())
+                                <!-- Search Input Field -->
+                                <input type="text" id="searchInput" class="form-control search-input" placeholder="Search self-assessment forms...">
+                                @if (Model.SelfAssessmentForms.Any())
                                 {
                                     <div class="table-container">
                                         <div class="table-responsive">
-                                            <table class="table table-bordered table-striped" id="feedbackTable">
+                                            <table class="table table-bordered table-striped" id="assessmentTableBody">
                                                 <thead class="table-dark">
                                                     <tr>
-                                                        <th>Feedback Form Title</th>
+                                                        <th>Self-Assessment Form Title</th>
                                                         <th class="date-time">Created Date</th>
                                                         <th class="actions">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach (var form in Model.FeedbackForms)
+                                                    @foreach (var form in Model.SelfAssessmentForms)
                                                     {
                                                         <tr>
                                                             <td>@form.Title</td>
@@ -147,11 +111,11 @@
                                                                 @(form.CreatedDate.HasValue ? form.CreatedDate.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")
                                                             </td>
                                                             <td class="actions">
-                                                                <a href="@Url.Action("ViewFeedbackForm", "Feedback", new { id = form.FeedbackFormID })" class="btn btn-primary btn-sm">View Details</a>
-                                                                <button type="button" class="btn btn-warning btn-sm edit-feedback-btn" data-feedback-id="@form.FeedbackFormID">
+                                                                <a href="@Url.Action("ViewSelfAssessmentForm", "SelfAssessment", new { id = form.SelfAssessmentFormID })" class="btn btn-primary btn-sm">View Details</a>
+                                                                <button type="button" class="btn btn-warning btn-sm edit-assessment-btn" data-assessment-id="@form.SelfAssessmentFormID">
                                                                     <i class="bi bi-pencil"></i> Edit
                                                                 </button>
-                                                                <button type="button" class="btn btn-danger btn-sm delete-feedback-btn" data-feedback-id="@form.FeedbackFormID">
+                                                                <button type="button" class="btn btn-danger btn-sm delete-assessment-btn" data-assessment-id="@form.SelfAssessmentFormID">
                                                                     <i class="bi bi-trash"></i> Delete Form
                                                                 </button>
                                                             </td>
@@ -164,10 +128,10 @@
                                 }
                                 else
                                 {
-                                    <div class="no-feedback-container">
+                                    <div class="no-assessment-container">
                                         <i class="bi bi-folder-x icon"></i>
-                                        <h5>No Feedback Forms Available</h5>
-                                        <a href="@Url.Action("CreateFeedback", "Feedback")" class="btn btn-primary btn-sm">Create Feedback Form</a>
+                                        <h5>No Self-Assessment Forms Available</h5>
+                                        <a href="@Url.Action("CreateSelfAssessment", "SelfAssessment")" class="btn btn-primary btn-sm">Create Self-Assessment Form</a>
                                     </div>
                                 }
                             </div>
@@ -183,12 +147,12 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Feedback Form Edit Restriction</h5>
+                    <h5 class="modal-title" id="editModalLabel">Self-Assessment Form Edit Restriction</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p class="text-danger">
-                        This feedback form is linked to the following quizzes and cannot be edited until they are removed:
+                        This self-assessment form is linked to the following quizzes and cannot be edited until they are removed:
                     </p>
                     <ul id="editLinkedQuizzesList"></ul>
                 </div>
@@ -198,44 +162,16 @@
             </div>
         </div>
     </div>
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete this feedback form? This action cannot be undone.</p>
-                </div>
-                <div class="modal-footer">
-                    <form id="confirmDeleteForm" method="post" action="/Feedback/DeleteFeedbackForm">
-                        @Html.AntiForgeryToken()
-                        <!-- Hidden input to hold the feedback form ID -->
-                        <input type="hidden" id="feedbackFormID" name="feedbackFormID" />
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
     <!-- Delete Restriction Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteRestrictionModal" tabindex="-1" aria-labelledby="deleteRestrictionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Feedback Form Delete Restriction</h5>
+                    <h5 class="modal-title" id="deleteRestrictionModalLabel">Delete Restriction</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-danger">
-                        This feedback form is linked to the following quizzes and cannot be deleted until they are removed:
-                    </p>
+                    <p>This self-assessment form is linked to the following quizzes and cannot be deleted until they are removed:</p>
                     <ul id="deleteLinkedQuizzesList"></ul>
                 </div>
                 <div class="modal-footer">
@@ -245,25 +181,53 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this self-assessment form? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <form id="confirmDeleteForm" method="post" action="/SelfAssessment/DeleteSelfAssessmentForm">
+                        @Html.AntiForgeryToken()
+                        <!-- Hidden input to hold the self-assessment form ID -->
+                        <input type="hidden" id="selfAssessmentFormId" name="selfAssessmentFormId" />
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         $(document).ready(function () {
-            $('#searchFeedbackInput').on('keyup', function () {
+            // Real-time search functionality
+            $('#searchInput').on('keyup', function () {
                 var value = $(this).val().toLowerCase();
-                $('#feedbackTable tbody tr').filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+
+                // Filter the rows based on the input
+                $('#assessmentTableBody tbody tr').filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().includes(value));
                 });
             });
         });
-        $('.edit-feedback-btn').on('click', async function () {
-            const feedbackFormId = $(this).data('feedback-id');
+        $('.edit-assessment-btn').on('click', async function () {
+            const assessmentFormId = $(this).data('assessment-id');
 
             try {
-                const response = await fetch('/Feedback/CheckLinkedQuizAttempts', {
+                const response = await fetch('/SelfAssessment/CheckLinkedQuizAttempts', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(feedbackFormId)
+                    body: JSON.stringify(assessmentFormId)
                 });
 
                 if (!response.ok) {
@@ -276,45 +240,56 @@
                     $('#editModal').modal('show');
                     $('#editLinkedQuizzesList').html(result.attemptedQuizzes.map(q => `<li>${q}</li>`).join(''));
                 } else {
-                    window.location.href = `/Feedback/EditFeedbackForm?feedbackFormId=${feedbackFormId}`;
+                    window.location.href = `/SelfAssessment/EditSelfAssessmentForm?selfAssessmentFormId=${assessmentFormId}`;
                 }
             } catch (error) {
                 console.error('Error checking quiz attempts:', error);
             }
-        });
+        })
 
-        $('.delete-feedback-btn').on('click', async function () {
-            const feedbackFormId = $(this).data('feedback-id');
 
-            try {
-                // Send POST request to check if the feedback form is linked to any quizzes
-                const response = await fetch('/Feedback/CheckLinkedQuizzes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(feedbackFormId) // Send the ID as JSON
-                });
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+        $('.delete-assessment-btn').on('click', async function () {
+            // Capture the self-assessment ID from the data attribute of the clicked button
+            const selfAssessmentFormId = $(this).data('assessment-id');
+
+            if (selfAssessmentFormId) {
+                try {
+                    // Make an AJAX call to check if the self-assessment form is linked to any quizzes
+                    const response = await fetch('/SelfAssessment/CheckLinkedQuizzes', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ selfAssessmentFormId }) // Send the ID as JSON
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const result = await response.json();
+
+                    if (result.isLinked) {
+                        // If linked quizzes are found, show the restriction modal and display the list
+                        $('#deleteLinkedQuizzesList').html(result.linkedQuizzes.map(q => `<li>${q}</li>`).join(''));
+                        $('#deleteRestrictionModal').modal('show');
+                    } else {
+                        // If no linked quizzes, set the self-assessment ID in the hidden input field inside the delete confirmation modal
+                        $('#selfAssessmentFormId').val(selfAssessmentFormId);
+                        // Show the delete confirmation modal
+                        $('#confirmDeleteModal').modal('show');
+                    }
+                } catch (error) {
+                    console.error('Error checking linked quizzes:', error);
                 }
-
-                const result = await response.json();
-
-                if (result.isLinked) {
-                    // If there are linked quizzes, display the restriction modal
-                    $('#deleteModal').modal('show');
-                    $('#deleteLinkedQuizzesList').html(result.linkedQuizzes.map(q => `<li>${q}</li>`).join(''));
-                } else {
-                    // If there are no linked quizzes, set up the delete confirmation modal
-                    $('#feedbackFormID').val(feedbackFormId); // Set hidden input value
-                    $('#confirmDeleteModal').modal('show');
-                }
-            } catch (error) {
-                console.error('Error checking linked quizzes:', error);
+            } else {
+                console.error('Self-assessment ID is null or undefined.');
             }
+
+   
         });
+
 
     </script>
 </body>

@@ -44,44 +44,6 @@ namespace PKFAuditManagement.Controllers
             return View("~/Views/General/Quiz/ViewAllFeedbackForm.cshtml", model);
         }
 
-        // DELETE: Feedback/DeleteFeedbackForm
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteFeedbackForm(Guid feedbackFormID)
-        {
-            var feedbackForm = await _context.FeedbackForms
-                .Include(f => f.Questions) // Include related questions to cascade delete
-                .FirstOrDefaultAsync(f => f.FeedbackFormID == feedbackFormID);
-
-            if (feedbackForm == null)
-            {
-                TempData["ErrorMessage"] = "Feedback form not found.";
-                return RedirectToAction(nameof(ViewAllFeedbackForms));
-            }
-
-            // Check for linked quizzes
-            var linkedQuizzes = await _context.Quiz
-                .Where(q => q.FeedbackFormID == feedbackFormID)
-                .Select(q => q.Title) // Get only the quiz titles for display
-                .ToListAsync();
-
-            if (linkedQuizzes.Any())
-            {
-                // Pass the linked quizzes to TempData to display in the modal
-                TempData["LinkedQuizzes"] = linkedQuizzes;
-                TempData["ErrorMessage"] = "This feedback form is linked to quizzes and cannot be deleted until they are removed.";
-                return RedirectToAction(nameof(ViewAllFeedbackForms));
-            }
-
-            // If no linked quizzes, proceed to delete
-            _context.FeedbackForms.Remove(feedbackForm);
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Feedback form deleted successfully!";
-            return RedirectToAction(nameof(ViewAllFeedbackForms));
-        }
-
-
         // GET: Feedback/CreateFeedback
         [HttpGet]
         public IActionResult CreateFeedback()
@@ -168,5 +130,174 @@ namespace PKFAuditManagement.Controllers
 
             return View("~/Views/General/Quiz/ViewFeedbackForm.cshtml", feedbackForm);
         }
+        // DELETE: Feedback/DeleteFeedbackForm
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFeedbackForm(Guid feedbackFormID)
+        {
+            var feedbackForm = await _context.FeedbackForms
+                .Include(f => f.Questions) // Include related questions for cascade delete
+                .FirstOrDefaultAsync(f => f.FeedbackFormID == feedbackFormID);
+
+            if (feedbackForm == null)
+            {
+                TempData["ErrorMessage"] = "Feedback form not found.";
+                return RedirectToAction(nameof(ViewAllFeedbackForms));
+            }
+
+            // Check for linked quizzes
+            var linkedQuizzesForDelete = await _context.Quiz
+                .Where(q => q.FeedbackFormID == feedbackFormID)
+                .Select(q => q.Title) // Get only the quiz titles for display
+                .ToListAsync();
+
+            if (linkedQuizzesForDelete.Any())
+            {
+                // Set TempData for linked quizzes and display message
+                TempData["LinkedQuizzesForDelete"] = linkedQuizzesForDelete;
+                TempData["ErrorMessage"] = "This feedback form is linked to quizzes and cannot be deleted until they are removed.";
+
+                // Redirect to display the message
+                return RedirectToAction(nameof(ViewAllFeedbackForms));
+            }
+
+            // If no linked quizzes, proceed with deletion
+            _context.FeedbackForms.Remove(feedbackForm);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Feedback form deleted successfully!";
+
+            // Clear TempData["LinkedQuizzesForDelete"] after successful deletion to avoid any residual data
+            TempData.Remove("LinkedQuizzesForDelete");
+            return RedirectToAction(nameof(ViewAllFeedbackForms));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditFeedbackForm(Guid feedbackFormId)
+        {
+            var feedbackForm = await _context.FeedbackForms
+                .Include(f => f.Questions)
+                .FirstOrDefaultAsync(f => f.FeedbackFormID == feedbackFormId);
+
+            if (feedbackForm == null)
+            {
+                TempData["ErrorMessage"] = "Feedback form not found.";
+                return RedirectToAction(nameof(ViewAllFeedbackForms));
+            }
+
+            // Map to ViewModel
+            var viewModel = new EditFeedbackFormViewModel
+            {
+                FeedbackFormID = feedbackForm.FeedbackFormID,
+                Title = feedbackForm.Title,
+                CreatedDate = feedbackForm.CreatedDate,
+                CreatedBy = feedbackForm.CreatedBy,
+                Questions = feedbackForm.Questions.Select(q => new FeedbackQuestionViewModel
+                {
+                    FeedbackQuestionID = q.FeedbackQuestionID,
+                    QuestionText = q.QuestionText,
+                    Type = (ViewModels.FeedbackType)q.Type
+                }).ToList()
+            };
+
+            return View("~/Views/General/Quiz/EditFeedbackForm.cshtml", viewModel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditFeedbackForm(EditFeedbackFormViewModel viewModel)
+        {
+            TempData["ErrorMessage"] = "";
+            TempData["SuccessMessage"] = "";
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "An unexpected error has occurred.";
+                return View("~/Views/General/Quiz/EditFeedbackForm.cshtml", viewModel);
+            }
+
+            var feedbackForm = await _context.FeedbackForms
+                .Include(f => f.Questions)
+                .FirstOrDefaultAsync(f => f.FeedbackFormID == viewModel.FeedbackFormID);
+
+            if (feedbackForm == null)
+            {
+                TempData["ErrorMessage"] = "Feedback form not found.";
+                return RedirectToAction(nameof(ViewAllFeedbackForms));
+            }
+
+            // Update feedback form title
+            feedbackForm.Title = viewModel.Title;
+
+            // Remove all existing questions for this feedback form
+            _context.FeedbackQuestions.RemoveRange(feedbackForm.Questions);
+
+            // Add new questions from the view model
+            foreach (var questionViewModel in viewModel.Questions)
+            {
+                feedbackForm.Questions.Add(new FeedbackQuestion
+                {
+                    FeedbackFormID = viewModel.FeedbackFormID,
+                    QuestionText = questionViewModel.QuestionText,
+                    Type = (Models.FeedbackType)questionViewModel.Type
+                });
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Feedback form updated successfully!";
+            return RedirectToAction(nameof(ViewAllFeedbackForms));
+        }
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CheckLinkedQuizzes([FromBody] Guid feedbackFormID)
+        {
+          var linkedQuizzes = await _context.Quiz
+         .Where(q => q.FeedbackFormID == feedbackFormID)
+         .Select(q => q.Title)
+         .ToListAsync();
+
+            return Json(new { isLinked = linkedQuizzes.Any(), linkedQuizzes });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckLinkedQuizAttempts([FromBody] Guid feedbackFormID)
+        {
+            // Get all quizzes linked to this feedback form
+            var linkedQuizzes = await _context.Quiz
+                .Where(q => q.FeedbackFormID == feedbackFormID)
+                .Select(q => q.QuizID)
+                .ToListAsync();
+
+            // Check if any of the linked quizzes have attempts
+            bool hasAttempts = await _context.Attempt
+                .AnyAsync(a => linkedQuizzes.Contains(a.QuizID));
+
+            if (hasAttempts)
+            {
+                // Get the titles of quizzes with attempts for display purposes
+                var attemptedQuizzes = await _context.Quiz
+                    .Where(q => linkedQuizzes.Contains(q.QuizID) && _context.Attempt.Any(a => a.QuizID == q.QuizID))
+                    .Select(q => q.Title)
+                    .ToListAsync();
+
+                return Json(new { hasAttempts = true, attemptedQuizzes });
+            }
+
+            // If no attempts, return false for hasAttempts
+            return Json(new { hasAttempts = false });
+        }
+
+        private async Task<bool> IsFeedbackFormLinkedToQuiz(Guid feedbackFormId)
+        {
+            return await _context.Quiz
+                .AnyAsync(q => q.FeedbackFormID == feedbackFormId);
+        }
+
     }
 }

@@ -1,0 +1,148 @@
+﻿@model PKFAuditManagement.ViewModels.EditFeedbackFormViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Feedback Form</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .form-label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <section class="section dashboard d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+        <div class="col-12 col-lg-8">
+            <!-- Mega Card -->
+            <div class="card shadow-lg p-4 mb-5 bg-white rounded">
+                <div class="card-header text-center">
+                    <h2 class="card-title mb-0" style="font-size: 1.75rem; font-weight: bold;">Edit Feedback Form</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-container">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">
+                                @TempData["SuccessMessage"]
+                            </div>
+                        }
+                        <form asp-action="EditFeedbackForm" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <!-- Hidden input for FeedbackFormID -->
+                            <input type="hidden" asp-for="FeedbackFormID" />
+
+                            <!-- Feedback Form Title -->
+                            <div class="form-group mb-3">
+                                <label for="Title" class="form-label">Feedback Form Title</label>
+                                <input type="text" class="form-control form-control-lg" asp-for="Title" required />
+                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Questions Section with Scrollable Area -->
+                            <div id="feedback-form-container" style="max-height: 400px; overflow-y: auto;">
+                                @for (int i = 0; i < Model.Questions.Count; i++)
+                                {
+                                    <div class="card mb-3 shadow-sm" data-index="@i">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="card-title">Question @(i + 1):</h5>
+                                                <button type="button" class="btn btn-danger btn-sm remove-question">
+                                                    <i class="bi bi-trash"></i> Remove Question
+                                                </button>
+                                            </div>
+
+                                            <!-- Hidden input for FeedbackQuestionID -->
+                                            <input type="hidden" name="Questions[@i].FeedbackQuestionID" value="@Model.Questions[i].FeedbackQuestionID" />
+
+                                            <!-- Question Type Dropdown -->
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Question Type</label>
+                                                @{
+                                                    var optionsHtml = new List<string>();
+                                                    foreach (var type in Enum.GetValues(typeof(PKFAuditManagement.Models.FeedbackType)))
+                                                    {
+                                                        var isSelected = Model.Questions[i].Type.Equals((FeedbackType)type) ? "selected=\"selected\"" : "";
+                                                        optionsHtml.Add($"<option value=\"{type}\" {isSelected}>{type}</option>");
+                                                    }
+                                                }
+                                                <select class="form-control" name="Questions[@i].Type" required>
+                                                    @Html.Raw(string.Join("", optionsHtml))
+                                                </select>
+                                            </div>
+
+                                            <!-- Question Text -->
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Question Text</label>
+                                                <input type="text" class="form-control" name="Questions[@i].QuestionText" value="@Model.Questions[i].QuestionText" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Buttons to Add Questions and Submit -->
+                            <div class="btn-container d-flex gap-3 mt-4 justify-content-center">
+                                <button type="button" class="btn btn-secondary btn-lg add-question" id="add-question">
+                                    <i class="bi bi-plus-lg"></i> Add Question
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- End of Mega Card -->
+        </div>
+    </section>
+
+    @section Scripts {
+        <script>
+            $(document).ready(function () {
+                // Add new question
+                $('#add-question').on('click', function () {
+                    var index = $('#feedback-form-container .card').length;
+
+                    var newQuestionHtml = `
+                                    <div class="card mb-3 shadow-sm" data-index="${index}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="card-title">Question ${index + 1}:</h5>
+                                                <button type="button" class="btn btn-danger btn-sm remove-question">
+                                                    <i class="bi bi-trash"></i> Remove Question
+                                                </button>
+                                            </div>
+                                            <input type="hidden" name="Questions[${index}].FeedbackQuestionID" value="new-${index}" />
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Question Type</label>
+                                                <select class="form-control" name="Questions[${index}].Type" required>
+                                                    <option value="" disabled selected>Select the Question Type</option>
+            @foreach (var type in Enum.GetValues(typeof(PKFAuditManagement.Models.FeedbackType)))
+            {
+                                                            <option value="@type">@type</option>
+            }
+                                                </select>
+                                            </div>
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Question Text</label>
+                                                <input type="text" class="form-control" name="Questions[${index}].QuestionText" required />
+                                            </div>
+                                        </div>
+                                    </div>`;
+                    $('#feedback-form-container').append(newQuestionHtml);
+                });
+
+                // Remove question
+                $(document).on('click', '.remove-question', function () {
+                    $(this).closest('.card').remove();
+                });
+            });
+        </script>
+    }
+</body>
+</html>
