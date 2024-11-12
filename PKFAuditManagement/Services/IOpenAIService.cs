@@ -128,6 +128,13 @@ namespace PKFAuditManagement.Services
                 }
             });
 
+            messageContent = System.Text.RegularExpressions.Regex.Replace(
+                messageContent,
+                @"(?<=\n|^)(\d+\.\s+)([^\n:]+):", // Matches numbered headings like "1. Cooling-off Period:"
+                "**$1$2**:" // Wraps the number and heading in bold (**)
+            );
+
+
             // Format sections to ensure numbered headings are bold and appear together without line breaks
             messageContent = System.Text.RegularExpressions.Regex.Replace(
                 messageContent,
@@ -147,11 +154,13 @@ namespace PKFAuditManagement.Services
                 "\n- $1" // Adds a newline before the dash and removes the bold tags around the text
             );
 
+            //
             messageContent = System.Text.RegularExpressions.Regex.Replace(
                 messageContent,
-                @"(?<!<br>)-", // Matches any dash not already preceded by a <br> tag
+                @"(?<=<br>|^|\n)-\s+(?=[A-Z])", // Matches dashes at the start of a list item, but not in compound words
                 "<br>-" // Adds a <br> tag before the dash
             );
+
 
             messageContent = System.Text.RegularExpressions.Regex.Replace(
                 messageContent,
