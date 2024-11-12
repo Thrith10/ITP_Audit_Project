@@ -17,12 +17,16 @@ namespace PKFAuditManagement.Controllers
         private readonly IOpenAIService _openAIService;
         private readonly IEmbeddingService _embeddingService;
         private readonly IMongoDBService _mongoDBService;
-        public ChatbotController(ApplicationDbContext context, IOpenAIService openAIService, IEmbeddingService embeddingService, IMongoDBService mongoDBService)
+        private readonly ILogger<ChatbotController> _logger;
+
+        public ChatbotController(ApplicationDbContext context, IOpenAIService openAIService, IEmbeddingService embeddingService, IMongoDBService mongoDBService,
+            ILogger<ChatbotController> logger)
         {
             _context = context;
             _openAIService = openAIService;
             _embeddingService = embeddingService;
             _mongoDBService = mongoDBService;
+            _logger = logger;
         }
 
         [Authorize(Roles = "Admin")]
@@ -127,13 +131,15 @@ namespace PKFAuditManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> GetChatResponse(string userInput)
         {
-            
+
             //var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "RAGDocuments", "SSQM2.pdf");
             //// Read a list of paragraphs from the PDF uploaded
             //List<string> paragraphs = PdfReader.ReadPdf(filePath);
 
             //// Paragraphs read will be saved to MongoDB collection
             //await _mongoDBService.SaveParagraphsToMongoDBAsync(paragraphs, "SSQM2");
+
+            _logger.LogInformation("GetChatResponse method called.");
 
             // Call embedding service to generate embeddings based on user input
             double[] embeddings = await _embeddingService.GenerateEmbeddingsAsync(userInput);
@@ -147,25 +153,30 @@ namespace PKFAuditManagement.Controllers
             // Find similar documents in MongoDB using the generated embeddings
             //List<string> similarDocuments = await _mongoDBService.FindSimilarDocumentsAsync(embeddings);
 
-            List<(string SectionTitle, string ParagraphText)> similarDocuments = 
+            List<(string SectionTitle, string ParagraphText, string DocumentName)> similarDocuments = 
                 await _mongoDBService.FindSimilarDocumentsAsync(embeddings, userInput);
 
-            // Get the first document from similarDocuments
-            var firstDocument = similarDocuments.FirstOrDefault();
+            _logger.LogInformation($"Number of similar documents retrieved: {similarDocuments.Count}");
 
-            // Extract the DocumentName, defaulting to an empty string if the list is empty
-            //string documentName = firstDocument.DocumentName ?? string.Empty;
+            similarDocuments.ForEach(doc =>
+            {
+                _logger.LogInformation($"SectionTitle: {doc.SectionTitle}, ParagraphText: {doc.ParagraphText}, DocumentName: {doc.DocumentName}");
+            });
 
             // Combine SectionTitle and ParagraphText for better context
             var combinedText = new StringBuilder();
+
+            // Append a single line of the document nam
             foreach (var doc in similarDocuments)
             {
                 combinedText.AppendLine($"Section: {doc.SectionTitle}\n{doc.ParagraphText}\n");
             }
 
+            string firstDocumentName = similarDocuments.Count > 0 ? similarDocuments[0].DocumentName : "No documents found";
+
             // Retrieve response from LLM based on the combined input
             //var response = await _openAIService.GetChatResponseAsync(userInput, string.Join("\n", similarDocuments));
-            var response = await _openAIService.GetChatResponseAsync(userInput, combinedText.ToString());
+            var response = await _openAIService.GetChatResponseAsync(userInput, combinedText.ToString(), firstDocumentName.ToString());
 
             // Return the generated response
             return Ok(response);
