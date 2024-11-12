@@ -37,20 +37,51 @@
                                                value="@Model.QuizEnd.ToString("yyyy-MM-ddTHH:mm")" placeholder="dd/MM/yyyy" required />
                                     </div>
 
-                                    <!-- New Participants Selection Field -->
                                     <div class="form-group">
                                         <label for="Participants">Participants (Note: Selection is limited to registered users only)</label>
                                         <br />
                                         <button type="button" id="select-participants-btn" class="btn btn-secondary btn-sm">Select Participants</button>
                                         <span class="separator">OR</span>
                                         <button type="button" id="upload-participants-btn" class="btn btn-secondary btn-sm">Upload via Excel</button>
-                                        <span id="participants-count" class="clickable" style="margin-left: 10px; color: blue; cursor: pointer;">
-                                            0 participants selected
-                                        </span>
-                                        <input type="file" id="ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
+                                        <p id="selected-participants-text" class="text-muted mt-2">No participants selected</p>
+                                        <span id="participants-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745;"></span>
                                     </div>
+                                    <input type="file" id="ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
+
 
                                     <input type="hidden" id="SelectedParticipants" name="SelectedParticipants" value="@Model.SelectedParticipants" />
+                                    <!-- Select Feedback Form Button -->
+                                    <div class="form-group mt-3">
+                                        <button type="button" class="btn btn-info btn-sm" id="select-feedback-form-btn">
+                                            <i class="bi bi-list-check"></i> Select Feedback Form
+                                        </button>
+                                        <input type="hidden" id="SelectedFeedbackFormId" name="SelectedFeedbackFormId" />
+                                        <p id="selected-feedback-form-text" class="text-muted mt-2">
+                                            No feedback form selected
+
+                                        </p>
+                                        <span id="feedback-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745; margin-left: 5px;"></span>
+                                    </div>
+
+                                    <!-- New Topics Field Section -->
+                                    <div class="form-group mt-3">
+                                        <label for="Topics">Quiz Topics</label>
+                                        <div id="topics-container">
+                                            @for (int i = 0; i < Model.Topics.Count; i++)
+                                            {
+                                                <div class="input-group mb-2 topic-group" data-index="@i">
+                                                    <input type="text" class="form-control" name="Topics[@i].Name" value="@Model.Topics[i].Name" placeholder="Enter topic name" required />
+                                                    <button type="button" class="btn btn-danger btn-sm remove-topic">
+                                                        <i class="bi bi-trash"></i> Remove
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                        <button type="button" class="btn btn-secondary btn-sm" id="add-topic">
+                                            <i class="bi bi-plus-lg"></i> Add Topic
+                                        </button>
+                                    </div>
+
 
                                     <!-- Questions Section -->
                                     <div id="quiz-container">
@@ -209,6 +240,29 @@
                                         <button type="submit" id="submit-button" class="btn btn-primary btn-sm">Save</button>
                                     </div>
                                 </form>
+                                <!-- Modal structure for selecting feedback form -->
+                                <div id="feedback-form-modal" class="modal">
+                                    <div class="modal-content">
+                                        <span id="close-feedback-form-modal" class="close-modal">&times;</span>
+                                        <h5>Select Feedback Form</h5>
+
+                                        <!-- Search box for filtering feedback forms -->
+                                        <input type="text" id="search-feedback-form-input" placeholder="Search feedback forms" class="form-control mb-3">
+
+                                        <!-- Feedback forms list -->
+                                        <ul id="feedback-form-list-container" class="list-group mb-3"></ul>
+
+                                        <!-- Pagination controls -->
+                                        <div class="pagination-controls mt-3 d-flex justify-content-center">
+                                            <button id="prev-feedback-form-page" class="btn btn-secondary">Prev</button>
+                                            <span id="current-feedback-form-page-number" class="mx-3">Page 1</span>
+                                            <button id="next-feedback-form-page" class="btn btn-secondary">Next</button>
+                                        </div>
+
+                                        <!-- Confirm selection button -->
+                                        <button type="button" id="confirm-feedback-form-selection-btn" class="btn btn-primary mt-3">Confirm Selection</button>
+                                    </div>
+                                </div>
 
                                 <!-- Modal for Participants Selection -->
                                 <div id="participants-modal" class="modal">
@@ -216,38 +270,50 @@
                                         <span class="close-modal">&times;</span>
                                         <h5>Select Participants</h5>
 
-                                        <!-- Button Container -->
-                                        <div class="button-container">
-                                            <button id="select-all" class="select-all-btn btn btn-primary">Select All</button>
+                                        <!-- Search Box for real-time filtering -->
+                                        <div class="form-group search-box-container">
+                                            <input type="text" id="search-participants" class="form-control" placeholder="Search participants by email" />
+                                            <button type="button" id="select-all-btn" class="btn btn-secondary mt-2">Select All</button>
+
                                         </div>
 
-                                        <!-- Participant List -->
-                                        <div class="participants-list">
-                                            <!-- Dynamically populated list -->
+                                        <!-- Participants List -->
+                                        <ul id="participants-list" class="list-group">
+                                            <!-- Dynamically populated list of participants will go here -->
+                                        </ul>
+
+                                        <!-- Pagination Controls -->
+                                        <div id="pagination-controls" class="pagination-controls d-flex justify-content-center align-items-center mt-3">
+                                            <button id="prev-page" class="btn btn-outline-primary btn-sm me-2">Previous</button>
+                                            <span id="current-page-number" class="mx-2">1</span>
+                                            <button id="next-page" class="btn btn-outline-primary btn-sm ms-2">Next</button>
                                         </div>
 
-                                        <!-- Pagination -->
-                                        <div class="pagination">
-                                            <button class="prev-page btn btn-secondary">Prev</button>
-                                            <span class="current-page">1</span>
-                                            <button class="next-page btn btn-secondary">Next</button>
-                                        </div>
-                                        <div class="button-container">
-                                            <button type="button" id="confirm-participants-btn" class="btn btn-primary">Confirm</button>
+                                        <!-- Confirm button to finalize selection -->
+                                        <button type="button" id="confirm-participants-btn" class="btn btn-primary mt-3">Confirm</button>
+                                    </div>
+                                </div>
+
+
+
+                                <!-- Invalid Options Modal -->
+                                <div class="modal fade" id="invalidOptionsModal" tabindex="-1" aria-labelledby="invalidOptionsModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="invalidOptionsModalLabel">Validation Error</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p id="invalidOptionsMessage"> <!-- Dynamic message goes here --> </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Modal for displaying selected participants -->
-                                <div id="selectedParticipantsModal" class="modal" style="display:none;">
-                                    <div class="modal-content">
-                                        <span id="closeSelectedParticipantsModal" class="close">&times;</span>
-                                        <h4>Selected Participants</h4>
-                                        <div class="scrollable-participants-list" style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
-                                            <ul id="selectedParticipantsList"></ul>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

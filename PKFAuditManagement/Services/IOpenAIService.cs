@@ -9,7 +9,7 @@ namespace PKFAuditManagement.Services
 {
     public interface IOpenAIService
     {
-        Task<string> GetChatResponseAsync(string userInput, string retrievalInput);
+        Task<string> GetChatResponseAsync(string userInput, string retrievalInput, string documentNames);
     }
 
     public class OpenAIService : IOpenAIService
@@ -27,7 +27,7 @@ namespace PKFAuditManagement.Services
             _memoryCache = memoryCache;
         }
 
-        public async Task<string> GetChatResponseAsync(string userInput, string retrievalInput)
+        public async Task<string> GetChatResponseAsync(string userInput, string retrievalInput, string documentNames)
         {
             try
             {
@@ -57,16 +57,19 @@ namespace PKFAuditManagement.Services
                 # RESPONSE FORMAT #
                 - Provide your responses using the information from the knowledge base first and foremost.
                 - **Format** the information retrieved from the knowledge base as **bullet points** or **numbered lists**.
-                - **Use headings** to separate different sections of the response (e.g., '1. Introduction', '2. Ethical Standards', etc.).
-                - Highlight any important points retrieved from the database with **bold** or _italic_ for emphasis.
+                - **Use headings** to separate different sections of the response (e.g., '1.Introduction', '2.Ethical Standards', etc.).
                 - Ensure that the response is broken down clearly and logically so that the auditor can easily follow it.
 
                 # EXAMPLE FORMAT #
                 For example, format your response like this:
-                1. **Code of Conduct**
-                   - _The code of conduct outlines the following principles:_
-                   - **Integrity**: Auditors must act with honesty and fairness.
-                   - **Objectivity**: Professional judgment should not be biased by outside influence.
+                **Serving as a Director or Officer of a Client**
+
+                According to the guidelines and standards, staff members of an audit firm should not serve as directors or officers of a client due to the following reasons:
+
+                **1. Independence Threats:**
+                   - Serving as a director or officer of an audit client poses significant independence threats because it can compromise objectivity and impartiality in the audit process.
+                
+                Do not bold words once inside the paragraph as such  - **Compromise of Objectivity and Impartiality**:. Keep it - Compromise of Objectivity and Impartiality:
                 
                 # DATABASE CONTENT #
                 Here is the retrieved data from the knowledge base that must be used in your response:{retrievalInput}
@@ -91,7 +94,6 @@ namespace PKFAuditManagement.Services
                 // Retrieve message content from the response
                 string messageContent = choice.Message.Content.ToString();
 
-
                 // Add the assistant's response to the chat history
                 chatHistory.Add(new Message(Role.Assistant, messageContent));
 
@@ -99,7 +101,8 @@ namespace PKFAuditManagement.Services
                 _memoryCache.Set(ChatHistoryCacheKey, chatHistory);
 
                 // Optionally, apply formatting to the response (custom formatting logic)
-                return FormatResponse(messageContent);
+                return FormatResponse(messageContent, documentNames);
+                //return messageContent;
             }
             catch (Exception ex)
             {
@@ -107,11 +110,9 @@ namespace PKFAuditManagement.Services
             }
         }
 
-        // Optional: Apply custom formatting to the response
-        private string FormatResponse(string messageContent)
+        private string FormatResponse(string messageContent, string documentNames)
         {
-            // Replace '**' with HTML-style bold tags.
-            // Ensuring that alternating ** are correctly converted to <b> and </b>
+            // Convert '**' to HTML bold tags for text formatting
             bool isBold = false;
             messageContent = System.Text.RegularExpressions.Regex.Replace(messageContent, @"\*\*", match =>
             {
@@ -127,25 +128,56 @@ namespace PKFAuditManagement.Services
                 }
             });
 
-            // Replace '_' with HTML-style italic tags.
-            // Ensuring that alternating _ are correctly converted to <i> and </i>
-            bool isItalic = false;
-            messageContent = System.Text.RegularExpressions.Regex.Replace(messageContent, @"_", match =>
-            {
-                if (isItalic)
-                {
-                    isItalic = false;
-                    return "</i>";
-                }
-                else
-                {
-                    isItalic = true;
-                    return "<i>";
-                }
-            });
+            messageContent = System.Text.RegularExpressions.Regex.Replace(
+                messageContent,
+                @"(?<=\n|^)(\d+\.\s+)([^\n:]+):", // Matches numbered headings like "1. Cooling-off Period:"
+                "**$1$2**:" // Wraps the number and heading in bold (**)
+            );
 
-            return messageContent;
+
+            // Format sections to ensure numbered headings are bold and appear together without line breaks
+            messageContent = System.Text.RegularExpressions.Regex.Replace(
+                messageContent,
+                @"(\d+)\.\s*(\*\*[^*]+\*\*)",
+                "<b>$1. $2</b>"
+            );
+
+            messageContent = System.Text.RegularExpressions.Regex.Replace(
+                messageContent,
+                @"(?<!^|\n)(<b>\d+\.)", // Look for a bold tag followed by a numbered heading, not already preceded by a line break
+                "\n$1" // Add a line break before the <b> tag and numbered heading
+            );
+
+            messageContent = System.Text.RegularExpressions.Regex.Replace(
+                messageContent,
+                @"(?<!\n)-\s*<b>(.*?)<\/b>", // Matches a dash followed by bold text, without a preceding newline
+                "\n- $1" // Adds a newline before the dash and removes the bold tags around the text
+            );
+
+            //
+            messageContent = System.Text.RegularExpressions.Regex.Replace(
+                messageContent,
+                @"(?<=<br>|^|\n)-\s+(?=[A-Z])", // Matches dashes at the start of a list item, but not in compound words
+                "<br>-" // Adds a <br> tag before the dash
+            );
+
+
+            messageContent = System.Text.RegularExpressions.Regex.Replace(
+                messageContent,
+                @"(?<=\n)(<b>\d+\.\s+[^<]+<\/b>)", // Matches bold numbered headings that are preceded by a newline
+                "<br><br>$1" // Adds a <br> before the matched heading
+            );
+
+
+            // Append citation at the end with line breaks for clear separation
+            return $"{messageContent}<br><br><i>Cited from \"{documentNames}\"</i>";
         }
+
+
+
+
+
+
 
     }
 }
