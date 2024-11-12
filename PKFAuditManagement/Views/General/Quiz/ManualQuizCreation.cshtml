@@ -46,7 +46,7 @@
                                         <p id="selected-participants-text" class="text-muted mt-2">No participants selected</p>
                                         <span id="participants-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745;"></span>
                                     </div>
-                                        <input type="file" id="ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
+                                    <input type="file" id="ExcelFile" name="ExcelFile" accept=".xlsx" style="display: none;" />
 
 
                                     <input type="hidden" id="SelectedParticipants" name="SelectedParticipants" value="@Model.SelectedParticipants" />
@@ -58,7 +58,7 @@
                                         <input type="hidden" id="SelectedFeedbackFormId" name="SelectedFeedbackFormId" />
                                         <p id="selected-feedback-form-text" class="text-muted mt-2">
                                             No feedback form selected
-                                            
+
                                         </p>
                                         <span id="feedback-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745; margin-left: 5px;"></span>
                                     </div>
@@ -243,14 +243,27 @@
                                 <!-- Modal structure for selecting feedback form -->
                                 <div id="feedback-form-modal" class="modal">
                                     <div class="modal-content">
-                                        <span id="close-feedback-modal" class="close-modal">&times;</span>
+                                        <span id="close-feedback-form-modal" class="close-modal">&times;</span>
                                         <h5>Select Feedback Form</h5>
-                                        <ul id="feedback-forms-list" class="list-group">
-                                            <!-- Dynamically populated list of feedback forms -->
-                                        </ul>
-                                        <button type="button" id="confirm-feedback-form-btn" class="btn btn-primary mt-3">Confirm Selection</button>
+
+                                        <!-- Search box for filtering feedback forms -->
+                                        <input type="text" id="search-feedback-form-input" placeholder="Search feedback forms" class="form-control mb-3">
+
+                                        <!-- Feedback forms list -->
+                                        <ul id="feedback-form-list-container" class="list-group mb-3"></ul>
+
+                                        <!-- Pagination controls -->
+                                        <div class="pagination-controls mt-3 d-flex justify-content-center">
+                                            <button id="prev-feedback-form-page" class="btn btn-secondary">Prev</button>
+                                            <span id="current-feedback-form-page-number" class="mx-3">Page 1</span>
+                                            <button id="next-feedback-form-page" class="btn btn-secondary">Next</button>
+                                        </div>
+
+                                        <!-- Confirm selection button -->
+                                        <button type="button" id="confirm-feedback-form-selection-btn" class="btn btn-primary mt-3">Confirm Selection</button>
                                     </div>
                                 </div>
+
                                 <!-- Modal for Participants Selection -->
                                 <div id="participants-modal" class="modal">
                                     <div class="modal-content">

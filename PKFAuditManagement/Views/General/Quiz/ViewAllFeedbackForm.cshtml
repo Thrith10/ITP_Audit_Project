@@ -135,7 +135,7 @@
                             This feedback form is linked to the following quizzes and cannot be deleted until they are removed:
                         </p>
                         <ul>
-                            @foreach (var quiz in TempData["LinkedQuizzes"] as List<string>)
+                            @foreach (var quiz in TempData["LinkedQuizzes"] as string[])
                             {
                                 <li>@quiz</li>
                             }
@@ -150,7 +150,7 @@
                     <form id="deleteForm" method="post" asp-action="DeleteFeedbackForm">
                         @Html.AntiForgeryToken()
                         <input type="hidden" id="feedbackFormID" name="feedbackFormID" value="" />
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         @if (TempData["LinkedQuizzes"] == null)
                         {
                             <button type="submit" class="btn btn-danger">Yes, Delete</button>

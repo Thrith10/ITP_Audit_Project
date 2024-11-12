@@ -280,39 +280,38 @@
                                                 {
                                                     <div class="table-container">
                                                         <div class="table-responsive">
-                                                        <table class="table table-bordered table-striped" id="pastQuizTable">
-                                                            <thead class="table-dark">
-                                                                <tr>
-                                                                    <th>Quiz Title</th>
-                                                                    <th>Description</th>
-                                                                    <th>Quiz Start</th>
-                                                                    <th>Quiz End</th>
-                                                                    <th>Actions</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach (var quiz in Model.Quizzes.Where(q => q.QuizEnd > DateTime.Now).OrderByDescending(q => q.QuizStart))
-                                                                {
+                                                            <table class="table table-bordered table-striped" id="pastQuizTable">
+                                                                <thead class="table-dark">
                                                                     <tr>
-                                                                        <td>@quiz.Title</td>
-                                                                        <td>@quiz.Description</td>
-                                                                        <td class="date-time">@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                        <td class="date-time">@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
-                                                                        <td class="actions">
-                                                                            <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">View Details</a>
-                                                                            <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">Show QR Code</button>
-
-                                                                            <!-- Button that triggers the Delete Confirmation Modal -->
-                                                                            <button type="button" class="btn btn-danger btn-sm" data-bs-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                                                                <i class="bi bi-trash"></i> Delete
-                                                                            </button>
-                                                                        </td>
+                                                                        <th>Quiz Title</th>
+                                                                        <th>Description</th>
+                                                                        <th>Quiz Start</th>
+                                                                        <th>Quiz End</th>
+                                                                        <th>Actions</th>
                                                                     </tr>
-                                                                }
-                                                            </tbody>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach (var quiz in Model.Quizzes.Where(q => q.QuizEnd < DateTime.Now).OrderByDescending(q => q.QuizStart))
+                                                                    {
+                                                                        <tr>
+                                                                            <td>@quiz.Title</td>
+                                                                            <td>@quiz.Description</td>
+                                                                            <td class="date-time">@quiz.QuizStart.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                            <td class="date-time">@quiz.QuizEnd.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                            <td class="actions">
+                                                                                <a href="@Url.Action("Details", "Quizzes", new { id = quiz.QuizID })" class="btn btn-primary btn-sm">View Details</a>
+                                                                                <button type="button" class="btn show-qr-btn" data-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#qrModal">Show QR Code</button>
 
-                                                        </table>
-                                                    </div>
+                                                                                <!-- Button that triggers the Delete Confirmation Modal -->
+                                                                                <button type="button" class="btn btn-danger btn-sm" data-bs-quiz-id="@quiz.QuizID" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                                                    <i class="bi bi-trash"></i> Delete
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 }
                                                 else
@@ -322,6 +321,7 @@
                                                         <h5>No Past Quizzes Available</h5>
                                                     </div>
                                                 }
+
                                             </div>
                                         </div>
 
