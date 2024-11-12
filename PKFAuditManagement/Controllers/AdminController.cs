@@ -30,7 +30,11 @@ namespace PKFAuditManagement.Controllers
         [Authorize(Roles = "Admin,Reviewer")]
         public IActionResult AdminDashboard()
         {
-            return View();
+            // Fetch the data from ChatbotDocuments table
+            var chatbotDocuments = _context.ChatbotDocuments.ToList();
+
+            // Pass the data to the view
+            return View(chatbotDocuments);
         }
 
         [Authorize(Roles = "Admin")]

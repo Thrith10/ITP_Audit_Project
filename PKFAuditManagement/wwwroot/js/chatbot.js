@@ -1,10 +1,25 @@
 // Add event listeners for resize functionality
 document.addEventListener('DOMContentLoaded', function () {
+
+
     const chatbotPopup = document.getElementById('chatbot-popup');
     const chatBox = document.getElementById('chat-box');
     let isResizing = false;
     let lastDownX = 0;
     let lastDownY = 0;
+    const chatMenu = document.getElementById('chat-menu');
+    const menuBtn = document.getElementById('menu-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+
+    // Toggle the visibility of the chat menu
+    menuBtn.addEventListener('click', function () {
+        chatMenu.style.display = chatMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Close the menu when the close button is clicked
+    closeMenuBtn.addEventListener('click', function () {
+        chatMenu.style.display = 'none';
+    });
 
     // Start resizing when mouse is down on the handle
     chatbotPopup.addEventListener('mousedown', function (e) {
@@ -89,49 +104,23 @@ function toggleChatbot() {
 
 // Function to show the introductory message and options
 function showIntroductionMessage() {
-    const introMessage = 'Hello, I am the audit chatbot trained on SSQM1, SSQM2, EP100, and EP200. To begin, please click an area you would like to explore:';
+    const introMessage = 'Hello, I am PKF-CAP\'s chatbot trained on audit documents. To begin, please click an area you would like to explore by clicking on the menu button on the bottom left and selecting a topic.';
     appendMessage('bot', introMessage); // Display the bot message with the introductory text
-
-    // Enhanced exit message with an additional explanation
-    const exitMessage = 'If you wish to exit at any time and reset the conversation, just type "exit". This will allow you to choose an area to explore again.';
-    appendMessage('bot', exitMessage); // Show the enhanced exit message
-
-    showDefaultOptions(); // Show the clickable options
 }
 // Variable to hold the current selection
-let currentSelection = null;
+let selectedTopic = null;
 
-// Function to display clickable options after the introductory message
-function showDefaultOptions() {
-    const options = [
-        { label: 'SSQM1', response: 'You selected SSQM1' },
-        { label: 'SSQM2', response: 'You selected SSQM2' },
-        { label: 'EP 100', response: 'You selected EP 100' },
-        { label: 'EP 200', response: 'You selected EP 200' }
-    ];
-
-    const buttonContainer = document.createElement('div');
-    buttonContainer.classList.add('button-container'); // Apply custom styling to align buttons
-
-    options.forEach(option => {
-        const button = document.createElement('button');
-        button.classList.add('chat-option-button');
-        button.textContent = option.label;
-        button.addEventListener('click', function () {
-            appendMessage('user', option.label); // Show user choice
-            appendMessage('bot', option.response); // Show bot response
-            // Save the current selection
-            currentSelection = option.label;
-            document.getElementById('user-input').disabled = false; // Enable chat input after a choice
-            buttonContainer.remove(); // Remove buttons after a choice
-        });
-        buttonContainer.appendChild(button);
+// Handle menu option clicks
+const menuOptions = document.querySelectorAll('.menu-option');
+menuOptions.forEach(option => {
+    option.addEventListener('click', function () {
+        document.getElementById('user-input').disabled = false;
+        selectedTopic = option.textContent; // Get the selected topic text
+        appendMessage('user', selectedTopic); // Show the user's choice
+        appendMessage('bot', `You selected ${selectedTopic}`); // Show the bot's response
+        document.getElementById('chat-menu').style.display = 'none'; // Hide the menu after selection
     });
-
-    const chatBox = document.getElementById('chat-box');
-    chatBox.appendChild(buttonContainer);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
+});
 
 // Function to send a message from the user
 function sendMessage() {
@@ -149,31 +138,6 @@ function sendMessage() {
     }
 }
 
-// Function to show the selection buttons again without clearing the conversation history
-function showSelectionButtons() {
-    if (currentSelection === null) {
-        // If no selection has been made yet, show the default options
-        showDefaultOptions();
-    } else {
-        // If a selection has been made, show the current selection message
-        const currentMessage = `You previously selected ${currentSelection}. To explore another area, please click one of the options below:`;
-        appendMessage('bot', currentMessage); // Show the current selection message
-        showDefaultOptions(); // Show the clickable options again
-    }
-
-}
-// Function to reset the chat and show the selection buttons again
-function resetChat() {
-    // Clear the chat box and reset the current selection
-    const chatBox = document.getElementById('chat-box');
-    chatBox.innerHTML = ''; // Clear chat history
-    currentSelection = null; // Reset the current selection
-
-    // Show the introduction message and options again
-    showIntroductionMessage();
-}
-
-
 // Function to get the chatbot's response via an AJAX request
 function respondToUser(userInput) {
     // Append a loading message for the bot response
@@ -181,11 +145,11 @@ function respondToUser(userInput) {
 
     // Make AJAX request
     $.ajax({
-        url: '/Chatbot/GetChatResponse',
+        url: '/Chatbot/GetNewChatResponse',
         type: 'POST',
         data: {
             'userInput': userInput,
-            'currentSelection': currentSelection 
+            'currentSelection': selectedTopic 
         },
         success: function (response) {
             // Replace the loading indicator with the actual response using jQuery's .html() to display as HTML

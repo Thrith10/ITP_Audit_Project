@@ -76,6 +76,7 @@ body {
     border-radius: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     width: 738px;
+    height: 800px;
     max-width: 90%;
     min-width: 300px; 
     z-index: 1000;
@@ -126,6 +127,67 @@ body {
     border-top: 1px solid #ddd;
     box-sizing: border-box; 
     height: 60px; 
+}
+
+/* Chat Menu Button */
+#menu-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+/* Chat Menu Container */
+.chat-menu {
+    display: none; /* Initially hidden */
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50%; 
+    background-color: #fff; 
+    border-top: 1px solid #ccc;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    z-index: 10;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+
+#close-menu-btn {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 22px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: block;
+    text-align: left;
+    width: 100%;
+    margin: 16px;  
+}
+
+/* Menu option button styling */
+.menu-option {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 15px 20px;
+    background-color: #fff; 
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    text-align: left;
+}
+
+/* Hover effect for menu option */
+.menu-option:hover {
+    background-color: #f1f1f1; 
+}
+
+.menu-option:hover {
+    background-color: #e0e0e0; 
 }
 
 #user-input {
