@@ -170,7 +170,7 @@ namespace PKFAuditManagement.Services
 
 
             // Append citation at the end with line breaks for clear separation
-            return $"{messageContent}<br><br><i>Cited from \"{documentNames}\"</i>";
+            return $"{messageContent}<br><br><i>Cited from \"{documentNames.ToUpper()}\"</i>";
         }
 
 

@@ -35,7 +35,7 @@ namespace PKFAuditManagement.Services
             _database = _client.GetDatabase("audit_documents");
 
             // Reference to the embedded_movies collection
-            _collection = _database.GetCollection<BsonDocument>("ep100_v1");
+            _collection = _database.GetCollection<BsonDocument>("docs_combined_v1");
             _logger = logger;
         }
 
@@ -289,8 +289,9 @@ namespace PKFAuditManagement.Services
                 throw new ApplicationException("Error during document search", ex);
             }
         }
+        
         */
-
+        
         public async Task<List<(string SectionTitle, string ParagraphText, string DocumentName)>> FindSimilarDocumentsAsync(double[] embedding, string userInput)
         {
             _logger.LogInformation($"Entered FindSimilarDocumentsAsync method with userInput: {userInput}");
@@ -343,7 +344,7 @@ namespace PKFAuditManagement.Services
                     _logger.LogInformation($"Calculated similarity score: {similarityScore}");
 
                     // Only consider documents with a high enough similarity score
-                    if (similarityScore > 0.5) // You may adjust this threshold based on your needs
+                    if (similarityScore > 0.3) // You may adjust this threshold based on your needs
                     {
                         string sectionTitle = doc.GetValue("SectionTitle", "N/A").AsString;
                         string paragraphText = doc.GetValue("ParagraphText", "N/A").AsString;
@@ -362,7 +363,7 @@ namespace PKFAuditManagement.Services
                 // Sort by similarity score and take the top N results
                 var topResults = resultsWithScores
                     .OrderByDescending(result => result.Score)
-                    .Take(10) // Limit to top 10 results
+                    .Take(100) // Limit to top 10 results
                     .Select(result => (result.SectionTitle, result.ParagraphText, result.DocumentName))
                     .ToList();
 
@@ -379,7 +380,7 @@ namespace PKFAuditManagement.Services
                 throw new ApplicationException("Error during document search", ex);
             }
         }
-
+        
         private double CalculateCosineSimilarity(double[] embedding1, double[] embedding2)
         {
             double dotProduct = 0.0;
