@@ -1,12 +1,21 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LangChain.Databases.Sqlite;
+using LangChain.DocumentLoaders;
+using LangChain.Extensions;
+using LangChain.Providers;
+using LangChain.Providers.OpenAI;
+using LangChain.Providers.OpenAI.Predefined;
+using LangChain.Splitters.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using PKFAuditManagement.Data;
 using PKFAuditManagement.Models;
 using PKFAuditManagement.Services;
 using PKFAuditManagement.Util;
+using System.Configuration;
 using System.Text;
 
 namespace PKFAuditManagement.Controllers
@@ -14,12 +23,15 @@ namespace PKFAuditManagement.Controllers
     public class ChatbotController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly OpenAiProvider _provider;
         private readonly IOpenAIService _openAIService;
         private readonly IEmbeddingService _embeddingService;
         private readonly IMongoDBService _mongoDBService;
+        private readonly IConfiguration _configuration;
+        private readonly TextEmbeddingV3SmallModel _embeddingModel;
         private readonly ILogger<ChatbotController> _logger;
 
-        public ChatbotController(ApplicationDbContext context, IOpenAIService openAIService, IEmbeddingService embeddingService, IMongoDBService mongoDBService,
+        public ChatbotController(ApplicationDbContext context, IOpenAIService openAIService, IEmbeddingService embeddingService, IMongoDBService mongoDBService, IConfiguration configuration,
             ILogger<ChatbotController> logger)
         {
             _context = context;
@@ -27,6 +39,9 @@ namespace PKFAuditManagement.Controllers
             _embeddingService = embeddingService;
             _mongoDBService = mongoDBService;
             _logger = logger;
+            _configuration = configuration;
+            _provider = new OpenAiProvider(_configuration["OPENAI_API_KEY"]);
+            _embeddingModel = new TextEmbeddingV3SmallModel(_provider);
         }
 
         [Authorize(Roles = "Admin")]
@@ -71,8 +86,8 @@ namespace PKFAuditManagement.Controllers
                 Directory.CreateDirectory(storagePath);
             }
 
-            // Generate a unique file name
-            var fileName = $"{Guid.NewGuid()}.pdf";
+            // Generate the file name
+            var fileName = $"{documentName}.pdf";
             var filePath = Path.Combine(storagePath, fileName);
 
             // Save the file
@@ -88,13 +103,6 @@ namespace PKFAuditManagement.Controllers
                 DateAdded = DateTime.UtcNow,
                 FilePath = $"/RAGDocuments/{fileName}"
             };
-
-
-            //    Read a list of paragraphs from the PDF uploaded
-            List<(string SectionTitle, string Chunk)> paragraphs = PdfReader.ReadPdf(filePath);
-
-            // Paragraphs read will be saved to MongoDB collection
-            await _mongoDBService.SaveParagraphsToMongoDBAsync(paragraphs, documentName);
 
             try
             {
@@ -129,7 +137,7 @@ namespace PKFAuditManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetChatResponse(string userInput)
+        public async Task<IActionResult> GetChatResponse(string userInput, string currentSelection)
         {
 
             //var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "RAGDocuments", "SSQM2.pdf");
@@ -182,40 +190,35 @@ namespace PKFAuditManagement.Controllers
             return Ok(response);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromForm] string documentName)
-        //{
-        //    if (file == null || file.Length == 0)
-        //    {
-        //        return BadRequest("No file uploaded.");
-        //    }
+        [HttpPost]
+        public async Task<IActionResult> GetNewChatResponse(string userInput, string currentSelection)
+        {
+            var pdfPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "RAGDocuments", $"{currentSelection}.pdf");
 
-        //    if (string.IsNullOrWhiteSpace(documentName))
-        //    {
-        //        return BadRequest("Document name is required.");
-        //    }
+            // Database selection based on the current selection
+            SqLiteVectorDatabase _vectorDatabase;
 
-        //    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "RAGDocuments");
-        //    Directory.CreateDirectory(uploadsFolder); // Create the directory if it doesn't exist
+            // Name of Db
+            var dbName = $"{currentSelection}-docs.db";
 
-        //    var filePath = Path.Combine(uploadsFolder, file.FileName);
+            // Use the DatabaseName from the selected document to create the SqLiteVectorDatabase instance
+            _vectorDatabase = new SqLiteVectorDatabase(dbName);
 
-        //    // Save the file
-        //    using (var stream = new FileStream(filePath, FileMode.Create))
-        //    {
-        //        await file.CopyToAsync(stream);
-        //    }
+            // Retrieve relevant documents
+            var vectorCollection = await _vectorDatabase.AddDocumentsFromAsync<PdfPigPdfLoader>(
+                _embeddingModel,
+                dimensions: 1536,
+                dataSource: DataSource.FromPath(pdfPath),
+                collectionName: "RAGDocuments",
+                textSplitter: new RecursiveCharacterTextSplitter(chunkSize: 512, chunkOverlap: 200));
 
-        //    // Read a list of paragraphs from the PDF uploaded
-        //    //List<string> paragraphs = PdfReader.ReadPdf(filePath);
+            var similarDocuments = await vectorCollection.GetSimilarDocuments(_embeddingModel, userInput, amount: 10);
 
-        //    List<(string SectionTitle, string Chunk)> paragraphs = PdfReader.ReadPdf(filePath);
+            // Retrieve response from LLM based on the combined input
+            var response = await _openAIService.GetNewChatResponseAsync(userInput, similarDocuments);
 
-        //    // Paragraphs read will be saved to MongoDB collection
-        //    await _mongoDBService.SaveParagraphsToMongoDBAsync(paragraphs, documentName);
-
-        //    // Return the generated response
-        //    return Ok();
-        //}
+            // Return the generated response
+            return Ok(response);
+        }
     }
 }
