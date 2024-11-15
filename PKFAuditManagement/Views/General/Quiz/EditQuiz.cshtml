@@ -82,6 +82,18 @@
                                                     <span id="feedback-selected-tick" class="bi bi-check-circle-fill ms-2" style="display: none; color: #28a745;"></span>
                                                 </div>
                                             </div>
+                                            <!-- Select Self-Assessment Form Button -->
+                                            <div class="form-group mt-3">
+                                                <!-- Self-Assessment Form Selection Button -->
+                                                <button type="button" class="btn btn-info btn-sm" id="select-self-assessment-form-btn">
+                                                    <i class="bi bi-list-check"></i> Select Self-Assessment Form
+                                                </button>
+
+                                                <!-- Hidden input to store selected Self-Assessment Form ID -->
+                                                <input type="hidden" id="SelectedSelfAssessmentFormId" name="SelectedSelfAssessmentFormId" />
+                                                <span id="selected-self-assessment-form-text" class="unselected-text">No self-assessment form selected</span>
+                                                <span id="self-assessment-selected-tick" class="bi bi-check-circle-fill" style="display: none;"></span>
+                                            </div>
 
 
                                             <!-- New Topics Field Section -->
@@ -149,66 +161,66 @@
                                                                         break;
 
                                                                     case QuestionType.SingleAnswerMCQ:
-                                                                        
-                                                                            <label>Options:</label>
-                                                                            @for (int j = 0; j < Model.Questions[i].Options.Count; j++)
-                                                                            {
-                                                                                <div class="input-group mb-2 option-group">
-                                                                                    <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions[i].Options[j].OptionText" required />
-                                                                                    <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                                        <i class="bi bi-trash"></i>
-                                                                                    </button>
-                                                                                </div>
-                                                                            }
-                                                                            <!-- Add Option Button -->
-                                                                            @if (Model.Questions[i].Options.Count < 5)
-                                                                            {
-                                                                                <button type="button" class="btn btn-secondary btn-sm add-option" data-question-index="@i">
-                                                                                    <i class="bi bi-plus-lg"></i> Add Option
+
+                                                                        <label>Options:</label>
+                                                                        @for (int j = 0; j < Model.Questions[i].Options.Count; j++)
+                                                                        {
+                                                                            <div class="input-group mb-2 option-group">
+                                                                                <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions[i].Options[j].OptionText" required />
+                                                                                <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                                    <i class="bi bi-trash"></i>
                                                                                 </button>
+                                                                            </div>
+                                                                        }
+                                                                        <!-- Add Option Button -->
+                                                                        @if (Model.Questions[i].Options.Count < 5)
+                                                                        {
+                                                                            <button type="button" class="btn btn-secondary btn-sm add-option" data-question-index="@i">
+                                                                                <i class="bi bi-plus-lg"></i> Add Option
+                                                                            </button>
+                                                                        }
+                                                                        <br />
+                                                                        <label>Select the correct answer:</label>
+                                                                        <select class="form-control" name="Questions[@i].CorrectOptionText" required>
+                                                                            @foreach (var option in Model.Questions[i].Options)
+                                                                            {
+                                                                                <option value="@option.OptionText" selected="@(Model.Questions[i].CorrectOptionText == option.OptionText)">@option.OptionText</option>
                                                                             }
-                                                                            <br />
-                                                                            <label>Select the correct answer:</label>
-                                                                            <select class="form-control" name="Questions[@i].CorrectOptionText" required>
-                                                                                @foreach (var option in Model.Questions[i].Options)
-                                                                                {
-                                                                                    <option value="@option.OptionText" selected="@(Model.Questions[i].CorrectOptionText == option.OptionText)">@option.OptionText</option>
-                                                                                }
-                                                                            </select>
-                                                                      
+                                                                        </select>
+
                                                                         break;
 
                                                                     case QuestionType.MultiAnswerMCQ:
-                                                                 
-                                                                            <label>Options:</label>
-                                                                            @for (int j = 0; j < Model.Questions[i].Options.Count; j++)
-                                                                            {
-                                                                                <div class="input-group mb-2 option-group">
-                                                                                    <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions[i].Options[j].OptionText" required />
-                                                                                    <button type="button" class="btn btn-danger btn-sm remove-option">
-                                                                                        <i class="bi bi-trash"></i>
-                                                                                    </button>
-                                                                                </div>
-                                                                            }
-                                                                            <!-- Add Option Button -->
-                                                                            @if (Model.Questions[i].Options.Count < 5)
-                                                                            {
-                                                                                <button type="button" class="btn btn-secondary btn-sm add-option" data-question-index="@i">
-                                                                                    <i class="bi bi-plus-lg"></i> Add Option
+
+                                                                        <label>Options:</label>
+                                                                        @for (int j = 0; j < Model.Questions[i].Options.Count; j++)
+                                                                        {
+                                                                            <div class="input-group mb-2 option-group">
+                                                                                <input type="text" class="form-control" name="Questions[@i].Options[@j].OptionText" value="@Model.Questions[i].Options[j].OptionText" required />
+                                                                                <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                                                    <i class="bi bi-trash"></i>
                                                                                 </button>
-                                                                            }
-                                                                            <br />
-                                                                            <label>Select the correct answer(s):</label>
-                                                                            <select class="form-control multi-select" name="Questions[@i].CorrectOptionText" multiple>
+                                                                            </div>
+                                                                        }
+                                                                        <!-- Add Option Button -->
+                                                                        @if (Model.Questions[i].Options.Count < 5)
+                                                                        {
+                                                                            <button type="button" class="btn btn-secondary btn-sm add-option" data-question-index="@i">
+                                                                                <i class="bi bi-plus-lg"></i> Add Option
+                                                                            </button>
+                                                                        }
+                                                                        <br />
+                                                                        <label>Select the correct answer(s):</label>
+                                                                        <select class="form-control multi-select" name="Questions[@i].CorrectOptionText" multiple>
                                                                             @{
                                                                                 var selectedCorrectAnswers = Model.Questions[i].CorrectOptionText?.Split(';') ?? new string[] { };
                                                                             }
-                                                                                @foreach (var option in Model.Questions[i].Options)
-                                                                                {
-                                                                                    <option value="@option.OptionText" selected="@(Model.Questions[i].CorrectOptionText != null && Model.Questions[i].CorrectOptionText.Contains(option.OptionText))">@option.OptionText</option>
-                                                                                }
-                                                                            </select>
-                                                                
+                                                                            @foreach (var option in Model.Questions[i].Options)
+                                                                            {
+                                                                                <option value="@option.OptionText" selected="@(Model.Questions[i].CorrectOptionText != null && Model.Questions[i].CorrectOptionText.Contains(option.OptionText))">@option.OptionText</option>
+                                                                            }
+                                                                        </select>
+
                                                                         break;
                                                                 }
                                                             </div>
@@ -304,6 +316,30 @@
                                             </div>
                                         </div>
 
+                                        <!-- Self-Assessment Form Modal -->
+                                        <div id="self-assessment-form-modal" class="modal" style="display: none;">
+                                            <div class="modal-content">
+                                                <span id="close-self-assessment-form-modal" class="close-modal">&times;</span>
+                                                <h5>Select Self-Assessment Form</h5>
+
+                                                <!-- Search box for filtering self-assessment forms -->
+                                                <input type="text" id="search-self-assessment-form-input" placeholder="Search self-assessment forms" class="form-control mb-3">
+
+                                                <!-- Self-Assessment Forms List -->
+                                                <ul id="self-assessment-form-list-container" class="list-group mb-3"></ul>
+
+                                                <!-- Pagination controls for Self-Assessment Forms -->
+                                                <div class="pagination-controls mt-3 d-flex justify-content-center">
+                                                    <button id="prev-self-assessment-form-page" class="btn btn-secondary">Prev</button>
+                                                    <span id="current-self-assessment-form-page-number" class="mx-3">Page 1</span>
+                                                    <button id="next-self-assessment-form-page" class="btn btn-secondary">Next</button>
+                                                </div>
+
+                                                <!-- Confirm selection button -->
+                                                <button type="button" id="confirm-self-assessment-form-selection-btn" class="btn btn-primary mt-3">Confirm Selection</button>
+                                            </div>
+                                        </div>
+
                                         <!-- Invalid Options Modal -->
                                         <div class="modal fade" id="invalidOptionsModal" tabindex="-1" aria-labelledby="invalidOptionsModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
@@ -320,6 +356,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>

@@ -398,6 +398,7 @@ namespace PKFAuditManagement.Controllers
                 quiz.QuizStart = quizViewModel.QuizStart;
                 quiz.QuizEnd = quizViewModel.QuizEnd;
                 quiz.FeedbackFormID = quizViewModel.SelectedFeedbackFormId; // Update Feedback Form ID
+                quiz.SelfAssessmentFormID = quizViewModel.SelectedSelfAssessmentFormId;
 
 
                 // Clear existing questions and options

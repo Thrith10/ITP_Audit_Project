@@ -45,6 +45,23 @@
     const selectedParticipantsList = document.getElementById("selected-participants-list");
     const closeParticipantsModalBtn = document.getElementById("close-participants-modal-btn");
 
+    //Self-Assessment
+    const selfAssessmentFormListContainer = document.getElementById('self-assessment-form-list-container');
+    const closeSelfAssessmentFormModal = document.getElementById('close-self-assessment-form-modal');
+    const confirmSelfAssessmentFormSelectionBtn = document.getElementById('confirm-self-assessment-form-selection-btn');
+    const selectedSelfAssessmentFormIdInput = document.getElementById('SelectedSelfAssessmentFormId');
+    const searchSelfAssessmentFormInput = document.getElementById('search-self-assessment-form-input');
+    const prevSelfAssessmentFormPageBtn = document.getElementById('prev-self-assessment-form-page');
+    const nextSelfAssessmentFormPageBtn = document.getElementById('next-self-assessment-form-page');
+    const currentSelfAssessmentFormPageNumber = document.getElementById('current-self-assessment-form-page-number');
+    const selectedSelfAssessmentFormText = document.getElementById('selected-self-assessment-form-text'); // Display element for selected form
+    const selfAssessmentFormSelectedTick = document.getElementById('self-assessment-selected-tick'); // Green tick icon
+
+    // Ensure default values for pagination and form data
+    let allSelfAssessmentForms = [];
+    let currentSelfAssessmentFormPage = 1;
+    const selfAssessmentFormsPerPage = 10;
+
     var quizStartInput = document.getElementById('QuizStart');
     var quizEndInput = document.getElementById('QuizEnd');
 
@@ -188,6 +205,107 @@
         const feedbackFormModal = document.getElementById('feedback-form-modal');
         if (event.target === feedbackFormModal) {
             feedbackFormModal.style.display = 'none';
+        }
+    });
+    //Self-Assessment
+    function loadSelfAssessmentForms() {
+        fetch('/Quizzes/GetSelfAssessmentForms') // Replace with the actual endpoint for self-assessment forms
+            .then(response => response.json())
+            .then(data => {
+                allSelfAssessmentForms = data;
+                currentSelfAssessmentFormPage = 1;
+                renderSelfAssessmentFormList();
+            })
+            .catch(error => console.error('Error fetching self-assessment forms:', error));
+    }
+
+    function renderSelfAssessmentFormList() {
+        const searchTerm = searchSelfAssessmentFormInput.value.toLowerCase();
+        const filteredSelfAssessmentForms = allSelfAssessmentForms.filter(form =>
+            form.title.toLowerCase().includes(searchTerm)
+        );
+
+        const startIndex = (currentSelfAssessmentFormPage - 1) * selfAssessmentFormsPerPage;
+        const endIndex = startIndex + selfAssessmentFormsPerPage;
+        const paginatedSelfAssessmentForms = filteredSelfAssessmentForms.slice(startIndex, endIndex);
+
+        selfAssessmentFormListContainer.innerHTML = '';
+
+        paginatedSelfAssessmentForms.forEach(form => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item list-group-item-action';
+            listItem.textContent = form.title;
+            listItem.dataset.id = form.id;
+
+            listItem.addEventListener('click', function () {
+                selfAssessmentFormListContainer.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+                listItem.classList.add('active');
+
+                // Set the hidden input value with the selected form ID
+                selectedSelfAssessmentFormIdInput.value = form.id;
+
+                // Update the display text to show the selected self-assessment form title
+                selectedSelfAssessmentFormText.textContent = form.title;
+                selectedSelfAssessmentFormText.classList.add('selected'); // Add class for styling
+
+                // Show the green tick beside the selected form text
+                selfAssessmentFormSelectedTick.style.display = 'inline';
+            });
+
+            selfAssessmentFormListContainer.appendChild(listItem);
+        });
+
+        updateSelfAssessmentFormPaginationControls(filteredSelfAssessmentForms.length);
+    }
+
+    function updateSelfAssessmentFormPaginationControls(totalItems) {
+        const totalPages = Math.ceil(totalItems / selfAssessmentFormsPerPage);
+
+        prevSelfAssessmentFormPageBtn.disabled = currentSelfAssessmentFormPage === 1;
+        nextSelfAssessmentFormPageBtn.disabled = currentSelfAssessmentFormPage === totalPages || totalPages === 0;
+
+        currentSelfAssessmentFormPageNumber.textContent = `Page ${currentSelfAssessmentFormPage} of ${totalPages}`;
+    }
+
+    searchSelfAssessmentFormInput.addEventListener('input', function () {
+        currentSelfAssessmentFormPage = 1;
+        renderSelfAssessmentFormList();
+    });
+
+    prevSelfAssessmentFormPageBtn.addEventListener('click', function () {
+        if (currentSelfAssessmentFormPage > 1) {
+            currentSelfAssessmentFormPage--;
+            renderSelfAssessmentFormList();
+        }
+    });
+
+    nextSelfAssessmentFormPageBtn.addEventListener('click', function () {
+        const totalPages = Math.ceil(
+            allSelfAssessmentForms.filter(form => form.title.toLowerCase().includes(searchSelfAssessmentFormInput.value.toLowerCase())).length / selfAssessmentFormsPerPage
+        );
+        if (currentSelfAssessmentFormPage < totalPages) {
+            currentSelfAssessmentFormPage++;
+            renderSelfAssessmentFormList();
+        }
+    });
+
+    document.getElementById('select-self-assessment-form-btn').addEventListener('click', function () {
+        document.getElementById('self-assessment-form-modal').style.display = 'block';
+        loadSelfAssessmentForms();
+    });
+
+    closeSelfAssessmentFormModal.addEventListener('click', function () {
+        document.getElementById('self-assessment-form-modal').style.display = 'none';
+    });
+
+    confirmSelfAssessmentFormSelectionBtn.addEventListener('click', function () {
+        document.getElementById('self-assessment-form-modal').style.display = 'none';
+    });
+
+    window.addEventListener('click', function (event) {
+        const selfAssessmentFormModal = document.getElementById('self-assessment-form-modal');
+        if (event.target === selfAssessmentFormModal) {
+            selfAssessmentFormModal.style.display = 'none';
         }
     });
 
@@ -611,10 +729,18 @@
     function isOptionUnique(options, newValue) {
         return options.filter(option => option === newValue).length === 1;
     }
+    function showInvalidOptionsPopup(message) {
+        // Set the message in the modal body dynamically
+        document.getElementById('invalidOptionsMessage').innerHTML = message;
 
-    function showInvalidOptionsPopup() {
-        alert('Some options are invalid. Please correct duplicate options before submitting.');
+        // Show the modal with custom positioning
+        var invalidOptionsModal = new bootstrap.Modal(document.getElementById('invalidOptionsModal'), {
+            backdrop: false, // No overlay
+            keyboard: false  // Prevent closing on keyboard actions
+        });
+        invalidOptionsModal.show();
     }
+
 
     document.addEventListener('input', function (e) {
         if (e.target && e.target.matches('.option-group input[type="text"]')) {
@@ -742,13 +868,14 @@
         });
 
         if (!isValid) {
-            showInvalidOptionsPopup();
+            showInvalidOptionsPopup("Some options are invalid. Please correct duplicate options before submitting.");
         }
 
         return isValid;
     }
-
+    // Ensure that when the form is submitted, the multi-select values are properly serialized
     document.querySelector('#submit-button').addEventListener('click', function (e) {
+        // Serialize all Select2 multi-selects for multi-answer MCQ
         var multiSelects = document.querySelectorAll('.multi-select');
         multiSelects.forEach(function (multiSelect) {
             var questionIndex = multiSelect.closest('.card').getAttribute('data-index');
@@ -765,12 +892,29 @@
             hiddenInput.type = 'hidden';
             hiddenInput.name = `Questions[${questionIndex}].CorrectOptionTexts`;
             hiddenInput.value = selectedOptions.join(';');
-
             multiSelect.parentElement.appendChild(hiddenInput);
         });
 
-        if (!validateQuiz()) {
-            e.preventDefault();
+        // Validation for feedback form, self-assessment form, and topics
+        const feedbackFormIdInput = document.getElementById('SelectedFeedbackFormId');
+        const selfAssessmentFormIdInput = document.getElementById('SelectedSelfAssessmentFormId'); // Ensure this input exists for self-assessment selection
+        const topicsContainer = document.getElementById('topics-container');
+        const topicInputs = topicsContainer.querySelectorAll('input[type="text"]');
+        const hasTopics = Array.from(topicInputs).some(input => input.value.trim() !== '');
+        const hasFeedbackForm = feedbackFormIdInput && feedbackFormIdInput.value.trim() !== '';
+        const hasSelfAssessmentForm = selfAssessmentFormIdInput && selfAssessmentFormIdInput.value.trim() !== '';
+
+        // Display errors in a modal and prevent form submission if topics, feedback form, or self-assessment form are missing
+        if (!hasTopics || !hasFeedbackForm || !hasSelfAssessmentForm) {
+            let errorMessage = '';
+            if (!hasTopics) errorMessage += 'Please add at least one topic.<br>';
+            if (!hasFeedbackForm) errorMessage += 'Please select a feedback form.<br>';
+            if (!hasSelfAssessmentForm) errorMessage += 'Please select a self-assessment form.<br>';
+
+            showInvalidOptionsPopup(errorMessage); // Display the error message(s) in a modal
+            e.preventDefault(); // Prevent form submission
+        } else if (!validateQuiz()) {
+            e.preventDefault(); // Prevent form submission if there are other validation errors
         }
     });
 

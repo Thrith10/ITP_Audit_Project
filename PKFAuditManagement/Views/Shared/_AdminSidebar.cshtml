@@ -54,6 +54,18 @@
                 <span>View Quizzes</span>
             </a>
         </li>
+                <li class="nav-item">
+                <a class="nav-link @(currentController == "Feedback" && currentAction == "ViewAllFeedbackForms" ? "active" : "collapsed")" asp-controller="Feedback" asp-action="ViewAllFeedbackForms">
+                <i class="bi bi-clipboard2-check"></i>
+                <span>View Feedback Forms</span>
+            </a>
+        </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentController == "SelfAssessment" && currentAction == "ViewAllSelfAssessmentForms" ? "active" : "collapsed")" asp-controller="SelfAssessment" asp-action="ViewAllSelfAssessmentForms">
+                    <i class="bi bi-clipboard2-check"></i>
+                    <span>View Self Assessment Forms</span>
+                </a>
+            </li>
 
         <li class="nav-heading">Administration</li>
 

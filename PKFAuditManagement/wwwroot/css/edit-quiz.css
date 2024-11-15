@@ -570,5 +570,75 @@ h5 {
 }
 
 #selected-feedback-form-text {
-font-weight:bold;
+color: black !important;
+}
+/* Self-Assessment Forms List Styling */
+#self-assessment-form-list-container .list-group-item {
+    cursor: pointer;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    transition: background-color 0.2s;
+}
+
+    #self-assessment-form-list-container .list-group-item:hover {
+        background-color: #f0f0f0;
+    }
+
+    #self-assessment-form-list-container .list-group-item.active {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+/* Pagination Controls */
+.pagination-controls button {
+    min-width: 80px;
+}
+
+#self-assessment-form-modal .btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Button Styling */
+#self-assessment-form-modal .btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+    #self-assessment-form-modal .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+#self-assessment-form-modal .btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+    #self-assessment-form-modal .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+/* Unselected text (normal font weight) */
+.unselected-text {
+    font-weight: normal;
+    margin-left: 10px;
+    color: black;
+}
+
+/* Selected text (bold font weight) */
+.selected {
+    font-weight: bold;
+}
+
+/* Green tick styling */
+#self-assessment-selected-tick {
+    display: none; /* Initially hidden */
+    color: #28a745;
+    margin-left: 5px;
 }
