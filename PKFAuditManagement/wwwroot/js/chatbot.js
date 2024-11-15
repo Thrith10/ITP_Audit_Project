@@ -1,10 +1,25 @@
 // Add event listeners for resize functionality
 document.addEventListener('DOMContentLoaded', function () {
+
+
     const chatbotPopup = document.getElementById('chatbot-popup');
     const chatBox = document.getElementById('chat-box');
     let isResizing = false;
     let lastDownX = 0;
     let lastDownY = 0;
+    const chatMenu = document.getElementById('chat-menu');
+    const menuBtn = document.getElementById('menu-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+
+    // Toggle the visibility of the chat menu
+    menuBtn.addEventListener('click', function () {
+        chatMenu.style.display = chatMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Close the menu when the close button is clicked
+    closeMenuBtn.addEventListener('click', function () {
+        chatMenu.style.display = 'none';
+    });
 
     // Start resizing when mouse is down on the handle
     chatbotPopup.addEventListener('mousedown', function (e) {
@@ -78,50 +93,72 @@ function toggleChatbot() {
     if (chatbotPopup.classList.contains('visible')) {
         chatbotPopup.classList.remove('visible');
     } else {
-        chatbotPopup.classList.add('visible'); // Add class for visibility
+        chatbotPopup.classList.add('visible');
         if (!hasOpened) {
-            showDefaultMessage();
-            hasOpened = true; // Set flag to true once the chatbot has been opened
+            showIntroductionMessage();
+            hasOpened = true;
         }
+        document.getElementById('user-input').disabled = true; // Disable chat input initially
     }
 }
 
-// Function to show the default message when the chatbot opens
-function showDefaultMessage() {
-    const defaultMessage = 'Hello! How can I assist you today?'; // Default message
-    appendMessage('bot', defaultMessage);
+// Function to show the introductory message and options
+function showIntroductionMessage() {
+    const introMessage = 'Hello, I am PKF-CAP\'s chatbot trained on audit documents. To begin, please click an area you would like to explore by clicking on the menu button on the bottom left and selecting a topic.';
+    appendMessage('bot', introMessage); // Display the bot message with the introductory text
 }
+// Variable to hold the current selection
+let selectedTopic = null;
+
+// Handle menu option clicks
+const menuOptions = document.querySelectorAll('.menu-option');
+menuOptions.forEach(option => {
+    option.addEventListener('click', function () {
+        document.getElementById('user-input').disabled = false;
+        selectedTopic = option.textContent; // Get the selected topic text
+        appendMessage('user', selectedTopic); // Show the user's choice
+        appendMessage('bot', `You selected ${selectedTopic}`); // Show the bot's response
+        document.getElementById('chat-menu').style.display = 'none'; // Hide the menu after selection
+    });
+});
 
 // Function to send a message from the user
 function sendMessage() {
     const userInput = document.getElementById('user-input').value.trim();
     if (userInput !== '') {
-        appendMessage('user', userInput);
-        respondToUser(userInput.toLowerCase());
-        document.getElementById('user-input').value = '';
+        appendMessage('user', userInput); // Show user message
+
+        if (userInput.toLowerCase() === 'exit') {
+            resetChat(); // Reset the chat if the user types 'exit'
+        } else {
+            respondToUser(userInput.toLowerCase()); // Get the bot's response
+        }
+
+        document.getElementById('user-input').value = ''; // Clear input field
     }
 }
 
 // Function to get the chatbot's response via an AJAX request
 function respondToUser(userInput) {
-    // Append a message for the bot response with a loading indicator
+    // Append a loading message for the bot response
     const loadingMessage = appendMessage('bot', createLoadingIndicator());
 
     // Make AJAX request
     $.ajax({
-        url: '/Chatbot/GetChatResponse',
+        url: '/Chatbot/GetNewChatResponse',
         type: 'POST',
-        data: { 'userInput': userInput },
+        data: {
+            'userInput': userInput,
+            'currentSelection': selectedTopic 
+        },
         success: function (response) {
-            // Replace the loading indicator with the actual response
-            loadingMessage.innerHTML = response;
+            // Replace the loading indicator with the actual response using jQuery's .html() to display as HTML
+            $(loadingMessage).remove(); // Remove the loading message
+            appendMessage('bot', response);
         },
         error: function (xhr, status, error) {
             console.error('Error:', error);
-            loadingMessage.innerHTML = 'Sorry, there was an error processing your request.';
-        },
-        complete: function () {
-            loadingIndicator.style.display = 'none'; // Hide loading indicator after response is received
+            $(loadingMessage).html('Sorry, there was an error processing your request.');
         }
     });
 }
@@ -130,14 +167,13 @@ function respondToUser(userInput) {
 function createLoadingIndicator() {
     return `<img src="/img/loading.gif" alt="Loading..." class="loading-indicator" width="24" height="24"/>`;
 }
-
 function appendMessage(sender, message) {
-    const chatBox = document.getElementById('chat-box');
-    const messageElement = document.createElement('div');
-    messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
-    messageElement.innerHTML = message;
-    chatBox.appendChild(messageElement);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    const chatBox = $('#chat-box');
+    const messageElement = $('<div></div>');
+    messageElement.addClass(sender === 'user' ? 'user-message' : 'bot-message');
+    messageElement.html(message); // Allow HTML content
+    chatBox.append(messageElement);
+    chatBox.scrollTop(chatBox[0].scrollHeight);
 
-    return messageElement; // Ensure this line is present
+    return messageElement[0]; // Return the DOM element for further manipulation if needed
 }

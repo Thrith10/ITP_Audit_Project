@@ -51,9 +51,8 @@
 
                         pageIndex++; // Increment page index
 
-                        // Skip pages 1 to 4
+                        // Skip pages
                         if (pageIndex <= 2)
-                        //if (pageIndex < 9)
                         {
                             continue; // Skip processing these pages
                         }
