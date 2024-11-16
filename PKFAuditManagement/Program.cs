@@ -13,7 +13,7 @@ using DotNetEnv;
 var builder = WebApplication.CreateBuilder(args);
 
 // Load the .env file
-Env.Load();
+//Env.Load();
 
 // Enable legacy timestamp behavior for Npgsql
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -42,12 +42,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-var connectionString = builder.Configuration["DefaultConnection"];
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//        options.UseNpgsql(connectionString, npgsqlOptions =>
-//            npgsqlOptions.CommandTimeout(300) 
-//        ));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+//var connectionString = builder.Configuration["DefaultConnection"];
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+            npgsqlOptions.CommandTimeout(300) 
+        ));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
