@@ -121,9 +121,6 @@ namespace PKFAuditManagement.UnitTests
             _mockUserService.Setup(s => s.GetUserEmailAsync(It.IsAny<ClaimsPrincipal>()))
                 .ReturnsAsync(userEmail);
 
-            var clientNames = new List<string> { "Client A", "Client B" };
-
-
             var adminEmails = new List<string> { "admin1@example.com" };
             var reviewerEmails = new List<string> { "reviewer1@example.com" };
 
