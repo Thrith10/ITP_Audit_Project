@@ -8,11 +8,12 @@ using Microsoft.Extensions.Options;
 using PKFAuditManagement.Services;
 using Amazon.S3;
 using Microsoft.Extensions.Caching.Memory;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load the .env file
-// Env.Load();
+Env.Load();
 
 // Enable legacy timestamp behavior for Npgsql
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -41,15 +42,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-//var connectionString = builder.Configuration["ConnectionString"];
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString, npgsqlOptions =>
-            npgsqlOptions.CommandTimeout(300) 
-        ));
-
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration["DefaultConnection"];
 //builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(connectionString));
+//        options.UseNpgsql(connectionString, npgsqlOptions =>
+//            npgsqlOptions.CommandTimeout(300) 
+//        ));
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
@@ -87,7 +88,8 @@ builder.Services.AddScoped<IEmbeddingService>(provider =>
 builder.Services.AddScoped<IMongoDBService>(sp =>
 {
     var embeddingService = sp.GetRequiredService<IEmbeddingService>(); // Resolve the IEmbeddingService
-    return new MongoDBService(builder.Configuration["MONGODB_CONNECTION_STRING"], embeddingService); // Pass both parameters to the constructor
+    var logger = sp.GetRequiredService<ILogger<MongoDBService>>(); // Resolve the ILogger<MongoDBService>
+    return new MongoDBService(builder.Configuration["MONGODB_CONNECTION_STRING"], embeddingService, logger); // Pass both parameters to the constructor
 });
 
 
@@ -104,6 +106,7 @@ builder.Services.AddScoped<SignInManager<CustomUser>>();
 var awsOptions = builder.Configuration.GetAWSOptions("AWS");
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddLogging();
 
 var app = builder.Build();
 

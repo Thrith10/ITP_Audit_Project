@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PKFAuditManagement", "PKFAuditManagement\PKFAuditManagement.csproj", "{8E98D429-96AE-4E19-8DD5-FF66AC3710B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PKFAuditManagement.UnitTests", "PKFAuditManagement.UnitTests\PKFAuditManagement.UnitTests.csproj", "{73CE66E1-FA7A-4DB6-8EB3-684639C9E875}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8E98D429-96AE-4E19-8DD5-FF66AC3710B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E98D429-96AE-4E19-8DD5-FF66AC3710B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E98D429-96AE-4E19-8DD5-FF66AC3710B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73CE66E1-FA7A-4DB6-8EB3-684639C9E875}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73CE66E1-FA7A-4DB6-8EB3-684639C9E875}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73CE66E1-FA7A-4DB6-8EB3-684639C9E875}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73CE66E1-FA7A-4DB6-8EB3-684639C9E875}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
