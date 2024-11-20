@@ -21,7 +21,6 @@ namespace PKFAuditManagement.ViewModels
 
     public class SelfAssessmentQuestionViewModel
     {
-        public Guid SelfAssessmentQuestionID { get; set; } // Unique ID for the question
         public string QuestionText { get; set; } // Text of the question
         public SelfAssessmentType Type { get; set; } // Type of the question (Rate1To5)
     }

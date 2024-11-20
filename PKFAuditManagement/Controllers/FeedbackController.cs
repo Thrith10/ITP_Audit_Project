@@ -194,7 +194,6 @@ namespace PKFAuditManagement.Controllers
                 CreatedBy = feedbackForm.CreatedBy,
                 Questions = feedbackForm.Questions.Select(q => new FeedbackQuestionViewModel
                 {
-                    FeedbackQuestionID = q.FeedbackQuestionID,
                     QuestionText = q.QuestionText,
                     Type = (ViewModels.FeedbackType)q.Type
                 }).ToList()
@@ -208,8 +207,8 @@ namespace PKFAuditManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditFeedbackForm(EditFeedbackFormViewModel viewModel)
         {
-            TempData["ErrorMessage"] = "";
-            TempData["SuccessMessage"] = "";
+            TempData["ErrorMessage"] = null;
+            TempData["SuccessMessage"] = null;
 
             if (!ModelState.IsValid)
             {

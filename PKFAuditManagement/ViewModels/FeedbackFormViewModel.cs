@@ -21,7 +21,7 @@ namespace PKFAuditManagement.ViewModels
 
     public class FeedbackQuestionViewModel
     {
-        public Guid FeedbackQuestionID { get; set; } // Unique ID for the question
+
         public string QuestionText { get; set; } // Text of the question
         public FeedbackType Type { get; set; } // Type of the question (Yes/No, Rate1To5, ShortAnswer)
     }

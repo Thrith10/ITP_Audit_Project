@@ -110,7 +110,6 @@ namespace PKFAuditManagement.Controllers
                     CreatedDate = f.CreatedDate,
                     Questions = f.Questions.Select(q => new SelfAssessmentQuestionViewModel
                     {
-                        SelfAssessmentQuestionID = q.SelfAssessmentQuestionID,
                         QuestionText = q.QuestionText,
                         Type = (ViewModels.SelfAssessmentType)q.Type
                     }).ToList()
@@ -167,7 +166,6 @@ namespace PKFAuditManagement.Controllers
                 CreatedBy = selfAssessmentForm.CreatedBy,
                 Questions = selfAssessmentForm.Questions.Select(q => new SelfAssessmentQuestionViewModel
                 {
-                    SelfAssessmentQuestionID = q.SelfAssessmentQuestionID,
                     QuestionText = q.QuestionText,
                     Type = (ViewModels.SelfAssessmentType)q.Type
                 }).ToList()
@@ -180,8 +178,8 @@ namespace PKFAuditManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditSelfAssessmentForm(EditSelfAssessmentFormViewModel viewModel)
         {
-            TempData["ErrorMessage"] = "";
-            TempData["SuccessMessage"] = "";
+            TempData["ErrorMessage"] = null;
+            TempData["SuccessMessage"] = null;
 
             if (!ModelState.IsValid)
             {
