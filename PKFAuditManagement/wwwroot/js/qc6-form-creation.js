@@ -15,6 +15,7 @@ $("#autocomplete").autocomplete({
 
 $("#industrySelect").select2({
     theme: "bootstrap",
+    width: '100%',
     createSearchChoice: function (term) {
         return false;
     }

@@ -1010,53 +1010,8 @@ namespace PKFAuditManagement.Controllers
         [Authorize(Roles = "Non-Auditor,User,Admin,Reviewer")]
         public async Task<IActionResult> QC6FormCreationAsync()
         {
-            // Path to the SSIC text file in the "uploads" folder
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            var industriesFilePath = Path.Combine(uploadsFolder, "SSIC_Codes.txt");
-
-            // Retrieve list of industries
-            var industries = System.IO.File.ReadAllLines(industriesFilePath).ToList();
-
-            // List to hold grouped industries (excluding the section headers)
-            var groupedIndustries = new List<KeyValuePair<string, List<string>>>();
-
-            // Variables to track the current group
-            List<string> currentGroup = null;
-            string currentGroupTitle = null;
-
-            foreach (var line in industries)
-            {
-                // Check if the line starts with a letter (i.e., A, B, C, etc.)
-                var firstChar = line.Substring(0, 1).ToUpper();
-
-                // If it's a new group (i.e., a new section header), start a new group
-                if (char.IsLetter(firstChar[0]) && (currentGroup == null || !line.StartsWith(currentGroupTitle)))
-                {
-                    // If a current group exists, add it to the list
-                    if (currentGroup != null)
-                    {
-                        groupedIndustries.Add(new KeyValuePair<string, List<string>>(currentGroupTitle, currentGroup));
-                    }
-
-                    // Start a new group with the full section title (e.g., "A AGRICULTURE AND FISHING")
-                    currentGroupTitle = line.Trim(); // Use the entire line as the title for the group
-                    currentGroup = new List<string>(); // Start fresh for the new group
-                }
-                else
-                {
-                    // Add only industry codes under the current group (skip section headers)
-                    if (line.Length > 2 && char.IsDigit(line[1])) // Ensure it's a valid industry code line
-                    {
-                        currentGroup.Add(line);  // Add the industry to the current group
-                    }
-                }
-            }
-
-            // Add the last group (after the loop ends)
-            if (currentGroup != null && currentGroup.Count > 0)
-            {
-                groupedIndustries.Add(new KeyValuePair<string, List<string>>(currentGroupTitle, currentGroup));
-            }
+            // Retrieve grouped industries 
+            var groupedIndustries = GroupIndustries();
 
             // Retrieve user email
             var userEmail = await _userService.GetUserEmailAsync(User);
@@ -1800,6 +1755,10 @@ namespace PKFAuditManagement.Controllers
             // Populate Sub Forms
             viewModel = RetrieveSubFormData(viewModel);
 
+            // Populate industries
+            var groupedIndustries = GroupIndustries();
+            viewModel.GroupedIndustries = groupedIndustries;
+
             // Append UserEmail to viewModel
             viewModel.UserEmail = user.Email;
 
@@ -2023,6 +1982,59 @@ namespace PKFAuditManagement.Controllers
 
             // Return the list of client names
             return Ok(clientNames);
+        }
+
+        public List<KeyValuePair<string, List<string>>> GroupIndustries()
+        {
+            // Path to the SSIC text file in the "uploads" folder
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            var industriesFilePath = Path.Combine(uploadsFolder, "SSIC_Codes.txt");
+
+            // Retrieve list of industries
+            var industries = System.IO.File.ReadAllLines(industriesFilePath).ToList();
+
+            // List to hold grouped industries (excluding the section headers)
+            var groupedIndustries = new List<KeyValuePair<string, List<string>>>();
+
+            // Variables to track the current group
+            List<string> currentGroup = null;
+            string currentGroupTitle = null;
+
+            foreach (var line in industries)
+            {
+                // Check if the line starts with a letter (i.e., A, B, C, etc.)
+                var firstChar = line.Substring(0, 1).ToUpper();
+
+                // If it's a new group (i.e., a new section header), start a new group
+                if (char.IsLetter(firstChar[0]) && (currentGroup == null || !line.StartsWith(currentGroupTitle)))
+                {
+                    // If a current group exists, add it to the list
+                    if (currentGroup != null)
+                    {
+                        groupedIndustries.Add(new KeyValuePair<string, List<string>>(currentGroupTitle, currentGroup));
+                    }
+
+                    // Start a new group with the full section title (e.g., "A AGRICULTURE AND FISHING")
+                    currentGroupTitle = line.Trim(); // Use the entire line as the title for the group
+                    currentGroup = new List<string>(); // Start fresh for the new group
+                }
+                else
+                {
+                    // Add only industry codes under the current group (skip section headers)
+                    if (line.Length > 2 && char.IsDigit(line[1])) // Ensure it's a valid industry code line
+                    {
+                        currentGroup.Add(line);  // Add the industry to the current group
+                    }
+                }
+            }
+
+            // Add the last group (after the loop ends)
+            if (currentGroup != null && currentGroup.Count > 0)
+            {
+                groupedIndustries.Add(new KeyValuePair<string, List<string>>(currentGroupTitle, currentGroup));
+            }
+
+            return groupedIndustries;
         }
 
     }
