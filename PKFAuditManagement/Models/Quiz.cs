@@ -24,7 +24,6 @@ namespace PKFAuditManagement.Models
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         // New property: List of topics
-        public ICollection<QuizTopic> Topics { get; set; } = new List<QuizTopic>();
         public Guid FeedbackFormID { get; set; } // Foreign key to the associated Feedback Form
         // Foreign key to SelfAssessmentForm
         public Guid? SelfAssessmentFormID { get; set; } // Nullable in case some quizzes don’t require a self-assessment form

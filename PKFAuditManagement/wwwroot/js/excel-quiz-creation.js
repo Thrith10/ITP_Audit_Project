@@ -14,7 +14,7 @@ async function processExcel() {
         var quizInfoSheet = workbook.Sheets['QuizInfo'];
         var quizTitle = quizInfoSheet['B2'] ? quizInfoSheet['B2'].v : '';
         var description = quizInfoSheet['B3'] ? quizInfoSheet['B3'].v : '';
-        var quizStart = quizInfoSheet['B4'] ? quizInfoSheet['B4'].w: '';
+        var quizStart = quizInfoSheet['B4'] ? quizInfoSheet['B4'].w : '';
 
         // Extract data from Questions (Sheet 3)
         var questionsSheet = workbook.Sheets['Questions'];
@@ -23,34 +23,71 @@ async function processExcel() {
 
         while (questionsSheet['A' + row]) {
             var question = questionsSheet['A' + row] ? questionsSheet['A' + row].v : '';
-            var optionA = questionsSheet['B' + row] ? questionsSheet['B' + row].v : '';
-            var optionB = questionsSheet['C' + row] ? questionsSheet['C' + row].v : '';
-            var optionC = questionsSheet['D' + row] ? questionsSheet['D' + row].v : '';
-            var optionD = questionsSheet['E' + row] ? questionsSheet['E' + row].v : '';
-            var optionE = questionsSheet['F' + row] ? questionsSheet['F' + row].v : '';
-            var correctAnswer = '';
-
-            var correctOption = questionsSheet['G' + row] ? questionsSheet['G' + row].v : '';
-            switch (correctOption) {
-                case 'A':
-                    correctAnswer = optionA;
+            var type = questionsSheet['B' + row] ? questionsSheet['B' + row].v : '';
+            switch (type.trim().toLowerCase()) {
+                case "truefalse":
+                    type = 1; // TrueFalse
                     break;
-                case 'B':
-                    correctAnswer = optionB;
+                case "singleanswermcq":
+                    type = 2; // SingleAnswerMCQ
                     break;
-                case 'C':
-                    correctAnswer = optionC;
+                case "multianswermcq":
+                    type = 3; // MultiAnswerMCQ
                     break;
-                case 'D':
-                    correctAnswer = optionD;
-                    break;
-                case 'E':
-                    correctAnswer = optionE;
-                    break;
+                default:
+                    alert(`Invalid question type: ${type}`);
+                    return;
             }
+
+            var optionA = questionsSheet['C' + row] ? questionsSheet['C' + row].v : '';
+            var optionB = questionsSheet['D' + row] ? questionsSheet['D' + row].v : '';
+            var optionC = questionsSheet['E' + row] ? questionsSheet['E' + row].v : '';
+            var optionD = questionsSheet['F' + row] ? questionsSheet['F' + row].v : '';
+            var optionE = questionsSheet['G' + row] ? questionsSheet['G' + row].v : '';
+
+            var correctAnswer = '';
+            var correctOption = questionsSheet['H' + row] ? questionsSheet['H' + row].v : '';
+
+            if (type === 3 && correctOption.includes(',')) {
+                const selectedOptions = correctOption.split(',').map(opt => opt.trim());
+                correctAnswer = selectedOptions.map(opt => {
+                    switch (opt) {
+                        case 'A': return optionA;
+                        case 'B': return optionB;
+                        case 'C': return optionC;
+                        case 'D': return optionD;
+                        case 'E': return optionE;
+                        default: return ''; // Handle invalid options gracefully
+                    }
+                }).filter(Boolean).join(',');
+            }
+            else {
+                switch (correctOption) {
+                    case 'A':
+                        correctAnswer = optionA;
+                        break;
+                    case 'B':
+                        correctAnswer = optionB;
+                        break;
+                    case 'C':
+                        correctAnswer = optionC;
+                        break;
+                    case 'D':
+                        correctAnswer = optionD;
+                        break;
+                    case 'E':
+                        correctAnswer = optionE;
+                        break;
+                    default:
+                        correctAnswer = ''; // Handle invalid single options
+                        break;
+                }
+            }
+
 
             questions.push({
                 description: question,
+                type: type,
                 optionA: optionA,
                 optionB: optionB,
                 optionC: optionC,
@@ -72,36 +109,30 @@ async function processExcel() {
             row++;
         }
 
-        // Call the backend to load ManualQuizCreation PartialView
-        loadQuizForm(quizTitle, description, quizStart, questions, participants);
+        // Call the backend to load ManualQuizCreation page
+        const excelQuizData = {
+            Title: quizTitle,
+            Description: description,
+            QuizStart: quizStart,
+            Questions: questions,
+            Participants: participants
+        };
+
+        const response = await fetch('/Quizzes/LoadManualQuizCreation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(excelQuizData)
+        });
+
+        if (response.ok) {
+            // Redirect to the new page
+            window.location.href = "/Quizzes/QuizAutoFilled";
+        } else {
+            alert('Error loading quiz form.');
+        }
     };
 
     reader.readAsArrayBuffer(file);
 }
-
-function loadQuizForm(quizTitle, description, quizStart, questions, participants) {
-    var excelQuizData = {
-        Title: quizTitle,
-        Description: description,
-        QuizStart: quizStart,
-        Questions: questions,
-        Participants: participants
-    };
-
-    $.ajax({
-        url: '/Quizzes/LoadManualQuizCreation',
-        type: 'POST',
-        data: JSON.stringify(excelQuizData),
-        contentType: 'application/json',
-        success: function (result) {
-
-            $('#quiz-form-container').html(result);
-             initializeQuizForm();
-
-        },
-        error: function () {
-            alert('Error loading quiz form.');
-        }
-    });
-}
-

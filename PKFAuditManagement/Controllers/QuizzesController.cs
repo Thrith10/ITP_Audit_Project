@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
 using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
 
 namespace PKFAuditManagement.Controllers
 {
@@ -176,21 +177,7 @@ namespace PKFAuditManagement.Controllers
 
                     await _context.SaveChangesAsync();
                 }
-                // Handle topics
-                if (quizViewModel.Topics != null && quizViewModel.Topics.Any())
-                {
-                    foreach (var topicViewModel in quizViewModel.Topics)
-                    {
-                        var quizTopic = new QuizTopic
-                        {
-                            QuizID = quiz.QuizID,
-                            Name = topicViewModel.Name
-                        };
-                        _context.QuizTopic.Add(quizTopic);
-                    }
 
-                    await _context.SaveChangesAsync(); // Save all topics linked to the quiz
-                }
 
                 TempData["SuccessMessage"] = "Quiz created successfully!";
                 return RedirectToAction(nameof(Create));
@@ -326,7 +313,6 @@ namespace PKFAuditManagement.Controllers
                 .Include(q => q.Questions)
                     .ThenInclude(q => q.Options)
                 .Include(q => q.Participants)
-                 .Include(q => q.Topics) 
                 .FirstOrDefaultAsync(q => q.QuizID == id);
 
             if (quiz == null)
@@ -362,10 +348,6 @@ namespace PKFAuditManagement.Controllers
                         OptionText = o.OptionText
                     }).ToList()
                 }).ToList(),
-                Topics = quiz.Topics.Select(t => new TopicViewModel
-                {
-                    Name = t.Name
-                }).ToList(), // Populate topics for the quiz
                 SelectedParticipants = selectedParticipants
             };
 
@@ -384,7 +366,6 @@ namespace PKFAuditManagement.Controllers
                     .Include(q => q.Questions)
                         .ThenInclude(q => q.Options)
                     .Include(q => q.Participants)
-                    .Include(q => q.Topics) // Include existing topics for deletion
                     .FirstOrDefaultAsync(q => q.QuizID == quizViewModel.QuizID);
 
                 if (quiz == null)
@@ -740,45 +721,86 @@ namespace PKFAuditManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> LoadManualQuizCreationAsync([FromBody] ExcelQuizViewModel excelQuizModel)
         {
-            var validEmailsResult = await EmailValidation(excelQuizModel.Participants);
-
-            if (validEmailsResult is BadRequestObjectResult badRequestResult)
+            try
             {
-                return badRequestResult; // Handle the case where no valid emails were found
+                // Validate emails
+                var validEmailsResult = await EmailValidation(excelQuizModel.Participants);
+
+                if (validEmailsResult is BadRequestObjectResult badRequestResult)
+                {
+                    return badRequestResult; // Handle the case where no valid emails were found
+                }
+
+                // Parse the valid emails string returned by EmailValidation (semicolon-delimited)
+                var validEmails = validEmailsResult is OkObjectResult okResult && okResult.Value is string validEmailsString
+                    ? validEmailsString.Split(';').ToList()
+                    : new List<string>();
+
+                // Parse QuizStart
+                var quizStart = DateTime.Parse(excelQuizModel.QuizStart);
+
+                // Map ExcelQuizViewModel to QuizViewModel
+                var quizViewModel = new QuizViewModel
+                {
+                    Title = excelQuizModel.Title,
+                    Description = excelQuizModel.Description,
+                    QuizStart = quizStart,
+                    // Automatically set QuizEnd to 11:59 PM on the same day as QuizStart
+                    QuizEnd = new DateTime(quizStart.Year, quizStart.Month, quizStart.Day, 23, 59, 59),
+                    Questions = excelQuizModel.Questions.Select(q => new QuestionViewModel
+                    {
+                        Description = q.Description,
+                        Type = q.Type, // Map to enum
+                        Options = new List<OptionViewModel>
+                {
+                    new OptionViewModel { OptionText = q.OptionA },
+                    new OptionViewModel { OptionText = q.OptionB },
+                    new OptionViewModel { OptionText = q.OptionC },
+                    new OptionViewModel { OptionText = q.OptionD },
+                    new OptionViewModel { OptionText = q.OptionE }
+                },
+                        CorrectOptionText = q.CorrectAnswer
+                    }).ToList(),
+                    SelectedParticipants = validEmails != null && validEmails.Any()
+                        ? string.Join(";", validEmails)
+                        : null
+                };
+                TempData["QuizViewModel"] = JsonConvert.SerializeObject(quizViewModel);
+
+                // Return the existing ManualQuizCreation PartialView with the mapped QuizViewModel
+                return View("~/Views/General/Quiz/QuizAutoFilled.cshtml", quizViewModel);
+            }
+            catch (Exception ex)
+            {
+                // Log the error message with details of the failing line
+                var errorDetails = $"Error occurred in {nameof(LoadManualQuizCreationAsync)}: {ex.Message}";
+
+                // Add specific handling to include stack trace for debugging purposes
+                errorDetails += Environment.NewLine + ex.StackTrace;
+
+                // Log the error to a logging framework like Serilog, NLog, etc.
+                // For example: _logger.LogError(errorDetails);
+
+                // Optionally, include a detailed error response for easier debugging
+                return StatusCode(500, new { message = "An error occurred while processing the request.", details = errorDetails });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult QuizAutoFilled()
+        {
+            // Retrieve the QuizViewModel from TempData
+            if (TempData["QuizViewModel"] == null)
+            {
+                return RedirectToAction("Error"); // Redirect to an error page if the model is missing
             }
 
-            // Parse the valid emails string returned by EmailValidation (semicolon-delimited)
-            var validEmails = validEmailsResult is OkObjectResult okResult && okResult.Value is string validEmailsString
-                ? validEmailsString.Split(';').ToList()
-                : new List<string>();
-
-            // Map ExcelQuizViewModel to QuizViewModel
-            var quizViewModel = new QuizViewModel
-            {
-                Title = excelQuizModel.Title,
-                Description = excelQuizModel.Description,
-                QuizStart = DateTime.Parse(excelQuizModel.QuizStart),
-                Questions = excelQuizModel.Questions.Select(q => new QuestionViewModel
-                {
-                    Description = q.Description,
-                    Options = new List<OptionViewModel>
-            {
-                new OptionViewModel { OptionText = q.OptionA },
-                new OptionViewModel { OptionText = q.OptionB },
-                new OptionViewModel { OptionText = q.OptionC },
-                new OptionViewModel { OptionText = q.OptionD },
-                new OptionViewModel { OptionText = q.OptionE }
-            },
-                    CorrectOptionText = q.CorrectAnswer
-                }).ToList(),
-                SelectedParticipants = validEmails != null && validEmails.Any()
-            ? string.Join(";", validEmails)
-            : null
-            };
-
-            // Return the existing ManualQuizCreation PartialView with the mapped QuizViewModel
-            return PartialView("~/Views/General/Quiz/QuizAutoFilled.cshtml", quizViewModel);
+            var quizViewModel = JsonConvert.DeserializeObject<QuizViewModel>((string)TempData["QuizViewModel"]);
+            TempData["QuizViewModel"] = null;
+            // Render the view with the model
+            return View("~/Views/General/Quiz/QuizAutoFilled.cshtml", quizViewModel);
         }
+
 
         // GET: Feedback/GetFeedbackForms
         [HttpGet]

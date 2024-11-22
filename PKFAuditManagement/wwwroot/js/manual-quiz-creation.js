@@ -2,9 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var quizStartInput = document.getElementById('QuizStart');
     var quizEndInput = document.getElementById('QuizEnd');
-    //Topic
-    var addTopicBtn = document.getElementById('add-topic');
-    var topicsContainer = document.getElementById('topics-container');
+
     //Feedback
     const feedbackFormListContainer = document.getElementById('feedback-form-list-container');
     const closeFeedbackFormModal = document.getElementById('close-feedback-form-modal');
@@ -315,37 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Add new topic
-    addTopicBtn.addEventListener('click', function () {
-        var index = topicsContainer.querySelectorAll('.topic-group').length;
-
-        var newTopicHtml = `
-        <div class="input-group mb-2 topic-group" data-index="${index}">
-            <input type="text" class="form-control" name="Topics[${index}].Name" placeholder="Enter topic name" required />
-            <button type="button" class="btn btn-danger btn-sm remove-topic">
-                <i class="bi bi-trash"></i> Remove
-            </button>
-        </div>`;
-
-        topicsContainer.insertAdjacentHTML('beforeend', newTopicHtml);
-    });
-
-    // Remove topic
-    document.addEventListener('click', function (event) {
-        if (event.target && event.target.classList.contains('remove-topic')) {
-            var topicGroup = event.target.closest('.topic-group');
-            topicGroup.remove();
-
-            // Re-index topics to maintain consistency in form data
-            var topicGroups = topicsContainer.querySelectorAll('.topic-group');
-            topicGroups.forEach((topicGroup, index) => {
-                topicGroup.setAttribute('data-index', index);
-                var input = topicGroup.querySelector('input');
-                input.setAttribute('name', `Topics[${index}].Name`);
-            });
-        }
-    });
-
+   
 
     // Open Participants Modal
     selectParticipantsBtn.addEventListener('click', function () {
@@ -1009,19 +977,15 @@ document.addEventListener('DOMContentLoaded', function () {
             multiSelect.parentElement.appendChild(hiddenInput);
         });
 
-        // Validation for feedback form, self-assessment form, and topics
+        // Validation for feedback form, self-assessment form, 
         const feedbackFormIdInput = document.getElementById('SelectedFeedbackFormId');
         const selfAssessmentFormIdInput = document.getElementById('SelectedSelfAssessmentFormId'); // Ensure this input exists for self-assessment selection
-        const topicsContainer = document.getElementById('topics-container');
-        const topicInputs = topicsContainer.querySelectorAll('input[type="text"]');
-        const hasTopics = Array.from(topicInputs).some(input => input.value.trim() !== '');
         const hasFeedbackForm = feedbackFormIdInput && feedbackFormIdInput.value.trim() !== '';
         const hasSelfAssessmentForm = selfAssessmentFormIdInput && selfAssessmentFormIdInput.value.trim() !== '';
 
-        // Display errors in a modal and prevent form submission if topics, feedback form, or self-assessment form are missing
-        if (!hasTopics || !hasFeedbackForm || !hasSelfAssessmentForm) {
+        // Display errors in a modal and prevent form submission if , feedback form, or self-assessment form are missing
+        if ( !hasFeedbackForm || !hasSelfAssessmentForm) {
             let errorMessage = '';
-            if (!hasTopics) errorMessage += 'Please add at least one topic.<br>';
             if (!hasFeedbackForm) errorMessage += 'Please select a feedback form.<br>';
             if (!hasSelfAssessmentForm) errorMessage += 'Please select a self-assessment form.<br>';
 

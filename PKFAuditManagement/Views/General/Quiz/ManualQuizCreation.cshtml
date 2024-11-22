@@ -77,26 +77,6 @@
                                         <span id="self-assessment-selected-tick" class="bi bi-check-circle-fill" style="display: none;"></span>
                                     </div>
 
-                                    <!-- New Topics Field Section -->
-                                    <div class="form-group mt-3">
-                                        <label for="Topics">Quiz Topics</label>
-                                        <div id="topics-container">
-                                            @for (int i = 0; i < Model.Topics.Count; i++)
-                                            {
-                                                <div class="input-group mb-2 topic-group" data-index="@i">
-                                                    <input type="text" class="form-control" name="Topics[@i].Name" value="@Model.Topics[i].Name" placeholder="Enter topic name" required />
-                                                    <button type="button" class="btn btn-danger btn-sm remove-topic">
-                                                        <i class="bi bi-trash"></i> Remove
-                                                    </button>
-                                                </div>
-                                            }
-                                        </div>
-                                        <button type="button" class="btn btn-secondary btn-sm" id="add-topic">
-                                            <i class="bi bi-plus-lg"></i> Add Topic
-                                        </button>
-                                    </div>
-
-
                                     <!-- Questions Section -->
                                     <div id="quiz-container">
                                         <!-- Updated Loop for Questions -->

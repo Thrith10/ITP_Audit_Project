@@ -2,6 +2,7 @@ using PKFAuditManagement.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace PKFAuditManagement.ViewModels
 {
@@ -108,12 +109,12 @@ namespace PKFAuditManagement.ViewModels
         public List<string> SelectedOptions { get; set; } = new List<string>();
     }
 
-
     public class ExcelQuizViewModel
     {
         public string Title { get; set; }
         public string Description { get; set; }
         public string QuizStart { get; set; } // DateTime in string format
+        public string QuizEnd { get; set; } // DateTime in string format
         public List<ExcelQuestionViewModel> Questions { get; set; }
         public List<string> Participants { get; set; } // Emails from the Participants sheet
 
@@ -133,5 +134,7 @@ namespace PKFAuditManagement.ViewModels
         public string OptionD { get; set; }
         public string OptionE { get; set; }
         public string CorrectAnswer { get; set; }
+        public QuestionType Type { get; set; }
     }
+
 }
