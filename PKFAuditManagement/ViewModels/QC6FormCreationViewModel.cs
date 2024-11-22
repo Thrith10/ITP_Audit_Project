@@ -103,6 +103,7 @@ namespace PKFAuditManagement.ViewModels
 
         public List<DocumentViewModel> AdditionalDocuments { get; set; } = new List<DocumentViewModel>();
         public string? DeletedDocumentFilenames { get; set; }
+        public List<KeyValuePair<string, List<string>>>? GroupedIndustries { get; set; }
     }
 
     public class DocumentViewModel

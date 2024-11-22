@@ -19,8 +19,40 @@ body {
   color: #444444;
 }
 
-/* Basic Styling for Chatbot */
+.select2-container--bootstrap .select2-selection {
+    border-radius: 0px;
+}
 
+.select2-container--default .select2-selection--multiple {
+    border-radius: 0;
+    border: 0;
+    border-bottom: 1px solid #ccc;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border: 0;
+    border-bottom: 1px solid #333;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+
+    color: var(--bs-body-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+/* Basic Styling for Chatbot */
 .chat-header a {
     text-decoration: none;
     color: white;
@@ -76,7 +108,7 @@ body {
     border-radius: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     width: 738px;
-    height: 800px;
+    height: 500px;
     max-width: 90%;
     min-width: 300px; 
     z-index: 1000;

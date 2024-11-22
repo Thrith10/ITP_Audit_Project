@@ -13,8 +13,13 @@ $("#autocomplete").autocomplete({
     }
 });
 
-
-
+$("#industrySelect").select2({
+    theme: "bootstrap",
+    width: '100%',
+    createSearchChoice: function (term) {
+        return false;
+    }
+});
 
 // Add event listener to the "Add Service" button
 document.getElementById('addService').addEventListener('click', addService);
