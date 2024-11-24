@@ -1,7 +1,13 @@
 ﻿@model PKFAuditManagement.ViewModels.QuizViewModel
 
-
 <div class="form-container">
+    <!-- Green Notification Bar -->
+    <div class="alert alert-primary" role="alert" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>To create a quiz using Excel, download the template file here:</span>
+        <a href="/downloads/ExcelQuizCreation.xlsx" class="btn btn-success btn-sm" download>Download Template</a>
+    </div>
+
+    <!-- Form Section -->
     <h5>Excel Quiz Creation</h5>
     <form id="uploadForm" enctype="multipart/form-data">
         <div class="form-group">
