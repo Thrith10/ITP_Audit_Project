@@ -6,6 +6,7 @@ WORKDIR /app
 # Copy the solution file and restore dependencies
 COPY *.sln ./
 COPY PKFAuditManagement/*.csproj ./PKFAuditManagement/
+COPY PKFAuditManagement.UnitTests/*.csproj ./PKFAuditManagement.UnitTests/
 RUN dotnet restore
 
 # Copy the rest of the source code to the container
