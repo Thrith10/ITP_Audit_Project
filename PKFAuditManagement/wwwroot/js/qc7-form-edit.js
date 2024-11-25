@@ -1,3 +1,12 @@
+// Add select2 to the Industry dropdown
+$("#industrySelect").select2({
+    theme: "bootstrap",
+    width: '100%',
+    createSearchChoice: function (term) {
+        return false;
+    }
+});
+
 // Store selected client
 let selectedClient = null;
 

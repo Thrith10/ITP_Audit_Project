@@ -58,6 +58,9 @@ namespace PKFAuditManagement.Controllers
             // Combine the emails and remove any duplicates
             var combinedEmails = adminEmails.Concat(reviewerEmails).Distinct().OrderBy(email => email).ToList();
 
+            // Retrieve grouped industries 
+            var groupedIndustries = GroupIndustries();
+
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
                                              .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
@@ -67,7 +70,7 @@ namespace PKFAuditManagement.Controllers
                                              .ToListAsync(); // Fetch the ordered list of unique client names
 
             // Retrieve QC7Form data
-            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, ClientNames = clientNames, AdminEmails = combinedEmails, IsNewForm = true });
+            var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel { UserEmail = userEmail, ClientNames = clientNames, AdminEmails = combinedEmails, IsNewForm = true, GroupedIndustries = groupedIndustries });
 
             return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
         }
@@ -154,6 +157,12 @@ namespace PKFAuditManagement.Controllers
 
                 // Populate Sub Forms
                 var viewModel = RetrieveSubFormData(new QC7FormCreationViewModel());
+
+                // Retrieve grouped industries 
+                var groupedIndustries = GroupIndustries();
+
+                // Append grouped industries 
+                viewModel.GroupedIndustries = groupedIndustries;
 
                 // Append combined emails to viewModel
                 viewModel.AdminEmails = combinedEmails;
@@ -369,6 +378,12 @@ namespace PKFAuditManagement.Controllers
 
             // Append combined emails to viewModel
             viewModel.AdminEmails = combinedEmails;
+
+            // Retrieve grouped industries 
+            var groupedIndustries = GroupIndustries();
+
+            // Append groupedIndustroes to viewModel
+            viewModel.GroupedIndustries = groupedIndustries;
 
             if (!ModelState.IsValid)
             {
@@ -937,6 +952,12 @@ namespace PKFAuditManagement.Controllers
             // Append emails to viewModel
             viewModel.AdminEmails = combinedEmails;
 
+            // Retrieve grouped industries 
+            var groupedIndustries = GroupIndustries();
+
+            // Append groupedIndustroes to viewModel
+            viewModel.GroupedIndustries = groupedIndustries;
+
             // Retrieve client names for display
             var clientNames = await _context.QC6Forms
                                              .Where(c => c.IsTemplate == false) // Filter based on IsTemplate
@@ -1347,6 +1368,12 @@ namespace PKFAuditManagement.Controllers
 
             // Append combined emails to viewModel
             viewModel.AdminEmails = combinedEmails;
+
+            // Retrieve grouped industries 
+            var groupedIndustries = GroupIndustries();
+
+            // Append groupedIndustroes to viewModel
+            viewModel.GroupedIndustries = groupedIndustries;
 
             if (!ModelState.IsValid)
             {
@@ -2065,6 +2092,58 @@ namespace PKFAuditManagement.Controllers
 
             // Return the combined data as JSON
             return Json(new { success = true, data = feeDetails });
+        }
+        public List<KeyValuePair<string, List<string>>> GroupIndustries()
+        {
+            // Path to the SSIC text file in the "uploads" folder
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            var industriesFilePath = Path.Combine(uploadsFolder, "SSIC_Codes.txt");
+
+            // Retrieve list of industries
+            var industries = System.IO.File.ReadAllLines(industriesFilePath).ToList();
+
+            // List to hold grouped industries (excluding the section headers)
+            var groupedIndustries = new List<KeyValuePair<string, List<string>>>();
+
+            // Variables to track the current group
+            List<string> currentGroup = null;
+            string currentGroupTitle = null;
+
+            foreach (var line in industries)
+            {
+                // Check if the line starts with a letter (i.e., A, B, C, etc.)
+                var firstChar = line.Substring(0, 1).ToUpper();
+
+                // If it's a new group (i.e., a new section header), start a new group
+                if (char.IsLetter(firstChar[0]) && (currentGroup == null || !line.StartsWith(currentGroupTitle)))
+                {
+                    // If a current group exists, add it to the list
+                    if (currentGroup != null)
+                    {
+                        groupedIndustries.Add(new KeyValuePair<string, List<string>>(currentGroupTitle, currentGroup));
+                    }
+
+                    // Start a new group with the full section title (e.g., "A AGRICULTURE AND FISHING")
+                    currentGroupTitle = line.Trim(); // Use the entire line as the title for the group
+                    currentGroup = new List<string>(); // Start fresh for the new group
+                }
+                else
+                {
+                    // Add only industry codes under the current group (skip section headers)
+                    if (line.Length > 2 && char.IsDigit(line[1])) // Ensure it's a valid industry code line
+                    {
+                        currentGroup.Add(line);  // Add the industry to the current group
+                    }
+                }
+            }
+
+            // Add the last group (after the loop ends)
+            if (currentGroup != null && currentGroup.Count > 0)
+            {
+                groupedIndustries.Add(new KeyValuePair<string, List<string>>(currentGroupTitle, currentGroup));
+            }
+
+            return groupedIndustries;
         }
     }
 }

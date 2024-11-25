@@ -13,6 +13,7 @@ $("#autocomplete").autocomplete({
     }
 });
 
+// Add select2 to the Industry dropdown
 $("#industrySelect").select2({
     theme: "bootstrap",
     width: '100%',
