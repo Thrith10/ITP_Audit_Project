@@ -22,7 +22,7 @@ using Sprache;
 namespace PKFAuditManagement.UnitTests
 {
     [TestFixture]
-    public class SignedFSFormControllerTests
+    public class SignedFSFormControllerTest
     {
         private Mock<IUserService> _mockUserService;
         private ApplicationDbContext _mockContext;
