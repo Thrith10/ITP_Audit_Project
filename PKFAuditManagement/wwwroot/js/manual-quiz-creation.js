@@ -508,11 +508,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Trigger file input click when 'Upload via Excel' button is clicked
-    document.getElementById('upload-participants-btn').addEventListener('click', function () {
+/*    document.getElementById('upload-participants-btn').addEventListener('click', function () {
         console.log('Upload button clicked. Opening file selector.');
         document.getElementById('ExcelFile').click();
     });
-
+*/
     // Handle the file selection
     document.getElementById('ExcelFile').addEventListener('change', handleFileSelect);
 

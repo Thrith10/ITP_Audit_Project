@@ -504,9 +504,9 @@
     });
 
     // Handle file upload for Excel
-    document.getElementById('upload-participants-btn').addEventListener('click', function () {
+/*    document.getElementById('upload-participants-btn').addEventListener('click', function () {
         document.getElementById('ExcelFile').click();
-    });
+    });*/
 
     document.getElementById('ExcelFile').addEventListener('change', handleFileSelect);
 
