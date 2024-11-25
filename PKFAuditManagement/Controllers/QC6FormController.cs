@@ -86,6 +86,12 @@ namespace PKFAuditManagement.Controllers
                 // Populate Sub Forms
                 var viewModel = RetrieveSubFormData(new QC6FormCreationViewModel());
 
+                // Retrieve grouped industries 
+                var groupedIndustries = GroupIndustries();
+
+                // Append grouped industries 
+                viewModel.GroupedIndustries = groupedIndustries;
+
                 // Append combined emails to viewModel
                 viewModel.AdminEmails = combinedEmails;
 
@@ -279,6 +285,12 @@ namespace PKFAuditManagement.Controllers
 
             // Append combined emails to viewModel
             viewModel.AdminEmails = combinedEmails;
+
+            // Retrieve grouped industries 
+            var groupedIndustries = GroupIndustries();
+
+            // Append groupedIndustroes to viewModel
+            viewModel.GroupedIndustries = groupedIndustries;
 
             if (!ModelState.IsValid)
             {
@@ -1338,6 +1350,11 @@ namespace PKFAuditManagement.Controllers
             // Append combined emails to viewModel
             viewModel.AdminEmails = combinedEmails;
 
+            // Retrieve grouped industries 
+            var groupedIndustries = GroupIndustries();
+
+            // Append grouped industries 
+            viewModel.GroupedIndustries = groupedIndustries;
 
             if (!ModelState.IsValid)
             {
