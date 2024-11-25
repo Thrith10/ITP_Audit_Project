@@ -163,7 +163,7 @@ namespace PKFAuditManagement.Services
                        <ul>
                            {{{{supportingDetails}}}}
                        </ul>
-                       <div class='citation'>If you have more questions about [question here]</div>
+                       <div class='citation'>If you have more questions about [question here], please feel free to ask.</div>
                    </div>
                 ";
 
