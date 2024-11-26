@@ -1919,7 +1919,7 @@ namespace PKFAuditManagement.Controllers
             return viewModel;
         }
 
-        private async Task SaveFileAsync(IFormFile file, string filePath)
+        public async Task SaveFileAsync(IFormFile file, string filePath)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
