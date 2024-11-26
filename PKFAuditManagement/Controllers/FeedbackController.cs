@@ -25,7 +25,15 @@ namespace PKFAuditManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> ViewAllFeedbackForms()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized(); // Handle the case where the user is not authenticated
+            }
+            var currentUserId = currentUser.Id;
+
             var feedbackForms = await _context.FeedbackForms
+                .Where(f => f.CreatedBy == currentUserId) // Filter by user ID
                 .Select(f => new FeedbackFormViewModel
                 {
                     FeedbackFormID = f.FeedbackFormID,

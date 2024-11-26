@@ -104,7 +104,7 @@ function toggleChatbot() {
 
 // Function to show the introductory message and options
 function showIntroductionMessage() {
-    const introMessage = 'Hello, I am PKF-CAP\'s chatbot trained on audit documents. To begin, please click an area you would like to explore by clicking on the menu button on the bottom left and selecting a topic.';
+    const introMessage = 'Hello, I am PKF-CAP\'s chatbot trained on audit documents. To begin, please click an area you would like to explore by clicking on the menu button on the bottom left and selecting a topic. By default, I do not have a knowledge base and you have to navigate to the "Manage Chatbots" page as an administrator to add documents to my knowledge base.';
     appendMessage('bot', introMessage); // Display the bot message with the introductory text
 }
 // Variable to hold the current selection

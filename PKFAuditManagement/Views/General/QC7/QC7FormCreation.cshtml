@@ -91,9 +91,16 @@
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label">Industry<span class="text-danger"> *</span></label>
                                         <div class="col-sm-10 d-flex align-items-center">
-                                            <select class="form-control" asp-for="Industry">
-                                                <option value="Industry1">Industry1</option>
-                                                <option value="Industry2">Industry2</option>
+                                            <select asp-for="Industry" id="industrySelect">
+                                                @foreach (var group in Model.GroupedIndustries)
+                                                {
+                                                    <optgroup label="@group.Key">
+                                                        @foreach (var industry in group.Value)
+                                                        {
+                                                            <option value="@industry">@industry</option>
+                                                        }
+                                                    </optgroup>
+                                                }
                                             </select>
                                         </div>
                                     </div>
@@ -987,6 +994,9 @@
 </div>
 
 @section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <partial name="_ValidationScriptsPartial" />

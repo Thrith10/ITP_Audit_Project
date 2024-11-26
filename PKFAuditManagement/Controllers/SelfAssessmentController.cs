@@ -26,7 +26,18 @@ namespace PKFAuditManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> ViewAllSelfAssessmentForms()
         {
+            // Get the current user
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized(); // Handle unauthenticated users
+            }
+
+            var currentUserId = currentUser.Id;
+
+            // Filter forms created by the current user
             var selfAssessmentForms = await _context.SelfAssessmentForms
+                .Where(f => f.CreatedBy == currentUserId) // Filter by user ID
                 .Select(f => new SelfAssessmentFormViewModel
                 {
                     SelfAssessmentFormID = f.SelfAssessmentFormID,
@@ -43,6 +54,7 @@ namespace PKFAuditManagement.Controllers
 
             return View("~/Views/General/Quiz/ViewAllSelfAssessmentForm.cshtml", model);
         }
+
 
         [HttpGet]
         public IActionResult CreateSelfAssessment()

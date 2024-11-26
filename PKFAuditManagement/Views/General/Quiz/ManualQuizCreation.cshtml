@@ -41,8 +41,8 @@
                                         <label for="Participants">Participants (Note: Selection is limited to registered users only)</label>
                                         <br />
                                         <button type="button" id="select-participants-btn" class="btn btn-secondary btn-sm">Select Participants</button>
-                                        <span class="separator">OR</span>
-                                        <button type="button" id="upload-participants-btn" class="btn btn-secondary btn-sm">Upload via Excel</button>
+@*                                         <span class="separator">OR</span>
+                                        <button type="button" id="upload-participants-btn" class="btn btn-secondary btn-sm">Upload via Excel</button> *@
                                         <p id="selected-participants-text" class="text-muted mt-2" style="cursor: pointer;">No participants selected</p>
                                         <span id="participants-selected-tick" class="bi bi-check-circle-fill" style="display: none; color: #28a745;"></span>
                                     </div>
@@ -76,26 +76,6 @@
                                         <span id="selected-self-assessment-form-text" class="unselected-text">No self-assessment form selected</span>
                                         <span id="self-assessment-selected-tick" class="bi bi-check-circle-fill" style="display: none;"></span>
                                     </div>
-
-                                    <!-- New Topics Field Section -->
-                                    <div class="form-group mt-3">
-                                        <label for="Topics">Quiz Topics</label>
-                                        <div id="topics-container">
-                                            @for (int i = 0; i < Model.Topics.Count; i++)
-                                            {
-                                                <div class="input-group mb-2 topic-group" data-index="@i">
-                                                    <input type="text" class="form-control" name="Topics[@i].Name" value="@Model.Topics[i].Name" placeholder="Enter topic name" required />
-                                                    <button type="button" class="btn btn-danger btn-sm remove-topic">
-                                                        <i class="bi bi-trash"></i> Remove
-                                                    </button>
-                                                </div>
-                                            }
-                                        </div>
-                                        <button type="button" class="btn btn-secondary btn-sm" id="add-topic">
-                                            <i class="bi bi-plus-lg"></i> Add Topic
-                                        </button>
-                                    </div>
-
 
                                     <!-- Questions Section -->
                                     <div id="quiz-container">

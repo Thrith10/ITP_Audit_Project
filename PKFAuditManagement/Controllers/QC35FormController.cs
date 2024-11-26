@@ -659,12 +659,6 @@ namespace PKFAuditManagement.Controllers
                 return View("~/Views/General/QC35/EditQC35Form.cshtml", viewModel);
             }
 
-            if (viewModel.ManagerName == viewModel.PartnerName)
-            {
-                ViewBag.ErrorMessage = "The Manager and Partner cannot be the same person. Please select different individuals for each role.";
-                return View("~/Views/General/QC35/EditQC35Form.cshtml", viewModel);
-            }
-
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try

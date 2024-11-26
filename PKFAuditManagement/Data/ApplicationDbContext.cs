@@ -56,7 +56,6 @@ namespace PKFAuditManagement.Data
         public DbSet<SelfAssessmentForm> SelfAssessmentForms { get; set; }
         public DbSet<SelfAssessmentQuestion> SelfAssessmentQuestions { get; set; }
         public DbSet<SelfAssessmentResponse> SelfAssessmentResponses { get; set; }
-        public DbSet<QuizTopic> QuizTopic { get; set; } // New DbSet for QuizTopic
 
 
 
@@ -76,12 +75,6 @@ namespace PKFAuditManagement.Data
                 .HasMany(q => q.Questions)
                 .WithOne(qn => qn.Quiz)
                 .HasForeignKey(qn => qn.QuizID)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Quiz>()
-                .HasMany(q => q.Topics)
-                .WithOne(t => t.Quiz)
-                .HasForeignKey(t => t.QuizID)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Option>()

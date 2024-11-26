@@ -19,7 +19,7 @@ using PKFAuditManagement.Models;
 namespace PKFAuditManagement.UnitTests
 {
     [TestFixture]
-    public class QC35Test
+    public class QC35FormControllerTest
     {
         private Mock<IUserService> _mockUserService;
         private Mock<ApplicationDbContext> _mockContext;

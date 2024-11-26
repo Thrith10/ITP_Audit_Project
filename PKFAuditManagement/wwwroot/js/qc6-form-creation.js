@@ -13,8 +13,10 @@ $("#autocomplete").autocomplete({
     }
 });
 
+// Add select2 to the Industry dropdown
 $("#industrySelect").select2({
     theme: "bootstrap",
+    width: '100%',
     createSearchChoice: function (term) {
         return false;
     }
@@ -678,34 +680,34 @@ function checkDuplicateDocuments() {
 }
 
 // Hook into the form submission event
-document.getElementById('qc6Form').addEventListener('submit', function (event) {
-    // Prevent default validation and handle manually
-    event.preventDefault(); // Stop the form from submitting
+//document.getElementById('qc6Form').addEventListener('submit', function (event) {
+//    // Prevent default validation and handle manually
+//    event.preventDefault(); // Stop the form from submitting
 
-    // Clear validation classes from file inputs without removing them
-    const fileInputs = this.querySelectorAll('input[type="file"]');
-    fileInputs.forEach(input => {
-        input.classList.remove('is-invalid', 'is-valid', 'was-validated'); // Remove validation classes
-        // Optionally remove tooltip attributes if needed
-        input.removeAttribute('data-bs-toggle');
-        input.removeAttribute('data-bs-placement');
-        input.removeAttribute('title');
-    });
+//    // Clear validation classes from file inputs without removing them
+//    const fileInputs = this.querySelectorAll('input[type="file"]');
+//    fileInputs.forEach(input => {
+//        input.classList.remove('is-invalid', 'is-valid', 'was-validated'); // Remove validation classes
+//        // Optionally remove tooltip attributes if needed
+//        input.removeAttribute('data-bs-toggle');
+//        input.removeAttribute('data-bs-placement');
+//        input.removeAttribute('title');
+//    });
 
-    // Remove Bootstrap's automatic validation classes from the form
-    this.classList.remove('was-validated');
-    this.classList.remove('is-invalid');
-    // Check for duplicates in document names
-    if (!checkDuplicateDocuments()) {
-        // Prevent form submission if duplicates were found
-        event.stopPropagation();
-    } else {
-        // No duplicates, remove any automatic is-valid classes and submit the form programmatically
-        const inputs = this.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.classList.remove('is-valid'); // Remove Bootstrap's automatic valid class
-        });
+//    // Remove Bootstrap's automatic validation classes from the form
+//    this.classList.remove('was-validated');
+//    this.classList.remove('is-invalid');
+//    // Check for duplicates in document names
+//    if (!checkDuplicateDocuments()) {
+//        // Prevent form submission if duplicates were found
+//        event.stopPropagation();
+//    } else {
+//        // No duplicates, remove any automatic is-valid classes and submit the form programmatically
+//        const inputs = this.querySelectorAll('input');
+//        inputs.forEach(input => {
+//            input.classList.remove('is-valid'); // Remove Bootstrap's automatic valid class
+//        });
 
-        this.submit();
-    }
-});
+//        this.submit();
+//    }
+//});

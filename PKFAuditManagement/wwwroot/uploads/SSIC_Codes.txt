@@ -482,8 +482,7 @@ C MANUFACTURING
 26802 Manufacture of blank magnetic tapes, diskettes, Blu-ray technology discs, CDs, DVDs and VCDs
 27 MANUFACTURE OF ELECTRICAL EQUIPMENT
 271 MANUFACTURE OF ELECTRIC MOTORS, GENERATORS, TRANSFORMERS, ELECTRICITY DISTRIBUTION AND CONTROL APPARATUS
-2710 Manufacture and Repair of Electric Motors, Generators, Transformers, Electricity
-Distribution and Control Apparatus
+2710 Manufacture and Repair of Electric Motors, Generators, Transformers, Electricity Distribution and Control Apparatus
 27101 Manufacture and repair of electric motors
 27102 Manufacture and repair of electric generators
 27103 Manufacture and repair of transformers
