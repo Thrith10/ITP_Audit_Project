@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@model List<ChatbotDocument>
+
+<!DOCTYPE html>
 <html lang="en">
 
 <body>
@@ -161,12 +163,17 @@
                         </div>
                         <div class="chat-box" id="chat-box"></div>
                         <div id="loader" style="display: none;"></div> <!-- Loading indicator -->
+                        <div id="chat-menu" class="chat-menu">
+                            <button id="close-menu-btn">✖ </button>
+                            @foreach (var document in Model)
+                            {
+                                <div class="menu-option" data-topic="@document.Name">@document.Name</div>
+                            }
+                        </div>
                         <div class="chat-input">
+                            <button id="menu-btn">☰</button>
                             <input type="text" id="user-input" placeholder="Type a message...">
                             <button id="send-btn">Send</button>
-                        </div>
-                        <div class="copyright">
-                            <a href="https://www.thecodinghubs.com/" target="_blank">Build By Coding Hubs © 2024</a>
                         </div>
                     </div>
                 </div>
