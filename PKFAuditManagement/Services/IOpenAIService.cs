@@ -181,8 +181,12 @@ namespace PKFAuditManagement.Services
                 // Add the user input to the chat history
                 chatHistory.Add(new Message(Role.User, userInput));
 
-                // Create the chat request
-                var chatRequest = new ChatRequest(chatHistory, Model.GPT4o);
+                // Create the chat request with temperature setting
+                var chatRequest = new ChatRequest(
+                 messages: chatHistory,
+                 model: Model.GPT4o,
+                 temperature: 0.5 
+                );
 
                 // Get the response from the OpenAI API
                 var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
