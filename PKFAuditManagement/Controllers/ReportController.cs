@@ -162,9 +162,7 @@ namespace PKFAuditManagement.Controllers
                 },
                 ["Quiz"] = new Dictionary<string, string>
                 {
-                    {"UserAttendance", "User Attendance"},
-                    {"QuizAttempt", "Quiz Attempt"},
-                    {"QuizResponse", "Quiz Response"},
+                    {"QuizActivityRecord", "Quiz Activity Record"}
                 }
 
                 
@@ -241,16 +239,35 @@ namespace PKFAuditManagement.Controllers
             }).Where(f => f != null).ToList();
 
             var selectClause = string.Join(", ", fieldsToSelect);
-            var formattedIds = string.Join(", ", request.SelectedFormIds.Select(id => $"'{id}'"));
+
+            // Separate SelectedFormIds into GUIDs and integers
+            var guidIds = request.SelectedFormIds
+                .Where(id => Guid.TryParse(id, out _)) // Filter valid GUIDs
+                .Select(Guid.Parse) // Parse them into Guid
+                .ToArray(); // Convert to array
+
+            var intIds = request.SelectedFormIds
+                .Where(id => int.TryParse(id, out _)) // Filter valid integers
+                .Select(int.Parse) // Parse them into integers
+                .ToArray(); // Convert to array of integers
+
+            // keep stringIds that are neither GUIDs nor integers
+            var stringIds = request.SelectedFormIds
+                .Where(id => !Guid.TryParse(id, out _) && !int.TryParse(id, out _)) // Filter non-GUIDs and non-integers
+                .ToArray(); // Convert to array of strings
 
             var formQuery = string.Empty; // Query to get form data
             var qc6FormStatusQuery = string.Empty; // Query to get QC6 form status data
+            var qc6FormApproversQuery = string.Empty; // Query to get QC6 form approvers data
             var qc7FormStatusQuery = string.Empty; // Query to get QC7 form status data
+            var qc7FormApproversQuery = string.Empty; // Query to get QC7 form approvers data
             var qc35FormStatusQuery = string.Empty; // Query to get QC35 form status data
             var signedFSFormStatusQuery = string.Empty; // Query to get Signed FS form status data
             var userAttendanceQuery = string.Empty; // Query to get user attendance data
             var quizAttemptQuery = string.Empty; // Query to get quiz attempt data
             var quizResponseQuery = string.Empty; // Query to get quiz response data
+            var quizFeedbackResponseQuery = string.Empty; // Query to get quiz feedback response data
+            var quizSelfAssessmentQuery = string.Empty; // Query to get quiz self assessment data
 
             if (selectedSections.Contains("QC6Form"))
             {
@@ -259,7 +276,7 @@ namespace PKFAuditManagement.Controllers
                     FROM ""QC6Forms""
                     LEFT JOIN ""QC6FormConclusions"" ON ""QC6Forms"".""QC6FormID"" = ""QC6FormConclusions"".""QC6FormID""
                     LEFT JOIN ""TNATNEAssessments"" ON ""QC6Forms"".""QC6FormID"" = ""TNATNEAssessments"".""QC6FormID""
-                    WHERE ""QC6Forms"".""QC6FormID"" IN ({selectedFormIds})";
+                    WHERE ""QC6Forms"".""QC6FormID"" = ANY(@intIds)";
             }
 
             if (selectedSections.Contains("QC7Form"))
@@ -269,7 +286,7 @@ namespace PKFAuditManagement.Controllers
                     FROM ""QC7Forms""
                     LEFT JOIN ""QC7FormConclusions"" ON ""QC7Forms"".""QC7FormID"" = ""QC7FormConclusions"".""QC7FormID""
                     LEFT JOIN ""TNATNEAssessments"" ON ""QC7Forms"".""QC7FormID"" = ""TNATNEAssessments"".""QC7FormID""
-                    WHERE ""QC7Forms"".""QC7FormID"" IN ({selectedFormIds})";
+                    WHERE ""QC7Forms"".""QC7FormID"" = ANY(@intIds)";
             }
 
             if (selectedSections.Contains("QC35Form") || selectedSections.Contains("DaysUntilDue"))
@@ -279,7 +296,7 @@ namespace PKFAuditManagement.Controllers
                     FROM ""QC35Forms""
                     LEFT JOIN ""QC35ChecklistItems"" ON ""QC35Forms"".""QC35FormID"" = ""QC35ChecklistItems"".""QC35FormID""
                     AND ""QC35ChecklistItems"".""Description"" = 'Date of Audit Report'
-                    WHERE ""QC35Forms"".""QC35FormID"" IN ({selectedFormIds})";
+                    WHERE ""QC35Forms"".""QC35FormID"" = ANY(@intIds)";
             }
 
             if (selectedSections.Contains("SignedFSForm"))
@@ -287,14 +304,14 @@ namespace PKFAuditManagement.Controllers
                 formQuery += $@"
                     SELECT {selectClause}
                     FROM ""SignedFSForm""
-                    WHERE ""SignedFSForm"".""Id"" IN ({selectedFormIds})";
+                    WHERE ""SignedFSForm"".""Id"" = ANY(@intIds)";
             }
 
             if (selectedSections.Contains("ClientStatus"))
             {
                 if (selectedFields.Contains("ClientStatus_QC6_Approvers_info"))
                 {
-                    qc6FormStatusQuery += $@"
+                    qc6FormApproversQuery += $@"
                         SELECT
                         ""QC6Forms"".""FileReference"" AS ""File Reference"", 
                         ""QC6Forms"".""ProspectiveClient"" AS ""Client Name"",
@@ -303,12 +320,12 @@ namespace PKFAuditManagement.Controllers
                         ""QC6FormConclusions"".""MPHODQMPApprovedBy"" AS ""QC6 Second Approver""
                         FROM ""QC6Forms""
                         LEFT JOIN ""QC6FormConclusions"" ON ""QC6Forms"".""QC6FormID"" = ""QC6FormConclusions"".""QC6FormID""
-                        WHERE ""QC6Forms"".""ProspectiveClient"" IN ({formattedIds})";
+                        WHERE ""QC6Forms"".""ProspectiveClient"" = ANY(@stringIds)";
                 }
 
                 if (selectedFields.Contains("ClientStatus_QC7_Approvers_info"))
                 {
-                    qc7FormStatusQuery += $@"
+                    qc7FormApproversQuery += $@"
                         SELECT
                         ""QC7Forms"".""FileReference"",
                         ""QC7Forms"".""Client"",
@@ -316,7 +333,7 @@ namespace PKFAuditManagement.Controllers
                         ""QC7FormConclusions"".""MPHODQMPApprovedBy""
                         FROM ""QC7Forms""
                         LEFT JOIN ""QC7FormConclusions"" ON ""QC7Forms"".""QC7FormID"" = ""QC7FormConclusions"".""QC7FormID""
-                        WHERE ""QC7Forms"".""Client"" IN ({formattedIds})";
+                        WHERE ""QC7Forms"".""Client"" = ANY(@stringIds)";
                 }
 
                 if (selectedFields.Contains("ClientStatus_QC6/QC7/QC35/SignedFS_Status"))
@@ -327,7 +344,7 @@ namespace PKFAuditManagement.Controllers
                         ""QC6Forms"".""ProspectiveClient"" AS ""QC6 Client Name"",
                         ""QC6Forms"".""Status"" AS ""QC6 Status""
                         FROM ""QC6Forms""
-                        WHERE ""QC6Forms"".""ProspectiveClient"" IN ({formattedIds})";
+                        WHERE ""QC6Forms"".""ProspectiveClient"" = ANY(@stringIds)";
 
                     qc7FormStatusQuery += $@"
                         SELECT
@@ -335,7 +352,7 @@ namespace PKFAuditManagement.Controllers
                         ""QC7Forms"".""Client"" AS ""QC7 Client Name"",
                         ""QC7Forms"".""Status"" AS ""QC7 Status""
                         FROM ""QC7Forms""
-                        WHERE ""QC7Forms"".""Client"" IN ({formattedIds})";
+                        WHERE ""QC7Forms"".""Client"" = ANY(@stringIds)";
 
                     qc35FormStatusQuery += $@"
                         SELECT
@@ -343,37 +360,39 @@ namespace PKFAuditManagement.Controllers
                         ""QC35Forms"".""ClientName"" AS ""QC35 Client Name"",
                         ""QC35Forms"".""Status"" AS ""QC35 Status""
                         FROM ""QC35Forms""
-                        WHERE ""QC35Forms"".""ClientName"" IN ({formattedIds})";
+                        WHERE ""QC35Forms"".""ClientName"" = ANY(@stringIds)";
 
                     signedFSFormStatusQuery += $@"
                         SELECT
                         ""SignedFSForm"".""Client"" AS ""Signed FS Client"",
                         ""SignedFSForm"".""IsProcessed"" AS ""Signed FS Status""
                         FROM ""SignedFSForm""
-                        WHERE ""SignedFSForm"".""Client"" IN ({formattedIds})";
+                        WHERE ""SignedFSForm"".""Client"" = ANY(@stringIds)";
                 }
             }
 
             if (selectedSections.Contains("Quiz"))
             {
-                if (selectedFields.Contains("Quiz_UserAttendance"))
+                if (selectedFields.Contains("Quiz_QuizActivityRecord"))
                 {
+                    // Add query to get quiz activity record
+                    // Query for user attendance
                     userAttendanceQuery += $@"
                         SELECT
-                        ""AspNetUsers"".""UserName"",
-                        ""Participants"".""ClockedAttendance""
+                        ""Quiz"".""Title"",
+                        ""AspNetUsers"".""UserName"" AS ""User Name"",
+                        ""Participants"".""ClockedAttendance"" AS ""Clocked Attendance""
                         FROM ""Quiz""
                         LEFT JOIN ""Participants"" ON ""Quiz"".""QuizID"" = ""Participants"".""QuizID""
                         LEFT JOIN ""AspNetUsers"" ON ""Participants"".""UserID"" = ""AspNetUsers"".""Id""
-                        WHERE ""Quiz"".""QuizID"" IN ({formattedIds})";
-                }
+                        WHERE ""Quiz"".""QuizID"" = ANY(@guidIds)";
 
-                if (selectedFields.Contains("Quiz_QuizAttempt"))
-                {
+                    // Query for quiz attempt
                     quizAttemptQuery += $@"
                         WITH QuizAttempts AS (
                             SELECT
                                 ""Quiz"".""Title"",
+                                ""Quiz"".""QuizID"",
                                 ""AspNetUsers"".""UserName"",
                                 ""Attempt"".""AttemptID"",
                                 ""Attempt"".""Score"",
@@ -383,24 +402,66 @@ namespace PKFAuditManagement.Controllers
                             LEFT JOIN ""Participants"" ON ""Quiz"".""QuizID"" = ""Participants"".""QuizID""
                             LEFT JOIN ""AspNetUsers"" ON ""Participants"".""UserID"" = ""AspNetUsers"".""Id""
                             LEFT JOIN ""Attempt"" ON ""Quiz"".""QuizID"" = ""Attempt"".""QuizID"" AND ""Participants"".""UserID"" = ""Attempt"".""UserID""
-                            WHERE ""Quiz"".""QuizID"" IN ({formattedIds})
+                            WHERE ""Quiz"".""QuizID"" = ANY(@guidIds)
+                        ),
+                        QuizQuestions AS (
+                            SELECT 
+                                ""QuizID"",
+                                COUNT(*) AS ""QuestionNum""
+                            FROM ""Questions""
+                            GROUP BY ""QuizID""
+                        ),
+                        FeedbackData AS (
+                            SELECT DISTINCT
+                                ""Quiz"".""Title"" AS ""Quiz"",
+                                ""Quiz"".""QuizID"",
+                                ""AspNetUsers"".""UserName"" AS ""User Name""
+                            FROM ""FeedbackForms""
+                            LEFT JOIN ""FeedbackQuestions"" ON ""FeedbackForms"".""FeedbackFormID"" = ""FeedbackQuestions"".""FeedbackFormID""
+                            LEFT JOIN ""FeedbackResponses"" ON ""FeedbackQuestions"".""FeedbackQuestionID"" = ""FeedbackResponses"".""FeedbackQuestionID""
+                            LEFT JOIN ""AspNetUsers"" ON ""FeedbackResponses"".""SubmittedBy"" = ""AspNetUsers"".""Id""
+                            LEFT JOIN ""Quiz"" ON ""FeedbackResponses"".""QuizID"" = ""Quiz"".""QuizID""
+                        ),
+                        SelfAssessmentData AS (
+                            SELECT DISTINCT
+                                ""Quiz"".""Title"" AS ""Quiz"",
+                                ""AspNetUsers"".""UserName"" AS ""User Name""
+                            FROM ""SelfAssessmentForms""
+                            LEFT JOIN ""SelfAssessmentQuestions"" ON ""SelfAssessmentForms"".""SelfAssessmentFormID"" = ""SelfAssessmentQuestions"".""SelfAssessmentFormID""
+                            LEFT JOIN ""SelfAssessmentResponses"" ON ""SelfAssessmentQuestions"".""SelfAssessmentQuestionID"" = ""SelfAssessmentResponses"".""SelfAssessmentQuestionID""
+                            LEFT JOIN ""AspNetUsers"" ON ""SelfAssessmentResponses"".""SubmittedBy"" = ""AspNetUsers"".""Id""
+                            LEFT JOIN ""Quiz"" ON ""SelfAssessmentResponses"".""QuizID"" = ""Quiz"".""QuizID""
                         )
-                        SELECT
-                        ""Title"",
-                        ""UserName"" AS ""User Name"",
-                        ""AttemptID"" AS ""Attempt ID"",
-                        'Attempt ' || ""AttemptNumber"" AS ""Attempt"",
-                        ""Score""
+                        SELECT DISTINCT
+                            QuizAttempts.""Title"",
+                            QuizAttempts.""UserName"" AS ""User Name"",
+                            QuizAttempts.""AttemptID"" AS ""Attempt ID"",
+                            'Attempt ' || CAST(QuizAttempts.""AttemptNumber"" AS TEXT) AS ""Attempt"",
+                            QuizAttempts.""Score"",
+                            CASE
+                                WHEN QuizAttempts.""Score"" IS NULL THEN 'No Attempt'
+                                WHEN QuizAttempts.""Score"" >= (QuizQuestions.""QuestionNum"" * 0.8) THEN 'Pass'
+                                ELSE 'Fail'
+                            END AS ""Result"",
+                            CASE
+                                WHEN FeedbackData.""User Name"" IS NOT NULL THEN 'Submitted'
+                            ELSE 'Not Submitted'
+                            END AS ""Feedback Status"",
+                            CASE
+                                WHEN SelfAssessmentData.""User Name"" IS NOT NULL THEN 'Submitted'
+                            ELSE 'Not Submitted'
+                            END AS ""Self-Assessment Status""
                         FROM QuizAttempts
-                        ORDER BY ""UserName""";
-                }
-                
+                        LEFT JOIN QuizQuestions ON QuizAttempts.""QuizID"" = QuizQuestions.""QuizID""
+                        LEFT JOIN FeedbackData ON QuizAttempts.""UserName"" = FeedbackData.""User Name""
+                        LEFT JOIN SelfAssessmentData ON QuizAttempts.""UserName"" = SelfAssessmentData.""User Name""
+                        ORDER BY QuizAttempts.""UserName""";
 
-                if (selectedFields.Contains("Quiz_QuizResponse"))
-                {
+                    // Query for quiz response
                     quizResponseQuery += $@"
                         SELECT
-                        ""QuizResponse"".""AttemptID"",
+                        ""QuizResponse"".""AttemptID"" AS ""Attempt ID"",
+                        ""Quiz"".""Title"",
                         ""Questions"".""Description"" AS ""Questions"",
                         ""QuizResponse"".""SelectedOption"" AS ""Selected Option"",
                         ""Questions"".""CorrectOptionText"" AS ""Correct Answer"",
@@ -410,9 +471,47 @@ namespace PKFAuditManagement.Controllers
                         END AS ""Result""
                         FROM ""Questions""
                         LEFT JOIN ""QuizResponse"" ON ""Questions"".""QuestionID"" = ""QuizResponse"".""QuestionID""
-                        WHERE ""Questions"".""QuizID"" IN ({formattedIds})
+                        LEFT JOIN ""Quiz"" ON ""Questions"".""QuizID"" = ""Quiz"".""QuizID""
+                        WHERE ""Questions"".""QuizID"" = ANY(@guidIds)
                         ORDER BY ""QuizResponse"".""AttemptID"" ASC";
+
+                    // Query for quiz feedback response
+                    quizFeedbackResponseQuery += $@"
+                        SELECT
+                        ""Quiz"".""Title"" AS ""Quiz"",
+                        ""AspNetUsers"".""UserName"" AS ""User Name"",
+                        ""FeedbackForms"".""Title"",
+                        ""FeedbackQuestions"".""QuestionText"" AS ""Question"",
+                        ""FeedbackResponses"".""Response"" 
+                        FROM ""FeedbackForms""
+                        LEFT JOIN ""FeedbackQuestions"" ON ""FeedbackForms"".""FeedbackFormID"" = ""FeedbackQuestions"".""FeedbackFormID""
+                        LEFT JOIN ""FeedbackResponses"" ON ""FeedbackQuestions"".""FeedbackQuestionID"" = ""FeedbackResponses"".""FeedbackQuestionID""
+                        LEFT JOIN ""AspNetUsers"" ON ""FeedbackResponses"".""SubmittedBy"" = ""AspNetUsers"".""Id""
+                        LEFT JOIN ""Quiz"" ON ""FeedbackResponses"".""QuizID"" = ""Quiz"".""QuizID""
+                        WHERE ""Quiz"".""QuizID"" = ANY(@guidIds)
+                        ORDER BY ""AspNetUsers"".""UserName"", ""FeedbackForms"".""Title""";
+
+                    // Query for quiz self assessment
+                    quizSelfAssessmentQuery += $@"
+                        SELECT
+                        ""Quiz"".""Title"" AS ""Quiz"",
+                        ""AspNetUsers"".""UserName"" AS ""User Name"",
+                        ""SelfAssessmentForms"".""Title"" AS ""Self-Assesment Title"",
+                        ""SelfAssessmentQuestions"".""QuestionText"" AS ""Question"",
+                        ""SelfAssessmentResponses"".""Rating"",
+                        CASE
+                            WHEN ""SelfAssessmentResponses"".""Stage"" = '1' THEN 'Submitted after quiz attempt'
+                            ELSE 'Submitted before quiz attempt'
+                        END AS ""Self-Assessment check""
+                        FROM ""SelfAssessmentForms""
+                        LEFT JOIN ""SelfAssessmentQuestions"" ON ""SelfAssessmentForms"".""SelfAssessmentFormID"" = ""SelfAssessmentQuestions"".""SelfAssessmentFormID""
+                        LEFT JOIN ""SelfAssessmentResponses"" ON ""SelfAssessmentQuestions"".""SelfAssessmentQuestionID"" = ""SelfAssessmentResponses"".""SelfAssessmentQuestionID""
+                        LEFT JOIN ""AspNetUsers"" ON ""SelfAssessmentResponses"".""SubmittedBy"" = ""AspNetUsers"".""Id""
+                        LEFT JOIN ""Quiz"" ON ""SelfAssessmentResponses"".""QuizID"" = ""Quiz"".""QuizID""
+                        WHERE ""Quiz"".""QuizID"" = ANY(@guidIds)
+                        ORDER BY ""AspNetUsers"".""UserName"", ""SelfAssessmentForms"".""Title""";
                 }
+
 
             }
 
@@ -425,106 +524,198 @@ namespace PKFAuditManagement.Controllers
                 {
                     await connection.OpenAsync(); // Open the connection asynchronously
 
-                    if (!string.IsNullOrEmpty(formQuery))
-                    {
-                        // run forms query
-                        var formResult = await connection.QueryAsync<dynamic>(formQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(formResult));
-                    }
+                    // List of queries strings
+                    var queries = new List<(string Query, object Parameters)> 
+                    {   
+                        (formQuery, new { intIds }),
+                        (qc6FormStatusQuery, new { stringIds }),
+                        (qc6FormApproversQuery, new { stringIds }),
+                        (qc7FormStatusQuery, new { stringIds }),
+                        (qc7FormApproversQuery, new { stringIds }),
+                        (qc35FormStatusQuery, new { stringIds }),
+                        (signedFSFormStatusQuery, new { stringIds }),
+                        (userAttendanceQuery, new { guidIds }),
+                        (quizAttemptQuery, new { guidIds }),
+                        (quizResponseQuery, new { guidIds }),
+                        (quizFeedbackResponseQuery, new { guidIds }),
+                        (quizSelfAssessmentQuery, new { guidIds }) 
+                    };
                     
-                    if (!string.IsNullOrEmpty(qc6FormStatusQuery))
+                    // Execute each query and add to DataTables
+                    foreach (var (query, parameters) in queries)
                     {
-                        // run qc6 status query
-                        var qc6FormStatusResult = await connection.QueryAsync<dynamic>(qc6FormStatusQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(qc6FormStatusResult));
-                    }
+                        await DataHelper.ExecuteQueryAndAddToDataTablesAsync(query, connection, dataTables, parameters);
+                    }                    
 
-                    if (!string.IsNullOrEmpty(qc7FormStatusQuery))
-                    {
-                        // run qc7 status query
-                        var qc7FormStatusResult = await connection.QueryAsync<dynamic>(qc7FormStatusQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(qc7FormStatusResult));
-                    }
-
-                    if (!string.IsNullOrEmpty(qc35FormStatusQuery))
-                    {
-                        // run qc35 status query
-                        var qc35FormStatusResult = await connection.QueryAsync<dynamic>(qc35FormStatusQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(qc35FormStatusResult));
-                    }
-
-                    if (!string.IsNullOrEmpty(signedFSFormStatusQuery))
-                    {
-                        // run signedFS status query
-                        var signedFSFormStatusResult = await connection.QueryAsync<dynamic>(signedFSFormStatusQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(signedFSFormStatusResult));
-                    }
-                    
-                    if (!string.IsNullOrEmpty(userAttendanceQuery))
-                    {
-                        // run user attendance query
-                        var userAttendanceResult = await connection.QueryAsync<dynamic>(userAttendanceQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(userAttendanceResult));
-                    }
-                    if (!string.IsNullOrEmpty(quizAttemptQuery))
-                    {
-                        // run quiz attempt query
-                        var quizAttemptResult = await connection.QueryAsync<dynamic>(quizAttemptQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(quizAttemptResult));
-                    }
-                    if (!string.IsNullOrEmpty(quizResponseQuery))
-                    {
-                        // run quiz query
-                        var quizResponseResult = await connection.QueryAsync<dynamic>(quizResponseQuery);
-                        dataTables.Add(DataHelper.ConvertToDataTable(quizResponseResult));
-                    }
-                    
                 }
-                catch (NpgsqlException ex)
+                catch (SqlException ex)
                 {
-                    // Handle PostgreSQL specific exceptions
-                    Console.WriteLine($"PostgreSQL error: {ex.Message}");
-                    return BadRequest(ex.Message);
+                    // Handle SQL exceptions
+                    Console.WriteLine($"SQL error: {ex.Message}");
+                    throw;
                 }
                 catch (Exception ex)
                 {
-                    // Handle general exceptions
-                    Console.WriteLine($"An error occurred: {ex.Message}");
-                    return BadRequest(ex.Message);
+                    // Handle other exceptions
+                    Console.WriteLine($"General error: {ex.Message}");
+                    throw;
                 }
-
             }
 
             using (var workbook = new XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add("Report");
-                int currentRow = 1;
-                int currentColumn = 1; // Starting column for the first DataTable
-
-                // Loop through each DataTable in dataTables
-                foreach (var table in dataTables)
+                if (selectedSections.Contains("Quiz"))
                 {
-                    // Add headers for the current DataTable
-                    var headers = table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
-                    for (int i = 0; i < headers.Count; i++)
-                    {
-                        worksheet.Cell(currentRow, currentColumn + i).Value = headers[i];
-                    }
+                    var userAttendanceTable = dataTables[0];
+                    var uniqueUsers = userAttendanceTable.AsEnumerable()
+                        .Select(row => row.Field<string>("User Name"))
+                        .Distinct()
+                        .ToList();
 
-                    // Add data for the current DataTable, starting just below the headers
-                    int dataRowStart = currentRow + 1;
-                    foreach (DataRow row in table.Rows)
+                    // Count the unique users
+                    int userCount = uniqueUsers.Count;
+
+                    // Create a new worksheet of overview user quiz data
+                    var overviewWorksheet = workbook.Worksheets.Add("Quiz Overview");
+                    int currentRow = 1; // Starting row for the current DataTable
+                    int currentColumn = 1; // Starting column for the first DataTable
+                    int tableIndex = 0; // Index of the current DataTable
+
+                    foreach (var table in dataTables)
                     {
-                        for (int i = 0; i < row.ItemArray.Length; i++)
+                        // Create a copy of the table
+                        var modifiedTable = table.Copy();
+
+                        // Process only the first two tables
+                        if (tableIndex >= 2)
                         {
-                            var value = row.ItemArray[i];
-                            worksheet.Cell(dataRowStart, currentColumn + i).Value = value != null ? value.ToString() : "Null";
+                            break; // Exit the loop after processing the first two tables
                         }
-                        dataRowStart++;
+
+                        // If it's the second table, remove a column
+                        if (tableIndex == 1)
+                        {
+                            // Check if the column "Attempt ID" exists
+                            if (modifiedTable.Columns.Contains("Attempt ID"))
+                            {
+                                modifiedTable.Columns.Remove("Attempt ID");  // Remove the column if it exists
+                            }
+
+                        }
+
+                        DataHelper.AddHeadersToWorksheet(overviewWorksheet, modifiedTable, currentRow, currentColumn);
+                        DataHelper.AddDataToWorksheet(overviewWorksheet, modifiedTable, currentRow + 1, currentColumn);
+
+                        // Update the starting column for the next DataTable, leaving a one-column gap
+                        currentColumn += modifiedTable.Columns.Count + 1;
+                        // Increment the table index
+                        tableIndex++;
                     }
 
-                    // Update the starting column for the next DataTable, leaving a one-column gap
-                    currentColumn += headers.Count + 1;
+                    foreach (var user in uniqueUsers)
+                    {
+                        // Create a new worksheet for each user
+                        var userWorksheet = workbook.Worksheets.Add(user);
+                        int userCurrentRow = 1; // Starting row for the current DataTable
+                        int userCurrentColumn = 1; // Starting column for the first DataTable
+                        
+                        // Filter the user's attendance data, add headers and data to the worksheet, and update the current column leaving a one-column gap
+                        var userAttendanceData = DataHelper.FilterDataTable(userAttendanceTable, "User Name", user);
+                        DataHelper.AddHeadersToWorksheet(userWorksheet, userAttendanceData, userCurrentRow, userCurrentColumn);
+                        DataHelper.AddDataToWorksheet(userWorksheet, userAttendanceData, userCurrentRow + 1, userCurrentColumn);
+                        userCurrentColumn += userAttendanceData.Columns.Count + 1;
+
+                        // Filter the user's quiz attempt data  
+                        var quizAttemptTable = dataTables[1];
+                        var quizAttemptData = DataHelper.FilterDataTable(quizAttemptTable, "User Name", user);
+                        // Extract the Attempt IDs for the filtered user
+                        var attemptIDs = quizAttemptData.AsEnumerable()
+                            .Select(row => row.Field<string>("Attempt ID"))
+                            .DefaultIfEmpty(null)
+                            .ToList();
+
+                        // Add headers and data for the current DataTable in the worksheet and update the current column leaving a one-column gap
+                        DataHelper.AddHeadersToWorksheet(userWorksheet, quizAttemptData, userCurrentRow, userCurrentColumn);
+                        DataHelper.AddDataToWorksheet(userWorksheet, quizAttemptData, userCurrentRow + 1, userCurrentColumn);
+                        userCurrentColumn += quizAttemptData.Columns.Count + 1;
+
+                        // Filter the user's quiz response data by the user's attempt IDs
+                        var quizResponseTable = dataTables[2];
+                        var filteredQuizResponseData = quizResponseTable.AsEnumerable()
+                            .Where(row => attemptIDs.Contains(row.Field<string>("Attempt ID")))
+                            .ToList();
+                        // Initialize quizResponseData as a clone of quizResponseTable's schema
+                        DataTable quizResponseData = quizResponseTable.Clone();
+
+                        if (!filteredQuizResponseData.Any())
+                        {
+                            quizResponseData = DataHelper.HandleEmptyDataTable(quizResponseData, "Attempt ID", "No Attempts done");
+                        }
+                        else
+                        {
+                            quizResponseData = filteredQuizResponseData.CopyToDataTable();
+                        }
+
+                        // Add headers and data for the current DataTable in the worksheet and update the current column leaving a one-column gap
+                        DataHelper.AddHeadersToWorksheet(userWorksheet, quizResponseData, userCurrentRow, userCurrentColumn);
+                        DataHelper.AddDataToWorksheet(userWorksheet, quizResponseData, userCurrentRow + 1, userCurrentColumn);
+                        userCurrentColumn += quizResponseData.Columns.Count + 1;
+
+                        // Filter the user's quiz feedback response data
+                        var quizFeedbackResponseTable = dataTables[3];
+                        var quizFeedbackResponseData = DataHelper.FilterDataTable(quizFeedbackResponseTable, "User Name", user);
+
+                        // Handle empty DataTable if no feedback responses are found
+                        if (quizFeedbackResponseData.Rows.Count == 0)
+                        {
+                            quizFeedbackResponseData = DataHelper.HandleEmptyDataTable(
+                                quizFeedbackResponseData, 
+                                "Quiz", 
+                                "No Feedback Responses found as user is either not a participant or has not submitted any feedback"
+                                );
+                        }
+
+                        // Add headers and data for the current DataTable in the worksheet and update the current column leaving a one-column gap
+                        DataHelper.AddHeadersToWorksheet(userWorksheet, quizFeedbackResponseData, userCurrentRow, userCurrentColumn);
+                        DataHelper.AddDataToWorksheet(userWorksheet, quizFeedbackResponseData, userCurrentRow + 1, userCurrentColumn);
+                        userCurrentColumn += quizFeedbackResponseData.Columns.Count + 1;
+
+                        // Filter the user's quiz self assessment data
+                        var quizSelfAssessmentTable = dataTables[4];
+                        var quizSelfAssessmentData = DataHelper.FilterDataTable(quizSelfAssessmentTable, "User Name", user);
+
+                        // Handle empty DataTable if no self assessment responses are found
+                        if (quizSelfAssessmentData.Rows.Count == 0)
+                        {
+                            quizSelfAssessmentData = DataHelper.HandleEmptyDataTable(
+                                quizSelfAssessmentData, 
+                                "Quiz", 
+                                "No Self-Assessment Responses found as user is either not a participant or has not submitted any self-assessment"
+                                );
+                        }
+
+                        // Add headers and data for the current DataTable in the worksheet and update the current column leaving a one-column gap
+                        DataHelper.AddHeadersToWorksheet(userWorksheet, quizSelfAssessmentData, userCurrentRow, userCurrentColumn);
+                        DataHelper.AddDataToWorksheet(userWorksheet, quizSelfAssessmentData, userCurrentRow + 1, userCurrentColumn);
+
+                    }
+
+                }
+                else
+                {
+                    var worksheet = workbook.Worksheets.Add("Report");
+                    int currentRow = 1; // Starting row for the current DataTable
+                    int currentColumn = 1; // Starting column for the first DataTable
+
+                    // Loop through each DataTable in dataTables
+                    foreach (var table in dataTables)
+                    {
+                        DataHelper.AddHeadersToWorksheet(worksheet, table, currentRow, currentColumn);
+                        DataHelper.AddDataToWorksheet(worksheet, table, currentRow + 1, currentColumn);
+
+                        // Update the starting column for the next DataTable, leaving a one-column gap
+                        currentColumn += table.Columns.Count + 1;
+                    }
                 }
 
                 // Prepare the response
