@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 //Env.Load();
 
 // Enable legacy timestamp behavior for Npgsql
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+// AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 // Register HttpClient for dependency injection
 builder.Services.AddHttpClient();
@@ -44,10 +44,10 @@ builder.Configuration.AddEnvironmentVariables();
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 //var connectionString = builder.Configuration["DefaultConnection"];
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString, npgsqlOptions =>
-            npgsqlOptions.CommandTimeout(300) 
-        ));
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//        options.UseNpgsql(connectionString, npgsqlOptions =>
+//            npgsqlOptions.CommandTimeout(300) 
+//        ));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
