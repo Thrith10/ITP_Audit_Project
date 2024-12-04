@@ -152,7 +152,17 @@ function addService() {
     `;
 
     servicesContainer.appendChild(serviceCard);
+
+    // Ensure all "Remove Service" buttons are visible if there is more than one card
+    const serviceCards = servicesContainer.getElementsByClassName('card');
+    if (serviceCards.length > 1) {
+        const removeButtons = servicesContainer.querySelectorAll('.btn-danger');
+        for (let i = 0; i < removeButtons.length; i++) {
+            removeButtons[i].style.display = 'inline-block';
+        }
+    }
 }
+
 
 // Function to display additional text field based on service field selection
 function showOtherServiceInput(selectElement) {
@@ -207,6 +217,14 @@ function removeService(button) {
         }
     }
 
+    // Hide "Remove Service" button if only one service card remains
+    if (serviceCards.length === 1) {
+        const removeButtons = servicesContainer.querySelectorAll('.btn-danger');
+        for (let i = 0; i < removeButtons.length; i++) {
+            removeButtons[i].style.display = 'none';
+        }
+    }
+
     calculateTotalAndConcentration();
 }
 
@@ -258,7 +276,6 @@ $(document).ready(function () {
     toggleSectionBResult();
     toggleSuspiciousTransactionReport();
     calculateTotalAndConcentration();
-
 
     // Function to update the Prior year’s recovery rate
     function updatePriorYearRecoveryRate() {

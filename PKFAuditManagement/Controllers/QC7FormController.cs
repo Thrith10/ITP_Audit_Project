@@ -1029,6 +1029,18 @@ namespace PKFAuditManagement.Controllers
                 // Retrieve QC7 Form Test data
                 var testData = _context.QC7FormTests.Where(e => e.QC7FormID.Equals(id)).ToList();
 
+                // Retrieve and populate OtherDocuments
+                var allDocuments = _context.QCDocuments.Where(d => d.QC7FormID == id).ToList();
+
+                // Split the documents into OtherDocuments and AdditionalDocuments
+                var otherDocument = allDocuments
+                    .Where(d => d.DocumentType == "OtherDocuments")
+                    .FirstOrDefault(); // There should be only one OtherDocuments
+
+                var additionalDocuments = allDocuments
+                    .Where(d => d.DocumentType != "OtherDocuments")
+                    .ToList();
+
                 // Loop through each SubForm in the viewModel
                 foreach (var subForm in viewModel.SubForms)
                 {
@@ -1061,14 +1073,32 @@ namespace PKFAuditManagement.Controllers
                 viewModel.Industry = qc7formData.Industry;
                 viewModel.PriorYearFee = qc7formData.PriorYearFee;
                 viewModel.TimeCosts = qc7formData.TimeCosts;
+                viewModel.PriorYearRecoveryRateComment = qc7formData.PriorYearRecoveryRateComment;
                 viewModel.PriorYearRecoveryRate = qc7formData.PriorYearRecoveryRate;
                 viewModel.AnyOutstandingUnpaidAuditFees = qc7formData.AnyOutstandingUnpaidAuditFees;
+
+                if (viewModel.AnyOutstandingUnpaidAuditFees == true)
+                {
+                    viewModel.AnyOutstandingUnpaidAuditFeesComment = qc7formData.AnyOutstandingUnpaidAuditFeesComment;
+                }
+
                 viewModel.TypeOfClientActivities = qc7formData.TypeOfClientActivities;
                 viewModel.RiskRatingPriorYear = qc7formData.RiskRatingPriorYear;
                 viewModel.AnySuspiciousTransactionReportFiled = qc7formData.AnySuspiciousTransactionReportFiled;
-                viewModel.SuspiciousTransactionReportFiledComment = qc7formData.SuspiciousTransactionReportFiledComment;
+
+                if (viewModel.AnySuspiciousTransactionReportFiled == true)
+                {
+                    viewModel.SuspiciousTransactionReportFiledComment = qc7formData.SuspiciousTransactionReportFiledComment;
+                }
+
                 viewModel.SafeguardReviewerName = qc7formData.SafeguardReviewerName;
                 viewModel.AnyOutstandingUnpaidNonAuditFees = qc7formData.AnyOutstandingUnpaidNonAuditFees;
+
+                if (viewModel.AnyOutstandingUnpaidNonAuditFees == true)
+                {
+                    viewModel.AnyOutstandingUnpaidNonAuditFeesComment = qc7formData.AnyOutstandingUnpaidNonAuditFeesComment;
+                }
+
                 viewModel.GrandTotal = qc7formData.GrandTotal;
                 viewModel.AuditFee = qc7formData.AuditFee;
                 viewModel.FeeConcentration = qc7formData.FeeConcentration;
@@ -1127,12 +1157,35 @@ namespace PKFAuditManagement.Controllers
                 // Append FeeDetail data for Services
                 foreach (var feeDetail in feeDetailData)
                 {
-                    viewModel.Services.Add(new FeeDetailViewModel
+                    // Create the FeeDetailViewModel object
+                    var feeDetailViewModel = new FeeDetailViewModel
                     {
                         NatureOfService = feeDetail.NatureOfService,
                         OtherService = feeDetail.OtherService,
                         Fee = feeDetail.Fee
-                    });
+                    };
+
+                    // Add the configured object to the Services collection
+                    viewModel.Services.Add(feeDetailViewModel);
+                }
+
+                // Populate OtherDocuments if it exists
+                if (otherDocument != null)
+                {
+                    viewModel.OtherDocumentsFileName = otherDocument.FileName;
+                }
+
+                // Populate AdditionalDocuments if they exist
+                if (additionalDocuments.Any())
+                {
+                    viewModel.AdditionalDocuments = additionalDocuments
+                        .Select(d => new DocumentViewModel
+                        {
+                            OldDocumentName = d.DocumentType,
+                            DocumentName = d.DocumentType,
+                            DocumentFileName = d.FileName
+                        })
+                        .ToList();
                 }
 
                 return View("~/Views/General/QC7/QC7FormCreation.cshtml", viewModel);
@@ -1430,6 +1483,12 @@ namespace PKFAuditManagement.Controllers
                     fileReference += "_NAS";
                 }
 
+                // Re-validate prior year fees for QC7 Form 
+                if (viewModel.PriorYearFee / viewModel.TimeCosts >= 30)
+                {
+                    viewModel.PriorYearRecoveryRateComment = null;
+                }
+
                 // Save viewModel data to EngagementTable
                 var qc7form = new QC7Form
                 {
@@ -1596,13 +1655,18 @@ namespace PKFAuditManagement.Controllers
                 // Process the submitted data
                 foreach (var service in viewModel.Services)
                 {
+                    if (service.NatureOfService != "Other Non-Audit Services")
+                    {
+                        service.OtherService = null;
+                    }
+
                     // Save QC7FormFeeDetail
                     var qC7FormFeeDetail = new QC7FormFeeDetail
                     {
                         QC7FormID = qc7formId,
                         NatureOfService = service.NatureOfService,
-                        Fee = service.Fee.Value,
                         OtherService = service.OtherService,
+                        Fee = service.Fee.Value,
                     };
 
                     // Add qC7FormFeeDetail to the context and save changes

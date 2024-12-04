@@ -129,7 +129,7 @@
                                         </div>
                                     </div>
                                     <div class="row mb-3" id="commentBoxContainer" style="display: none;">
-                                        <label class="col-sm-2 col-form-label">Comments on Prior Year's' Recovery Rate</label>
+                                        <label class="col-sm-2 col-form-label">Comments on Prior Year's Recovery Rate</label>
                                         <div class="col-sm-10 d-flex align-items-center">
                                             <input type="text" class="form-control" asp-for="PriorYearRecoveryRateComment" id="PriorYearRecoveryRateComment" placeholder="Please provide reasons if the recovery rate is below 30%">
                                         </div>
@@ -248,9 +248,15 @@
                                                                     <input asp-for="Services[i].Fee" class="form-control fee-input" oninput="calculateTotalAndConcentration()" required />
                                                                 </div>
                                                             </div>
-                                                            <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: none;">
+                                                            <div class="col-sm-12 mt-3" id="otherServiceInput-@i" style="display: @(Model.Services[@i].NatureOfService == "Other Non-Audit Services" ? "block" : "none");">
                                                                 <label>Name of Non-Audit Service<span class="text-danger"> *</span></label>
-                                                                <input type="text" name="Services[@i].OtherService" class="form-control">
+                                                                <input type="text" asp-for="Services[i].OtherService" class="form-control">
+                                                            </div>
+                                                            <div class="col-sm-12 mt-3">
+                                                                @if (Model.Services.Count > 1)
+                                                                {
+                                                                    <button type="button" class="btn btn-danger" onclick="removeService(this)">Remove Service</button>
+                                                                }
                                                             </div>
                                                         </div>
                                                     </div>
