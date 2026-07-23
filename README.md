@@ -48,7 +48,7 @@ The system was developed over two phases using a rapid-prototyping methodology w
 | Module | Purpose | In this repo? |
 |---|---|---|
 | **Web App — Audit Engagement Monitoring** | Digitises engagement/client acceptance forms, tracks manpower hours, monitors engagement status end-to-end, sends automated email reminders, and archives completed engagements. | ✅ Yes |
-| **Mobile App — Staff Training Monitoring** | Lets staff register attendance, take post-course quizzes, and submit feedback/self-assessments, with results exportable for analysis. | ✅ Yes |
+| **Staff Training Monitoring(Web)** | Lets staff register attendance, take post-course quizzes, and submit feedback/self-assessments, with results exportable for analysis. | ✅ Yes |
 | **RAG Chatbot** | Answers audit-domain questions grounded in the firm's own uploaded documents, with source citations, so answers are traceable instead of hallucinated. | 📄 Documented only — see paper/poster |
  
 ## Architecture
@@ -79,7 +79,6 @@ Iterating on real user feedback, we added conversation history awareness (so fol
  
 **In this repo:**
 - **Web:** ASP.NET Core MVC, ASP.NET Core Web API, Bootstrap, jQuery
-- **Mobile:** Flutter (cross-platform iOS/Android)
 - **Data:** Microsoft SQL Server (Amazon RDS)
 - **Infra:** Docker, AWS (EC2, VPC, RDS, S3), OpenVPN
 
@@ -109,15 +108,9 @@ Iterating on real user feedback, we added conversation history awareness (so fol
 ![File_Archival_Form](docs/File_Archival_Form.jpg)
 *Figure 5: File Archival Form*
 
-<p align="center">
-  <img src="docs/Mobile_Quiz.jpg" alt="Mobile Quiz" width="280">
-  <br>
-  <i>Figure 6: Mobile Quiz Dashboard</i>
-</p>
-
 ## Results & Status
  
-The audit engagement system completed its initial AWS deployment and was in active use for pilot feedback with the client firm. The chatbot was independently evaluated by an accounting-trained team for accuracy and domain relevance. The mobile training app was in final release prep for the App Store / Google Play at time of writing. Both systems underwent security review before rollout.
+The audit engagement system completed its initial AWS deployment and was in active use for pilot feedback with the client firm. The staff training monitoring module was in the same rollout, giving staff a single web-based system for attendance, quizzes, and feedback in place of manual tracking. Both systems underwent security review before rollout.
  
 ## Team
  
